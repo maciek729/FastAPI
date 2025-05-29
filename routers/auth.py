@@ -1,5 +1,7 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
+
+from click import argument
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -10,6 +12,12 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from fastapi.templating import Jinja2Templates
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+import secrets
+from pydantic import EmailStr, SecretStr
+from dotenv import load_dotenv
+import os
+
 
 router = APIRouter(
     prefix='/auth',
@@ -21,6 +29,21 @@ ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
+
+load_dotenv()
+conf = ConnectionConfig(
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=SecretStr(os.getenv("MAIL_PASSWORD")),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=int(os.getenv("MAIL_PORT", 465)),
+    MAIL_SERVER=os.getenv("MAIL_SERVER"),
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=True,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=False
+)
+
+
 
 
 class CreateUserRequest(BaseModel):
@@ -66,10 +89,25 @@ def render_register_page(request: Request):
 
 def authenticate_user(username: str, password: str, db):
     user = db.query(Users).filter(Users.username == username).first()
+
     if not user:
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
     if not bcrypt_context.verify(password, user.hashed_password):
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email before logging in"
+        )
+
     return user
 
 
@@ -94,23 +132,40 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Could not validate user.')
 
+async def send_verification_email(email: EmailStr, token: str):
+    verify_link = f"http://localhost:8000/auth/verify?token={token}"
+    message = MessageSchema(
+        subject="Email Verification",
+        recipients=[email],
+        body=f"Click to verify: {verify_link}",
+        subtype="plain"
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
+    token = secrets.token_urlsafe(32)
+    thisEmail = create_user_request.email
     create_user_model = Users(
-        email=create_user_request.email,
+        email=thisEmail,
         username=create_user_request.username,
         first_name=create_user_request.first_name,
         last_name=create_user_request.last_name,
         role=create_user_request.role,
         hashed_password=bcrypt_context.hash(create_user_request.password),
         is_active=True,
-        phone_number=create_user_request.phone_number
+        phone_number=create_user_request.phone_number,
+        is_verified=False,
+        verification_token = token
     )
 
     db.add(create_user_model)
     db.commit()
+
+    await send_verification_email(thisEmail, token)
 
 
 @router.post("/token", response_model=Token)
@@ -124,6 +179,34 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
     return {'access_token': token, 'token_type': 'bearer'}
 
+
+@router.get("/verify")
+async def verify_email(token: str, db: Session = Depends(get_db)):
+    user = db.query(Users).filter(Users.verification_token == token).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid verification token"
+        )
+
+    user.is_verified = True
+    user.verification_token = None
+    db.commit()
+
+    from fastapi.responses import HTMLResponse
+    html_content = """
+    <html>
+        <head>
+            <title>Email Verified</title>
+        </head>
+        <body>
+            <h1>Email successfully verified!</h1>
+            <p>You can now <a href="/auth/login-page">log in</a>.</p>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
 
 
 
