@@ -15,6 +15,9 @@ class Users(Base):
     role = Column(String)
     phone_number = Column(String)
 
+    is_verified = Column(Boolean, default=False)
+    verification_token = Column(String, nullable=True)
+
 
 class Todos(Base):
     __tablename__ = 'todos'
