@@ -46,8 +46,6 @@ conf = ConnectionConfig(
 )
 
 
-
-
 class CreateUserRequest(BaseModel):
     username: str
     email: str
