@@ -2,7 +2,7 @@ from datetime import timedelta, datetime, timezone
 from typing import Annotated
 
 from click import argument
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
@@ -17,6 +17,8 @@ import secrets
 from pydantic import EmailStr, SecretStr
 from dotenv import load_dotenv
 import os
+from fastapi.responses import HTMLResponse
+
 
 
 router = APIRouter(
@@ -79,10 +81,20 @@ templates = Jinja2Templates(directory="templates")
 def redner_login_page(request: Request):
     return templates.TemplateResponse("login.html", {'request': request})
 
-
 @router.get("/register-page")
 def render_register_page(request: Request):
     return templates.TemplateResponse("register.html", {'request': request})
+
+@router.get("/forgot-password-page")
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+@router.get("/reset-password-page")
+async def reset_password_page(request: Request, token: str):
+    return templates.TemplateResponse("reset_password.html", {
+        "request": request,
+        "token": token
+    })
 
 ### Endpoints ##
 
@@ -194,7 +206,7 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
     user.verification_token = None
     db.commit()
 
-    from fastapi.responses import HTMLResponse
+
     html_content = """
     <html>
         <head>
@@ -209,7 +221,71 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
     return HTMLResponse(content=html_content, status_code=200)
 
 
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
 
 
+@router.post("/forgot-password")
+async def forgot_password(
+    email: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(Users).filter(Users.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="Email not found"
+        )
+
+    token = secrets.token_urlsafe(32)
+    expires = datetime.utcnow() + timedelta(hours=1)
+
+    user.reset_password_token = token
+    user.reset_password_token_expires = expires
+    db.commit()
+
+    reset_link = f"http://localhost:8000/auth/reset-password-page?token={token}"
+
+    message = MessageSchema(
+        subject="Password Reset Request",
+        recipients=[email],
+        body=f"Click to reset password: {reset_link}",
+        subtype="plain"
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+    return {"message": "Password reset link sent to email"}
+
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
+
+
+@router.post("/reset-password")
+async def reset_password(
+    token: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(Users).filter(
+        Users.reset_password_token == token,
+        Users.reset_password_token_expires > datetime.utcnow()
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired token"
+        )
+
+    user.hashed_password = bcrypt_context.hash(new_password)
+    user.reset_password_token = None
+    user.reset_password_token_expires = None
+    db.commit()
+
+    return {"message": "Password updated successfully"}
 
 

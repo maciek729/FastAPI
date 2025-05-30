@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 
 
 class Users(Base):
@@ -17,6 +19,9 @@ class Users(Base):
 
     is_verified = Column(Boolean, default=False)
     verification_token = Column(String, nullable=True)
+
+    reset_password_token = Column(String, nullable=True)
+    reset_password_token_expires = Column(DateTime, nullable=True)
 
 
 class Todos(Base):
