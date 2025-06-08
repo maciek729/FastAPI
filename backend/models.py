@@ -23,5 +23,14 @@ class Users(Base):
     reset_password_token = Column(String, nullable=True)
     reset_password_token_expires = Column(DateTime, nullable=True)
 
+class Groups(Base):
+    __tablename__ = 'groups'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True)
+    description = Column(String, unique=True)
+    created_by = Column(String)
+    created_at = Column(DateTime)
+
 
 
