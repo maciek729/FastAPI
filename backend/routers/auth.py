@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
-from database import SessionLocal
-from models import Users
+from ..database import SessionLocal
+from ..models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -32,7 +32,9 @@ ALGORITHM = 'HS256'
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
-load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(__file__),"..",".env")
+load_dotenv(dotenv_path)
+
 conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
     MAIL_PASSWORD=SecretStr(os.getenv("MAIL_PASSWORD")),

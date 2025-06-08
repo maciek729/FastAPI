@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, status
-from models import Base
-from database import engine
-from routers import auth, index, admin, users
+from .models import Base
+from .database import engine
+from .routers import auth, index, admin, users
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware

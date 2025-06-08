@@ -5,12 +5,10 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import Dashboard from "./components/Dashboard"; // Make sure this is imported
 
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Add this line to redirect root to login */}
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
