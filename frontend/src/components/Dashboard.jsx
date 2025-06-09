@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../css/Dashboard.css';
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
+    
+    // Kontrola Paska bocznego
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
 
     const getCookie = (name) => {
         let cookieValue = null;
@@ -60,17 +66,87 @@ export default function Dashboard() {
         fetchUserData();
     }, [navigate]);
 
+    useEffect(() => {
+        if (!userData) return; // Poczekaj, aż dane się załadują
+
+        const toggles = document.querySelectorAll('.js-toggle');
+
+        const handleToggleClick = (e) => {
+            const toggle = e.currentTarget;
+            const targetClass = toggle.dataset.target;
+            const submenu = document.querySelector(`.js-submenu.${targetClass}`);
+            const isHidden = submenu.classList.contains('hidden');
+
+            submenu.classList.toggle('hidden');
+            toggle.textContent = `${isHidden ? '▾' : '▸'} ${toggle.textContent.slice(2)}`;
+        };
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', handleToggleClick);
+        });
+
+        return () => {
+            toggles.forEach(toggle => {
+                toggle.removeEventListener('click', handleToggleClick);
+            });
+        };
+    }, [userData]);
+
+
+
     if (!userData) {
         return <div className="loading">Loading...</div>;
     }
 
     return (
         <div className="dashboard-container">
-            <nav className="dashboard-nav">
-                <h1>Welcome, {userData.first_name}!</h1>
-                <button onClick={handleLogout}>Logout</button>
-            </nav>
-            <div className="dashboard-content">
+            <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
+                <div className="sidebar-content">
+                    <h1>zdAI to!</h1>
+
+                    <div className="sidebar-section">
+                        <div className="sidebar-section-title js-toggle" data-target="my-space">
+                            ▸ Moja przestrzeń
+                        </div>
+                        <ul className="js-submenu my-space hidden">
+                            <li>Fizyka</li>
+                            <li>Matematyka</li>
+                        </ul>
+                    </div>
+
+                    <div className="sidebar-section">
+                        <div className="sidebar-section-title js-toggle" data-target="xyz-space">
+                            ▸ Przestrzeń XYZ
+                        </div>
+                        <ul className="js-submenu xyz-space hidden">
+                            <li>Biologia</li>
+                        </ul>
+                    </div>
+
+                    <div className="sidebar-section">
+                        <div className="sidebar-section-title js-toggle" data-target="settings-space">
+                            ▸ Ustawienia
+                        </div>
+                        <ul className="js-submenu settings-space hidden">
+                            <li>Profil</li>
+                            <li>Ustawienia</li>
+                            <li onClick={handleLogout} style={{ cursor: 'pointer', color: 'red' }}>
+                                Wyloguj się
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Toggle button obok sidebaru */}
+            <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
+                {isSidebarOpen ? '◀' : '▶'}
+            </button>
+
+            <main className="dashboard-content">
+                <nav className="dashboard-nav">
+                    <h1>Welcome, {userData.first_name}!</h1>
+                </nav>
                 <div className="user-info">
                     <h2>Your Profile</h2>
                     <p>Email: {userData.email}</p>
@@ -78,7 +154,7 @@ export default function Dashboard() {
                     <p>Role: {userData.role}</p>
                     <p>Phone: {userData.phone_number}</p>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
