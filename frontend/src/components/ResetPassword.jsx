@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import '../css/ResetPassword.css'; // << pamiętaj o imporcie stylu!
 
 export default function ResetPassword() {
-    const { token } = useParams();  // Get token from URL params
+    const { token } = useParams();
     const navigate = useNavigate();
     const [newPassword, setNewPassword] = useState("");
     const [error, setError] = useState("");
@@ -19,13 +20,11 @@ export default function ResetPassword() {
                 method: "POST",
                 body: formData,
             });
-            
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.detail || "Password reset failed");
             }
-            
-            alert("Password updated successfully!");
+            alert("Hasło zostało pomyślnie zaktualizowane!");
             navigate("/login");
         } catch (err) {
             setError(err.message);
@@ -35,19 +34,19 @@ export default function ResetPassword() {
     return (
         <div className="auth-container">
             <form className="auth-card" onSubmit={handleSubmit}>
-                <h2>Reset Password</h2>
+                <h2>Zresetuj hasło</h2>
                 <div className="form-group">
-                    <label htmlFor="new_password">New Password</label>
+                    <label htmlFor="new_password">Nowe hasło</label>
                     <input
                         id="new_password"
                         type="password"
                         value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        onChange={e => setNewPassword(e.target.value)}
                         required
-                        placeholder="Enter new password"
+                        placeholder="Wprowadź nowe hasło"
                     />
                 </div>
-                <button type="submit">Reset Password</button>
+                <button type="submit">Zresetuj hasło</button>
                 {error && <div className="error-message">{error}</div>}
             </form>
         </div>
