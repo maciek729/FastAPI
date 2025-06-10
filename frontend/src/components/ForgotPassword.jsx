@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../css/ForgotPassword.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -15,23 +16,39 @@ export default function ForgotPassword() {
         body: new URLSearchParams({ email }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Error");
-      setMessage("If this email exists, a reset link has been sent.");
+      if (!res.ok) throw new Error(data.detail || "Wystąpił błąd.");
+      setMessage("Jeśli ten adres istnieje, wysłaliśmy link do resetowania hasła.");
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Reset Password</h2>
-      <input type="email" name="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
-      <button type="submit">Send reset link</button>
-      {error && <div style={{color: "red"}}>{error}</div>}
-      {message && <div style={{color: "green"}}>{message}</div>}
-      <div>
-        <a href="/login">Back to login</a>
-      </div>
-    </form>
+    <div className="auth-container">
+      <form className="auth-card" onSubmit={handleSubmit}>
+        <h2 className="auth-header">Resetowanie hasła</h2>
+        <p className="auth-desc">
+          Podaj adres e-mail powiązany z Twoim kontem,<br />
+          a wyślemy do Ciebie link do zmiany hasła.
+        </p>
+        <div className="form-group">
+          <label htmlFor="email">Adres e-mail</label>
+          <input
+            id="email"
+            type="email"
+            placeholder="Wprowadź e-mail"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Wyślij link resetujący</button>
+        {error && <div className="error-message">{error}</div>}
+        {message && <div className="ok-message">{message}</div>}
+        <div className="return-login">
+          <a href="/login">Powrót do logowania</a>
+        </div>
+      </form>
+    </div>
   );
 }
