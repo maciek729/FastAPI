@@ -1,6 +1,5 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
-
 from click import argument
 from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from pydantic import BaseModel
@@ -18,6 +17,7 @@ from pydantic import EmailStr, SecretStr
 from dotenv import load_dotenv
 import os
 from fastapi.responses import HTMLResponse
+import re
 
 
 
@@ -49,11 +49,8 @@ conf = ConnectionConfig(
 class CreateUserRequest(BaseModel):
     username: str
     email: str
-    first_name: str
-    last_name: str
     password: str
     role: str
-    phone_number: str
 
 
 class Token(BaseModel):
@@ -97,8 +94,11 @@ async def reset_password_page(request: Request, token: str):
 ### Endpoints ##
 
 
-def authenticate_user(username: str, password: str, db):
-    user = db.query(Users).filter(Users.username == username).first()
+def authenticate_user(identifier: str, password: str, db):
+    if re.match(r"[^@]+@[^@]+\.[^@]+", identifier):
+        user = db.query(Users).filter(Users.email == identifier).first()
+    else:
+        user = db.query(Users).filter(Users.username == identifier).first()
 
     if not user:
         raise HTTPException(
@@ -162,12 +162,9 @@ async def create_user(db: db_dependency,
     create_user_model = Users(
         email=thisEmail,
         username=create_user_request.username,
-        first_name=create_user_request.first_name,
-        last_name=create_user_request.last_name,
         role=create_user_request.role,
         hashed_password=bcrypt_context.hash(create_user_request.password),
         is_active=True,
-        phone_number=create_user_request.phone_number,
         is_verified=False,
         verification_token = token
     )
