@@ -64,12 +64,9 @@ export default function Register() {
   const [form, setForm] = useState({
     username: "",
     email: "",
-    first_name: "",
-    last_name: "",
     password: "",
     password2: "",
-    role: "",
-    phone_number: ""
+    role: ""
   });
   const [error, setError] = useState("");
 
@@ -132,30 +129,6 @@ export default function Register() {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="first_name">Imię</label>
-          <input
-            id="first_name"
-            name="first_name"
-            type="text"
-            placeholder="Podaj imię"
-            value={form.first_name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="last_name">Nazwisko</label>
-          <input
-            id="last_name"
-            name="last_name"
-            type="text"
-            placeholder="Podaj nazwisko"
-            value={form.last_name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
           <label htmlFor="role">Rola</label>
           <input
             id="role"
@@ -163,18 +136,6 @@ export default function Register() {
             type="text"
             placeholder="Admin/User"
             value={form.role}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="phone_number">Telefon</label>
-          <input
-            id="phone_number"
-            name="phone_number"
-            type="text"
-            placeholder="Podaj numer telefonu"
-            value={form.phone_number}
             onChange={handleChange}
             required
           />
