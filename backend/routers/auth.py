@@ -19,8 +19,6 @@ import os
 from fastapi.responses import HTMLResponse
 import re
 
-
-
 router = APIRouter(
     prefix='/auth',
     tags=['auth']
