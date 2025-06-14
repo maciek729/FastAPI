@@ -1,6 +1,5 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
-
 from click import argument
 from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from pydantic import BaseModel
@@ -11,7 +10,6 @@ from models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
-from fastapi.templating import Jinja2Templates
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 import secrets
 from pydantic import EmailStr, SecretStr
@@ -71,28 +69,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-templates = Jinja2Templates(directory="templates")
-
-
-### Pages ###
-@router.get("/login-page")
-def redner_login_page(request: Request):
-    return templates.TemplateResponse("login.html", {'request': request})
-
-@router.get("/register-page")
-def render_register_page(request: Request):
-    return templates.TemplateResponse("register.html", {'request': request})
-
-@router.get("/forgot-password-page")
-def forgot_password_page(request: Request):
-    return templates.TemplateResponse("forgot_password.html", {"request": request})
-
-@router.get("/reset-password-page")
-async def reset_password_page(request: Request, token: str):
-    return templates.TemplateResponse("reset_password.html", {
-        "request": request,
-        "token": token
-    })
 
 ### Endpoints ##
 
