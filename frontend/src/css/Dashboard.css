@@ -178,6 +178,7 @@
 .dashboard-content {
     flex-grow: 1;
     padding: 20px 40px;
+    color:black;
 }
 
 .dashboard-nav {
