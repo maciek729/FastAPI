@@ -200,3 +200,20 @@
 .hidden {
     display: none;
 }
+/* Stylizacja paska przewijania */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #f8f9fb;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: #f1dede;
+    border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #e8caca;
+}
