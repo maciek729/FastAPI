@@ -5,7 +5,8 @@ import '../css/Dashboard.css';
 export default function Dashboard() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
-    // Defaultowe przestrzenie i pokoje
+
+    // Przestrzenie i pokoje (Ustawienia zawsze na końcu)
     const [spaces, setSpaces] = useState([
         {
             title: 'Moja przestrzeń',
@@ -20,15 +21,21 @@ export default function Dashboard() {
         {
             title: 'Ustawienia',
             className: 'settings-space',
-            rooms: ['Profil', 'Ustawienia', 'Wyloguj się']
+            rooms: ['Profil', 'Ustawienia', 'Wyloguj się'],
+            isSettings: true // Flaga identyfikująca przestrzeń ustawień
         }
     ]);
 
-    // Kontrola Paska bocznego
+    // Stan rozwinięcia przestrzeni
+    const [expandedSpaces, setExpandedSpaces] = useState(
+        spaces.map(() => true)
+    );
+
+    // Kontrola paska bocznego
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
-
+    // Pobieranie ciasteczka
     const getCookie = (name) => {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -44,6 +51,7 @@ export default function Dashboard() {
         return cookieValue;
     };
 
+    // Wylogowanie
     const handleLogout = () => {
         const cookies = document.cookie.split(";");
         for (let i = 0; i < cookies.length; i++) {
@@ -54,21 +62,38 @@ export default function Dashboard() {
         }
         navigate('/login');
     };
+
+    // Dodawanie przestrzeni (nad Ustawieniami)
     const handleAddSpace = () => {
         const newTitle = prompt("Podaj nazwę nowej przestrzeni:");
         if (!newTitle) return;
 
         const newClassName = newTitle.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
-        setSpaces(prev => [
-            ...prev,
-            {
+        
+        setSpaces(prev => {
+            // Znajdź indeks przestrzeni Ustawienia
+            const settingsIndex = prev.findIndex(space => space.isSettings);
+            
+            // Wstaw nową przestrzeń przed Ustawieniami
+            const newSpaces = [...prev];
+            newSpaces.splice(settingsIndex, 0, {
                 title: newTitle,
                 className: newClassName,
                 rooms: []
-            }
-        ]);
+            });
+            
+            return newSpaces;
+        });
+        
+        setExpandedSpaces(prev => {
+            const settingsIndex = spaces.findIndex(space => space.isSettings);
+            const newExpanded = [...prev];
+            newExpanded.splice(settingsIndex, 0, false);
+            return newExpanded;
+        });
     };
 
+    // Dodawanie pokoju
     const handleAddRoom = (spaceIndex) => {
         const newRoom = prompt("Podaj nazwę nowego pokoju:");
         if (!newRoom) return;
@@ -83,6 +108,16 @@ export default function Dashboard() {
         });
     };
 
+    // Przełączanie rozwinięcia przestrzeni
+    const toggleSpace = (index) => {
+        setExpandedSpaces(prev => {
+            const newState = [...prev];
+            newState[index] = !newState[index];
+            return newState;
+        });
+    };
+
+    // Pobieranie danych użytkownika
     useEffect(() => {
         const token = getCookie('access_token');
         if (!token) {
@@ -112,78 +147,59 @@ export default function Dashboard() {
         fetchUserData();
     }, [navigate]);
 
-   useEffect(() => {
-        const handleToggleClick = (e) => {
-            const toggle = e.currentTarget;
-            const targetClass = toggle.dataset.target;
-            const submenu = document.querySelector(`.js-submenu.${targetClass}`);
-            const isHidden = submenu.classList.contains('hidden');
-
-            submenu.classList.toggle('hidden');
-            toggle.textContent = `${isHidden ? '▾' : '▸'} ${toggle.textContent.slice(2)}`;
-        };
-
-        const toggles = document.querySelectorAll('.js-toggle');
-        
-        // Najpierw usuwamy wszystkie wcześniej dodane zdublowane nasłuchiwacze
-        toggles.forEach(toggle => {
-            toggle.replaceWith(toggle.cloneNode(true));
-        });
-
-        // Od nowa dodajemy tylko jeden nasłuchiwacz
-        const freshToggles = document.querySelectorAll('.js-toggle');
-        freshToggles.forEach(toggle => {
-            toggle.addEventListener('click', handleToggleClick);
-        });
-
-        return () => {
-            freshToggles.forEach(toggle => {
-                toggle.removeEventListener('click', handleToggleClick);
-            });
-        };
-    }, [spaces]);
-
     if (!userData) {
         return <div className="loading">Loading...</div>;
     }
 
     return (
         <div className="dashboard-container">
-            <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
-                <div className="sidebar-content">
-                    <h1>zdAI to!</h1>
-
-                    {spaces.map((space, index) => (
-                        <div className="sidebar-section" key={space.className}>
-                            <div className="sidebar-section-title js-toggle" data-target={space.className}>
-                                ▸ {space.title}
-                            </div>
-                            <ul className={`js-submenu ${space.className} hidden`}>
-                                {space.rooms.map((room, i) => (
-                                    <li key={i}
-                                        onClick={room === 'Wyloguj się' ? handleLogout : null}
-                                        style={room === 'Wyloguj się' ? { cursor: 'pointer', color: 'red' } : {}}
-                                    >
-                                        {room}
-                                    </li>
-                                ))}
-                                <li style={{ color: 'green', cursor: 'pointer' }} onClick={() => handleAddRoom(index)}>
-                                    ➕ Dodaj pokój
-                                </li>
-                            </ul>
-                        </div>
-                    ))}
-
-                    <button onClick={handleAddSpace} style={{ marginTop: '10px', width: '100%' }}>
-                        ➕ Dodaj przestrzeń
-                    </button>
-                </div>
-            </aside>
-
-            {/* Toggle button obok sidebaru */}
             <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
                 {isSidebarOpen ? '◀' : '▶'}
             </button>
+            <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
+                <div className="sidebar-inner">
+                    <div className="sidebar-content">
+                        <h1>zdAI to!</h1>
+
+                        {spaces.map((space, index) => (
+                            <div className="sidebar-section" key={space.className}>
+                                <div
+                                    className="sidebar-section-title"
+                                    onClick={() => toggleSpace(index)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {expandedSpaces[index] ? '▾' : '▸'} {space.title}
+                                </div>
+                                {expandedSpaces[index] && (
+                                    <ul className={`js-submenu ${space.className}`}>
+                                        {space.rooms.map((room, i) => (
+                                            <li
+                                                key={i}
+                                                onClick={room === 'Wyloguj się' ? handleLogout : null}
+                                                style={room === 'Wyloguj się' ? { cursor: 'pointer', color: 'red' } : {}}
+                                            >
+                                                {room}
+                                            </li>
+                                        ))}
+                                        {!space.isSettings && (
+                                            <li
+                                                style={{ color: 'green', cursor: 'pointer' }}
+                                                onClick={() => handleAddRoom(index)}
+                                            >
+                                                ➕ Dodaj pokój
+                                            </li>
+                                        )}
+                                    </ul>
+                                )}
+                            </div>
+                        ))}
+
+                        <button onClick={handleAddSpace} style={{ marginTop: '10px', width: '100%' }}>
+                            ➕ Dodaj przestrzeń
+                        </button>
+                    </div>
+                </div>
+            </aside>
 
             <main className="dashboard-content">
                 <nav className="dashboard-nav">
