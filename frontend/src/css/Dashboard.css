@@ -2,6 +2,7 @@
     display: flex;
     height: 100vh;
     font-family: Arial, sans-serif;
+    position: relative;
 }
 
 /* Sidebar */
@@ -97,6 +98,7 @@
 
 /* Sidebar */
 .sidebar {
+    margin-top: 20px;
     width: 200px;
     background-color: #f8f9fb;
     color: #333;
@@ -119,22 +121,25 @@
 }
 
 .sidebar-toggle-btn {
-    position: absolute;
-    left: 200px;
-    top: 20px;
-    z-index: 1000;
-    background-color: #ddd;
-    border: none;
-    padding: 4px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: left 0.3s ease;
+    width: 60px;
+    position:absolute;
+  align-self: flex-start;
+  margin-bottom: 25px;
+  background-color: #ddd;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
+
+/* Gdy sidebar jest zwinięty, przesuń przycisk w lewo */
 .sidebar.collapsed + .sidebar-toggle-btn {
-    left: 0;
+  left: 60px;
 }
+
+
 
 .sidebar h1 {
     font-size: 18px;

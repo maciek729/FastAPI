@@ -149,41 +149,45 @@ export default function Dashboard() {
 
     return (
         <div className="dashboard-container">
-            <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
-                <div className="sidebar-content">
-                    <h1>zdAI to!</h1>
-
-                    {spaces.map((space, index) => (
-                        <div className="sidebar-section" key={space.className}>
-                            <div className="sidebar-section-title js-toggle" data-target={space.className}>
-                                ▸ {space.title}
-                            </div>
-                            <ul className={`js-submenu ${space.className} hidden`}>
-                                {space.rooms.map((room, i) => (
-                                    <li key={i}
-                                        onClick={room === 'Wyloguj się' ? handleLogout : null}
-                                        style={room === 'Wyloguj się' ? { cursor: 'pointer', color: 'red' } : {}}
-                                    >
-                                        {room}
-                                    </li>
-                                ))}
-                                <li style={{ color: 'green', cursor: 'pointer' }} onClick={() => handleAddRoom(index)}>
-                                    ➕ Dodaj pokój
-                                </li>
-                            </ul>
-                        </div>
-                    ))}
-
-                    <button onClick={handleAddSpace} style={{ marginTop: '10px', width: '100%' }}>
-                        ➕ Dodaj przestrzeń
-                    </button>
-                </div>
-            </aside>
-
-            {/* Toggle button obok sidebaru */}
             <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
                 {isSidebarOpen ? '◀' : '▶'}
             </button>
+            <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
+                <div className="sidebar-inner">
+                    <div className="sidebar-content">
+                        <h1>zdAI to!</h1>
+
+                        {spaces.map((space, index) => (
+                            <div className="sidebar-section" key={space.className}>
+                                <div className="sidebar-section-title js-toggle" data-target={space.className}>
+                                    ▸ {space.title}
+                                </div>
+                                <ul className={`js-submenu ${space.className} hidden`}>
+                                    {space.rooms.map((room, i) => (
+                                        <li
+                                            key={i}
+                                            onClick={room === 'Wyloguj się' ? handleLogout : null}
+                                            style={room === 'Wyloguj się' ? { cursor: 'pointer', color: 'red' } : {}}
+                                        >
+                                            {room}
+                                        </li>
+                                    ))}
+                                    <li
+                                        style={{ color: 'green', cursor: 'pointer' }}
+                                        onClick={() => handleAddRoom(index)}
+                                    >
+                                        ➕ Dodaj pokój
+                                    </li>
+                                </ul>
+                            </div>
+                        ))}
+
+                        <button onClick={handleAddSpace} style={{ marginTop: '10px', width: '100%' }}>
+                            ➕ Dodaj przestrzeń
+                        </button>
+                    </div>
+                </div>
+            </aside>
 
             <main className="dashboard-content">
                 <nav className="dashboard-nav">
