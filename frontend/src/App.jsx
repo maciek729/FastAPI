@@ -6,6 +6,7 @@ import ResetPassword from "./components/ResetPassword";
 import Dashboard from "./components/Dashboard"; 
 import Chat from "./components/Chat";
 import Intro from "./components/Intro";
+import Sidebar from "./components/Sidebar";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/chat" element={<Chat/>} />
         <Route path="/intro" element={<Intro/>}/>        
       </Routes>

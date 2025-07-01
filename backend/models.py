@@ -46,6 +46,13 @@ class Messages(Base):
     message = Column(String)
     sent_at = Column(DateTime)
 
+class Spaces(Base):
+    __tablename__ = "spaces"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime)
 
 class Notebooks(Base):
     __tablename__ = "notebooks"
@@ -54,6 +61,7 @@ class Notebooks(Base):
     name = Column(String, unique=True)
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime)
+    space_id = Column(Integer, ForeignKey("spaces.id"))  
 
 class Notes(Base):
     __tablename__ = "notes"

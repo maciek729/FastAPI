@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import '../css/ResetPassword.css'; // << pamiętaj o imporcie stylu!
+import '../css/ResetPassword.css'; 
 
 export default function ResetPassword() {
     const { token } = useParams();
