@@ -1,21 +1,21 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated
 from click import argument
-from fastapi import APIRouter, Depends, HTTPException, Request, Form
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from starlette import status
+from fastapi import APIRouter, Depends, HTTPException, Request, Form # type: ignore
+from pydantic import BaseModel # type: ignore
+from sqlalchemy.orm import Session # type: ignore
+from starlette import status # type: ignore
 from database import SessionLocal
 from models import Users
-from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from jose import jwt, JWTError
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from passlib.context import CryptContext # type: ignore
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer    # type: ignore
+from jose import jwt, JWTError # type: ignore
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig # type: ignore
 import secrets
-from pydantic import EmailStr, SecretStr
+from pydantic import EmailStr, SecretStr # type: ignore
 from dotenv import load_dotenv
 import os
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse # type: ignore
 import re
 
 router = APIRouter(
