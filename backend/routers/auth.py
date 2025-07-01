@@ -214,7 +214,6 @@ async def forgot_password(
     user.reset_password_token_expires = expires
     db.commit()
 
-    # Change this line to point to your React frontend
     reset_link = f"http://localhost:5173/reset-password/{token}"
 
     message = MessageSchema(
