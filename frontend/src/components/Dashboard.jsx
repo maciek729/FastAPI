@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/Dashboard.css';
 import Sidebar from './Sidebar';
+import NotebookView from './NotebookView'; 
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [selectedNotebook, setSelectedNotebook] = useState(null); // <-- tutaj przenosimy stan
+    const [notebookDetails, setNotebookDetails] = useState(null);
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -26,15 +29,21 @@ export default function Dashboard() {
     };
 
     const handleLogout = () => {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i];
+        document.cookie.split(";").forEach(cookie => {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
             document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-        }
+        });
         navigate('/login');
     };
+
+    const refreshNotebook = () => {
+        fetch(`http://localhost:8000/notebooks/${selectedNotebook.id}`)
+            .then(res => res.json())
+            .then(data => setNotebookDetails(data))
+            .catch(err => console.error('Błąd pobierania szczegółów:', err));
+    };
+
 
     useEffect(() => {
         const token = getCookie('access_token');
@@ -46,9 +55,7 @@ export default function Dashboard() {
         const fetchUserData = async () => {
             try {
                 const response = await fetch('http://localhost:8000/user/', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
                     const data = await response.json();
@@ -65,34 +72,58 @@ export default function Dashboard() {
         fetchUserData();
     }, [navigate]);
 
+    // Ładowanie szczegółów notatnika po kliknięciu
+    useEffect(() => {
+        if (selectedNotebook) {
+            fetch(`http://localhost:8000/notebooks/${selectedNotebook.id}`)
+                .then(res => res.json())
+                .then(data => setNotebookDetails(data))
+                .catch(err => console.error('Błąd pobierania szczegółów:', err));
+        }
+    }, [selectedNotebook]);
+
     if (!userData) {
         return <div className="loading">Loading...</div>;
     }
 
     return (
         <div className="dashboard-container">
-            <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
-                {isSidebarOpen ? '◀' : '▶'}
+            <button 
+                className="sidebar-toggle-btn" 
+                onClick={toggleSidebar}
+                title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                style={{
+                    left: isSidebarOpen ? '260px' : '16px',
+                    transform: isSidebarOpen ? 'translateX(-50%)' : 'translateX(0)'
+                }}
+            >
+                {isSidebarOpen ? '❮❮' : '❯❯'}
             </button>
-            
-            <Sidebar 
+
+            <Sidebar
                 isSidebarOpen={isSidebarOpen}
                 toggleSidebar={toggleSidebar}
                 userData={userData}
                 handleLogout={handleLogout}
+                onSelectNotebook={setSelectedNotebook}
             />
 
-            <main className="dashboard-content">
-                <nav className="dashboard-nav">
-                    <h1>Welcome, {userData.first_name}!</h1>
-                </nav>
-                <div className="user-info">
-                    <h2>Your Profile</h2>
-                    <p>Email: {userData.email}</p>
-                    <p>Username: {userData.username}</p>
-                    <p>Role: {userData.role}</p>
-                    <p>Phone: {userData.phone_number}</p>
-                </div>
+            <main className="dashboard-content"
+                style={{
+                    marginLeft: isSidebarOpen ? '260px' : '0',
+                    transition: 'margin-left 0.3s ease'
+                }}>
+                {!selectedNotebook ? (
+                    <div className="user-info">
+                        <h2>Wybierz notatnik z menu</h2>
+                    </div>
+                ) : (
+                    <NotebookView
+                        details={notebookDetails}
+                        userData={userData}
+                        refreshNotebook={refreshNotebook}
+                    />
+                )}
             </main>
         </div>
     );

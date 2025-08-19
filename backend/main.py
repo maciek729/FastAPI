@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, status
 from models import Base
 from database import engine
-from routers import auth, index, admin, users, ai, spaces, notebooks
+from routers import auth, index, admin, users, ai, notebooks, notes
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,5 +29,5 @@ app.include_router(index.router)
 app.include_router(admin.router)
 app.include_router(users.router)
 app.include_router(ai.router)
-app.include_router(spaces.router)
 app.include_router(notebooks.router)
+app.include_router(notes.router)
