@@ -7,6 +7,8 @@ import Dashboard from "./components/Dashboard";
 import Chat from "./components/Chat";
 import Intro from "./components/Intro";
 import Sidebar from "./components/Sidebar";
+import NotebookView from "./components/NotebookView";
+
 
 function App() {
   return (
@@ -20,7 +22,9 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/chat" element={<Chat/>} />
-        <Route path="/intro" element={<Intro/>}/>        
+        <Route path="/intro" element={<Intro/>}/>    
+        <Route path="/notebookView" element={<NotebookView/>}/>        
+    
       </Routes>
     </BrowserRouter>
   );

@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from database import SessionLocal, Base  # Zakładam, że masz Base z declarative_base()
 from models import Notebooks
 from dotenv import load_dotenv
 
@@ -25,33 +26,44 @@ class CreateNotebookRequest(BaseModel):
     name: str
     created_by: int
     created_at: datetime = datetime.now(timezone.utc)
-    space_id: int  
+    space_type: str = "personal"  
+    is_shared: bool = False
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 def create_notebook(request: CreateNotebookRequest, db: db_dependency):
-    existing_notebook = db.query(Notebooks).filter(Notebooks.name == request.name, Notebooks.space_id == request.space_id).first()
+    existing_notebook = db.query(Notebooks).filter(
+        Notebooks.name == request.name,
+        Notebooks.created_by == request.created_by,
+        Notebooks.space_type == request.space_type
+    ).first()
+
     if existing_notebook:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Notebook with this name already exists in this space."
         )
+
     new_notebook = Notebooks(
         name=request.name,
         created_by=request.created_by,
         created_at=request.created_at,
-        space_id=request.space_id  
+        space_type=request.space_type,
+        is_shared=request.is_shared
     )
     db.add(new_notebook)
     db.commit()
     db.refresh(new_notebook)
     return {"message": "Notebook created successfully", "notebook_id": new_notebook.id}
 
-@router.get("/list", response_model=list[CreateNotebookRequest])
-def list_notebooks(space_id: int, db: db_dependency):
-    notebooks = db.query(Notebooks).filter(Notebooks.space_id == space_id)
-    return notebooks.all()
+@router.get("/list")
+def list_notebooks(created_by: int, space_type: str, db: db_dependency):
+    notebooks = db.query(Notebooks).filter(
+        Notebooks.created_by == created_by,
+        Notebooks.space_type == space_type
+    ).all()
+    return notebooks
 
 @router.get("/{notebook_id}", response_model=CreateNotebookRequest)
 def get_notebook(notebook_id: int, db: db_dependency):
