@@ -214,8 +214,20 @@ export default function Chat() {
     e.preventDefault();
     setIsDragOver(false);
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && (droppedFile.type === 'text/plain' || droppedFile.type === 'application/pdf')) {
+    
+    const supportedTypes = [
+      'text/plain', 
+      'application/pdf', 
+      'image/jpeg', 
+      'image/jpg', 
+      'image/png', 
+      'image/webp'
+    ];
+    
+    if (droppedFile && supportedTypes.includes(droppedFile.type)) {
       setFile(droppedFile);
+    } else {
+      alert("Nieobsługiwany format pliku. Obsługiwane formaty: TXT, PDF, JPG, JPEG, PNG.");
     }
   };
 
@@ -231,7 +243,7 @@ export default function Chat() {
 
   const uploadFile = async () => {
     if (!file) {
-      alert("Wybierz plik TXT lub PDF.");
+      alert("Wybierz plik TXT, PDF, JPG, JPEG lub PNG.");
       return;
     }
 
@@ -253,7 +265,7 @@ export default function Chat() {
           { role: "user", content: `Wczytano plik: ${file.name}`, type: "file" },
           { 
             role: "assistant", 
-            content: "Dokładnie przeanalizowano dokument. Możesz teraz zadawać konkretne pytania o jego zawartość.",
+            content: data.message || "Plik został pomyślnie wczytany. Możesz teraz zadawać pytania o jego zawartość.",
             type: "success"
           }
         ]);
@@ -406,6 +418,7 @@ export default function Chat() {
                   <div className="chat-message-text">
                     {msg.content}
                   </div>
+                  
                   {msg.type === 'file' && (
                     <div className="chat-file-indicator">
                       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -451,7 +464,7 @@ export default function Chat() {
               type="file" 
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept=".txt,.pdf" 
+              accept=".txt,.pdf,.jpg,.jpeg,.png,.webp"   
               className="chat-file-input"
               disabled={isLoading}
             />
@@ -459,19 +472,19 @@ export default function Chat() {
             {!file ? (
               <>
                 <div className="chat-upload-icon">
-                  <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                  <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M12,13V9H10v4H7l5,5 5-5h-3Z"/>
                   </svg>
                 </div>
                 <p className="chat-upload-text">
                   <span>Przeciągnij plik tutaj lub kliknij aby wybrać</span>
-                  <small>Obsługiwane formaty: TXT, PDF</small>
+                  <small>Obsługiwane formaty: TXT, PDF, JPG lub PNG</small>
                 </p>
               </>
             ) : (
               <div className="chat-file-preview">
                 <div className="chat-file-info">
-                  <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                   </svg>
                   <div className="chat-file-details">
@@ -488,8 +501,10 @@ export default function Chat() {
                   className="chat-file-remove"
                   disabled={isLoading}
                 >
-                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 
+                            5 17.59 6.41 19 12 13.41 17.59 19 
+                            19 17.59 13.41 12z"/>
                   </svg>
                 </button>
               </div>
@@ -500,12 +515,20 @@ export default function Chat() {
             <button
               onClick={uploadFile}
               disabled={isLoading}
-              className="chat-upload-btn"
+              className="chat-upload-btn small"   
             >
-              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 16l-4-4h3V4h2v8h3l-4 4z"/>
               </svg>
-              {isLoading ? 'Przetwarzanie...' : 'Prześlij dokument'}
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style={{marginLeft: "4px"}}>
+                <path d="M21 19V5a2 2 0 0 0-2-2H5a2 
+                        2 0 0 0-2 2v14a2 2 0 0 
+                        0 2 2h14a2 2 0 0 
+                        0 2-2zM5 5h14v4h-4a1 1 0 0 
+                        0-1 .76L12.67 15l-2.34-5.24A1 
+                        1 0 0 0 9 9H5V5z"/>
+              </svg>
+              {isLoading ? 'Przetwarzanie...' : 'Prześlij'}
             </button>
           )}
         </div>
