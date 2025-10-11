@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import styles from "../css/Auth.module.css";
 
 function Register() {
@@ -54,6 +55,12 @@ function Register() {
 
   return (
     <div className={styles.authContainer}>
+      {/* Back to Intro Button */}
+      <Link to="/" className={styles.backButton}>
+        <ArrowLeft />
+        <span>Back to Home</span>
+      </Link>
+
       <form className={styles.authCard} onSubmit={handleSubmit}>
         <h2 className={styles.title}>Create Account</h2>
         <p className={styles.subtitle}>Sign up to get started</p>
