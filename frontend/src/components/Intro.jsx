@@ -1,249 +1,403 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, FileText, Zap, FolderOpen, Menu, X, Star, Users, Sparkles } from 'lucide-react';
-import '../css/Intro.css';
+import { useNavigate } from 'react-router-dom';
+import { MessageCircle, FileText, Zap, FolderOpen, Menu, X, Star, Users, Sparkles, LogIn } from 'lucide-react';
+import styles from '../css/Intro.module.css';
 
 const Intro = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState({});
 
+  // Helper function to get cookie
+  const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
+  // Check if user is already logged in and redirect to dashboard
+  useEffect(() => {
+    const token = getCookie('access_token');
+    if (token) {
+      // User is already logged in, redirect to dashboard
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
   const features = [
     {
-      icon: <MessageCircle className="feature-icon" />,
+      icon: <MessageCircle className={styles.featureIcon} />,
       title: "Porozmawiaj z AI Study Buddy",
       description: "Uzyskaj natychmiastowe odpowiedzi, wyjaśnienia i spersonalizowane wskazówki na dowolny temat. Twój prywatny korepetytor dostępny 24/7.",
       highlight: "Inteligentne odpowiedzi w sekundach",
-    //   mockup: "💬 Jak działa fotosynteza?\n🤖 Fotosynteza to proces, w którym rośliny...\n💬 Czy możesz to wyjaśnić prościej?\n🤖 Oczywiście! Wyobraź sobie, że rośliny..."
     },
     {
-      icon: <FileText className="feature-icon" />,
+      icon: <FileText className={styles.featureIcon} />,
       title: "Bezproblemowe robienie notatek",
       description: "Rób jasne, zwięzłe notatki bezpośrednio w zdAI. Organizuj je łatwo i uzyskuj dostęp w dowolnym miejscu i czasie.",
       highlight: "Synchronizacja w chmurze",
-    //   mockup: "📝 Historia Polski\n├─ Średniowiecze\n├─ Renesans\n└─ Czasy współczesne\n\n✨ Auto-organizacja tematów"
     },
     {
-      icon: <Zap className="feature-icon" />,
+      icon: <Zap className={styles.featureIcon} />,
       title: "Generuj skuteczne materiały",
       description: "Przekształć swoje notatki w niestandardowe fiszki i testy sprawdzające. Ucz się mądrzej, a nie ciężej.",
       highlight: "AI tworzy idealne fiszki",
-    //   mockup: "🎯 FISZKA #1\nPytanie: Co to jest fotosynteza?\nOdpowiedź: Proces wytwarzania...\n\n🎯 QUIZ\n1. Które organelle odpowiadają za fotosyntezę?\na) Mitochondria b) Chloroplasty ✓"
     },
     {
-      icon: <FolderOpen className="feature-icon" />,
+      icon: <FolderOpen className={styles.featureIcon} />,
       title: "Scentralizowane centrum nauki",
       description: "Przechowuj wszystkie materiały do nauki - notatki, fiszki, quizy - starannie zorganizowane w jednym miejscu.",
-      highlight: "Wszystko pod ręką",
-    //   mockup: "📚 Moje Materiały\n├─ 📖 Biologia (15 notatek)\n├─ 🧮 Matematyka (8 fiszek)\n├─ 🌍 Geografia (12 quizów)\n└─ 📜 Historia (20 notatek)"
-    }
+      highlight: "Wszystko w jednym miejscu",
+    },
   ];
-
-  const stats = [
-    { number: "10K+", label: "Aktywnych uczniów" },
-    { number: "50K+", label: "Wygenerowanych fiszek" },
-    { number: "98%", label: "Zadowolonych użytkowników" }
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % features.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setIsVisible(prev => ({
-            ...prev,
-            [entry.target.id]: entry.isIntersecting
-          }));
+          if (entry.isIntersecting) {
+            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
+          }
         });
       },
       { threshold: 0.1 }
     );
 
-    document.querySelectorAll('[id]').forEach((el) => {
+    document.querySelectorAll('[id^="feature-"]').forEach((el) => {
       observer.observe(el);
     });
 
     return () => observer.disconnect();
   }, []);
 
-  return (
-    
-    <div className="intro-container">
-      {/* Decorative background elements */}
-      <div className="intro-bg-decorations">
-        <div className="intro-bg-blob intro-bg-blob-1"></div>
-        <div className="intro-bg-blob intro-bg-blob-2"></div>
-        <div className="intro-bg-blob intro-bg-blob-3"></div>
-      </div>
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % features.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [features.length]);
 
-      {/* Header */}
-      <header className="intro-header">
-        <div className="intro-header-content">
-          <div className="intro-logo">
-            <div className="intro-logo-icon">
-              <Sparkles className="intro-logo-sparkles" />
-            </div>
-            <span className="intro-logo-text">zdAI to!</span>
+  const handleGetStarted = () => {
+    navigate('/register');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  return (
+    <div className={styles.introContainer}>
+      {/* Navigation Header */}
+      <header className={styles.introHeader}>
+        <div className={styles.introNav}>
+          <div className={styles.introLogo}>
+            <Sparkles className={styles.introLogoIcon} />
+            <span className={styles.introLogoText}>zdAI to!</span>
+          </div>
+          
+          {/* Desktop Navigation */}
+          <nav className={styles.introNavLinks}>
+            <a href="#features" className={styles.introNavLink}>Funkcje</a>
+            <a href="#benefits" className={styles.introNavLink}>Korzyści</a>
+            <a href="#testimonials" className={styles.introNavLink}>Opinie</a>
+          </nav>
+          
+          {/* Auth Buttons */}
+          <div className={styles.introAuthButtons}>
+            <button 
+              className={styles.introBtnLogin}
+              onClick={handleLogin}
+            >
+              <LogIn size={18} />
+              Zaloguj się
+            </button>
+            <button 
+              className={styles.introBtnSignup}
+              onClick={handleGetStarted}
+            >
+              <Users size={18} />
+              Rozpocznij
+            </button>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="intro-nav desktop-nav">
-            <button className="intro-nav-login">Zaloguj się</button>
-            <button className="intro-nav-signup">Zarejestruj się</button>
-          </nav>
-
-          {/* Mobile menu button */}
-          <button
-            className="intro-mobile-menu-btn"
+          {/* Mobile Menu Button */}
+          <button 
+            className={styles.introMobileMenuBtn}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X className="intro-menu-icon" /> : <Menu className="intro-menu-icon" />}
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="intro-mobile-menu">
-            <button className="intro-mobile-login">Zaloguj się</button>
-            <button className="intro-mobile-signup">Zarejestruj się</button>
+          <div className={styles.introMobileMenu}>
+            <a href="#features" onClick={() => setIsMenuOpen(false)}>Funkcje</a>
+            <a href="#benefits" onClick={() => setIsMenuOpen(false)}>Korzyści</a>
+            <a href="#testimonials" onClick={() => setIsMenuOpen(false)}>Opinie</a>
+            <button className={styles.introMobileLogin} onClick={handleLogin}>
+              Zaloguj się
+            </button>
+            <button className={styles.introMobileSignup} onClick={handleGetStarted}>
+              Rozpocznij za darmo
+            </button>
           </div>
         )}
       </header>
 
       {/* Hero Section */}
-      <section id="hero" className="intro-hero">
-        <div className="intro-hero-content">
-          <div className={`intro-hero-wrapper ${isVisible.hero ? 'visible' : ''}`}>
-            <div className="intro-hero-badge">
-              <Star className="intro-badge-icon" />
-              Nowa era nauki z AI
+      <section className={styles.introHero}>
+        <div className={styles.introHeroContent}>
+          <div className={styles.introHeroBadge}>
+            <Sparkles size={16} />
+            <span>Wspierane przez AI • Zaufane przez 10,000+ uczniów</span>
+          </div>
+          
+          <h1 className={styles.introHeroTitle}>
+            Twoja osobista <span className={styles.introGradientText}>AI nauka</span> rewolucja
+          </h1>
+          
+          <p className={styles.introHeroDescription}>
+            zdAI to! łączy w sobie inteligentną konwersację AI, łatwe notatowanie i inteligentne 
+            narzędzia do generowania materiałów edukacyjnych - wszystko w jednym, pięknie 
+            zaprojektowanym miejscu.
+          </p>
+          
+          <div className={styles.introHeroButtons}>
+            <button 
+              className={styles.introBtnPrimary}
+              onClick={handleGetStarted}
+            >
+              <Users size={20} />
+              Zacznij za darmo
+              <Sparkles className={styles.introBtnSparkle} size={16} />
+            </button>
+            <button className={styles.introBtnSecondary}>
+              <MessageCircle size={20} />
+              Zobacz jak działa
+            </button>
+          </div>
+          
+          <div className={styles.introHeroStats}>
+            <div className={styles.introStat}>
+              <div className={styles.introStatNumber}>10,000+</div>
+              <div className={styles.introStatLabel}>Aktywnych uczniów</div>
             </div>
-            
-            <h1 className="intro-hero-title">
-              <span className="intro-hero-title-line1">Doładuj swoją</span>
-              <span className="intro-hero-title-line2">naukę z zdAI!</span>
-            </h1>
-            
-            <p className="intro-hero-description">
-              Twój inteligentny asystent nauki: <strong>Czat, notatki, fiszki i więcej</strong> - wszystko w jednym magicznym miejscu zaprojektowanym dla komputerów.
-            </p>
-
-            <div className="intro-hero-buttons">
-              <button className="intro-btn-primary">
-                <span className="intro-btn-content">
-                  Rozpocznij przygodę
-                  <Sparkles className="intro-btn-icon" />
-                </span>
-              </button>
-              <button className="intro-btn-secondary">
-                Zobacz demo
-              </button>
+            <div className={styles.introStatDivider}></div>
+            <div className={styles.introStat}>
+              <div className={styles.introStatNumber}>50,000+</div>
+              <div className={styles.introStatLabel}>Utworzonych fiszek</div>
             </div>
-
-            {/* Stats */}
-            <div className="intro-stats">
-              {stats.map((stat, index) => (
-                <div key={index} className="intro-stat-item">
-                  <div className="intro-stat-number">{stat.number}</div>
-                  <div className="intro-stat-label">{stat.label}</div>
-                </div>
-              ))}
+            <div className={styles.introStatDivider}></div>
+            <div className={styles.introStat}>
+              <div className={styles.introStatNumber}>4.9/5</div>
+              <div className={styles.introStatLabel}>Ocena użytkowników</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="intro-features">
-        <div className="intro-features-content">
-          <div className={`intro-features-header ${isVisible.features ? 'visible' : ''}`}>
-            <h2 className="intro-features-title">
-              Supermoce dla Twojej nauki
-            </h2>
-            <p className="intro-features-description">
-              Odkryj narzędzia zaprojektowane specjalnie dla komputerów, które zmienią sposób, w jaki się uczysz. 
-              Każda funkcja została stworzona z myślą o maksymalnej produktywności na dużym ekranie.
-            </p>
-          </div>
+      <section id="features" className={styles.introFeatures}>
+        <div className={styles.introSectionHeader}>
+          <h2 className={styles.introSectionTitle}>
+            Wszystko czego potrzebujesz <span className={styles.introGradientText}>w jednym miejscu</span>
+          </h2>
+          <p className={styles.introSectionDescription}>
+            Kompleksowy ekosystem do nauki, zaprojektowany aby Ci pomóc osiągnąć więcej
+          </p>
+        </div>
 
-          {/* Feature cards */}
-          <div className="intro-features-grid">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className={`intro-feature-card ${currentSlide === index ? 'active' : ''}`}
-              >
-                <div className="intro-feature-content">
-                  <div className="intro-feature-icon-wrapper">
-                    {feature.icon}
-                  </div>
-                  <div className="intro-feature-text">
-                    <div className="intro-feature-highlight">
-                      {feature.highlight}
-                    </div>
-                    <h3 className="intro-feature-title">
-                      {feature.title}
-                    </h3>
-                    <p className="intro-feature-description">
-                      {feature.description}
-                    </p>
-                  </div>
+        <div className={styles.introFeaturesGrid}>
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              id={`feature-${index}`}
+              className={`${styles.introFeatureCard} ${
+                isVisible[`feature-${index}`] ? styles.visible : ''
+              }`}
+            >
+              <div className={styles.introFeatureIconWrapper}>
+                {feature.icon}
+              </div>
+              <h3 className={styles.introFeatureTitle}>{feature.title}</h3>
+              <p className={styles.introFeatureDescription}>{feature.description}</p>
+              <div className={styles.introFeatureHighlight}>
+                <Sparkles size={14} />
+                <span>{feature.highlight}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section id="benefits" className={styles.introBenefits}>
+        <div className={styles.introBenefitsContent}>
+          <div className={styles.introBenefitsText}>
+            <h2 className={styles.introBenefitsTitle}>
+              Ucz się <span className={styles.introGradientText}>mądrzej</span>, nie ciężej
+            </h2>
+            <div className={styles.introBenefitsList}>
+              <div className={styles.introBenefitItem}>
+                <div className={styles.introBenefitIcon}>
+                  <Zap size={20} />
                 </div>
-                <div className="intro-feature-mockup">
-                  <pre className="intro-mockup-text">{feature.mockup}</pre>
+                <div>
+                  <h3>Oszczędzaj czas</h3>
+                  <p>AI automatycznie tworzy fiszki i quizy z Twoich notatek</p>
                 </div>
               </div>
-            ))}
+              <div className={styles.introBenefitItem}>
+                <div className={styles.introBenefitIcon}>
+                  <MessageCircle size={20} />
+                </div>
+                <div>
+                  <h3>Uzyskaj natychmiastową pomoc</h3>
+                  <p>24/7 dostęp do AI asystenta nauki dla każdego tematu</p>
+                </div>
+              </div>
+              <div className={styles.introBenefitItem}>
+                <div className={styles.introBenefitIcon}>
+                  <FolderOpen size={20} />
+                </div>
+                <div>
+                  <h3>Zachowaj porządek</h3>
+                  <p>Wszystkie materiały do nauki w jednym, zorganizowanym miejscu</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className={styles.introBenefitsVisual}>
+            <div className={styles.introMockupCard}>
+              <div className={styles.introMockupHeader}>
+                <div className={styles.introMockupDots}>
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+              <div className={styles.introMockupContent}>
+                <div className={`${styles.introMockupMessage} ${styles.user}`}>
+                  Wyjaśnij fotosyntezę prostymi słowami
+                </div>
+                <div className={`${styles.introMockupMessage} ${styles.ai}`}>
+                  Oczywiście! Fotosynteza to sposób, w jaki rośliny...
+                </div>
+                <div className={styles.introMockupTyping}>
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className={styles.introTestimonials}>
+        <h2 className={styles.introSectionTitle}>
+          Co mówią <span className={styles.introGradientText}>nasi użytkownicy</span>
+        </h2>
+        
+        <div className={styles.introTestimonialsGrid}>
+          <div className={styles.introTestimonialCard}>
+            <div className={styles.introTestimonialStars}>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={16} fill="currentColor" className={styles.introStarIcon} />
+              ))}
+            </div>
+            <p className={styles.introTestimonialText}>
+              "zdAI to! całkowicie zmieniło moje podejście do nauki. AI asystent jest niesamowity!"
+            </p>
+            <div className={styles.introTestimonialAuthor}>
+              <div className={styles.introAuthorAvatar}>A</div>
+              <div>
+                <div className={styles.introAuthorName}>Anna Kowalska</div>
+                <div className={styles.introAuthorRole}>Uczennica liceum</div>
+              </div>
+            </div>
           </div>
 
-          {/* Progress indicators */}
-          <div className="intro-progress-indicators">
-            {features.map((_, index) => (
-              <button
-                key={index}
-                className={`intro-progress-dot ${currentSlide === index ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
+          <div className={styles.introTestimonialCard}>
+            <div className={styles.introTestimonialStars}>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={16} fill="currentColor" className={styles.introStarIcon} />
+              ))}
+            </div>
+            <p className={styles.introTestimonialText}>
+              "Najlepsza aplikacja do nauki jakiej używałem. Automatyczne fiszki oszczędzają mi godziny!"
+            </p>
+            <div className={styles.introTestimonialAuthor}>
+              <div className={styles.introAuthorAvatar}>P</div>
+              <div>
+                <div className={styles.introAuthorName}>Piotr Nowak</div>
+                <div className={styles.introAuthorRole}>Student uniwersytetu</div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.introTestimonialCard}>
+            <div className={styles.introTestimonialStars}>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={16} fill="currentColor" className={styles.introStarIcon} />
+              ))}
+            </div>
+            <p className={styles.introTestimonialText}>
+              "Wreszcie wszystkie moje notatki w jednym miejscu. Interfejs jest piękny i intuicyjny."
+            </p>
+            <div className={styles.introTestimonialAuthor}>
+              <div className={styles.introAuthorAvatar}>M</div>
+              <div>
+                <div className={styles.introAuthorName}>Maria Wiśniewska</div>
+                <div className={styles.introAuthorRole}>Maturzystka</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section id="cta" className="intro-cta">
-        <div className="intro-cta-content">
-          <div className={`intro-cta-wrapper ${isVisible.cta ? 'visible' : ''}`}>
-            <h2 className="intro-cta-title">
+      <section className={styles.introCta}>
+        <div className={styles.introCtaContent}>
+          <div className={`${styles.introCtaBox} ${isVisible['cta'] ? styles.visible : ''}`}>
+            <h2 className={styles.introCtaTitle}>
               Gotowy na rewolucję w nauce?
             </h2>
-            <p className="intro-cta-description">
-              Dołącz do tysięcy uczniów, którzy już odkryli moc AI w nauce na komputerze. 
+            <p className={styles.introCtaDescription}>
+              Dołącz do tysięcy uczniów, którzy już odkryli moc AI w nauce. 
               Rozpocznij swoją przygodę już dziś - całkowicie za darmo!
             </p>
             
-            <div className="intro-cta-buttons">
-              <button className="intro-cta-primary">
-                <span className="intro-cta-btn-content">
-                  <Users className="intro-cta-icon" />
+            <div className={styles.introCtaButtons}>
+              <button 
+                className={styles.introCtaPrimary}
+                onClick={handleGetStarted}
+              >
+                <span className={styles.introCtaBtnContent}>
+                  <Users className={styles.introCtaIcon} />
                   Stwórz konto teraz
-                  <Sparkles className="intro-cta-sparkles" />
+                  <Sparkles className={styles.introCtaSparkles} />
                 </span>
               </button>
               
-              <div className="intro-cta-social-proof">
-                <div className="intro-cta-free-text">Darmowy start • Bez zobowiązań</div>
-                <div className="intro-cta-rating">
-                  <div className="intro-rating-stars">
+              <div className={styles.introCtaSocialProof}>
+                <div className={styles.introCtaFreeText}>Darmowy start • Bez zobowiązań</div>
+                <div className={styles.introCtaRating}>
+                  <div className={styles.introRatingStars}>
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="intro-star-icon" />
+                      <Star key={i} className={styles.introStarIcon} fill="currentColor" />
                     ))}
                   </div>
-                  <span className="intro-rating-text">4.9/5 z 2,500+ opinii</span>
+                  <span className={styles.introRatingText}>4.9/5 z 2,500+ opinii</span>
                 </div>
               </div>
             </div>
@@ -252,22 +406,22 @@ const Intro = () => {
       </section>
 
       {/* Footer */}
-      <footer className="intro-footer">
-        <div className="intro-footer-content">
-          <div className="intro-footer-logo">
-            <div className="intro-footer-logo-icon">
-              <Sparkles className="intro-footer-sparkles" />
+      <footer className={styles.introFooter}>
+        <div className={styles.introFooterContent}>
+          <div className={styles.introFooterLogo}>
+            <div className={styles.introFooterLogoIcon}>
+              <Sparkles className={styles.introFooterSparkles} />
             </div>
-            <span className="intro-footer-logo-text">zdAI to!</span>
+            <span className={styles.introFooterLogoText}>zdAI to!</span>
           </div>
           
-          <div className="intro-footer-links">
-            <div className="intro-footer-nav">
-              <a href="#" className="intro-footer-link">Warunki użytkowania</a>
-              <a href="#" className="intro-footer-link">Polityka prywatności</a>
-              <a href="#" className="intro-footer-link">Kontakt</a>
+          <div className={styles.introFooterLinks}>
+            <div className={styles.introFooterNav}>
+              <a href="#" className={styles.introFooterLink}>Warunki użytkowania</a>
+              <a href="#" className={styles.introFooterLink}>Polityka prywatności</a>
+              <a href="#" className={styles.introFooterLink}>Kontakt</a>
             </div>
-            <div className="intro-footer-copyright">
+            <div className={styles.introFooterCopyright}>
               © 2025 zdAI to! Wszystkie prawa zastrzeżone.
             </div>
           </div>

@@ -10,12 +10,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        {/* Landing page - Intro shown to unlogged users */}
+        <Route path="/" element={<Intro />} />
+        
+        {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/intro" element={<Intro />} />
+        
+        {/* Protected dashboard route */}
         <Route path="/dashboard" element={<MainLayout />} />
       </Routes>
     </BrowserRouter>
