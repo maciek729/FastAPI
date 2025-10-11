@@ -3,12 +3,8 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
-import Dashboard from "./components/Dashboard"; 
-import Chat from "./components/Chat";
+import MainLayout from "./components/Layout/MainLayout";
 import Intro from "./components/Intro";
-import Sidebar from "./components/Sidebar";
-import NotebookView from "./components/NotebookView";
-
 
 function App() {
   return (
@@ -19,12 +15,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/sidebar" element={<Sidebar />} />
-        <Route path="/chat" element={<Chat/>} />
-        <Route path="/intro" element={<Intro/>}/>    
-        <Route path="/notebookView" element={<NotebookView/>}/>        
-    
+        <Route path="/intro" element={<Intro />} />
+        <Route path="/dashboard" element={<MainLayout />} />
       </Routes>
     </BrowserRouter>
   );

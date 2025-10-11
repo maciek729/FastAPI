@@ -3,36 +3,36 @@ import Chat from "./Chat";
 import FilesView from "./FilesView";
 import FlashcardsView from "./FlashcardsView";
 import TestsView from "./TestsView";
-import "../css/NotebookView.css";
+import styles from "../css/NotebookView.module.css";
 
 export default function NotebookView({ details, userData, refreshNotebook }) {
     const [activeTab, setActiveTab] = useState("files"); 
-    // "chat" | "files" | "flashcards"
+    // "chat" | "files" | "flashcards" | "tests"
 
     return (
-        <div className="notebook-view">
+        <div className={styles.notebookView}>
             {/* Pasek z zakładkami */}
-            <div className="tabs-bar">
+            <div className={styles.tabsBar}>
                 <button 
-                    className={`tab ${activeTab === "chat" ? "active" : ""}`} 
+                    className={`${styles.tab} ${activeTab === "chat" ? styles.active : ""}`} 
                     onClick={() => setActiveTab("chat")}
                 >
                     💬 Chat z AI
                 </button>
                 <button 
-                    className={`tab ${activeTab === "files" ? "active" : ""}`} 
+                    className={`${styles.tab} ${activeTab === "files" ? styles.active : ""}`} 
                     onClick={() => setActiveTab("files")}
                 >
                     📁 Moje Pliki
                 </button>
                 <button 
-                    className={`tab ${activeTab === "flashcards" ? "active" : ""}`} 
+                    className={`${styles.tab} ${activeTab === "flashcards" ? styles.active : ""}`} 
                     onClick={() => setActiveTab("flashcards")}
                 >
                     🎯 Fiszki
                 </button>
                 <button 
-                    className={`tab ${activeTab === "tests" ? "active" : ""}`} 
+                    className={`${styles.tab} ${activeTab === "tests" ? styles.active : ""}`} 
                     onClick={() => setActiveTab("tests")}
                 >
                     📄 Sprawdziany
@@ -40,7 +40,7 @@ export default function NotebookView({ details, userData, refreshNotebook }) {
             </div>
 
             {/* Wyświetlanie aktywnego widoku */}
-            <div className="tab-container">
+            <div className={styles.tabContainer}>
                 {activeTab === "chat" && <Chat />}
                 {activeTab === "files" && (
                     <FilesView 

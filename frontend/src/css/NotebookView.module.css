@@ -1,4 +1,6 @@
-.notebook-view {
+/* NotebookView.module.css - Converted from FastAPI NotebookView.css */
+
+.notebookView {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -6,8 +8,111 @@
     background: #f8f9fa;
 }
 
+/* Files View Container */
+.filesView {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Cards Container for Notes */
+.cardsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.date {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.cardTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.cardDescription {
+    font-size: 0.9rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+/* Empty State */
+.emptyState {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+}
+
+.emptyState h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.emptyState p {
+    font-size: 1rem;
+}
+
+.addFirstNoteBtn {
+    background: #6c63ff;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 20px;
+}
+
+.addFirstNoteBtn:hover {
+    background: #5b54d9;
+    transform: translateY(-2px);
+}
+
 /* Tabs Bar */
-.tabs-bar {
+.tabsBar {
     display: flex;
     gap: 1rem;
     padding: 12px 24px;
@@ -41,15 +146,14 @@
     box-shadow: 0 2px 6px rgba(108, 99, 255, 0.25);
 }
 
-.tab-container {
+.tabContainer {
     flex: 1;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
-/* Style dla komponentów wewnętrznych */
-.tab-container > * {
+.tabContainer > * {
     flex: 1;
     overflow: hidden;
     display: flex;
@@ -57,12 +161,11 @@
 }
 
 /* Header Section */
-.header-section {
-    margin-top: 24px;
-    margin-bottom: 32px;
+.headerSection {
+    margin-bottom: 24px;
 }
 
-.header-top {
+.headerTop {
     margin-bottom: 16px;
 }
 
@@ -74,22 +177,22 @@
     color: #6b7280;
 }
 
-.breadcrumb-item {
+.breadcrumbItem {
     color: #6b7280;
     cursor: pointer;
     transition: color 0.2s ease;
 }
 
-.breadcrumb-item:hover {
+.breadcrumbItem:hover {
     color: #6c63ff;
 }
 
-.breadcrumb-current {
+.breadcrumbCurrent {
     color: #6c63ff;
     font-weight: 500;
 }
 
-.header-main {
+.headerMain {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -97,7 +200,7 @@
     gap: 16px;
 }
 
-.notebook-title {
+.notebookTitle {
     font-size: 2rem;
     font-weight: 700;
     color: #1f2937;
@@ -105,7 +208,7 @@
     word-break: break-word;
 }
 
-.add-note-btn {
+.addNoteBtn {
     background: #6c63ff;
     color: white;
     border: none;
@@ -115,133 +218,15 @@
     font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(108, 99, 255, 0.2);
-    flex-shrink: 0;
 }
 
-.add-note-btn:hover {
-    background: #5b54d9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(108, 99, 255, 0.3);
-}
-
-/* Cards Container */
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    overflow-y: auto;
-    padding: 8px;
-}
-
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    position: relative;
-    transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
-    height: fit-content;
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #d1d5db;
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-}
-
-.tag {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.date {
-    font-size: 0.8rem;
-    color: #9ca3af;
-    font-weight: 500;
-}
-
-.card-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0 0 12px 0;
-    line-height: 1.4;
-    word-break: break-word;
-}
-
-.card-description {
-    font-size: 0.9rem;
-    color: #6b7280;
-    line-height: 1.5;
-    margin: 0;
-    word-break: break-word;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
-
-/* Empty State */
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 16px;
-    border: 2px dashed #e5e7eb;
-    margin: 8px;
-}
-
-.empty-icon {
-    font-size: 3rem;
-    margin-bottom: 16px;
-}
-
-.empty-state h3 {
-    font-size: 1.4rem;
-    color: #374151;
-    margin: 0 0 8px 0;
-}
-
-.empty-state p {
-    color: #6b7280;
-    margin: 0 0 24px 0;
-    font-size: 1rem;
-}
-
-.add-first-note-btn {
-    background: #6c63ff;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.add-first-note-btn:hover {
+.addNoteBtn:hover {
     background: #5b54d9;
     transform: translateY(-2px);
 }
 
 /* Modal Styles */
-.modal-overlay {
+.modalOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -255,7 +240,7 @@
     padding: 20px;
 }
 
-.modal-content {
+.modalContent {
     background: white;
     border-radius: 16px;
     width: 100%;
@@ -265,7 +250,7 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.modal-header {
+.modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -273,14 +258,14 @@
     margin-bottom: 24px;
 }
 
-.modal-header h2 {
+.modalHeader h2 {
     font-size: 1.5rem;
     font-weight: 600;
     color: #1f2937;
     margin: 0;
 }
 
-.close-btn {
+.closeBtn {
     background: none;
     border: none;
     font-size: 1.5rem;
@@ -291,21 +276,21 @@
     transition: all 0.2s ease;
 }
 
-.close-btn:hover {
+.closeBtn:hover {
     background: #f3f4f6;
     color: #6b7280;
 }
 
 /* Form Styles */
-.note-form {
+.noteForm {
     padding: 0 24px 24px 24px;
 }
 
-.form-group {
+.formGroup {
     margin-bottom: 20px;
 }
 
-.form-group label {
+.formGroup label {
     display: block;
     font-weight: 600;
     color: #374151;
@@ -313,9 +298,9 @@
     font-size: 0.9rem;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
     width: 100%;
     padding: 12px 16px;
     border: 2px solid #e5e7eb;
@@ -325,28 +310,28 @@
     font-family: inherit;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
     outline: none;
     border-color: #6c63ff;
     box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
 }
 
-.form-group textarea {
+.formGroup textarea {
     resize: vertical;
     min-height: 120px;
 }
 
-.form-actions {
+.formActions {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
     margin-top: 32px;
 }
 
-.cancel-btn,
-.submit-btn {
+.cancelBtn,
+.submitBtn {
     padding: 12px 24px;
     border-radius: 10px;
     font-weight: 600;
@@ -355,25 +340,25 @@
     font-size: 0.9rem;
 }
 
-.cancel-btn {
+.cancelBtn {
     background: #f3f4f6;
     color: #6b7280;
     border: 1px solid #d1d5db;
 }
 
-.cancel-btn:hover {
+.cancelBtn:hover {
     background: #e5e7eb;
     color: #374151;
 }
 
-.submit-btn {
+.submitBtn {
     background: #6c63ff;
     color: white;
     border: none;
     box-shadow: 0 2px 4px rgba(108, 99, 255, 0.2);
 }
 
-.submit-btn:hover {
+.submitBtn:hover {
     background: #5b54d9;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(108, 99, 255, 0.3);
@@ -391,11 +376,20 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .notebook-view {
+    .notebookView {
         padding: 0;
     }
     
-    .tabs-bar {
+    .filesView {
+        padding: 16px;
+    }
+    
+    .cardsContainer {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .tabsBar {
         padding: 12px 16px;
         gap: 0.5rem;
     }
@@ -405,37 +399,30 @@
         font-size: 0.85rem;
     }
     
-    .header-main {
+    .headerMain {
         flex-direction: column;
         gap: 16px;
         align-items: stretch;
-        padding: 0 16px;
+        padding: 0;
     }
     
-    .notebook-title {
+    .notebookTitle {
         font-size: 1.6rem;
     }
     
-    .cards-container {
-        grid-template-columns: 1fr;
-        gap: 16px;
-        padding: 16px;
-    }
-    
-    .modal-content {
+    .modalContent {
         margin: 0;
         border-radius: 12px;
     }
     
-    .header-section {
-        padding: 0 16px;
-        margin-top: 16px;
-        margin-bottom: 24px;
+    .headerSection {
+        padding: 0;
+        margin-bottom: 16px;
     }
 }
 
 @media (max-width: 480px) {
-    .tabs-bar {
+    .tabsBar {
         flex-direction: column;
         gap: 0.5rem;
     }
@@ -443,11 +430,6 @@
     .tab {
         width: 100%;
         text-align: center;
-    }
-    
-    .cards-container {
-        padding: 8px;
-        gap: 12px;
     }
     
     .card {

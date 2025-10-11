@@ -1,0 +1,321 @@
+/* Auth.module.css - Authentication Pages Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  background: #0a0b0d;
+  height: 100vh;
+}
+
+/* ANIMATED BACKGROUND */
+.authContainer {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  position: relative;
+  background: 
+    radial-gradient(ellipse at top, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(239, 68, 68, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0b0d 0%, #111827 50%, #0a0b0d 100%);
+}
+
+/* SUBTLE GRID PATTERN */
+.authContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.15) 1px, transparent 0);
+  background-size: 50px 50px;
+  animation: gridShift 30s linear infinite;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+@keyframes gridShift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+/* AUTH CARD */
+.authCard {
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardFadeIn 0.6s ease-out forwards;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 100px rgba(59, 130, 246, 0.1);
+}
+
+@keyframes cardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.authCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* TITLE & SUBTITLE */
+.title {
+  text-align: center;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  animation: titleFadeIn 0.6s ease-out 0.2s forwards;
+}
+
+.subtitle {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: subtitleFadeIn 0.6s ease-out 0.4s forwards;
+}
+
+@keyframes titleFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes subtitleFadeIn {
+  to { opacity: 1; }
+}
+
+/* FORM GROUP */
+.formGroup {
+  margin-bottom: 1.25rem;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: formGroupFadeIn 0.5s ease-out forwards;
+}
+
+.formGroup:nth-child(3) { animation-delay: 0.5s; }
+.formGroup:nth-child(4) { animation-delay: 0.6s; }
+.formGroup:nth-child(5) { animation-delay: 0.7s; }
+.formGroup:nth-child(6) { animation-delay: 0.8s; }
+
+@keyframes formGroupFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.formGroup label {
+  display: block;
+  color: #cbd5e1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.025em;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.formGroup input::placeholder {
+  color: #64748b;
+}
+
+.formGroup input:focus {
+  border-color: #60a5fa;
+  background: rgba(30, 41, 59, 0.7);
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.1);
+}
+
+.formGroup input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* SUBMIT BUTTON */
+.submitButton {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  opacity: 0;
+  animation: buttonFadeIn 0.6s ease-out 0.9s forwards;
+}
+
+@keyframes buttonFadeIn {
+  to { opacity: 1; }
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ERROR MESSAGE */
+.errorMessage {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  animation: errorShake 0.4s ease-in-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+/* AUTH LINKS */
+.authLinks {
+  text-align: center;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  opacity: 0;
+  animation: linksFadeIn 0.6s ease-out 1.1s forwards;
+}
+
+@keyframes linksFadeIn {
+  to { opacity: 1; }
+}
+
+.authLinks a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.authLinks a:hover {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.authLinks a:last-child {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.authLinks a:last-child:hover {
+  color: #cbd5e1;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 640px) {
+  .authContainer {
+    padding: 1rem;
+  }
+  
+  .authCard {
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .formGroup input {
+    padding: 0.75rem 0.875rem;
+  }
+  
+  .submitButton {
+    padding: 0.875rem;
+  }
+}
+
+/* ACCESSIBILITY */
+.authCard *:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* PERFORMANCE OPTIMIZATION */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .authContainer::before {
+    animation: none !important;
+  }
+}

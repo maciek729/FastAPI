@@ -1,74 +1,17 @@
-// import { useState } from "react";
-
-// export default function Register() {
-//   const [form, setForm] = useState({
-//     username: "", email: "", first_name: "", last_name: "",
-//     password: "", password2: "", role: "", phone_number: ""
-//   });
-//   const [error, setError] = useState("");
-
-//   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
-
-//   const handleSubmit = async e => {
-//     e.preventDefault();
-//     setError("");
-//     if (form.password !== form.password2) {
-//       setError("Passwords do not match");
-//       return;
-//     }
-//     try {
-//       const payload = { ...form };
-//       delete payload.password2;
-//       const res = await fetch("http://localhost:8000/auth/", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(payload),
-//       });
-//       if (!res.ok) {
-//         const data = await res.json();
-//         throw new Error(data.detail || "Registration failed");
-//       }
-//       alert("Registration successful! Check your email for verification.");
-//       window.location.href = "/login";
-//     } catch (err) {
-//       setError(err.message);
-//     }
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit}>
-//       <h2>Register</h2>
-//       <input name="username" placeholder="Username" value={form.username} onChange={handleChange} required />
-//       <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-//       <input name="first_name" placeholder="First Name" value={form.first_name} onChange={handleChange} required />
-//       <input name="last_name" placeholder="Last Name" value={form.last_name} onChange={handleChange} required />
-//       <input name="role" placeholder="Role" value={form.role} onChange={handleChange} required />
-//       <input name="phone_number" placeholder="Phone Number" value={form.phone_number} onChange={handleChange} required />
-//       <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required />
-//       <input name="password2" type="password" placeholder="Repeat Password" value={form.password2} onChange={handleChange} required />
-//       <button type="submit">Register</button>
-//       {error && <div style={{color: "red"}}>{error}</div>}
-//       <div>
-//         <a href="/login">Back to login</a>
-//       </div>
-//     </form>
-//   );
-// }
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "../css/Register.css";
+import styles from "../css/Auth.module.css";
 
-export default function Register() {
+function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
     password2: "",
-    role: ""
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -77,99 +20,116 @@ export default function Register() {
   const handleSubmit = async e => {
     e.preventDefault();
     setError("");
+    
     if (form.password !== form.password2) {
-      setError("Hasła nie są zgodne");
+      setError("Passwords do not match");
       return;
     }
+    
+    setIsLoading(true);
+    
     try {
       const payload = { ...form };
       delete payload.password2;
+      
       const res = await fetch("http://localhost:8000/auth/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || "Rejestracja nie powiodła się");
+        throw new Error(data.detail || "Registration failed");
       }
-      alert("Rejestracja zakończona sukcesem! Sprawdź maila, by potwierdzić konto.");
+      
+      alert("Registration successful! You can now log in.");
       navigate("/login");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h2>Stwórz konto</h2>
-        <div className="form-group">
-          <label htmlFor="username">Nazwa użytkownika</label>
+    <div className={styles.authContainer}>
+      <form className={styles.authCard} onSubmit={handleSubmit}>
+        <h2 className={styles.title}>Create Account</h2>
+        <p className={styles.subtitle}>Sign up to get started</p>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="username">Username</label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Podaj nazwę użytkownika"
+            placeholder="Choose a username"
             value={form.username}
             onChange={handleChange}
             required
+            disabled={isLoading}
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="email">E-mail</label>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="email">Email</label>
           <input
             id="email"
             name="email"
             type="email"
-            placeholder="Podaj e-mail"
+            placeholder="Enter your email"
             value={form.email}
             onChange={handleChange}
             required
+            disabled={isLoading}
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="role">Rola</label>
-          <input
-            id="role"
-            name="role"
-            type="text"
-            placeholder="Admin/User"
-            value={form.role}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Hasło</label>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="password">Password</label>
           <input
             id="password"
             name="password"
             type="password"
-            placeholder="Podaj hasło"
+            placeholder="Create a password"
             value={form.password}
             onChange={handleChange}
             required
+            disabled={isLoading}
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="password2">Powtórz hasło</label>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="password2">Confirm Password</label>
           <input
             id="password2"
             name="password2"
             type="password"
-            placeholder="Powtórz hasło"
+            placeholder="Repeat your password"
             value={form.password2}
             onChange={handleChange}
             required
+            disabled={isLoading}
           />
         </div>
-        <button type="submit">Zarejestruj się</button>
-        {error && <div className="error-message">{error}</div>}
-        <div className="auth-links">
-          <Link to="/login">Masz już konto? Zaloguj się</Link>
+        
+        <button 
+          type="submit" 
+          className={styles.submitButton}
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating account..." : "Register"}
+        </button>
+        
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        
+        <div className={styles.authLinks}>
+          <Link to="/login">Already have an account? Log in</Link>
         </div>
       </form>
     </div>
   );
 }
+
+export default Register;
