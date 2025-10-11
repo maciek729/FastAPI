@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from "axios";
-import '../css/NotebookView.css';
+import styles from '../css/NotebookView.module.css';
 
 export default function FilesView({ details, userData, refreshNotebook }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
@@ -10,7 +10,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         type: 'Notatka' 
     });
 
-    if (!details) return <div className="loading">Ładowanie notatnika...</div>;
+    if (!details) return <div className={styles.loading}>Ładowanie notatnika...</div>;
 
     const handleAddNote = async (e) => {
         e.preventDefault();
@@ -62,12 +62,12 @@ export default function FilesView({ details, userData, refreshNotebook }) {
     };
 
     return (
-        <div className="files-view">
-            <div className="header-section">
-                <div className="header-main">
-                    <h1 className="notebook-title">{details.name}</h1>
+        <div className={styles.filesView}>
+            <div className={styles.headerSection}>
+                <div className={styles.headerMain}>
+                    <h1 className={styles.notebookTitle}>{details.name}</h1>
                     <button 
-                        className="add-note-btn"
+                        className={styles.addNoteBtn}
                         onClick={() => setShowAddNoteModal(true)}
                     >
                         + Dodaj notatkę
@@ -75,24 +75,24 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                 </div>
             </div>
 
-            <div className="cards-container">
+            <div className={styles.cardsContainer}>
                 {details.notes && Array.isArray(details.notes) && details.notes.length > 0 ? (
                     details.notes.map(note => (
-                        <div key={note.id} className="card">
-                            <div className="card-header">
+                        <div key={note.id} className={styles.card}>
+                            <div className={styles.cardHeader}>
                                 <span 
-                                    className="tag" 
+                                    className={styles.tag} 
                                     style={{ backgroundColor: getTypeColor(note.type) }}
                                 >
                                     {note.type || 'Notatka'}
                                 </span>
-                                <span className="date">
+                                <span className={styles.date}>
                                     {formatDate(note.created_at)}
                                 </span>
                             </div>
                             
-                            <h3 className="card-title">{note.title}</h3>
-                            <p className="card-description">
+                            <h3 className={styles.cardTitle}>{note.title}</h3>
+                            <p className={styles.cardDescription}>
                                 {note.content?.length > 100 
                                     ? note.content.substring(0, 100) + '...' 
                                     : note.content
@@ -101,12 +101,12 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                         </div>
                     ))
                 ) : (
-                    <div className="empty-state">
-                        <div className="empty-icon">📝</div>
+                    <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}>📝</div>
                         <h3>Brak notatek</h3>
                         <p>Dodaj pierwszą notatkę do tego notatnika</p>
                         <button 
-                            className="add-first-note-btn"
+                            className={styles.addFirstNoteBtn}
                             onClick={() => setShowAddNoteModal(true)}
                         >
                             Dodaj notatkę
@@ -116,20 +116,20 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             </div>
 
             {showAddNoteModal && (
-                <div className="modal-overlay" onClick={() => setShowAddNoteModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
+                <div className={styles.modalOverlay} onClick={() => setShowAddNoteModal(false)}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
                             <h2>Dodaj nową notatkę</h2>
                             <button 
-                                className="close-btn"
+                                className={styles.closeBtn}
                                 onClick={() => setShowAddNoteModal(false)}
                             >
                                 ×
                             </button>
                         </div>
                         
-                        <form onSubmit={handleAddNote} className="note-form">
-                            <div className="form-group">
+                        <form onSubmit={handleAddNote} className={styles.noteForm}>
+                            <div className={styles.formGroup}>
                                 <label htmlFor="noteTitle">Tytuł notatki</label>
                                 <input
                                     id="noteTitle"
@@ -141,7 +141,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                 />
                             </div>
                             
-                            <div className="form-group">
+                            <div className={styles.formGroup}>
                                 <label htmlFor="noteType">Typ notatki</label>
                                 <select
                                     id="noteType"
@@ -154,7 +154,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                 </select>
                             </div>
                             
-                            <div className="form-group">
+                            <div className={styles.formGroup}>
                                 <label htmlFor="noteContent">Treść notatki</label>
                                 <textarea
                                     id="noteContent"
@@ -166,15 +166,15 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                 />
                             </div>
                             
-                            <div className="form-actions">
+                            <div className={styles.formActions}>
                                 <button 
                                     type="button" 
-                                    className="cancel-btn"
+                                    className={styles.cancelBtn}
                                     onClick={() => setShowAddNoteModal(false)}
                                 >
                                     Anuluj
                                 </button>
-                                <button type="submit" className="submit-btn">
+                                <button type="submit" className={styles.submitBtn}>
                                     Dodaj notatkę
                                 </button>
                             </div>

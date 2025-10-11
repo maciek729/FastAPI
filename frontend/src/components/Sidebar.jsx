@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import '../css/Sidebar.css';
+import styles from '../css/Sidebar.module.css';
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook }) => {
     const [spaces] = useState([
@@ -12,9 +12,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [selectedNotebook, setSelectedNotebook] = useState(null);
 
     useEffect(() => {
-        fetchNotebooks('personal');
-        fetchNotebooks('shared');
-    }, [userData.id]);
+        if (userData?.id) {
+            fetchNotebooks('personal');
+            fetchNotebooks('shared');
+        }
+    }, [userData?.id]);
 
     const fetchNotebooks = async (spaceType) => {
         try {
@@ -55,21 +57,21 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const handleNotebookClick = (notebook) => {
+        setSelectedNotebook(notebook);
         onSelectNotebook(notebook); 
     };
 
-
     return (
-        <aside className={`sidebar ${!isSidebarOpen ? 'collapsed' : ''}`}>
-            <div className="sidebar-inner">
+        <aside className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''}`}>
+            <div className={styles.sidebarInner}>
 
                 {/* Header */}
-                <div className="sidebar-header">
-                    <div className="brand-container">
-                        <div className="brand-icon">
+                <div className={styles.sidebarHeader}>
+                    <div className={styles.brandContainer}>
+                        <div className={styles.brandIcon}>
                             🧠
                         </div>
-                        <div className="brand-text">
+                        <div className={styles.brandText}>
                             <h1>zdAI to!</h1>
                             <p>Twój inteligentny system nauki</p>
                         </div>
@@ -77,41 +79,43 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 </div>
 
                 {/* Content */}
-                <div className="sidebar-content">
+                <div className={styles.sidebarContent}>
                     {spaces.map((space) => (
-                        <div key={space.id} className={`sidebar-section ${expandedSpaces.includes(space.id) ? 'expanded' : ''}`}>
-                            <div className="sidebar-section-title-container">
+                        <div 
+                            key={space.id} 
+                            className={`${styles.sidebarSection} ${expandedSpaces.includes(space.id) ? styles.expanded : ''}`}
+                        >
+                            <div className={styles.sidebarSectionTitleContainer}>
                                 <div
-                                    className="sidebar-section-title"
+                                    className={styles.sidebarSectionTitle}
                                     onClick={() => toggleSpace(space.id)}
                                 >
-                                    <div className="space-info">
-                                        <div className="space-icon">{space.icon}</div>
-                                        <div className="space-name">{space.name}</div>
+                                    <div className={styles.spaceInfo}>
+                                        <div className={styles.spaceIcon}>{space.icon}</div>
+                                        <div className={styles.spaceName}>{space.name}</div>
                                     </div>
                                     <button
-                                    className="add-notebook-icon-btn"
-                                    onClick={(e) => {
-                                        e.stopPropagation(); 
-                                        handleAddNotebook(space.id);
-                                    }}
-                                    title="Dodaj notatnik"
-                                >
-                                    ➕
-                                </button>
+                                        className={styles.addNotebookIconBtn}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); 
+                                            handleAddNotebook(space.id);
+                                        }}
+                                        title="Dodaj notatnik"
+                                    >
+                                        ➕
+                                    </button>
                                 </div>                              
                             </div>
 
-
                             {expandedSpaces.includes(space.id) && (
-                                <ul className="js-submenu">
+                                <ul className={styles.jsSubmenu}>
                                     {(notebooks[space.id] || []).map(notebook => (
                                         <li
                                             key={notebook.id}
-                                            className={`notebook-item ${selectedNotebook?.id === notebook.id ? 'selected' : ''}`}
+                                            className={`${styles.notebookItem} ${selectedNotebook?.id === notebook.id ? styles.selected : ''}`}
                                             onClick={() => handleNotebookClick(notebook)}
                                         >
-                                            <span className="notebook-name">{notebook.name}</span>
+                                            <span className={styles.notebookName}>{notebook.name}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -121,17 +125,17 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 </div>
 
                 {/* User Section */}
-                <div className="sidebar-options">
-                    <div className="user-profile">
-                        <div className="user-avatar">
-                            {userData?.name?.charAt(0) || 'A'}
+                <div className={styles.sidebarOptions}>
+                    <div className={styles.userProfile}>
+                        <div className={styles.userAvatar}>
+                            {userData?.name?.charAt(0) || userData?.username?.charAt(0) || 'A'}
                         </div>
-                        <div className="user-info">
-                            <div className="user-name">{userData?.username || 'unknown'}</div>
-                            <div className="user-email">{userData?.email || 'unknown@failed'}</div>
+                        <div className={styles.userInfo}>
+                            <div className={styles.userName}>{userData?.username || 'unknown'}</div>
+                            <div className={styles.userEmail}>{userData?.email || 'unknown@failed'}</div>
                         </div>
                     </div>
-                    <button className="logout-btn" onClick={handleLogout}>
+                    <button className={styles.logoutBtn} onClick={handleLogout}>
                         Wyloguj się
                     </button>
                 </div>

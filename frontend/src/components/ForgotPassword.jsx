@@ -1,54 +1,82 @@
 import { useState } from "react";
-import "../css/ForgotPassword.css";
+import { Link } from "react-router-dom";
+import styles from "../css/Auth.module.css";
 
-export default function ForgotPassword() {
+function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setError(""); setMessage("");
+    setError("");
+    setMessage("");
+    setIsLoading(true);
+
     try {
+      const formData = new FormData();
+      formData.append("email", email);
+
       const res = await fetch("http://localhost:8000/auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ email }),
+        body: formData,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Wystąpił błąd.");
-      setMessage("Jeśli ten adres istnieje, wysłaliśmy link do resetowania hasła.");
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "Failed to send reset link");
+      }
+
+      setMessage("Password reset link sent! Check your email.");
+      setEmail("");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h2 className="auth-header">Resetowanie hasła</h2>
-        <p className="auth-desc">
-          Podaj adres e-mail powiązany z Twoim kontem,<br />
-          a wyślemy do Ciebie link do zmiany hasła.
+    <div className={styles.authContainer}>
+      <form className={styles.authCard} onSubmit={handleSubmit}>
+        <h2 className={styles.title}>Forgot Password?</h2>
+        <p className={styles.subtitle}>
+          Enter your email and we'll send you a reset link
         </p>
-        <div className="form-group">
-          <label htmlFor="email">Adres e-mail</label>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="email">Email Address</label>
           <input
             id="email"
+            name="email"
             type="email"
-            placeholder="Wprowadź e-mail"
+            placeholder="Enter your email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
-        <button type="submit">Wyślij link resetujący</button>
-        {error && <div className="error-message">{error}</div>}
-        {message && <div className="ok-message">{message}</div>}
-        <div className="return-login">
-          <a href="/login">Powrót do logowania</a>
+
+        <button
+          type="submit"
+          className={styles.submitButton}
+          disabled={isLoading}
+        >
+          {isLoading ? "Sending..." : "Send Reset Link"}
+        </button>
+
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        {message && <div className={styles.successMessage}>{message}</div>}
+
+        <div className={styles.authLinks}>
+          <Link to="/login">Back to Login</Link>
+          <Link to="/register">Don't have an account? Sign up</Link>
         </div>
       </form>
     </div>
   );
 }
+
+export default ForgotPassword;

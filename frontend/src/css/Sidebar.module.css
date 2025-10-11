@@ -1,4 +1,4 @@
-/* Sidebar.css */
+/* Sidebar.module.css - FastAPI Original Styles */
 
 .sidebar {
     position: fixed;
@@ -19,25 +19,25 @@
     overflow: hidden;
 }
 
-.sidebar-inner {
+.sidebarInner {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
 /* Header */
-.sidebar-header {
+.sidebarHeader {
     padding: 24px;
     border-bottom: 1px solid #f3f4f6;
 }
 
-.brand-container {
+.brandContainer {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.brand-icon {
+.brandIcon {
     width: 40px;
     height: 40px;
     background: linear-gradient(135deg, #8b5cf6, #3b82f6);
@@ -49,38 +49,38 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.brand-text h1 {
+.brandText h1 {
     font-size: 20px;
     font-weight: 700;
     color: #111827;
     margin: 0;
 }
 
-.brand-text p {
+.brandText p {
     font-size: 12px;
     color: #6b7280;
     margin: 0;
 }
 
 /* Content */
-.sidebar-content {
+.sidebarContent {
     flex: 1;
     overflow-y: auto;
     padding: 16px;
 }
 
-.sidebar-section {
+.sidebarSection {
     margin-bottom: 24px;
 }
 
-.sidebar-section-title-container {
+.sidebarSectionTitleContainer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-right: 8px;
 }
 
-.sidebar-section-title {
+.sidebarSectionTitle {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -91,21 +91,21 @@
     flex: 1;
 }
 
-.sidebar-section-title:hover {
+.sidebarSectionTitle:hover {
     background-color: #f9fafb;
 }
 
 /* Active/Expanded state for section titles */
-.sidebar-section.expanded .sidebar-section-title {
+.sidebarSection.expanded .sidebarSectionTitle {
     background-color: #f3e8ff;
     color: #7c3aed;
 }
 
-.sidebar-section.expanded .sidebar-section-title:hover {
+.sidebarSection.expanded .sidebarSectionTitle:hover {
     background-color: #ede9fe;
 }
 
-.add-notebook-icon-btn {
+.addNotebookIconBtn {
     background: none;
     border: none;
     color: #4a4a4a;
@@ -115,17 +115,17 @@
     transition: color 0.2s ease;
 }
 
-.add-notebook-icon-btn:hover {
+.addNotebookIconBtn:hover {
     color: #000;
 }
 
-.space-info {
+.spaceInfo {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.space-icon {
+.spaceIcon {
     width: 24px;
     height: 24px;
     background-color: #f3e8ff;
@@ -136,33 +136,24 @@
     font-size: 12px;
 }
 
-.space-name {
+.spaceName {
     font-weight: 600;
     color: #374151;
     font-size: 14px;
 }
 
-.sidebar-section.expanded .space-name {
-    color: #7c3aed;
-}
-
-.expand-arrow {
-    color: #9ca3af;
-    font-size: 12px;
-}
-
-.sidebar-section.expanded .expand-arrow {
+.sidebarSection.expanded .spaceName {
     color: #7c3aed;
 }
 
 /* Notebooks List */
-.js-submenu {
+.jsSubmenu {
     list-style: none;
     padding: 0;
     margin: 8px 0 0 12px;
 }
 
-.notebook-item {
+.notebookItem {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -174,74 +165,37 @@
     margin-bottom: 4px;
 }
 
-.notebook-item:hover {
+.notebookItem:hover {
     background-color: #f9fafb;
 }
 
-.notebook-item.selected {
+.notebookItem.selected {
     background-color: #8b5cf6;
     color: white;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.notebook-icon {
-    font-size: 18px;
-    width: 20px;
-    text-align: center;
-}
-
-.notebook-name {
+.notebookName {
     font-size: 14px;
     font-weight: 500;
     flex: 1;
 }
 
-/* Add Notebook Button */
-.add-notebook-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    border: 2px dashed #d1d5db;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: #6b7280;
-    margin-top: 8px;
-}
-
-.add-notebook-btn:hover {
-    border-color: #a855f7;
-    background-color: #faf5ff;
-    color: #8b5cf6;
-}
-
-.add-icon {
-    font-size: 18px;
-    width: 20px;
-    text-align: center;
-}
-
-.add-notebook-btn span:last-child {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* User Section */
-.sidebar-options {
+/* Footer - User Section */
+.sidebarOptions {
     border-top: 1px solid #f3f4f6;
     background-color: #f9fafb;
     padding: 16px;
 }
 
-.user-profile {
+.userProfile {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
 }
 
-.user-avatar {
+.userAvatar {
     width: 40px;
     height: 40px;
     background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -254,23 +208,23 @@
     font-size: 14px;
 }
 
-.user-info {
+.userInfo {
     flex: 1;
 }
 
-.user-name {
+.userName {
     font-size: 14px;
     font-weight: 600;
     color: #111827;
     margin-bottom: 2px;
 }
 
-.user-email {
+.userEmail {
     font-size: 12px;
     color: #6b7280;
 }
 
-.logout-btn {
+.logoutBtn {
     width: 100%;
     background-color: #ef4444;
     color: white;
@@ -283,43 +237,8 @@
     transition: all 0.2s ease;
 }
 
-.logout-btn:hover {
+.logoutBtn:hover {
     background-color: #dc2626;
-}
-
-/* Hide Sidebar Button - assuming it's outside this component */
-.toggle-sidebar-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 60;
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    transition: all 0.3s ease;
-}
-
-.toggle-sidebar-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-}
-
-.toggle-sidebar-btn:active {
-    transform: translateY(0);
-}
-
-/* When sidebar is open, move the button */
-.sidebar-open .toggle-sidebar-btn {
-    left: 280px;
 }
 
 /* Responsive */
@@ -331,9 +250,5 @@
     
     .sidebar.collapsed {
         width: 0;
-    }
-    
-    .sidebar-open .toggle-sidebar-btn {
-        left: 20px;
     }
 }
