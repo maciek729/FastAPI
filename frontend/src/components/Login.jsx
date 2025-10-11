@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import styles from "../css/Auth.module.css";
 
 function Login() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ 
-    username: "", 
-    password: "" 
-  });
+  const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -44,6 +40,12 @@ function Login() {
 
   return (
     <div className={styles.authContainer}>
+      {/* Back to Intro Button */}
+      <Link to="/" className={styles.backButton}>
+        <ArrowLeft />
+        <span>Back to Home</span>
+      </Link>
+
       <form className={styles.authCard} onSubmit={handleSubmit}>
         <h2 className={styles.title}>Welcome Back</h2>
         <p className={styles.subtitle}>Sign in to your account</p>
