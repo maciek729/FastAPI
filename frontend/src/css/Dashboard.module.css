@@ -1,79 +1,274 @@
-/* Dashboard.module.css - Converted from original FastAPI Dashboard.css */
+/* Dashboard.module.css - Light Minimalistic Design Matching Auth Pages */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* Main Dashboard Container */
 .dashboardContainer {
-    display: flex;
-    height: 100vh;
-    font-family: Arial, sans-serif;
-    position: relative;
-    color: black;
+  width: 100%;
+  min-height: 100vh;
+  padding: 3rem 3rem;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
 }
 
-/* Modern Sidebar Toggle Button */
-.sidebarToggleBtn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 60;
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    transition: all 0.3s ease;
+/* Notebook Selection View */
+.notebookSelection {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.sidebarToggleBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-    background: linear-gradient(135deg, #9d69f7, #4f8bf9);
+/* Header Section */
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out 0.1s forwards;
 }
 
-.sidebarToggleBtn:active {
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
     transform: translateY(0);
+  }
 }
 
-/* When sidebar is open, move the button to the right */
-.sidebarToggleBtn.sidebarOpen {
-    left: 280px;
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
 }
 
-.dashboardContent {
-    flex-grow: 1;
-    padding: 20px 40px;
+.subtitle {
+  font-size: 1.125rem;
+  color: #64748b;
+  font-weight: 400;
 }
 
-.dashboardNav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+/* Actions Section */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out 0.3s forwards;
 }
 
-.userInfo p {
-    margin: 8px 0;
+.createButton {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
+  font-family: 'Inter', sans-serif;
 }
 
+.createButton:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(139, 92, 246, 0.35);
+}
+
+.createButton:active {
+  transform: translateY(0);
+}
+
+/* Loading State */
 .loading {
-    font-size: 20px;
-    text-align: center;
-    margin-top: 50px;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #64748b;
+  font-size: 1.125rem;
+  font-weight: 500;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out 0.5s forwards;
 }
 
-.hidden {
-    display: none;
+/* Notebooks Grid */
+.notebooksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out 0.5s forwards;
 }
 
-/* Responsive */
+/* Empty State */
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border: 2px dashed rgba(148, 163, 184, 0.3);
+  border-radius: 1.5rem;
+  color: #64748b;
+  font-size: 1.125rem;
+}
+
+.emptyState p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Notebook Card */
+.notebookCard {
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 1.25rem;
+  padding: 2rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.notebookCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.notebookIcon {
+  font-size: 2.5rem;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notebookName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+  word-break: break-word;
+}
+
+.notebookInfo {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Notebook View Container */
+.notebookViewContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out 0.1s forwards;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.625rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.backButton:hover {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #8b5cf6;
+  transform: translateX(-2px);
+}
+
+.currentNotebook {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .sidebarToggleBtn.sidebarOpen {
-        left: 20px;
-    }
+  .dashboardContainer {
+    padding: 2rem 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .notebooksGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .createButton {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .breadcrumb {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Accessibility */
+.dashboardContainer *:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Performance Optimization */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .header,
+  .actions,
+  .loading,
+  .notebooksGrid,
+  .breadcrumb {
+    animation: none;
+    opacity: 1;
+  }
 }
