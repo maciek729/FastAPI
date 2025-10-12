@@ -161,8 +161,7 @@ export default function MainLayout() {
         className={styles.sidebarToggleBtn}
         onClick={toggleSidebar}
         style={{
-          left: isSidebarOpen ? '280px' : '20px',
-          transition: 'left 0.3s ease'
+          left: isSidebarOpen ? '280px' : '20px'
         }}
       >
         {isSidebarOpen ? '❮❮' : '❯❯'}
@@ -176,12 +175,9 @@ export default function MainLayout() {
         onSelectNotebook={handleSelectNotebook}
       />
       
+      {/* USUNIĘTE inline styles dla marginLeft - teraz kontrolowane przez CSS */}
       <div 
-        className={styles.contentArea}
-        style={{
-          marginLeft: isSidebarOpen ? '260px' : '0',
-          transition: 'margin-left 0.3s ease'
-        }}
+        className={`${styles.contentArea} ${!isSidebarOpen ? styles.contentAreaCollapsed : ''}`}
       >
         {renderContent()}
       </div>
