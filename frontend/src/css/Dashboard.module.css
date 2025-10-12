@@ -1,21 +1,23 @@
-/* Dashboard.module.css - Light Minimalistic Design Matching Auth Pages */
+/* Dashboard.module.css - Light Minimalistic Design */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* Main Dashboard Container */
 .dashboardContainer {
   width: 100%;
-  min-height: 100vh;
-  padding: 3rem 3rem;
+  height: 100vh; /* PEŁNA WYSOKOŚĆ */
+  padding: 2rem;
   background: transparent;
   font-family: 'Inter', sans-serif;
   box-sizing: border-box;
+  overflow: hidden; /* BRAK SCROLLBARÓW */
 }
 
 /* Notebook Selection View */
 .notebookSelection {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  padding: 1rem;
 }
 
 /* Header Section */
@@ -105,6 +107,7 @@
   gap: 1.5rem;
   opacity: 0;
   animation: fadeInUp 0.5s ease-out 0.5s forwards;
+  padding: 0 1rem;
 }
 
 /* Empty State */
@@ -174,8 +177,8 @@
 
 /* Notebook View Container */
 .notebookViewContainer {
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   width: 100%;
 }
 
@@ -184,7 +187,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  padding: 0 1rem;
+  padding: 0 2rem;
   opacity: 0;
   animation: fadeInUp 0.5s ease-out 0.1s forwards;
 }
@@ -222,7 +225,11 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .dashboardContainer {
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .notebookSelection {
+    padding: 0.5rem;
   }
 
   .title {
@@ -236,6 +243,7 @@
   .notebooksGrid {
     grid-template-columns: 1fr;
     gap: 1rem;
+    padding: 0;
   }
 
   .createButton {
@@ -246,6 +254,7 @@
   .breadcrumb {
     flex-direction: column;
     align-items: flex-start;
+    padding: 0 1rem;
   }
 }
 
