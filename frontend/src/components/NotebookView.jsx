@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageCircle, FileText, Zap, ClipboardCheck } from "lucide-react";
 import Chat from "./Chat";
 import FilesView from "./FilesView";
 import FlashcardsView from "./FlashcardsView";
@@ -6,47 +7,42 @@ import TestsView from "./TestsView";
 import styles from "../css/NotebookView.module.css";
 
 export default function NotebookView({ details, userData, refreshNotebook }) {
-    const [activeTab, setActiveTab] = useState("files"); 
-    // "chat" | "files" | "flashcards" | "tests"
+    const [activeTab, setActiveTab] = useState("files");
+
+    const tabs = [
+        { id: "chat", label: "Chat z AI", icon: MessageCircle },
+        { id: "files", label: "Moje Pliki", icon: FileText },
+        { id: "flashcards", label: "Fiszki", icon: Zap },
+        { id: "tests", label: "Sprawdziany", icon: ClipboardCheck }
+    ];
 
     return (
         <div className={styles.notebookView}>
-            {/* Pasek z zakładkami */}
+            {/* Tabs Bar */}
             <div className={styles.tabsBar}>
-                <button 
-                    className={`${styles.tab} ${activeTab === "chat" ? styles.active : ""}`} 
-                    onClick={() => setActiveTab("chat")}
-                >
-                    💬 Chat z AI
-                </button>
-                <button 
-                    className={`${styles.tab} ${activeTab === "files" ? styles.active : ""}`} 
-                    onClick={() => setActiveTab("files")}
-                >
-                    📁 Moje Pliki
-                </button>
-                <button 
-                    className={`${styles.tab} ${activeTab === "flashcards" ? styles.active : ""}`} 
-                    onClick={() => setActiveTab("flashcards")}
-                >
-                    🎯 Fiszki
-                </button>
-                <button 
-                    className={`${styles.tab} ${activeTab === "tests" ? styles.active : ""}`} 
-                    onClick={() => setActiveTab("tests")}
-                >
-                    📄 Sprawdziany
-                </button>
+                {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                        <button
+                            key={tab.id}
+                            className={`${styles.tab} ${activeTab === tab.id ? styles.active : ""}`}
+                            onClick={() => setActiveTab(tab.id)}
+                        >
+                            <Icon size={18} />
+                            <span>{tab.label}</span>
+                        </button>
+                    );
+                })}
             </div>
 
-            {/* Wyświetlanie aktywnego widoku */}
+            {/* Tab Content */}
             <div className={styles.tabContainer}>
                 {activeTab === "chat" && <Chat />}
                 {activeTab === "files" && (
-                    <FilesView 
-                        details={details} 
-                        userData={userData} 
-                        refreshNotebook={refreshNotebook} 
+                    <FilesView
+                        details={details}
+                        userData={userData}
+                        refreshNotebook={refreshNotebook}
                     />
                 )}
                 {activeTab === "flashcards" && <FlashcardsView />}
