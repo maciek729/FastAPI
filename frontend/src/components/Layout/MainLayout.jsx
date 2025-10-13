@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import Sidebar from "../Sidebar";
 import Dashboard from "../Dashboard";
@@ -29,7 +29,7 @@ export default function MainLayout() {
     return cookieValue;
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
       const cookie = cookies[i];
@@ -38,27 +38,12 @@ export default function MainLayout() {
       document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
     }
     navigate('/login');
-  };
+  }, [navigate]);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleSelectNotebook = (notebook) => {
-    setSelectedNotebook(notebook);
-    setActiveSection('notebooks');
-  };
-
-  const refreshNotebook = () => {
-    if (selectedNotebook) {
-      fetch(`http://localhost:8000/notebooks/${selectedNotebook.id}`)
-        .then(res => res.json())
-        .then(data => setNotebookDetails(data))
-        .catch(err => console.error('Error fetching notebook details:', err));
-    }
-  };
-
-  // Check authentication and fetch user data
   useEffect(() => {
     const token = getCookie('access_token');
     if (!token) {
@@ -66,70 +51,43 @@ export default function MainLayout() {
       return;
     }
 
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/user/', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data);
-        } else {
-          handleLogout();
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+    fetch('http://localhost:8000/user/', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Unauthorized');
+        return res.json();
+      })
+      .then(data => setUserData(data))
+      .catch(() => {
         handleLogout();
-      }
-    };
+      });
+  }, [navigate, handleLogout]);
 
-    fetchUserData();
-  }, [navigate]);
+  const handleSelectNotebook = (notebook) => {
+    setSelectedNotebook(notebook);
+    setActiveSection('notebook');
+    
+    const token = getCookie('access_token');
+    fetch(`http://localhost:8000/notebooks/${notebook.id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setNotebookDetails(data))
+      .catch(err => console.error('Error fetching notebook:', err));
+  };
 
-  // Load notebook details when a notebook is selected
-  useEffect(() => {
+  const refreshNotebook = () => {
     if (selectedNotebook) {
-      fetch(`http://localhost:8000/notebooks/${selectedNotebook.id}`)
-        .then(res => res.json())
-        .then(data => setNotebookDetails(data))
-        .catch(err => console.error('Error fetching notebook details:', err));
+      handleSelectNotebook(selectedNotebook);
     }
-  }, [selectedNotebook]);
-
-  if (!userData) {
-    return (
-      <div className={styles.mainLayout}>
-        <div className={styles.contentArea}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            height: '100vh',
-            color: '#60a5fa',
-            fontSize: '1.2rem'
-          }}>
-            Loading...
-          </div>
-        </div>
-      </div>
-    );
-  }
+  };
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'dashboard':
-        return (
-          <Dashboard
-            userData={userData}
-            selectedNotebook={selectedNotebook}
-            setSelectedNotebook={setSelectedNotebook}
-            notebookDetails={notebookDetails}
-            refreshNotebook={refreshNotebook}
-          />
-        );
       case 'chat':
         return <Chat />;
-      case 'notebooks':
+      case 'notebook':
         return selectedNotebook ? (
           <NotebookView
             details={notebookDetails}
@@ -156,17 +114,6 @@ export default function MainLayout() {
 
   return (
     <div className={styles.mainLayout}>
-      {/* Sidebar Toggle Button */}
-      <button 
-        className={styles.sidebarToggleBtn}
-        onClick={toggleSidebar}
-        style={{
-          left: isSidebarOpen ? '280px' : '20px'
-        }}
-      >
-        {isSidebarOpen ? '❮❮' : '❯❯'}
-      </button>
-
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
@@ -175,7 +122,6 @@ export default function MainLayout() {
         onSelectNotebook={handleSelectNotebook}
       />
       
-      {/* USUNIĘTE inline styles dla marginLeft - teraz kontrolowane przez CSS */}
       <div 
         className={`${styles.contentArea} ${!isSidebarOpen ? styles.contentAreaCollapsed : ''}`}
       >

@@ -1,7 +1,7 @@
-/* NotebookView.module.css - Light Minimalistic Full-Width Design */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* NotebookView.module.css - Minimalist Design */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Main Notebook View Container - Full Width */
+/* Main Container */
 .notebookView {
   display: flex;
   flex-direction: column;
@@ -11,79 +11,80 @@
   font-family: 'Inter', sans-serif;
 }
 
-/* Tabs Bar - Sticky Header */
+/* Tabs Bar - Minimalist & Touching Top */
 .tabsBar {
   display: flex;
-  gap: 0.5rem;
-  padding: 1.5rem 3rem;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
+/* Tab Button - Minimalist */
 .tab {
-  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
   background: transparent;
-  font-size: 0.9375rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 500;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
   color: #64748b;
+  cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
   font-family: 'Inter', sans-serif;
+  white-space: nowrap;
 }
 
 .tab:hover {
-  background: rgba(139, 92, 246, 0.08);
-  color: #7c3aed;
+  background: rgba(139, 92, 246, 0.05);
+  color: #8b5cf6;
 }
 
 .tab.active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-  color: white;
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
-/* Tab Content Container */
+.tab svg {
+  flex-shrink: 0;
+}
+
+/* Tab Container */
 .tabContainer {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  padding: 0;
 }
 
-/* Custom Scrollbar */
 .tabContainer::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .tabContainer::-webkit-scrollbar-track {
-  background: rgba(148, 163, 184, 0.1);
+  background: transparent;
 }
 
 .tabContainer::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
-  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.2);
+  border-radius: 3px;
 }
 
 .tabContainer::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.3);
 }
 
 /* Files View */
 .filesView {
   flex: 1;
-  padding: 3rem;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -92,20 +93,7 @@
 
 /* Header Section */
 .headerSection {
-  margin-bottom: 3rem;
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-out 0.1s forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  margin-bottom: 2rem;
 }
 
 .headerMain {
@@ -113,29 +101,27 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .notebookTitle {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
-  letter-spacing: -0.02em;
-  word-break: break-word;
 }
 
 .addNoteBtn {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.875rem 1.75rem;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
@@ -143,9 +129,8 @@
 }
 
 .addNoteBtn:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
 
 .addNoteBtn:active {
@@ -155,47 +140,27 @@
 /* Cards Container */
 .cardsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-out 0.3s forwards;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
 }
 
 /* Note Card */
 .noteCard {
   background: white;
   border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 1.25rem;
-  padding: 1.75rem;
+  border-radius: 12px;
+  padding: 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.noteCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.noteCard:hover::before {
-  opacity: 1;
+  gap: 0.875rem;
 }
 
 .noteCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
   border-color: rgba(139, 92, 246, 0.3);
 }
 
@@ -203,32 +168,30 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .noteTitle {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #1e293b;
   margin: 0;
-  word-break: break-word;
   flex: 1;
 }
 
 .noteType {
-  padding: 0.375rem 0.875rem;
-  border-radius: 1.5rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .noteContent {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: #64748b;
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -241,30 +204,29 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
   margin-top: auto;
 }
 
 .noteDate {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: #94a3b8;
   font-weight: 500;
 }
 
 .noteActions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .noteAction {
-  padding: 0.5rem;
+  padding: 0.375rem;
   background: transparent;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #64748b;
-  font-size: 1rem;
 }
 
 .noteAction:hover {
@@ -276,21 +238,21 @@
 .emptyState {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 3rem 2rem;
   background: white;
-  border: 2px dashed rgba(148, 163, 184, 0.3);
-  border-radius: 1.5rem;
+  border: 2px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
   color: #64748b;
 }
 
 .emptyIcon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.4;
 }
 
 .emptyText {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 500;
   margin: 0;
 }
@@ -298,101 +260,78 @@
 /* Loading State */
 .loading {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 3rem 2rem;
   color: #64748b;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
-/* Modal Styles */
+/* Modal Overlay */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
-  padding: 2rem;
+  z-index: 1000;
+  padding: 1rem;
 }
 
+/* Modal */
 .modal {
   background: white;
-  border-radius: 1.5rem;
+  border-radius: 12px;
   padding: 2rem;
-  max-width: 600px;
+  max-width: 500px;
   width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
-  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .modalTitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1e293b;
   margin: 0;
 }
 
-.closeBtn {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: #64748b;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.closeBtn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.modalForm {
+.modalBody {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .formGroup label {
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #374151;
-  font-size: 0.9375rem;
+  color: #334155;
 }
 
 .formGroup input,
 .formGroup textarea,
 .formGroup select {
-  padding: 0.875rem 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
   font-size: 0.9375rem;
+  color: #1e293b;
+  background: #fafbfc;
   font-family: 'Inter', sans-serif;
   transition: all 0.2s ease;
-  background: white;
-  color: #0f172a;
 }
 
 .formGroup input:focus,
@@ -400,28 +339,28 @@
 .formGroup select:focus {
   outline: none;
   border-color: #8b5cf6;
+  background: white;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .formGroup textarea {
-  resize: vertical;
   min-height: 120px;
-  line-height: 1.6;
+  resize: vertical;
 }
 
 .modalActions {
   display: flex;
   gap: 0.75rem;
-  justify-content: flex-end;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .btnCancel,
 .btnSubmit {
-  padding: 0.875rem 1.75rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
+  flex: 1;
+  padding: 0.625rem 1.125rem;
+  border-radius: 8px;
   font-size: 0.9375rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
@@ -429,13 +368,13 @@
 }
 
 .btnCancel {
-  background: transparent;
+  background: white;
   color: #64748b;
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .btnCancel:hover {
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(148, 163, 184, 0.05);
   color: #374151;
 }
 
@@ -446,8 +385,7 @@
 }
 
 .btnSubmit:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
 
@@ -455,85 +393,28 @@
   transform: translateY(0);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .filesView {
-    padding: 2rem;
-  }
-
-  .cardsContainer {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
   .tabsBar {
-    padding: 1rem 1.5rem;
-    gap: 0.375rem;
+    gap: 0.125rem;
+    padding: 0.625rem 0.75rem;
     overflow-x: auto;
   }
 
   .tab {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .tab span {
+    display: none;
   }
 
   .filesView {
     padding: 1.5rem 1rem;
   }
 
-  .notebookTitle {
-    font-size: 1.75rem;
-  }
-
-  .headerMain {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .addNoteBtn {
-    width: 100%;
-    justify-content: center;
-  }
-
   .cardsContainer {
     grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .modal {
-    padding: 1.5rem;
-    max-height: 90vh;
-  }
-
-  .modalActions {
-    flex-direction: column-reverse;
-  }
-
-  .btnCancel,
-  .btnSubmit {
-    width: 100%;
-  }
-}
-
-/* Accessibility */
-.notebookView *:focus-visible {
-  outline: 2px solid #8b5cf6;
-  outline-offset: 2px;
-}
-
-/* Performance Optimization */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .headerSection,
-  .cardsContainer {
-    animation: none;
-    opacity: 1;
   }
 }
