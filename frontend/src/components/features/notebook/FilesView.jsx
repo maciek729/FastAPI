@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from "axios";
-import styles from '../css/NotebookView.module.css';
+import styles from "../../../css/features/NotebookView.module.css";
 
 export default function FilesView({ details, userData, refreshNotebook }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
@@ -77,74 +77,61 @@ export default function FilesView({ details, userData, refreshNotebook }) {
 
             <div className={styles.cardsContainer}>
                 {details.notes && Array.isArray(details.notes) && details.notes.length > 0 ? (
-                    details.notes.map(note => (
-                        <div key={note.id} className={styles.card}>
-                            <div className={styles.cardHeader}>
+                    details.notes.map((note) => (
+                        <div key={note.id} className={styles.noteCard}>
+                            <div className={styles.noteCardHeader}>
+                                <h3 className={styles.noteTitle}>{note.title}</h3>
                                 <span 
-                                    className={styles.tag} 
+                                    className={styles.noteType}
                                     style={{ backgroundColor: getTypeColor(note.type) }}
                                 >
-                                    {note.type || 'Notatka'}
+                                    {note.type}
                                 </span>
-                                <span className={styles.date}>
+                            </div>
+                            <p className={styles.noteContent}>
+                                {note.content?.substring(0, 120)}
+                                {note.content?.length > 120 ? '...' : ''}
+                            </p>
+                            <div className={styles.noteFooter}>
+                                <span className={styles.noteDate}>
                                     {formatDate(note.created_at)}
                                 </span>
                             </div>
-                            
-                            <h3 className={styles.cardTitle}>{note.title}</h3>
-                            <p className={styles.cardDescription}>
-                                {note.content?.length > 100 
-                                    ? note.content.substring(0, 100) + '...' 
-                                    : note.content
-                                }
-                            </p>
                         </div>
                     ))
                 ) : (
                     <div className={styles.emptyState}>
-                        <div className={styles.emptyIcon}>📝</div>
-                        <h3>Brak notatek</h3>
-                        <p>Dodaj pierwszą notatkę do tego notatnika</p>
-                        <button 
-                            className={styles.addFirstNoteBtn}
-                            onClick={() => setShowAddNoteModal(true)}
-                        >
-                            Dodaj notatkę
-                        </button>
+                        <p>Brak notatek. Dodaj pierwszą!</p>
                     </div>
                 )}
             </div>
 
+            {/* Add Note Modal */}
             {showAddNoteModal && (
                 <div className={styles.modalOverlay} onClick={() => setShowAddNoteModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Dodaj nową notatkę</h2>
-                            <button 
-                                className={styles.closeBtn}
-                                onClick={() => setShowAddNoteModal(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        
-                        <form onSubmit={handleAddNote} className={styles.noteForm}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <h2 className={styles.modalTitle}>Dodaj nową notatkę</h2>
+                        <form onSubmit={handleAddNote}>
                             <div className={styles.formGroup}>
-                                <label htmlFor="noteTitle">Tytuł notatki</label>
+                                <label>Tytuł</label>
                                 <input
-                                    id="noteTitle"
                                     type="text"
                                     value={newNote.title}
                                     onChange={(e) => setNewNote({...newNote, title: e.target.value})}
-                                    placeholder="Wprowadź tytuł notatki..."
-                                    required
+                                    placeholder="Tytuł notatki"
                                 />
                             </div>
-                            
                             <div className={styles.formGroup}>
-                                <label htmlFor="noteType">Typ notatki</label>
+                                <label>Treść</label>
+                                <textarea
+                                    value={newNote.content}
+                                    onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                                    placeholder="Treść notatki..."
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Typ</label>
                                 <select
-                                    id="noteType"
                                     value={newNote.type}
                                     onChange={(e) => setNewNote({...newNote, type: e.target.value})}
                                 >
@@ -153,29 +140,16 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     <option value="Fiszki">Fiszki</option>
                                 </select>
                             </div>
-                            
-                            <div className={styles.formGroup}>
-                                <label htmlFor="noteContent">Treść notatki</label>
-                                <textarea
-                                    id="noteContent"
-                                    value={newNote.content}
-                                    onChange={(e) => setNewNote({...newNote, content: e.target.value})}
-                                    placeholder="Wprowadź treść notatki..."
-                                    rows="8"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formActions}>
+                            <div className={styles.modalActions}>
                                 <button 
                                     type="button" 
-                                    className={styles.cancelBtn}
+                                    className={styles.btnCancel}
                                     onClick={() => setShowAddNoteModal(false)}
                                 >
                                     Anuluj
                                 </button>
-                                <button type="submit" className={styles.submitBtn}>
-                                    Dodaj notatkę
+                                <button type="submit" className={styles.btnSubmit}>
+                                    Dodaj
                                 </button>
                             </div>
                         </form>

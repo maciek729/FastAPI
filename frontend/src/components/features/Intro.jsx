@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, FileText, Zap, FolderOpen, Menu, X, Star, Users, Sparkles, LogIn } from 'lucide-react';
-import styles from '../css/Intro.module.css';
+import styles from '../../css/features/Intro.module.css';
 
 const Intro = () => {
   const navigate = useNavigate();
