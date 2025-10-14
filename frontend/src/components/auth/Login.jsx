@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
-;
 
 function Login() {
   const navigate = useNavigate();
@@ -26,7 +25,7 @@ function Login() {
       
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || "Invalid credentials");
+        throw new Error(data.detail || "Nieprawidłowe dane logowania");
       }
       
       const data = await res.json();
@@ -44,20 +43,20 @@ function Login() {
       {/* Back to Intro Button */}
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
-        <span>Back to Home</span>
+        <span>Powrót do strony głównej</span>
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Welcome Back</h2>
-        <p className={styles.subtitle}>Sign in to your account</p>
+        <h2 className={styles.title}>Witaj ponownie</h2>
+        <p className={styles.subtitle}>Zaloguj się do swojego konta</p>
         
         <div className={styles.formGroup}>
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">Nazwa użytkownika</label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Enter your username"
+            placeholder="Podaj swoją nazwę użytkownika"
             value={form.username}
             onChange={handleChange}
             required
@@ -66,12 +65,12 @@ function Login() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">Hasło</label>
           <input
             id="password"
             name="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder="Podaj swoje hasło"
             value={form.password}
             onChange={handleChange}
             required
@@ -84,14 +83,14 @@ function Login() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Logging in..." : "Login"}
+          {isLoading ? "Logowanie..." : "Zaloguj się"}
         </button>
         
         {error && <div className={styles.errorMessage}>{error}</div>}
         
         <div className={styles.authLinks}>
-          <Link to="/register">Don't have an account? Sign up</Link>
-          <Link to="/forgot-password">Forgot your password?</Link>
+          <Link to="/register">Nie masz konta? Zarejestruj się</Link>
+          <Link to="/forgot-password">Zapomniałeś hasła?</Link>
         </div>
       </form>
     </div>

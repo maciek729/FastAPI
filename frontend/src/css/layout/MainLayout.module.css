@@ -1,38 +1,38 @@
-/* MainLayout Module CSS - Fixed Encapsulation */
+/* MainLayout Module CSS - Fixed Encapsulation + Full Height */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Main Layout Container */
 .mainLayout {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   background: linear-gradient(135deg, #fdfeff 0%, #f8f9fd 50%, #f3f4f9 100%);
   font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
+  display: flex;
 }
 
 /* Content Area - Main container for page content */
 .contentArea {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
-  margin-left: 0;
-  padding-left: 240px;
-  padding-top: 2rem;
-  padding-right: 2rem;
-  padding-bottom: 2rem;
+  margin-left: 240px;
+  padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
   font-family: 'Inter', sans-serif;
   position: relative;
   z-index: 1;
-  transition: padding-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
-  will-change: padding-left;
+  will-change: margin-left;
+  display: flex;
+  flex-direction: column;
 }
 
 /* When sidebar is collapsed */
 .contentAreaCollapsed {
-  padding-left: 60px !important;
+  margin-left: 60px !important;
 }
 
 /* Custom Scrollbar for Content Area */
@@ -53,8 +53,10 @@
   background: rgba(139, 92, 246, 0.5);
 }
 
-/* Content fade-in animation - only for direct children */
+/* Direct children take full space */
 .contentArea > * {
+  flex: 1;
+  min-height: 0;
   animation: contentFadeIn 0.5s ease-out;
 }
 
@@ -72,12 +74,11 @@
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .contentArea {
-    padding: 1rem;
-    padding-left: 60px;
+    margin-left: 60px;
   }
   
   .contentAreaCollapsed {
-    padding-left: 1rem !important;
+    margin-left: 0 !important;
   }
 }
 
@@ -95,8 +96,7 @@
     transition-duration: 0.01ms !important;
   }
   
-  .contentArea > *,
-  .breadcrumb {
+  .contentArea > * {
     animation: none;
     opacity: 1;
     transform: none;

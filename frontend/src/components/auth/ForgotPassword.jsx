@@ -25,10 +25,10 @@ function ForgotPassword() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || "Failed to send reset link");
+        throw new Error(data.detail || "Nie udało się wysłać linku resetującego");
       }
 
-      setMessage("Password reset link sent! Check your email.");
+      setMessage("Link do resetowania hasła został wysłany! Sprawdź swoją skrzynkę email.");
       setEmail("");
     } catch (err) {
       setError(err.message);
@@ -40,18 +40,18 @@ function ForgotPassword() {
   return (
     <div className={styles.authContainer}>
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Forgot Password?</h2>
+        <h2 className={styles.title}>Zapomniałeś hasła?</h2>
         <p className={styles.subtitle}>
-          Enter your email and we'll send you a reset link
+          Podaj swój email, a wyślemy Ci link do resetowania
         </p>
 
         <div className={styles.formGroup}>
-          <label htmlFor="email">Email Address</label>
+          <label htmlFor="email">Adres email</label>
           <input
             id="email"
             name="email"
             type="email"
-            placeholder="Enter your email"
+            placeholder="Podaj swój email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -64,15 +64,15 @@ function ForgotPassword() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Sending..." : "Send Reset Link"}
+          {isLoading ? "Wysyłanie..." : "Wyślij link resetujący"}
         </button>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
         {message && <div className={styles.successMessage}>{message}</div>}
 
         <div className={styles.authLinks}>
-          <Link to="/login">Back to Login</Link>
-          <Link to="/register">Don't have an account? Sign up</Link>
+          <Link to="/login">Powrót do logowania</Link>
+          <Link to="/register">Nie masz konta? Zarejestruj się</Link>
         </div>
       </form>
     </div>
