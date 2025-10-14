@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, Trash2, Upload, Send, User, Bot } from "lucide-react";
-import styles from '../css/Chat.module.css';
+import styles from "../../../css/features/Chat.module.css";
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);

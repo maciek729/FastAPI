@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import ForgotPassword from "./components/ForgotPassword";
-import ResetPassword from "./components/ResetPassword";
-import MainLayout from "./components/Layout/MainLayout";
-import Intro from "./components/Intro";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/auth/ResetPassword";
+import MainLayout from "./components/layout/MainLayout";
+import Intro from "./components/features/Intro";
 
 function App() {
   return (

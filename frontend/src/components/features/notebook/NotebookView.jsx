@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { MessageCircle, FileText, Zap, ClipboardCheck } from "lucide-react";
-import Chat from "./Chat";
-import FilesView from "./FilesView";
-import FlashcardsView from "./FlashcardsView";
-import TestsView from "./TestsView";
-import styles from "../css/NotebookView.module.css";
+import Chat from "../chat/Chat";
+import FilesView from "../notebook/FilesView";
+import FlashcardsView from "../notebook/FlashcardsView";
+import TestsView from "../notebook/TestsView";
+import styles from "../../../css/features/NotebookView.module.css";
 
 export default function NotebookView({ details, userData, refreshNotebook }) {
     const [activeTab, setActiveTab] = useState("files");

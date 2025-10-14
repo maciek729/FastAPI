@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
-import Sidebar from "../Sidebar";
-import Dashboard from "../Dashboard";
-import Chat from "../Chat";
-import NotebookView from "../NotebookView";
-import styles from "../../css/MainLayout.module.css";
+import Sidebar from "./Sidebar";
+import Dashboard from "../features/dashboard/Dashboard";
+import Chat from "../features/chat/Chat";
+import NotebookView from "../features/notebook/NotebookView";
+import styles from "../../css/layout/MainLayout.module.css";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -83,10 +83,17 @@ export default function MainLayout() {
     }
   };
 
+  const handleBackToDashboard = () => {
+    setSelectedNotebook(null);
+    setNotebookDetails(null);
+    setActiveSection('dashboard');
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'chat':
         return <Chat />;
+      
       case 'notebook':
         return selectedNotebook ? (
           <NotebookView
@@ -99,14 +106,12 @@ export default function MainLayout() {
             Please select a notebook from the sidebar
           </div>
         );
+      
       default:
         return (
           <Dashboard
             userData={userData}
-            selectedNotebook={selectedNotebook}
-            setSelectedNotebook={setSelectedNotebook}
-            notebookDetails={notebookDetails}
-            refreshNotebook={refreshNotebook}
+            onSelectNotebook={handleSelectNotebook}
           />
         );
     }
@@ -120,6 +125,7 @@ export default function MainLayout() {
         userData={userData}
         handleLogout={handleLogout}
         onSelectNotebook={handleSelectNotebook}
+        onGoToDashboard={handleBackToDashboard}
       />
       
       <div 

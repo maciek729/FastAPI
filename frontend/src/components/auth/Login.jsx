@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import styles from "../css/Auth.module.css";
+import styles from "../../css/shared/Auth.module.css";
+;
 
 function Login() {
   const navigate = useNavigate();

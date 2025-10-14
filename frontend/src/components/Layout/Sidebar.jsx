@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Lock, Users, Plus, ChevronRight, Sparkles, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
-import styles from '../css/Sidebar.module.css';
+import styles from "../../css/layout/Sidebar.module.css";
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook }) => {
+const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard }) => {
     const [spaces] = useState([
         { id: 'personal', name: 'Osobista', icon: Lock },
         { id: 'shared', name: 'Wspólna', icon: Users }
@@ -50,7 +50,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const toggleSpace = (spaceId) => {
-        if (!isSidebarOpen) return; // Don't toggle when sidebar is collapsed
+        if (!isSidebarOpen) return;
         setExpandedSpaces(prev =>
             prev.includes(spaceId)
                 ? prev.filter(id => id !== spaceId)
@@ -59,9 +59,16 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const handleNotebookClick = (notebook) => {
-        if (!isSidebarOpen) return; // Don't select when sidebar is collapsed
+        if (!isSidebarOpen) return;
         setSelectedNotebook(notebook);
         onSelectNotebook(notebook); 
+    };
+
+    const handleBrandClick = () => {
+        setSelectedNotebook(null);
+        if (onGoToDashboard) {
+            onGoToDashboard();
+        }
     };
 
     return (
@@ -70,7 +77,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
 
                 {/* Header with Toggle */}
                 <div className={styles.sidebarHeader}>
-                    <div className={styles.brandContainer}>
+                    <div 
+                        className={styles.brandContainer}
+                        onClick={handleBrandClick}
+                        style={{ cursor: 'pointer' }}
+                        title="Go to Dashboard"
+                    >
                         <div className={styles.brandIcon}>
                             <Sparkles size={20} />
                         </div>
@@ -105,9 +117,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                         className={styles.sectionTitle}
                                         onClick={() => {
                                             if (!isSidebarOpen) {
-                                                toggleSidebar(); // Open sidebar when collapsed
+                                                toggleSidebar();
                                             } else {
-                                                toggleSpace(space.id); // Toggle space when expanded
+                                                toggleSpace(space.id);
                                             }
                                         }}
                                         title={space.name}
@@ -124,39 +136,43 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                         )}
                                     </div>
                                     {isSidebarOpen && (
-                                        <button
+                                        <button 
                                             className={styles.addBtn}
-                                            onClick={(e) => {
-                                                e.stopPropagation(); 
-                                                handleAddNotebook(space.id);
-                                            }}
-                                            title="Dodaj notatnik"
+                                            onClick={() => handleAddNotebook(space.id)}
+                                            title={`Add ${space.name} notebook`}
                                         >
                                             <Plus size={16} />
                                         </button>
                                     )}
                                 </div>
 
-                                {isSidebarOpen && isExpanded && (
-                                    <ul className={styles.notebooksList}>
-                                        {(notebooks[space.id] || []).map(notebook => (
-                                            <li
+                                {/* Notebook List */}
+                                {isExpanded && isSidebarOpen && (
+                                    <div className={styles.notebookList}>
+                                        {notebooks[space.id]?.map((notebook) => (
+                                            <div
                                                 key={notebook.id}
-                                                className={`${styles.notebookItem} ${selectedNotebook?.id === notebook.id ? styles.selected : ''}`}
+                                                className={`${styles.notebookItem} ${selectedNotebook?.id === notebook.id ? styles.active : ''}`}
                                                 onClick={() => handleNotebookClick(notebook)}
+                                                title={notebook.name}
                                             >
                                                 <span className={styles.notebookName}>{notebook.name}</span>
-                                            </li>
+                                            </div>
                                         ))}
-                                    </ul>
+                                        {(!notebooks[space.id] || notebooks[space.id].length === 0) && (
+                                            <div className={styles.emptyNotebooks}>
+                                                No notebooks yet
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         );
                     })}
                 </div>
 
-                {/* User Section */}
-                <div className={styles.userSection}>
+                {/* User Footer */}
+                <div className={styles.sidebarFooter}>
                     {isSidebarOpen ? (
                         <>
                             <div className={styles.userProfile}>

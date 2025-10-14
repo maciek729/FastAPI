@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import styles from "../css/Auth.module.css";
+import styles from "../../css/shared/Auth.module.css";
+;
 
 function ResetPassword() {
   const { token } = useParams();
