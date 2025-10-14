@@ -1,28 +1,29 @@
-/* NotebookView.module.css - Minimalist Design */
+/* NotebookView.module.css - Full Height Layout */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Main Container */
+/* Main Container - Takes 100% of content area */
 .notebookView {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background: linear-gradient(135deg, #fdfeff 0%, #f8f9fd 50%, #f3f4f9 100%);
+  background: transparent;
   font-family: 'Inter', sans-serif;
+  overflow: hidden;
 }
 
-/* Tabs Bar - Minimalist & Touching Top */
+/* Tabs Bar - Fixed at top */
 .tabsBar {
   display: flex;
   gap: 0.25rem;
-  padding: 0.75rem 1rem;
+  padding: 1rem 2rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   flex-shrink: 0;
 }
 
-/* Tab Button - Minimalist */
+/* Tab Button */
 .tab {
   display: flex;
   align-items: center;
@@ -55,13 +56,14 @@
   flex-shrink: 0;
 }
 
-/* Tab Container */
+/* Tab Container - Scrollable content area */
 .tabContainer {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .tabContainer::-webkit-scrollbar {
@@ -89,11 +91,15 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* Header Section */
 .headerSection {
   margin-bottom: 2rem;
+  flex-shrink: 0;
 }
 
 .headerMain {
@@ -137,11 +143,32 @@
   transform: translateY(0);
 }
 
-/* Cards Container */
+/* Cards Container - Scrollable grid */
 .cardsContainer {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.25rem;
+  flex: 1;
+  overflow-y: auto;
+  align-content: start;
+  padding-bottom: 1rem;
+}
+
+.cardsContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cardsContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cardsContainer::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.2);
+  border-radius: 3px;
+}
+
+.cardsContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.3);
 }
 
 /* Note Card */
@@ -156,6 +183,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+  height: fit-content;
 }
 
 .noteCard:hover {
@@ -195,6 +223,7 @@
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -214,26 +243,6 @@
   font-weight: 500;
 }
 
-.noteActions {
-  display: flex;
-  gap: 0.375rem;
-}
-
-.noteAction {
-  padding: 0.375rem;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #64748b;
-}
-
-.noteAction:hover {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
-}
-
 /* Empty State */
 .emptyState {
   grid-column: 1 / -1;
@@ -245,16 +254,10 @@
   color: #64748b;
 }
 
-.emptyIcon {
-  font-size: 3rem;
-  margin-bottom: 0.75rem;
-  opacity: 0.4;
-}
-
-.emptyText {
+.emptyState p {
+  margin: 0;
   font-size: 1rem;
   font-weight: 500;
-  margin: 0;
 }
 
 /* Loading State */
@@ -292,27 +295,18 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.modalHeader {
-  margin-bottom: 1.5rem;
-}
-
 .modalTitle {
   font-size: 1.25rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0;
-}
-
-.modalBody {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  margin: 0 0 1.5rem 0;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
+  margin-bottom: 1rem;
 }
 
 .formGroup label {
@@ -396,8 +390,8 @@
 /* Responsive */
 @media (max-width: 768px) {
   .tabsBar {
+    padding: 0.75rem 1rem;
     gap: 0.125rem;
-    padding: 0.625rem 0.75rem;
     overflow-x: auto;
   }
 
@@ -406,15 +400,15 @@
     font-size: 0.8125rem;
   }
 
-  .tab span {
-    display: none;
-  }
-
   .filesView {
     padding: 1.5rem 1rem;
   }
 
   .cardsContainer {
     grid-template-columns: 1fr;
+  }
+
+  .notebookTitle {
+    font-size: 1.5rem;
   }
 }

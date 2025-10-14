@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
-;
 
 function Register() {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ function Register() {
     setError("");
     
     if (form.password !== form.password2) {
-      setError("Passwords do not match");
+      setError("Hasła nie pasują do siebie");
       return;
     }
     
@@ -42,10 +41,10 @@ function Register() {
       
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || "Registration failed");
+        throw new Error(data.detail || "Rejestracja nie powiodła się");
       }
       
-      alert("Registration successful! You can now log in.");
+      alert("Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.");
       navigate("/login");
     } catch (err) {
       setError(err.message);
@@ -59,20 +58,20 @@ function Register() {
       {/* Back to Intro Button */}
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
-        <span>Back to Home</span>
+        <span>Powrót do strony głównej</span>
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Create Account</h2>
-        <p className={styles.subtitle}>Sign up to get started</p>
+        <h2 className={styles.title}>Utwórz konto</h2>
+        <p className={styles.subtitle}>Zarejestruj się, aby rozpocząć</p>
         
         <div className={styles.formGroup}>
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">Nazwa użytkownika</label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Choose a username"
+            placeholder="Wybierz nazwę użytkownika"
             value={form.username}
             onChange={handleChange}
             required
@@ -86,7 +85,7 @@ function Register() {
             id="email"
             name="email"
             type="email"
-            placeholder="Enter your email"
+            placeholder="Podaj swój email"
             value={form.email}
             onChange={handleChange}
             required
@@ -95,12 +94,12 @@ function Register() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">Hasło</label>
           <input
             id="password"
             name="password"
             type="password"
-            placeholder="Create a password"
+            placeholder="Utwórz hasło"
             value={form.password}
             onChange={handleChange}
             required
@@ -109,12 +108,12 @@ function Register() {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="password2">Confirm Password</label>
+          <label htmlFor="password2">Potwierdź hasło</label>
           <input
             id="password2"
             name="password2"
             type="password"
-            placeholder="Repeat your password"
+            placeholder="Powtórz swoje hasło"
             value={form.password2}
             onChange={handleChange}
             required
@@ -127,13 +126,13 @@ function Register() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Creating account..." : "Register"}
+          {isLoading ? "Tworzenie konta..." : "Zarejestruj się"}
         </button>
         
         {error && <div className={styles.errorMessage}>{error}</div>}
         
         <div className={styles.authLinks}>
-          <Link to="/login">Already have an account? Log in</Link>
+          <Link to="/login">Masz już konto? Zaloguj się</Link>
         </div>
       </form>
     </div>

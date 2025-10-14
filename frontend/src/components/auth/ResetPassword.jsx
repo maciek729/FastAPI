@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import styles from "../../css/shared/Auth.module.css";
-;
 
 function ResetPassword() {
   const { token } = useParams();
@@ -24,12 +23,12 @@ function ResetPassword() {
     setMessage("");
 
     if (form.newPassword.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setError("Hasło musi mieć co najmniej 8 znaków");
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      setError("Passwords do not match");
+      setError("Hasła nie pasują do siebie");
       return;
     }
 
@@ -47,10 +46,10 @@ function ResetPassword() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || "Password reset failed");
+        throw new Error(data.detail || "Resetowanie hasła nie powiodło się");
       }
 
-      setMessage("Password updated successfully! Redirecting to login...");
+      setMessage("Hasło zostało zaktualizowane pomyślnie! Przekierowanie do logowania...");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -64,16 +63,16 @@ function ResetPassword() {
   return (
     <div className={styles.authContainer}>
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Reset Password</h2>
-        <p className={styles.subtitle}>Enter your new password</p>
+        <h2 className={styles.title}>Resetuj hasło</h2>
+        <p className={styles.subtitle}>Wprowadź nowe hasło</p>
 
         <div className={styles.formGroup}>
-          <label htmlFor="newPassword">New Password</label>
+          <label htmlFor="newPassword">Nowe hasło</label>
           <input
             id="newPassword"
             name="newPassword"
             type="password"
-            placeholder="Enter new password (min. 8 characters)"
+            placeholder="Wprowadź nowe hasło (min. 8 znaków)"
             value={form.newPassword}
             onChange={handleChange}
             required
@@ -83,12 +82,12 @@ function ResetPassword() {
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="confirmPassword">Confirm Password</label>
+          <label htmlFor="confirmPassword">Potwierdź hasło</label>
           <input
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            placeholder="Confirm new password"
+            placeholder="Potwierdź nowe hasło"
             value={form.confirmPassword}
             onChange={handleChange}
             required
@@ -102,14 +101,14 @@ function ResetPassword() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Resetting..." : "Reset Password"}
+          {isLoading ? "Resetowanie..." : "Zresetuj hasło"}
         </button>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
         {message && <div className={styles.successMessage}>{message}</div>}
 
         <div className={styles.authLinks}>
-          <Link to="/login">Back to Login</Link>
+          <Link to="/login">Powrót do logowania</Link>
         </div>
       </form>
     </div>
