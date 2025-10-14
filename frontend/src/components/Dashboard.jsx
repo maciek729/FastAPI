@@ -30,7 +30,7 @@ export default function Dashboard({
         setNotebooks(data);
       }
     } catch (error) {
-      console.error('Error fetching notebooks:', error);
+      console.error('Błąd podczas pobierania notatników:', error);
     } finally {
       setIsLoading(false);
     }
@@ -41,7 +41,7 @@ export default function Dashboard({
   };
 
   const handleCreateNotebook = async () => {
-    const name = prompt('Enter notebook name:');
+    const name = prompt('Wprowadź nazwę notatnika:');
     if (!name) return;
 
     try {
@@ -56,7 +56,7 @@ export default function Dashboard({
         fetchNotebooks();
       }
     } catch (error) {
-      console.error('Error creating notebook:', error);
+      console.error('Błąd podczas tworzenia notatnika:', error);
     }
   };
 
@@ -65,35 +65,34 @@ export default function Dashboard({
       {!selectedNotebook ? (
         <div className={styles.notebookSelection}>
           <div className={styles.header}>
-            <h1 className={styles.title}>Welcome back, {userData?.username}!</h1>
-            <p className={styles.subtitle}>Select a notebook or create a new one</p>
+            <h1 className={styles.title}>Witaj ponownie, {userData?.username}!</h1>
+            <p className={styles.subtitle}>Wybierz notatnik lub utwórz nowy</p>
           </div>
 
           <div className={styles.actions}>
             <button className={styles.createButton} onClick={handleCreateNotebook}>
-              + Create New Notebook
+              + Utwórz nowy notatnik
             </button>
           </div>
 
           {isLoading ? (
-            <div className={styles.loading}>Loading notebooks...</div>
+            <div className={styles.loading}>Ładowanie notatników...</div>
           ) : (
             <div className={styles.notebooksGrid}>
               {notebooks.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <p>No notebooks yet. Create your first one!</p>
+                  <p>Nie masz jeszcze żadnych notatników. Utwórz pierwszy!</p>
                 </div>
               ) : (
                 notebooks.map((notebook) => (
-                  <div
-                    key={notebook.id}
+                  <div 
+                    key={notebook.id} 
                     className={styles.notebookCard}
                     onClick={() => handleNotebookClick(notebook)}
                   >
-                    <div className={styles.notebookIcon}>📚</div>
-                    <h3 className={styles.notebookName}>{notebook.name}</h3>
-                    <p className={styles.notebookInfo}>
-                      {notebook.files_count || 0} files
+                    <h3>{notebook.name}</h3>
+                    <p className={styles.notebookMeta}>
+                      Utworzono: {new Date(notebook.created_at).toLocaleDateString('pl-PL')}
                     </p>
                   </div>
                 ))
@@ -102,25 +101,11 @@ export default function Dashboard({
           )}
         </div>
       ) : (
-        <div className={styles.notebookViewContainer}>
-          <div className={styles.breadcrumb}>
-            <button 
-              className={styles.backButton}
-              onClick={() => setSelectedNotebook(null)}
-            >
-              ← Back to Notebooks
-            </button>
-            <span className={styles.currentNotebook}>
-              {selectedNotebook.name}
-            </span>
-          </div>
-          
-          <NotebookView
-            details={notebookDetails}
-            userData={userData}
-            refreshNotebook={refreshNotebook}
-          />
-        </div>
+        <NotebookView
+          details={notebookDetails}
+          userData={userData}
+          refreshNotebook={refreshNotebook}
+        />
       )}
     </div>
   );
