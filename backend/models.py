@@ -2,7 +2,7 @@ from datetime import datetime
 
 from database import Base
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
-
+from sqlalchemy.orm import relationship
 
 class Users(Base):
     __tablename__ = 'users'
@@ -51,11 +51,24 @@ class Notebooks(Base):
     __tablename__ = "notebooks"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True)
+    name = Column(String)
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime)
-    space_type = Column(String, default="personal") 
-    is_shared = Column(Boolean, default=False)  
+    space_type = Column(String, default="personal")
+    is_shared = Column(Boolean, default=False)
+
+    notes = relationship("Notes", back_populates="notebook", cascade="all, delete-orphan")
+    collaborators = relationship("NotebookCollaborator", back_populates="notebook", cascade="all, delete")
+
+class NotebookCollaborator(Base):
+    __tablename__ = "notebook_collaborators"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    notebook = relationship("Notebooks", back_populates="collaborators")
+    user = relationship("Users")
 
 class Notes(Base):
     __tablename__ = "notes"
@@ -65,10 +78,13 @@ class Notes(Base):
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
     title = Column(String)
     content = Column(String)
-    type = Column(String(50), default="Notatka")  
+    type = Column(String(50), default="Notatka")
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     is_shared = Column(Boolean, default=False)
+
+    # 🔼 RELACJA DO NOTEBOOKA
+    notebook = relationship("Notebooks", back_populates="notes")
 
 class Tests(Base):
     __tablename__ = "tests"
