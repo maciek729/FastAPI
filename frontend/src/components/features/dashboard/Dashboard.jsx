@@ -14,7 +14,7 @@ export default function Dashboard({ userData, onSelectNotebook }) {
   const fetchNotebooks = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/notebooks/', {
+      const response = await fetch('http://localhost:8000/notebooks/list', {
         credentials: 'include'
       });
       if (response.ok) {
@@ -33,7 +33,7 @@ export default function Dashboard({ userData, onSelectNotebook }) {
     if (!name) return;
 
     try {
-      const response = await fetch('http://localhost:8000/notebooks/', {
+      const response = await fetch('http://localhost:8000/notebooks/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

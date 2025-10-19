@@ -412,3 +412,218 @@
     font-size: 1.5rem;
   }
 }
+
+/* Dodaj te style na końcu twojego NotebookView.module.css */
+
+/* Header Actions */
+.headerActions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Collaborator Button */
+.collaboratorBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  background: white;
+  color: #8b5cf6;
+  border: 2px solid #8b5cf6;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.collaboratorBtn:hover {
+  background: rgba(139, 92, 246, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.collaboratorBtn:active {
+  transform: translateY(0);
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #1e293b;
+}
+
+/* Add Collaborator Form */
+.addCollaboratorForm {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.inputWithButton {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.inputWithButton input {
+  flex: 1;
+}
+
+.btnAdd {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.btnAdd:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btnAdd:active {
+  transform: translateY(0);
+}
+
+/* Collaborators List */
+.collaboratorsList {
+  margin-top: 1.5rem;
+}
+
+.collaboratorsTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 1rem 0;
+}
+
+.collaboratorsItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.collaboratorItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(139, 92, 246, 0.03);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.collaboratorItem:hover {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.collaboratorAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.collaboratorName {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.btnRemove {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btnRemove:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.emptyCollaborators {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: rgba(148, 163, 184, 0.05);
+  border: 2px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  color: #64748b;
+}
+
+.emptyCollaborators p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .headerActions {
+    width: 100%;
+  }
+
+  .collaboratorBtn,
+  .addNoteBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .inputWithButton {
+    flex-direction: column;
+  }
+
+  .btnAdd {
+    width: 100%;
+    justify-content: center;
+  }
+}

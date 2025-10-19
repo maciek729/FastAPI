@@ -73,7 +73,10 @@ export default function MainLayout() {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
-      .then(data => setNotebookDetails(data))
+      .then(data => {
+        console.log("Pobrane szczegóły notatnika:", data);
+        setNotebookDetails(data);
+      })
       .catch(err => console.error('Error fetching notebook:', err));
   };
 
