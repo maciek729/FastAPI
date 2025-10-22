@@ -10,6 +10,25 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    resetServerSession();
+    
+    setMessages([]);
+    setFile(null);
+    setInputValue('');
+  }, []); 
+
+  const resetServerSession = async () => {
+    try {
+      await fetch("http://localhost:8000/ai/reset_session", {
+        method: "POST",
+      });
+      console.log("Nowa sesja chat utworzona");
+    } catch (error) {
+      console.error("Błąd resetowania sesji:", error);
+    }
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -131,14 +150,22 @@ export default function Chat() {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
-    setFile(null);
+  const clearChat = async () => {
+    try {
+      await fetch("http://localhost:8000/ai/clear_files", {
+        method: "POST",
+      });
+      await resetServerSession();
+    } catch (error) {
+      console.error("Błąd podczas czyszczenia:", error);
+    } finally {
+      setMessages([]);
+      setFile(null);
+    }
   };
 
   return (
     <div className={styles.chatContainer}>
-      {/* Header */}
       <div className={styles.chatHeader}>
         <div className={styles.chatHeaderLeft}>
           <Sparkles size={20} className={styles.headerIcon} />
@@ -154,7 +181,6 @@ export default function Chat() {
         </button>
       </div>
 
-      {/* Messages */}
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (
           <div className={styles.emptyState}>
@@ -194,7 +220,6 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* File Upload */}
       {file && (
         <div className={styles.filePreview}>
           <span>📎 {file.name}</span>
@@ -205,7 +230,6 @@ export default function Chat() {
         </div>
       )}
 
-      {/* Input */}
       <div className={styles.inputContainer}>
         <button 
           className={styles.uploadBtn}
@@ -218,7 +242,7 @@ export default function Chat() {
           type="file"
           style={{ display: 'none' }}
           onChange={handleFileChange}
-          accept=".pdf,.txt,.doc,.docx"
+          accept=".pdf,.txt,.jpg,.jpeg,.png,.webp"
         />
         <textarea
           className={styles.input}
@@ -240,3 +264,5 @@ export default function Chat() {
     </div>
   );
 }
+
+

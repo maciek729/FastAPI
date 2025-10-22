@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "./Sidebar";
 import Dashboard from "../features/dashboard/Dashboard";
 import Chat from "../features/chat/Chat";
@@ -9,10 +9,12 @@ import styles from "../../css/layout/MainLayout.module.css";
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const navigate = useNavigate();
+  const location = useLocation();
   const [userData, setUserData] = useState(null);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   const [notebookDetails, setNotebookDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [notebookSection, setNotebookSection] = useState('overview');
 
   const getCookie = (name) => {
     let cookieValue = null;
@@ -67,6 +69,7 @@ export default function MainLayout() {
   const handleSelectNotebook = (notebook) => {
     setSelectedNotebook(notebook);
     setActiveSection('notebook');
+    setNotebookSection('files');
     
     const token = getCookie('access_token');
     fetch(`http://localhost:8000/notebooks/${notebook.id}`, {
@@ -92,17 +95,23 @@ export default function MainLayout() {
     setActiveSection('dashboard');
   };
 
+  const getChatKey = () => {
+    return `chat-${location.pathname}-${activeSection}-${selectedNotebook?.id || 'dashboard'}`;
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case 'chat':
-        return <Chat />;
+        return <Chat key={getChatKey()} />;
       
       case 'notebook':
         return selectedNotebook ? (
           <NotebookView
+            key={selectedNotebook?.id} 
             details={notebookDetails}
             userData={userData}
             refreshNotebook={refreshNotebook}
+            defaultSection={notebookSection}
           />
         ) : (
           <div style={{ padding: '2rem', color: '#94a3b8' }}>

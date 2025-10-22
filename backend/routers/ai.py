@@ -13,20 +13,15 @@ router = APIRouter(
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     print("⚠️ Brak GEMINI_API_KEY. Dodaj go do pliku .env")
-    client = None
     model = None
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        client = True  
         print("✅ Gemini client initialized successfully")
     except Exception as e:
         print(f"Błąd inicjalizacji klienta Gemini: {e}")
-        client = None
         model = None
-
-uploaded_files: list[dict] = []
 
 class ChatMessage(BaseModel):
     message: str
@@ -74,12 +69,13 @@ def get_gemini_response(messages: list, files: list = None) -> str:
         return f"Błąd Gemini API: {str(e)}"
 
 def get_fallback_response(prompt: str) -> str:
-    """Fallback response gdy Gemini nie jest dostępny"""
     return "Witaj! Jestem asystentem AI. Aby korzystać z pełnych funkcji, skonfiguruj klucz GEMINI_API_KEY w pliku .env"
 
-@router.post("/uploadfile", response_class=JSONResponse)
+current_session_files = []
+
+@router.post("/upload", response_class=JSONResponse)
 async def upload_file(file: UploadFile = File(...)):
-    """Endpoint do przesyłania plików bezpośrednio do Gemini"""
+    """Endpoint do przesyłania plików - tylko dla aktualnej sesji"""
     try:
         content = await file.read()
         
@@ -103,7 +99,8 @@ async def upload_file(file: UploadFile = File(...)):
         
         file_content_base64 = base64.b64encode(content).decode('utf-8')
         
-        uploaded_files.append({
+        # Dodaj plik do aktualnej sesji
+        current_session_files.append({
             "filename": file.filename,
             "mime_type": mime_type,
             "content": file_content_base64,
@@ -112,7 +109,7 @@ async def upload_file(file: UploadFile = File(...)):
 
         return {
             "status": "success",
-            "message": f"Plik {file.filename} został pomyślnie wczytany i będzie używany w konwersacji z Gemini.",
+            "message": f"Plik {file.filename} został pomyślnie wczytany.",
             "file_type": mime_type,
             "file_size": len(content)
         }
@@ -125,19 +122,22 @@ async def upload_file(file: UploadFile = File(...)):
 
 @router.post("/clear_files", response_class=JSONResponse)
 async def clear_files():
-    """Endpoint do czyszczenia przechowywanych plików"""
-    uploaded_files.clear()
-    return {"status": "success", "message": "Pliki wyczyszczone."}
+    """Endpoint do czyszczenia plików"""
+    current_session_files.clear()
+    return {
+        "status": "success", 
+        "message": "Pliki wyczyszczone."
+    }
 
 @router.post("/chat", response_class=JSONResponse)
 async def chat_endpoint(chat_data: ChatMessage):
-    """Główny endpoint czatu"""
+    """Główny endpoint czatu - używa tylko aktualnej sesji"""
     try:
         messages = chat_data.conversation.copy()
         messages.append({"role": "user", "content": chat_data.message})
 
-        if client:
-            response_text = get_gemini_response(messages, uploaded_files)
+        if model:
+            response_text = get_gemini_response(messages, current_session_files)
         else:
             response_text = get_fallback_response(chat_data.message)
 
@@ -150,21 +150,30 @@ async def chat_endpoint(chat_data: ChatMessage):
             "status": "success",
             "response": response_text,
             "conversation": updated_conversation,
-            "files_used": len(uploaded_files) > 0
+            "files_used": len(current_session_files) > 0
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Błąd podczas przetwarzania żądania: {str(e)}")
 
+@router.post("/reset_session", response_class=JSONResponse)
+async def reset_session():
+    """Resetuje całą sesję - tworzy nową pustą"""
+    current_session_files.clear()
+    return {
+        "status": "success", 
+        "message": "Sesja zresetowana. Wszystkie pliki zostały usunięte."
+    }
+
 @router.get("/api_status")
 async def api_status():
-    """Endpoint sprawdzający status API i konfiguracji"""
+    """Endpoint sprawdzający status API"""
     return {
         "status": "active",
-        "gemini_configured": bool(GEMINI_API_KEY and client),
-        "has_files": bool(uploaded_files),
-        "files_count": len(uploaded_files),
-        "model": "gemini-1.5-flash"
+        "gemini_configured": bool(GEMINI_API_KEY and model),
+        "has_files": bool(current_session_files),
+        "files_count": len(current_session_files),
+        "model": "gemini-2.0-flash-exp"
     }
 
 @router.get("/files")
@@ -177,6 +186,7 @@ async def get_files():
                 "type": file["mime_type"],
                 "size": file["size"]
             }
-            for file in uploaded_files
+            for file in current_session_files
         ]
     }
+
