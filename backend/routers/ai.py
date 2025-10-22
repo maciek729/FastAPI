@@ -71,7 +71,6 @@ def get_gemini_response(messages: list, files: list = None) -> str:
 def get_fallback_response(prompt: str) -> str:
     return "Witaj! Jestem asystentem AI. Aby korzystać z pełnych funkcji, skonfiguruj klucz GEMINI_API_KEY w pliku .env"
 
-# Pojedyncza sesja na żądanie - resetowana przy każdym nowym żądaniu
 current_session_files = []
 
 @router.post("/upload", response_class=JSONResponse)
@@ -190,3 +189,4 @@ async def get_files():
             for file in current_session_files
         ]
     }
+

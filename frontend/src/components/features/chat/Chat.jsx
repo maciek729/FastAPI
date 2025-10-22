@@ -10,15 +10,13 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Reset sesji przy każdym montowaniu komponentu
   useEffect(() => {
     resetServerSession();
     
-    // Czyszczenie lokalnego stanu
     setMessages([]);
     setFile(null);
     setInputValue('');
-  }, []); // Pusta tablica zależności = uruchamia się tylko przy montowaniu
+  }, []); 
 
   const resetServerSession = async () => {
     try {
@@ -266,3 +264,5 @@ export default function Chat() {
     </div>
   );
 }
+
+
