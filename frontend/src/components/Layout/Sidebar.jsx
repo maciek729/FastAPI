@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Lock, Users, Plus, ChevronRight, Sparkles, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
 import styles from "../../css/layout/Sidebar.module.css";
+import UserFooter from "../features/sidebar_user_menu/UserFooter";
+import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard }) => {
     const [spaces] = useState([
@@ -174,28 +176,17 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 {/* User Footer */}
                 <div className={styles.sidebarFooter}>
                     {isSidebarOpen ? (
-                        <>
-                            <div className={styles.userProfile}>
-                                <div className={styles.userAvatar}>
-                                    {userData?.name?.charAt(0) || userData?.username?.charAt(0) || 'U'}
-                                </div>
-                                <div className={styles.userInfo}>
-                                    <div className={styles.userName}>{userData?.username || 'User'}</div>
-                                </div>
-                            </div>
-                            <button className={styles.logoutBtn} onClick={handleLogout} title="Logout">
-                                <LogOut size={16} />
-                            </button>
-                        </>
+                        <UserFooter
+                            userData={userData}
+                            handleLogout={handleLogout}
+                            onSettingsClick={() => console.log("Otwórz ustawienia")}
+                        />
                     ) : (
-                        <div className={styles.collapsedUserSection}>
-                            <div className={styles.userAvatarCollapsed} title={userData?.username || 'User'}>
-                                {userData?.name?.charAt(0) || userData?.username?.charAt(0) || 'U'}
-                            </div>
-                            <button className={styles.logoutBtnCollapsed} onClick={handleLogout} title="Logout">
-                                <LogOut size={18} />
-                            </button>
-                        </div>
+                        <UserFooterCollapsed
+                            userData={userData}
+                            handleLogout={handleLogout}
+                            onSettingsClick={() => console.log("Otwórz ustawienia")}
+                        />
                     )}
                 </div>
             </div>
