@@ -3,7 +3,7 @@ import { LogOut } from "lucide-react";
 import UserMenu from "./UserMenu";
 import styles from "../../../css/layout/Sidebar.module.css";
 
-const UserFooter = ({ userData, handleLogout, onSettingsClick }) => {
+const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -19,6 +19,11 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick }) => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    const handleSettingsClick = () => {
+        if (onGoToSection) onGoToSection('settings');
+        setIsMenuOpen(false);
+    };
+
     return (
         <>
             <div className={styles.userProfileWrapper} ref={menuRef}>
@@ -33,7 +38,8 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick }) => {
 
                 {isMenuOpen && (
                     <UserMenu
-                        onSettingsClick={onSettingsClick}
+                        onGoToSection={onGoToSection}
+                        onSettingsClick={handleSettingsClick}
                         onClose={() => setIsMenuOpen(false)}
                     />
                 )}

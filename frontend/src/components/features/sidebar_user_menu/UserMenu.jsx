@@ -1,8 +1,16 @@
 import React from "react";
-import { Settings, User, Palette, HelpCircle } from "lucide-react";
+import { Settings, User, Palette, HelpCircle, Bell} from "lucide-react";
 import styles from "../../../css/layout/Sidebar.module.css";
 
-const UserMenu = ({ isCollapsed = false, onSettingsClick, onClose }) => {
+const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
+
+    const handleMenuClick = (id) => {
+        if (onGoToSection) {
+            onGoToSection(id);
+        }
+        onClose();
+    }
+
     const menuItems = [
         {
             id: 'profile',
@@ -17,28 +25,21 @@ const UserMenu = ({ isCollapsed = false, onSettingsClick, onClose }) => {
             id: 'themes',
             label: 'Motywy',
             icon: Palette,
-            onClick: () => {
-                console.log("Otwórz motywy");
-                onClose();
-            }
         },
         {
             id: 'settings',
             label: 'Ustawienia',
             icon: Settings,
-            onClick: () => {
-                onSettingsClick();
-                onClose();
-            }
+        },
+        {
+            id: 'notifications',
+            label: 'Powiadomienia',
+            icon: Bell,
         },
         {
             id: 'help',
             label: 'Pomoc',
             icon: HelpCircle,
-            onClick: () => {
-                console.log("Otwórz pomoc");
-                onClose();
-            }
         }
     ];
 
@@ -50,7 +51,7 @@ const UserMenu = ({ isCollapsed = false, onSettingsClick, onClose }) => {
                     <button
                         key={item.id}
                         className={styles.menuItem}
-                        onClick={item.onClick}
+                        onClick={() => handleMenuClick(item.id)}
                     >
                         <Icon size={16} />
                         <span>{item.label}</span>

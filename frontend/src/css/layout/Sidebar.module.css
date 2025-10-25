@@ -524,6 +524,7 @@
   min-height: 68px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative; /* DODAJ TO */
+  cursor: pointer;
 }
 
 .userMenu {
@@ -555,6 +556,7 @@
 }
 
 .menuItem {
+  color: #8b5cf6;
   display: flex;
   align-items: center;
   gap: 8px;

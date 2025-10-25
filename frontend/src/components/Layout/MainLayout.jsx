@@ -5,6 +5,7 @@ import Dashboard from "../features/dashboard/Dashboard";
 import Chat from "../features/chat/Chat";
 import NotebookView from "../features/notebook/NotebookView";
 import styles from "../../css/layout/MainLayout.module.css";
+import Settings from "../features/settings/Settings";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -15,6 +16,15 @@ export default function MainLayout() {
   const [notebookDetails, setNotebookDetails] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [notebookSection, setNotebookSection] = useState('overview');
+
+  // 1. NOWA FUNKCJA DO ZMIANY SEKCJI
+  const handleGoToSection = (sectionId) => {
+    setActiveSection(sectionId);
+    // Upewnij się, że opuszczasz widok notatnika, jeśli przechodzisz do innej sekcji
+    if (sectionId !== 'notebook') {
+        setSelectedNotebook(null);
+    }
+  };
 
   const getCookie = (name) => {
     let cookieValue = null;
@@ -103,6 +113,9 @@ export default function MainLayout() {
     switch (activeSection) {
       case 'chat':
         return <Chat key={getChatKey()} />;
+
+      case 'settings':
+        return <Settings userData={userData}/>
       
       case 'notebook':
         return selectedNotebook ? (
@@ -138,6 +151,8 @@ export default function MainLayout() {
         handleLogout={handleLogout}
         onSelectNotebook={handleSelectNotebook}
         onGoToDashboard={handleBackToDashboard}
+        // 2. PRZEKAŻ FUNKCJĘ DALEJ, ABY SIDEBAR MÓGŁ JĄ UŻYĆ
+        onGoToSection={handleGoToSection}
       />
       
       <div 

@@ -5,7 +5,7 @@ import styles from "../../css/layout/Sidebar.module.css";
 import UserFooter from "../features/sidebar_user_menu/UserFooter";
 import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard }) => {
+const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
     const [spaces] = useState([
         { id: 'personal', name: 'Osobista', icon: Lock },
         { id: 'shared', name: 'Wspólna', icon: Users }
@@ -179,12 +179,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                         <UserFooter
                             userData={userData}
                             handleLogout={handleLogout}
+                            onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log("Otwórz ustawienia")}
                         />
                     ) : (
                         <UserFooterCollapsed
                             userData={userData}
                             handleLogout={handleLogout}
+                            onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log("Otwórz ustawienia")}
                         />
                     )}
