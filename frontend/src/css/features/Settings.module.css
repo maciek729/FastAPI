@@ -1,0 +1,299 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.formWrapper {
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+.helpContainer {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  max-width: 800px; /*Tego nie jestem pewien, czy tak chcecie*/
+  margin: 2rem auto;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 0.875rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  font-family: 'Inter', sans-serif;
+  animation: fadeInUp 0.5s ease-out forwards;
+  height: auto;
+  box-sizing: border-box;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.helpTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  margin-top:0;
+  margin-bottom:0;
+  margin-right:10px;
+  margin-left:15px;
+}
+
+.inputTitle {
+    margin-bottom: 0.8rem;
+}
+
+.inputTitle,
+.textArea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.inputField:focus,
+.textArea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  outline: none;
+  background: white;
+}
+
+.textArea {
+  resize: vertical;
+  min-height: 220px; /*ewentualnie również do zmiany*/
+}
+
+.sendButton {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+.sendButton:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+}
+
+.sendButton:active {
+  transform: translateY(0);
+}
+
+.statusMessage {
+  margin-top: 1rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9375rem;
+}
+
+.titleContainer h2 {
+  font-weight:800;
+  margin-bottom: 15px;
+}
+
+.brandIcon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    margin-top: 0;
+}
+
+.subtitle {
+    font-size: 0.9375rem;
+    color: #64748b;
+    font-weight: 400;
+    margin-top: 0;
+}
+
+/* Domyślny .titleContainer dla nagłówka sekcji (h2 + p) */
+.titleContainer {
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+/* Kontener wewnątrz formularza (ikona + h2) */
+.helpContainer .titleContainer {
+    flex-direction: row; /* Wyrównuje w poziomie */
+    align-items: center; /* KLUCZ: Wyrównuje w pionie */
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.formContainer {
+    display: flex;
+    flex-direction: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+/*
+==============================================================
+Plik: Help.jsx i HelpQuestion.jsx
+==============================================================
+*/
+
+.wrapper {
+  width: 80%;
+  max-width: 800px;;
+  justify-content: center;
+  margin: 0.75rem auto;
+    margin-bottom: 0.75rem; 
+    border-radius: 0.625rem;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.collapsibleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    background-color: #f7f2fd;
+    color: #54189d;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.collapsibleHeader:hover {
+    opacity: 0.9;
+}
+
+.toggleIcon {
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+}
+
+.content {
+    max-height: 0;
+    overflow: hidden;
+    background: white;
+    color: #0f172a;
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out; 
+    padding: 0 1rem;
+    font-size: 13px;;
+}
+
+.open {
+    max-height: 500px; 
+    padding: 1rem;
+}
+
+.content p {
+    margin: 0;
+}
+
+/*
+==============================================================
+Plik: SettingSelectElement.jsx 
+==============================================================
+*/
+
+.selectWrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 1rem;
+    padding: 1rem 1rem 1rem 1rem;
+    justify-content: center;
+}
+
+.selectLabel {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.4rem;
+}
+
+.selectElement {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0.625rem;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: #0f172a;
+    background: white;
+    box-sizing: border-box;
+    appearance: none; 
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpolygon points='0,0 20,0 10,10' fill='%236b7280'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+    cursor: pointer;
+}
+
+.settingsGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto 2rem auto;
+}
+
+.settingsGroup .selectWrapper {
+    flex-basis: calc(50% - 1rem); 
+    min-width: 250px; 
+}
+
+.settingsMainContainer {
+    width: 100%;
+    margin: 2rem auto;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  max-width: 800px;
+  margin: 1rem auto 0rem auto;
+  justify-content: center;
+  text-align: center;
+}
