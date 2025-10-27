@@ -1,6 +1,7 @@
 import React, {useState}  from "react";
 import styles from "../../../css/features/Settings.module.css"
-import { ChevronRight, Sparkles} from "lucide-react";
+import { Sparkles} from "lucide-react";
+import HelpQuestion from "./HelpQuestion.jsx";
 
 export default function Help({userData}) {
     const [title, setTitle] = useState("");
@@ -35,7 +36,6 @@ export default function Help({userData}) {
                 setTitle("");
                 setMessage("");
             } else {
-                // Obsługa błędów z FastAPI
                 setStatus(data.detail || "Wystąpił błąd podczas wysyłania wiadomości.");
             }
         } catch (error) {
@@ -48,6 +48,27 @@ export default function Help({userData}) {
 
     return (
         <div className={styles.formWrapper}>
+            {/* Nagłówek */}
+            <div className={styles.titleContainer}>
+                <h2 className={styles.title}>Pomoc i kontakt</h2>
+                <p className={styles.subtitle}>Masz pytania? Sprawdź najczęstsze pytania lub skontaktuj się z nami!</p>
+            </div>
+
+            {/* Pytania i odpowiedzi */}
+            <HelpQuestion
+                question="Jeżeli byście chcieli to mogę dodać nową sekcję kontakt"
+                answer="i tam wówczas umieszczę formularz. Bo nie wiedziałem, gdzie go umieścić, więc na razie jest tutaj"
+            />
+            <HelpQuestion
+                question="Jak mogę zresetować moje hasło?"
+                answer="Aby zresetować swoje hasło, przejdź do strony logowania i kliknij na link 'Zapomniałeś hasła?'. Postępuj zgodnie z instrukcjami, aby ustawić nowe hasło."
+            />
+            <HelpQuestion
+                question="Jak mogę skontaktować się z zespołem wsparcia?"
+                answer="Aby skontaktować się z naszym zespołem wsparcia, wypełnij poniższy formularz kontaktowy, a my odpowiemy na Twoją wiadomość tak szybko, jak to możliwe."
+            />
+
+            {/* Formularz */}
             <form className={styles.helpContainer} onSubmit={handleSubmit}>
                 <div className={styles.titleContainer}>
                     <Sparkles size={20} className={styles.brandIcon}/>
@@ -75,10 +96,8 @@ export default function Help({userData}) {
 
                 <button type="submit" className={styles.sendButton} disabled={isLoading}>
                     {isLoading ? "Wysyłanie..." : "Wyślij"}
-                    <ChevronRight size={20} />
                 </button>
 
-                {/* Dodaj prosty loader i wyświetlanie statusu */}
                 {status && <p className={styles.statusMessage}>{status}</p>}
             </form>
         </div>  

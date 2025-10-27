@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+.formWrapper {
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
 .helpContainer {
   display: flex;
   flex-direction: column;
@@ -118,4 +123,89 @@
   color: white;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    margin-top: 0;
+}
+
+.subtitle {
+    font-size: 0.9375rem;
+    color: #64748b;
+    font-weight: 400;
+    margin-top: 0;
+}
+
+.titleContainer {
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.helpContainer .titleContainer {
+    flex-direction: row; /* Zmieniamy na wiersz, gdy jest to nagłówek formularza */
+    gap: 1.2rem; /* Odstęp między ikoną a nagłówkiem */
+    margin-bottom: 1.5rem; /* Mniejszy margines dla formularza */
+}
+
+/* Plik: src/css/features/Settings.module.css */
+
+.wrapper {
+  width: 80%;
+  max-width: 800px;;
+  justify-content: center;
+  margin: 0.75rem auto;
+    margin-bottom: 0.75rem; 
+    border-radius: 0.625rem;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.collapsibleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.collapsibleHeader:hover {
+    opacity: 0.9;
+}
+
+.toggleIcon {
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+}
+
+.content {
+    max-height: 0;
+    overflow: hidden;
+    background: white;
+    color: #0f172a;
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out; 
+    padding: 0 1rem;
+}
+
+.open {
+    max-height: 500px; 
+    padding: 1rem;
+}
+
+.content p {
+    margin: 0;
 }
