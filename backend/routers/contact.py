@@ -58,7 +58,6 @@ async def send_contact_email(user_email: EmailStr, title: str, message_content: 
         recipients=[admin_email],
         body=body,
         subtype="plain",
-        sender = user_email,
         reply_to=[user_email]
     )
     fm = FastMail(conf)
