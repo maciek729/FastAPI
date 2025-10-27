@@ -51,13 +51,15 @@ async def send_contact_email(user_email: EmailStr, title: str, message_content: 
     if not admin_email:
         raise ValueError("MAIL_FROM not configured")
 
-    body = f"Od: {user_email}\nTemat: {title}\n\nWiadomość:\n{message_content}"
+    body = f"Temat: {title}\n\nWiadomość:\n{message_content}"
 
     message = MessageSchema(
         subject=f"NOWA WIADOMOŚĆ KONTAKTOWA: {title}",
         recipients=[admin_email],
         body=body,
-        subtype="plain"
+        subtype="plain",
+        sender = user_email,
+        reply_to=[user_email]
     )
     fm = FastMail(conf)
     await fm.send_message(message)
