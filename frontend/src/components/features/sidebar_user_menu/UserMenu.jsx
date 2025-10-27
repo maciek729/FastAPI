@@ -18,11 +18,6 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
             icon: User
         },
         {
-            id: 'themes',
-            label: 'Motywy',
-            icon: Palette,
-        },
-        {
             id: 'settings',
             label: 'Ustawienia',
             icon: Settings,

@@ -59,6 +59,7 @@ export default function Help({userData}) {
                 question="Jeżeli byście chcieli to mogę dodać nową sekcję kontakt"
                 answer="i tam wówczas umieszczę formularz. Bo nie wiedziałem, gdzie go umieścić, więc na razie jest tutaj"
             />
+
             <HelpQuestion
                 question="Jak mogę zresetować moje hasło?"
                 answer="Aby zresetować swoje hasło, przejdź do strony logowania i kliknij na link 'Zapomniałeś hasła?'. Postępuj zgodnie z instrukcjami, aby ustawić nowe hasło."
@@ -70,7 +71,7 @@ export default function Help({userData}) {
 
             {/* Formularz */}
             <form className={styles.helpContainer} onSubmit={handleSubmit}>
-                <div className={styles.titleContainer}>
+                <div className={styles.formContainer}>
                     <Sparkles size={20} className={styles.brandIcon}/>
                     <h2 className={styles.helpTitle}>Skontaktuj się z nami</h2>
                 </div>
