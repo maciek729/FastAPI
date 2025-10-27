@@ -13,13 +13,9 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
 
     const menuItems = [
         {
-            id: 'profile',
+            id: 'user_settings',
             label: 'Profil',
-            icon: User,
-            onClick: () => {
-                console.log("Otwórz profil");
-                onClose();
-            }
+            icon: User
         },
         {
             id: 'themes',

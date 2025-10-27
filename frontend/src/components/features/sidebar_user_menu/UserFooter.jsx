@@ -19,10 +19,10 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) 
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleSettingsClick = () => {
-        if (onGoToSection) onGoToSection('settings');
-        setIsMenuOpen(false);
-    };
+    // const handleSettingsClick = () => {
+    //     if (onGoToSection) onGoToSection('settings');
+    //     setIsMenuOpen(false);
+    // };
 
     return (
         <>
@@ -39,7 +39,7 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) 
                 {isMenuOpen && (
                     <UserMenu
                         onGoToSection={onGoToSection}
-                        onSettingsClick={handleSettingsClick}
+                        // onSettingsClick={handleSettingsClick}
                         onClose={() => setIsMenuOpen(false)}
                     />
                 )}

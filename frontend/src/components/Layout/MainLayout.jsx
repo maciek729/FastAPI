@@ -6,6 +6,8 @@ import Chat from "../features/chat/Chat";
 import NotebookView from "../features/notebook/NotebookView";
 import styles from "../../css/layout/MainLayout.module.css";
 import Settings from "../features/settings/Settings";
+import UserSettings from "../features/settings/UserSettings";
+import Help from '../features/settings/Help';
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -116,6 +118,12 @@ export default function MainLayout() {
 
       case 'settings':
         return <Settings userData={userData}/>
+
+      case 'user_settings':
+        return <UserSettings userData={userData} />
+
+      case 'help':
+        return <Help userData={userData}/>;
       
       case 'notebook':
         return selectedNotebook ? (
