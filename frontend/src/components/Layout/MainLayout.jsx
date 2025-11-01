@@ -128,11 +128,12 @@ export default function MainLayout() {
       case 'notebook':
         return selectedNotebook ? (
           <NotebookView
-            key={selectedNotebook?.id} 
+            key={selectedNotebook?.id}
             details={notebookDetails}
             userData={userData}
             refreshNotebook={refreshNotebook}
             defaultSection={notebookSection}
+            isSidebarOpen={isSidebarOpen}
           />
         ) : (
           <div style={{ padding: '2rem', color: '#94a3b8' }}>

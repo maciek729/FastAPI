@@ -91,8 +91,13 @@ class Tests(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
     title = Column(String)
+    topic = Column(String, nullable=True)  # Description/topic of the test
     note_id = Column(Integer, ForeignKey("notes.id"))
+    source_type = Column(String, default="manual")  # manual, file, note
+    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
+    is_pinned = Column(Boolean, default=False)  # whether test is pinned to top
     created_at = Column(DateTime)
 
 class TestQuestions(Base):
@@ -101,6 +106,7 @@ class TestQuestions(Base):
     id = Column(Integer, primary_key=True, index=True)
     test_id = Column(Integer, ForeignKey("tests.id"))
     question = Column(String)
+    question_type = Column(String, default="multiple_choice")  # multiple_choice, multiple_answers, true_false
     correct_answer = Column(String)
     other_options = Column(String)
 
@@ -108,7 +114,7 @@ class UserAnswers(Base):
     __tablename__ = "user_answers"
 
     id = Column(Integer, primary_key=True, index=True)
-    test_question_id = (Integer, ForeignKey("test_questions.id"))
+    test_question_id = Column(Integer, ForeignKey("test_questions.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     selected_answer = Column(String)
     is_correct = Column(Boolean)

@@ -1,4 +1,4 @@
-export default function TestsView() {
+export default function FlashcardsView() {
     return (
         <div className="tab-content">
             <h2>🎯 Fiszki</h2>
