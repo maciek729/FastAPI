@@ -25,15 +25,15 @@ load_dotenv()
 # --- Gemini AI Configuration ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
-    print("⚠️ Brak GEMINI_API_KEY. Dodaj go do pliku .env")
+    print("[WARNING] Brak GEMINI_API_KEY. Dodaj go do pliku .env")
     model = None
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        print("✅ Gemini client initialized for tests router")
+        print("[SUCCESS] Gemini client initialized for tests router")
     except Exception as e:
-        print(f"Błąd inicjalizacji klienta Gemini w tests router: {e}")
+        print(f"[ERROR] Błąd inicjalizacji klienta Gemini w tests router: {e}")
         model = None
 
 # --- DB dependency ---
@@ -56,6 +56,7 @@ class TestGenerateRequest(BaseModel):
     num_questions: int = 5
     question_type: str = "multiple_choice"  # multiple_choice, multiple_answers, true_false, mixed
     note_id: Optional[int] = None
+    folder_id: Optional[int] = None
 
 class QuestionOut(BaseModel):
     id: int
@@ -72,6 +73,7 @@ class TestOut(BaseModel):
     id: int
     user_id: int
     notebook_id: int
+    folder_id: Optional[int] = None
     title: str
     topic: Optional[str] = None
     note_id: Optional[int]
@@ -350,6 +352,7 @@ async def generate_test_from_file(
     num_questions: int = Form(...),
     question_type: str = Form(...),
     file: UploadFile = File(...),
+    folder_id: Optional[int] = Form(None),
     db: Session = Depends(get_db)
 ):
     """
@@ -395,6 +398,7 @@ async def generate_test_from_file(
         new_test = Tests(
             user_id=user_id,
             notebook_id=notebook_id,
+            folder_id=folder_id,
             title=title,
             topic=topic,
             source_type="file",
@@ -458,6 +462,7 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
         new_test = Tests(
             user_id=request.user_id,
             notebook_id=request.notebook_id,
+            folder_id=request.folder_id,
             title=request.title,
             topic=request.topic,
             note_id=request.note_id,
@@ -762,3 +767,62 @@ async def update_test_pin(test_id: int, request: UpdatePinRequest, db: db_depend
     db.refresh(test)
 
     return {"message": "Pin status updated successfully", "is_pinned": test.is_pinned}
+
+class CopyTestRequest(BaseModel):
+    target_notebook_id: int
+    user_id: int
+
+@router.post("/{test_id}/copy", response_model=TestWithQuestions, status_code=status.HTTP_201_CREATED)
+async def copy_test_to_notebook(test_id: int, request: CopyTestRequest, db: db_dependency):
+    """
+    Copy a test and all its questions to another notebook
+    """
+    # Get the original test
+    original_test = db.query(Tests).filter(Tests.id == test_id).first()
+    if not original_test:
+        raise HTTPException(status_code=404, detail="Test not found")
+
+    # Get all questions from the original test
+    original_questions = db.query(TestQuestions).filter(TestQuestions.test_id == test_id).all()
+
+    # Create a new test in the target notebook
+    new_test = Tests(
+        user_id=request.user_id,
+        notebook_id=request.target_notebook_id,
+        title=original_test.title,
+        topic=original_test.topic,
+        note_id=None,  # Don't copy note_id as it might not exist in target notebook
+        source_type=original_test.source_type,
+        grid_position=None,  # Will be set by frontend drag-and-drop
+        is_pinned=False,  # New copy starts unpinned
+        created_at=datetime.now()
+    )
+    db.add(new_test)
+    db.commit()
+    db.refresh(new_test)
+
+    # Copy all questions to the new test
+    copied_questions = []
+    for original_question in original_questions:
+        new_question = TestQuestions(
+            test_id=new_test.id,
+            question=original_question.question,
+            question_type=original_question.question_type,
+            correct_answer=original_question.correct_answer,
+            other_options=original_question.other_options
+        )
+        db.add(new_question)
+        db.commit()
+        db.refresh(new_question)
+        copied_questions.append(new_question)
+
+    return TestWithQuestions(
+        id=new_test.id,
+        user_id=new_test.user_id,
+        notebook_id=new_test.notebook_id,
+        title=new_test.title,
+        topic=new_test.topic,
+        note_id=new_test.note_id,
+        created_at=new_test.created_at,
+        questions=[QuestionOut.model_validate(q) for q in copied_questions]
+    )

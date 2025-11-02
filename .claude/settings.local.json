@@ -7,7 +7,11 @@
       "Bash(python add_question_type_column.py:*)",
       "Bash(npm install:*)",
       "Bash(python:*)",
-      "Bash(timeout 3 bash:*)"
+      "Bash(timeout 3 bash:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout 5 bash:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

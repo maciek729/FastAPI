@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, status
 from models import Base
 from database import engine
-from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests
+from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, test_folders
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +14,7 @@ Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # React dev server
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],  # React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,4 +32,5 @@ app.include_router(ai.router)
 app.include_router(notebooks.router)
 app.include_router(notes.router)
 app.include_router(tests.router)
+app.include_router(test_folders.router)
 app.include_router(contact.router)
