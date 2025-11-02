@@ -490,6 +490,15 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const getFilteredAndSortedTests = () => {
         let filtered = tests;
 
+        // Filter by current folder context
+        if (currentFolder) {
+            // Inside a folder - only show tests in this folder
+            filtered = filtered.filter(test => test.folder_id === currentFolder.id);
+        } else {
+            // Root dashboard - only show tests not in any folder
+            filtered = filtered.filter(test => !test.folder_id);
+        }
+
         // Filter by search query
         if (searchQuery) {
             filtered = filtered.filter(test =>
@@ -1020,8 +1029,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         })}
 
                         {/* Tests in this folder */}
-                        {tests.filter(t => t.folder_id === currentFolder.id).length > 0 ? (
-                            tests.filter(t => t.folder_id === currentFolder.id).map((test, index) => (
+                        {getFilteredAndSortedTests().length > 0 ? (
+                            getFilteredAndSortedTests().map((test, index) => (
                                 <div
                                     key={test.id}
                                     className={`${styles.testCard} ${dragOverIndex === index ? styles.dragOver : ''} ${dragNotAllowedIndex === index ? styles.dragNotAllowed : ''} ${test.is_pinned ? styles.pinnedCard : ''}`}
@@ -1149,8 +1158,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         })}
 
                         {/* Tests not in folders */}
-                        {tests && tests.filter(t => !t.folder_id).length > 0 ? (
-                            getFilteredAndSortedTests().filter(t => !t.folder_id).map((test, index) => (
+                        {getFilteredAndSortedTests().length > 0 ? (
+                            getFilteredAndSortedTests().map((test, index) => (
                                 <div
                                     key={test.id}
                                     className={`${styles.testCard} ${dragOverIndex === index ? styles.dragOver : ''} ${dragNotAllowedIndex === index ? styles.dragNotAllowed : ''} ${test.is_pinned ? styles.pinnedCard : ''}`}
