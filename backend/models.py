@@ -86,12 +86,24 @@ class Notes(Base):
     # 🔼 RELACJA DO NOTEBOOKA
     notebook = relationship("Notebooks", back_populates="notes")
 
+class TestFolders(Base):
+    __tablename__ = "test_folders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String)
+    parent_folder_id = Column(Integer, ForeignKey("test_folders.id"), nullable=True)  # for nested folders
+    grid_position = Column(Integer, nullable=True)
+    created_at = Column(DateTime)
+
 class Tests(Base):
     __tablename__ = "tests"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    folder_id = Column(Integer, ForeignKey("test_folders.id"), nullable=True)  # parent folder
     title = Column(String)
     topic = Column(String, nullable=True)  # Description/topic of the test
     note_id = Column(Integer, ForeignKey("notes.id"))

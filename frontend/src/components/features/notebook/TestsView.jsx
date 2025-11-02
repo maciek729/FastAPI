@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from "axios";
-import { Plus, X, Play, BarChart, Trash2, CheckCircle, Search, Filter, Pin } from 'lucide-react';
+import { Plus, X, Play, BarChart, Trash2, CheckCircle, Search, Filter, Pin, Folder, FolderOpen, ChevronRight, MoreVertical, ArrowLeft } from 'lucide-react';
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import styles from "../../../css/features/TestsView.module.css";
@@ -66,10 +66,15 @@ const MathText = ({ text }) => {
 
 export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [tests, setTests] = useState([]);
+    const [folders, setFolders] = useState([]);
+    const [expandedFolders, setExpandedFolders] = useState([]);
+    const [currentFolder, setCurrentFolder] = useState(null); // Currently opened folder
     const [notes, setNotes] = useState([]);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showTakeTestModal, setShowTakeTestModal] = useState(false);
     const [showResultsModal, setShowResultsModal] = useState(false);
+    const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+    const [newFolderName, setNewFolderName] = useState('');
     const [loading, setLoading] = useState(false);
     const [currentTest, setCurrentTest] = useState(null);
     const [currentQuestions, setCurrentQuestions] = useState([]);
@@ -88,13 +93,21 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [filterSource, setFilterSource] = useState('all'); // all, manual, file, note
     const [sortBy, setSortBy] = useState('date_desc'); // date_desc, date_asc, name_asc, name_desc
     const [draggedTest, setDraggedTest] = useState(null);
+    const [draggedFolder, setDraggedFolder] = useState(null);
+    const [draggedItem, setDraggedItem] = useState(null); // for folders and tests
     const [dragOverIndex, setDragOverIndex] = useState(null);
+    const [dragNotAllowedIndex, setDragNotAllowedIndex] = useState(null);
+    const [dragOverFolder, setDragOverFolder] = useState(null);
+    const [dragOverFolderIndex, setDragOverFolderIndex] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedTest, setSelectedTest] = useState(null);
+    const [folderMenuOpen, setFolderMenuOpen] = useState(null);
+    const [editingFolder, setEditingFolder] = useState(null);
 
     useEffect(() => {
         if (userData?.id && notebookId) {
             fetchTests();
+            fetchFolders();
             fetchNotes();
         }
     }, [userData?.id, notebookId]);
@@ -107,6 +120,17 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setTests(response.data);
         } catch (err) {
             console.error('Error fetching tests:', err);
+        }
+    };
+
+    const fetchFolders = async () => {
+        if (!notebookId) return;
+
+        try {
+            const response = await axios.get(`http://localhost:8000/test-folders/list?user_id=${userData.id}&notebook_id=${notebookId}`);
+            setFolders(response.data);
+        } catch (err) {
+            console.error('Error fetching folders:', err);
         }
     };
 
@@ -175,6 +199,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 formData.append('topic', newTest.topic || 'Generuj pytania na podstawie pliku');
                 formData.append('num_questions', newTest.num_questions);
                 formData.append('question_type', newTest.question_type);
+                if (currentFolder) {
+                    formData.append('folder_id', currentFolder.id);
+                }
 
                 await axios.post("http://localhost:8000/tests/generate-from-file", formData, {
                     headers: {
@@ -190,7 +217,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                     topic: newTest.topic || 'Generuj pytania na podstawie notatki',
                     num_questions: parseInt(newTest.num_questions),
                     question_type: newTest.question_type,
-                    note_id: newTest.source_type === 'note' ? newTest.note_id : null
+                    note_id: newTest.source_type === 'note' ? newTest.note_id : null,
+                    folder_id: currentFolder?.id || null
                 });
             }
 
@@ -381,6 +409,84 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         setSortBy('date_desc');
     };
 
+    // Folder handlers
+    const handleCreateFolder = async (e) => {
+        e.preventDefault();
+        if (!newFolderName.trim()) return;
+
+        try {
+            await axios.post('http://localhost:8000/test-folders/create', {
+                notebook_id: notebookId,
+                user_id: userData.id,
+                name: newFolderName,
+                parent_folder_id: currentFolder?.id || null
+            });
+            setNewFolderName('');
+            setShowCreateFolderModal(false);
+            fetchFolders();
+        } catch (err) {
+            console.error('Error creating folder:', err);
+            alert("Błąd tworzenia folderu");
+        }
+    };
+
+    const openFolder = (folder) => {
+        setCurrentFolder(folder);
+    };
+
+    const closeFolder = () => {
+        if (currentFolder?.parent_folder_id) {
+            // Navigate to parent folder
+            const parentFolder = folders.find(f => f.id === currentFolder.parent_folder_id);
+            setCurrentFolder(parentFolder);
+        } else {
+            // Navigate to root (main dashboard)
+            setCurrentFolder(null);
+        }
+    };
+
+    const handleDeleteFolder = async (folderId) => {
+        if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.')) return;
+
+        try {
+            await axios.delete(`http://localhost:8000/test-folders/${folderId}`);
+            fetchFolders();
+            fetchTests();
+        } catch (err) {
+            console.error('Error deleting folder:', err);
+            alert("Błąd usuwania folderu");
+        }
+    };
+
+    const handleRenameFolder = async (e) => {
+        e.preventDefault();
+        if (!editingFolder || !editingFolder.name.trim()) return;
+
+        try {
+            await axios.patch(`http://localhost:8000/test-folders/${editingFolder.id}/rename`, {
+                name: editingFolder.name
+            });
+            setEditingFolder(null);
+            fetchFolders();
+        } catch (err) {
+            console.error('Error renaming folder:', err);
+            alert("Błąd zmiany nazwy folderu");
+        }
+    };
+
+    const handleMoveTestToFolder = async (testId, folderId) => {
+        try {
+            await axios.post('http://localhost:8000/test-folders/move-test', {
+                test_id: testId,
+                folder_id: folderId
+            });
+            fetchTests();
+        } catch (err) {
+            console.error('Error moving test:', err);
+            alert("Błąd przenoszenia testu");
+        }
+    };
+
     const getFilteredAndSortedTests = () => {
         let filtered = tests;
 
@@ -440,28 +546,68 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         setDraggedTest({ test, index });
         e.dataTransfer.effectAllowed = 'move';
         e.currentTarget.style.opacity = '0.5';
+
+        // Add test data to dataTransfer for drag-to-copy to sidebar
+        e.dataTransfer.setData('application/json', JSON.stringify({
+            type: 'test',
+            testId: test.id,
+            userId: userData.id,
+            sourceNotebookId: notebookId
+        }));
     };
 
     const handleDragEnd = (e) => {
         e.currentTarget.style.opacity = '1';
         setDraggedTest(null);
         setDragOverIndex(null);
+        setDragNotAllowedIndex(null);
     };
 
     const handleDragOver = (e, index) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        setDragOverIndex(index);
+
+        const filteredTests = getFilteredAndSortedTests();
+        const targetTest = filteredTests[index];
+        const draggedTestData = draggedTest?.test;
+
+        // Allow drag over only if:
+        // 1. Both tests have same pinned status (pinned can only swap with pinned, unpinned with unpinned)
+        if (draggedTestData && targetTest) {
+            if (draggedTestData.is_pinned === targetTest.is_pinned) {
+                e.dataTransfer.dropEffect = 'move';
+                setDragOverIndex(index);
+                setDragNotAllowedIndex(null);
+            } else {
+                e.dataTransfer.dropEffect = 'none';
+                setDragOverIndex(null);
+                setDragNotAllowedIndex(index);
+            }
+        } else {
+            e.dataTransfer.dropEffect = 'move';
+            setDragOverIndex(index);
+            setDragNotAllowedIndex(null);
+        }
     };
 
     const handleDrop = async (e, dropIndex) => {
         e.preventDefault();
+        setDragNotAllowedIndex(null);
+
         if (!draggedTest || draggedTest.index === dropIndex) {
             setDragOverIndex(null);
             return;
         }
 
         const filteredTests = getFilteredAndSortedTests();
+        const draggedTestData = draggedTest.test;
+        const targetTest = filteredTests[dropIndex];
+
+        // Prevent dropping pinned test on unpinned test and vice versa
+        if (draggedTestData.is_pinned !== targetTest.is_pinned) {
+            setDragOverIndex(null);
+            return;
+        }
+
         const newTests = [...filteredTests];
         const [removed] = newTests.splice(draggedTest.index, 1);
         newTests.splice(dropIndex, 0, removed);
@@ -500,6 +646,113 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         }
 
         setDragOverIndex(null);
+    };
+
+    // Folder drag handlers
+    const handleFolderDragOver = (e, folderId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverFolder(folderId);
+    };
+
+    const handleFolderDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverFolder(null);
+    };
+
+    const handleFolderDrop = async (e, folderId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverFolder(null);
+
+        if (draggedTest) {
+            // Move test into folder
+            await handleMoveTestToFolder(draggedTest.test.id, folderId);
+            setDraggedTest(null);
+        }
+    };
+
+    // Folder card drag handlers (for reordering folders in grid)
+    const handleFolderCardDragStart = (e, folder, index) => {
+        setDraggedFolder({ folder, index });
+        e.dataTransfer.effectAllowed = 'move';
+        e.currentTarget.style.opacity = '0.5';
+
+        // Add folder data to dataTransfer for drag-to-copy to sidebar
+        e.dataTransfer.setData('application/json', JSON.stringify({
+            type: 'folder',
+            folderId: folder.id,
+            userId: userData.id,
+            sourceNotebookId: notebookId
+        }));
+    };
+
+    const handleFolderCardDragEnd = (e) => {
+        e.currentTarget.style.opacity = '1';
+        setDraggedFolder(null);
+        setDragOverFolderIndex(null);
+    };
+
+    const handleFolderCardDragOver = (e, index) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (draggedFolder) {
+            // Only allow folder-to-folder reordering
+            e.dataTransfer.dropEffect = 'move';
+            setDragOverFolderIndex(index);
+        }
+    };
+
+    const handleFolderCardDrop = async (e, dropIndex) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!draggedFolder || draggedFolder.index === dropIndex) {
+            setDragOverFolderIndex(null);
+            return;
+        }
+
+        const foldersList = folders.filter(f => !f.parent_folder_id);
+        const newFolders = [...foldersList];
+        const [removed] = newFolders.splice(draggedFolder.index, 1);
+        newFolders.splice(dropIndex, 0, removed);
+
+        // Update grid positions for folders
+        const updatedFolders = newFolders.map((folder, idx) => ({
+            ...folder,
+            grid_position: idx
+        }));
+
+        // Update local state immediately
+        setFolders(prevFolders => {
+            const allFolders = [...prevFolders];
+            updatedFolders.forEach(updated => {
+                const idx = allFolders.findIndex(f => f.id === updated.id);
+                if (idx !== -1) {
+                    allFolders[idx] = updated;
+                }
+            });
+            return allFolders;
+        });
+
+        // Update backend
+        try {
+            await Promise.all(
+                updatedFolders.map(folder =>
+                    axios.patch(`http://localhost:8000/test-folders/${folder.id}/position`, {
+                        grid_position: folder.grid_position
+                    })
+                )
+            );
+        } catch (err) {
+            console.error('Error updating folder positions:', err);
+            // Revert on error
+            fetchFolders();
+        }
+
+        setDragOverFolderIndex(null);
     };
 
     const renderQuestion = (question, index) => {
@@ -606,7 +859,37 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         <div className={styles.testsView}>
             <div className={styles.headerSection}>
                 <div className={styles.leftSection}>
-                    <h1 className={styles.notebookTitle}>Sprawdziany</h1>
+                    {currentFolder ? (
+                        <>
+                            <button
+                                onClick={closeFolder}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.5rem',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#f59e0b',
+                                    fontWeight: 600,
+                                    fontSize: '1rem',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-3px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+                            >
+                                <ArrowLeft size={20} />
+                                Powrót
+                            </button>
+                            <h1 className={styles.notebookTitle} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                <Folder size={24} style={{color: '#f59e0b'}} />
+                                {currentFolder.name}
+                            </h1>
+                        </>
+                    ) : (
+                        <h1 className={styles.notebookTitle}>Sprawdziany</h1>
+                    )}
                     <div className={styles.searchBox}>
                         <Search size={16} />
                         <input
@@ -648,78 +931,376 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         </button>
                     )}
                 </div>
-                <button
-                    className={styles.addNoteBtn}
-                    onClick={() => setShowGenerateModal(true)}
-                >
-                    <Plus size={18} />
-                    Wygeneruj nowy test
-                </button>
+                <div style={{display: 'flex', gap: '0.75rem'}}>
+                    <button
+                        className={styles.addFolderBtn}
+                        onClick={() => setShowCreateFolderModal(true)}
+                    >
+                        <Folder size={18} />
+                        Nowy folder
+                    </button>
+                    <button
+                        className={styles.addNoteBtn}
+                        onClick={() => setShowGenerateModal(true)}
+                    >
+                        <Plus size={18} />
+                        Wygeneruj nowy test
+                    </button>
+                </div>
             </div>
 
             <div className={`${styles.cardsContainer} ${!isSidebarOpen ? styles.cardsContainerExpanded : ''}`}>
-                {tests && tests.length > 0 ? (
-                    getFilteredAndSortedTests().map((test, index) => (
-                        <div
-                            key={test.id}
-                            className={`${styles.testCard} ${dragOverIndex === index ? styles.dragOver : ''} ${test.is_pinned ? styles.pinnedCard : ''}`}
-                            draggable={!test.is_pinned}
-                            onDragStart={(e) => !test.is_pinned && handleDragStart(e, test, index)}
-                            onDragEnd={handleDragEnd}
-                            onDragOver={(e) => handleDragOver(e, index)}
-                            onDrop={(e) => handleDrop(e, index)}
-                        >
-                            <div className={styles.testCardHeader}>
-                                <h3 className={styles.testTitle}>{test.title}</h3>
-                                <div className={styles.cardActions}>
-                                    <button
-                                        className={`${styles.pinTestBtn} ${test.is_pinned ? styles.pinned : ''}`}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleTogglePin(test.id, !test.is_pinned);
+                {currentFolder ? (
+                    /* Show subfolders and tests inside the current folder */
+                    <>
+                        {/* Subfolders */}
+                        {folders.filter(f => f.parent_folder_id === currentFolder.id).map((folder, index) => {
+                            const folderTests = tests.filter(t => t.folder_id === folder.id);
+                            const subfolders = folders.filter(f => f.parent_folder_id === folder.id);
+                            const totalItems = folderTests.length + subfolders.length;
+
+                            return (
+                                <div
+                                    key={`folder-${folder.id}`}
+                                    className={`${styles.folderCard} ${dragOverFolder === folder.id ? styles.folderDragOver : ''} ${dragOverFolderIndex === index ? styles.dragOver : ''}`}
+                                    onClick={() => openFolder(folder)}
+                                    draggable={true}
+                                    onDragStart={(e) => handleFolderCardDragStart(e, folder, index)}
+                                    onDragEnd={handleFolderCardDragEnd}
+                                    onDragOver={(e) => {
+                                        handleFolderDragOver(e, folder.id);
+                                        handleFolderCardDragOver(e, index);
+                                    }}
+                                    onDragLeave={handleFolderDragLeave}
+                                    onDrop={(e) => {
+                                        handleFolderDrop(e, folder.id);
+                                        handleFolderCardDrop(e, index);
+                                    }}
+                                >
+                                    <div className={styles.folderHeader}>
+                                        <div className={styles.folderLeft}>
+                                            <Folder size={24} />
+                                            <span className={styles.folderName}>{folder.name}</span>
+                                            <span className={styles.folderCount}>({totalItems})</span>
+                                        </div>
+                                        <button
+                                            className={styles.btnFolderOptions}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setFolderMenuOpen(folderMenuOpen === folder.id ? null : folder.id);
+                                            }}
+                                        >
+                                            <MoreVertical size={18} />
+                                        </button>
+                                    </div>
+
+                                    {folderMenuOpen === folder.id && (
+                                        <div className={styles.folderMenu}>
+                                            <button onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingFolder(folder);
+                                                setFolderMenuOpen(null);
+                                            }}>
+                                                Zmień nazwę
+                                            </button>
+                                            <button
+                                                className={styles.deleteFolderBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteFolder(folder.id);
+                                                    setFolderMenuOpen(null);
+                                                }}
+                                            >
+                                                Usuń folder
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* Tests in this folder */}
+                        {tests.filter(t => t.folder_id === currentFolder.id).length > 0 ? (
+                            tests.filter(t => t.folder_id === currentFolder.id).map((test, index) => (
+                                <div
+                                    key={test.id}
+                                    className={`${styles.testCard} ${dragOverIndex === index ? styles.dragOver : ''} ${dragNotAllowedIndex === index ? styles.dragNotAllowed : ''} ${test.is_pinned ? styles.pinnedCard : ''}`}
+                                    draggable={true}
+                                    onDragStart={(e) => handleDragStart(e, test, index)}
+                                    onDragEnd={handleDragEnd}
+                                    onDragOver={(e) => handleDragOver(e, index)}
+                                    onDrop={(e) => handleDrop(e, index)}
+                                >
+                                    <div className={styles.testCardHeader}>
+                                        <h3 className={styles.testTitle}>{test.title}</h3>
+                                        <div className={styles.cardActions}>
+                                            <button
+                                                className={`${styles.pinTestBtn} ${test.is_pinned ? styles.pinned : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleTogglePin(test.id, !test.is_pinned);
+                                                }}
+                                                title={test.is_pinned ? "Odepnij test" : "Przypnij test"}
+                                            >
+                                                <Pin size={16} />
+                                            </button>
+                                            <button
+                                                className={styles.deleteTestBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteTest(test.id);
+                                                }}
+                                                title="Usuń test"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span
+                                        className={styles.sourceLabel}
+                                        style={{
+                                            backgroundColor: `${getSourceLabel(test.source_type).color}15`,
+                                            color: getSourceLabel(test.source_type).color,
+                                            border: `1px solid ${getSourceLabel(test.source_type).color}40`
                                         }}
-                                        title={test.is_pinned ? "Odepnij test" : "Przypnij test"}
                                     >
-                                        <Pin size={16} />
-                                    </button>
+                                        {getSourceLabel(test.source_type).text}
+                                    </span>
                                     <button
-                                        className={styles.deleteTestBtn}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteTest(test.id);
-                                        }}
-                                        title="Usuń test"
+                                        className={styles.btnDetails}
+                                        onClick={() => handleShowDetails(test)}
                                     >
-                                        <Trash2 size={16} />
+                                        Szczegóły
                                     </button>
                                 </div>
+                            ))
+                        ) : folders.filter(f => f.parent_folder_id === currentFolder.id).length === 0 ? (
+                            <div className={styles.emptyState}>
+                                <p>Ten folder jest pusty. Przeciągnij testy tutaj lub utwórz nowe!</p>
                             </div>
-                            <span
-                                className={styles.sourceLabel}
-                                style={{
-                                    backgroundColor: `${getSourceLabel(test.source_type).color}15`,
-                                    color: getSourceLabel(test.source_type).color,
-                                    border: `1px solid ${getSourceLabel(test.source_type).color}40`
-                                }}
-                            >
-                                {getSourceLabel(test.source_type).text}
-                            </span>
-                            <button
-                                className={styles.btnDetails}
-                                onClick={() => handleShowDetails(test)}
-                            >
-                                Szczegóły
-                            </button>
-                        </div>
-                    ))
+                        ) : null}
+                    </>
                 ) : (
-                    <div className={styles.emptyState}>
-                        <p>Brak testów. Wygeneruj pierwszy test używając AI!</p>
-                    </div>
+                    <>
+                        {/* Folders */}
+                        {folders.filter(f => !f.parent_folder_id).map((folder, index) => {
+                            const folderTests = tests.filter(t => t.folder_id === folder.id);
+                            const subfolders = folders.filter(f => f.parent_folder_id === folder.id);
+                            const totalItems = folderTests.length + subfolders.length;
+
+                            return (
+                                <div
+                                    key={`folder-${folder.id}`}
+                                    className={`${styles.folderCard} ${dragOverFolder === folder.id ? styles.folderDragOver : ''} ${dragOverFolderIndex === index ? styles.dragOver : ''}`}
+                                    onClick={() => openFolder(folder)}
+                                    draggable={true}
+                                    onDragStart={(e) => handleFolderCardDragStart(e, folder, index)}
+                                    onDragEnd={handleFolderCardDragEnd}
+                                    onDragOver={(e) => {
+                                        handleFolderDragOver(e, folder.id);
+                                        handleFolderCardDragOver(e, index);
+                                    }}
+                                    onDragLeave={handleFolderDragLeave}
+                                    onDrop={(e) => {
+                                        handleFolderDrop(e, folder.id);
+                                        handleFolderCardDrop(e, index);
+                                    }}
+                                >
+                                    <div className={styles.folderHeader}>
+                                        <div className={styles.folderLeft}>
+                                            <Folder size={24} />
+                                            <span className={styles.folderName}>{folder.name}</span>
+                                            <span className={styles.folderCount}>({totalItems})</span>
+                                        </div>
+                                        <button
+                                            className={styles.btnFolderOptions}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setFolderMenuOpen(folderMenuOpen === folder.id ? null : folder.id);
+                                            }}
+                                        >
+                                            <MoreVertical size={18} />
+                                        </button>
+                                    </div>
+
+                                    {folderMenuOpen === folder.id && (
+                                        <div className={styles.folderMenu}>
+                                            <button onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingFolder(folder);
+                                                setFolderMenuOpen(null);
+                                            }}>
+                                                Zmień nazwę
+                                            </button>
+                                            <button
+                                                className={styles.deleteFolderBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteFolder(folder.id);
+                                                    setFolderMenuOpen(null);
+                                                }}
+                                            >
+                                                Usuń folder
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* Tests not in folders */}
+                        {tests && tests.filter(t => !t.folder_id).length > 0 ? (
+                            getFilteredAndSortedTests().filter(t => !t.folder_id).map((test, index) => (
+                                <div
+                                    key={test.id}
+                                    className={`${styles.testCard} ${dragOverIndex === index ? styles.dragOver : ''} ${dragNotAllowedIndex === index ? styles.dragNotAllowed : ''} ${test.is_pinned ? styles.pinnedCard : ''}`}
+                                    draggable={true}
+                                    onDragStart={(e) => handleDragStart(e, test, index)}
+                                    onDragEnd={handleDragEnd}
+                                    onDragOver={(e) => handleDragOver(e, index)}
+                                    onDrop={(e) => handleDrop(e, index)}
+                                >
+                                    <div className={styles.testCardHeader}>
+                                        <h3 className={styles.testTitle}>{test.title}</h3>
+                                        <div className={styles.cardActions}>
+                                            <button
+                                                className={`${styles.pinTestBtn} ${test.is_pinned ? styles.pinned : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleTogglePin(test.id, !test.is_pinned);
+                                                }}
+                                                title={test.is_pinned ? "Odepnij test" : "Przypnij test"}
+                                            >
+                                                <Pin size={16} />
+                                            </button>
+                                            <button
+                                                className={styles.deleteTestBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteTest(test.id);
+                                                }}
+                                                title="Usuń test"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span
+                                        className={styles.sourceLabel}
+                                        style={{
+                                            backgroundColor: `${getSourceLabel(test.source_type).color}15`,
+                                            color: getSourceLabel(test.source_type).color,
+                                            border: `1px solid ${getSourceLabel(test.source_type).color}40`
+                                        }}
+                                    >
+                                        {getSourceLabel(test.source_type).text}
+                                    </span>
+                                    <button
+                                        className={styles.btnDetails}
+                                        onClick={() => handleShowDetails(test)}
+                                    >
+                                        Szczegóły
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            !folders.filter(f => !f.parent_folder_id).length && (
+                                <div className={styles.emptyState}>
+                                    <p>Brak testów. Wygeneruj pierwszy test używając AI!</p>
+                                </div>
+                            )
+                        )}
+                    </>
                 )}
             </div>
 
             {/* Generate Test Modal */}
+            {/* Create Folder Modal */}
+            {showCreateFolderModal && (
+                <div className={sharedStyles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
+                    <div className={sharedStyles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
+                        <div className={sharedStyles.modalHeader}>
+                            <h2 className={sharedStyles.modalTitle}>Utwórz nowy folder</h2>
+                            <button
+                                className={sharedStyles.closeBtn}
+                                onClick={() => setShowCreateFolderModal(false)}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
+                            <div className={sharedStyles.formGroup}>
+                                <label>Nazwa folderu</label>
+                                <input
+                                    type="text"
+                                    value={newFolderName}
+                                    onChange={(e) => setNewFolderName(e.target.value)}
+                                    placeholder="Wpisz nazwę folderu..."
+                                    className={sharedStyles.formInput}
+                                    autoFocus
+                                    required
+                                />
+                            </div>
+                            <div className={sharedStyles.modalActions}>
+                                <button
+                                    type="button"
+                                    className={sharedStyles.btnCancel}
+                                    onClick={() => setShowCreateFolderModal(false)}
+                                >
+                                    Anuluj
+                                </button>
+                                <button type="submit" className={sharedStyles.btnSubmit}>
+                                    Utwórz folder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Rename Folder Modal */}
+            {editingFolder && (
+                <div className={sharedStyles.modalOverlay} onClick={() => setEditingFolder(null)}>
+                    <div className={sharedStyles.modal} onClick={(e) => e.stopPropagation()}>
+                        <div className={sharedStyles.modalHeader}>
+                            <h2 className={sharedStyles.modalTitle}>Zmień nazwę folderu</h2>
+                            <button
+                                className={sharedStyles.closeBtn}
+                                onClick={() => setEditingFolder(null)}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleRenameFolder} style={{padding: '2rem'}}>
+                            <div className={sharedStyles.formGroup}>
+                                <label>Nowa nazwa</label>
+                                <input
+                                    type="text"
+                                    value={editingFolder.name}
+                                    onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
+                                    placeholder="Wpisz nową nazwę folderu..."
+                                    className={sharedStyles.formInput}
+                                    autoFocus
+                                    required
+                                />
+                            </div>
+                            <div className={sharedStyles.modalActions}>
+                                <button
+                                    type="button"
+                                    className={sharedStyles.btnCancel}
+                                    onClick={() => setEditingFolder(null)}
+                                >
+                                    Anuluj
+                                </button>
+                                <button type="submit" className={sharedStyles.btnSubmit}>
+                                    Zmień nazwę
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {showGenerateModal && (
                 <div className={sharedStyles.modalOverlay} onClick={() => !loading && setShowGenerateModal(false)}>
                     <div className={sharedStyles.modal} onClick={(e) => e.stopPropagation()}>

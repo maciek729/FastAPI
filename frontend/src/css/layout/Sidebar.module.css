@@ -300,6 +300,14 @@
   border-left-color: #8b5cf6;
 }
 
+.notebookItem.dragOver {
+  background: rgba(34, 197, 94, 0.1);
+  border-left-color: #22c55e;
+  color: #22c55e;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 2px rgba(34, 197, 94, 0.3);
+}
+
 .notebookName {
   white-space: nowrap;
   overflow: hidden;

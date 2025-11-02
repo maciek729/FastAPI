@@ -12,15 +12,15 @@ router = APIRouter(
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
-    print("⚠️ Brak GEMINI_API_KEY. Dodaj go do pliku .env")
+    print("[WARNING] Brak GEMINI_API_KEY. Dodaj go do pliku .env")
     model = None
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        print("✅ Gemini client initialized successfully")
+        print("[SUCCESS] Gemini client initialized successfully")
     except Exception as e:
-        print(f"Błąd inicjalizacji klienta Gemini: {e}")
+        print(f"[ERROR] Błąd inicjalizacji klienta Gemini: {e}")
         model = None
 
 class ChatMessage(BaseModel):
