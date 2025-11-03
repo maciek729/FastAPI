@@ -57,7 +57,8 @@ async def send_contact_email(user_email: EmailStr, title: str, message_content: 
         subject=f"NOWA WIADOMOŚĆ KONTAKTOWA: {title}",
         recipients=[admin_email],
         body=body,
-        subtype="plain"
+        subtype="plain",
+        reply_to=[user_email]
     )
     fm = FastMail(conf)
     await fm.send_message(message)
