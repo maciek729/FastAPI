@@ -6,7 +6,7 @@ import FlashcardsView from "../notebook/FlashcardsView";
 import TestsView from "../notebook/TestsView";
 import styles from "../../../css/features/NotebookView.module.css";
 
-export default function NotebookView({ details, userData, refreshNotebook }) {
+export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen }) {
     const [activeTab, setActiveTab] = useState("files");
 
     const tabs = [
@@ -46,7 +46,7 @@ export default function NotebookView({ details, userData, refreshNotebook }) {
                     />
                 )}
                 {activeTab === "flashcards" && <FlashcardsView />}
-                {activeTab === "tests" && <TestsView />}
+                {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
             </div>
         </div>
     );

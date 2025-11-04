@@ -71,13 +71,13 @@ def create_note(note: NoteCreate, db: db_dependency):
 
 
 @router.get("/list/{notebook_id}", response_model=List[NoteOut])
-def list_notes(notebook_id: int, db: Session = Depends(db_dependency)):
+def list_notes(notebook_id: int, db: db_dependency):
     notes = db.query(Notes).filter(Notes.notebook_id == notebook_id).all()
     return notes
 
 
 @router.get("/{note_id}", response_model=NoteOut)
-def get_note(note_id: int, db: Session = Depends(db_dependency)):
+def get_note(note_id: int, db: db_dependency):
     note = db.query(Notes).filter(Notes.id == note_id).first()
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
