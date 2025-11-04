@@ -1,61 +1,226 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-.titleContainer h2 {
-  font-weight:800;
-  margin-bottom: 15px;
+.settingsMainContainer {
+  max-width: 1400px; /*Szerokosc maksymalna tak jak u macieja w przestrzeniach*/
+  width: 80%;
+  flex-direction: column;
+  display: flex;
+  min-height: 0;
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .titleContainer {
-    text-align: center;
-    margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
 }
 
 .title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
-    margin-top: 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 0.1rem;
+  letter-spacing: -0.02em;
+  margin-top: 0;
 }
 
 .subtitle {
-    font-size: 0.9375rem;
-    color: #64748b;
-    font-weight: 400;
-    margin-top: 0;
+  font-size: 0.9375rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-top: 0;
 }
-.sectionHeader {
+
+/* Sekcje */
+.sectionContainer {
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  padding-bottom: 1rem;;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
-  padding: 25px;
-  max-width: 800px;
-  margin: 1rem auto 0rem auto;
+  gap: 2rem;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.sectionOption {
+  display: flex;
+  width: 100%; /* Na wypadek */
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  padding-bottom: 0.1rem;;
+}
+.optionLabel {
   justify-content: center;
-  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
 }
-.settingsGroup {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    width: 80%;
-    max-width: 800px;
-    margin: 0 auto 2rem auto;
+/*Tu nadpisz styl przycisków Zarządzaj
+gdyby komuś się nie podobało, że wyglądają tak samo jak Zapisz zmiany
+Pozdro*/
+.optionButton {}
+.optionButton:hover {}
+.optionButton:active {}
+
+/* SpinnerBoxy / Selecty */
+.selectWrapper {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  margin-left: auto;
+}
+.optionSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0.625rem 1.125rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  padding-right: 2.5rem; 
+  width: 100%;
+}
+.optionSelect option {
+  color: black;
+  background: white;
+}
+.selectWrapper::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 0 1 1.06 0L10 10.94l3.71-3.73a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.23 8.27a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd' /%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 1.25em;
+  width: 1.25em;
+  height: 1.25em;
+  pointer-events: none;
+}
+.selectWrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+.selectWrapper:active {
+  transform: scale(1.03);
 }
 
-.settingsGroup {
-    flex-basis: calc(50% - 1rem); 
-    min-width: 250px; 
+/* Komunikat informacyjny */
+.infoMessage {
+  margin-top: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 1.5rem;
+  background-color: #dcfce7;
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 0.9375rem;
+  opacity: 0;
+  transform: translateY(-15px);
+  visibility: hidden;
+  transition: 
+    opacity 0.3s ease-in-out,
+    transform 0.3s ease-in-out,
+    visibility 0.3s ease-in-out,
+    max-height 0.3s ease-in-out,
+    margin-top 0.3s ease-in-out;
+}
+.infoMessage p {
+  color: #14532d;
+  font-weight: 500;
+  font-style: italic;
+  margin: 0;
+}
+.infoMessage.show {
+  max-height: 10rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
 }
 
-.settingsMainContainer {
-    width: 100%;
-    margin: 2rem auto;
+/* Sekcja przycisków */
+.buttonsContainer {
+  display: flex;
+  margin-top: 24px;
+  gap: 1.2rem;
 }
-
+.saveButton, .optionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  background:  linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-family: 'Inter', sans-serif;
+}
+.saveButton {
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+}
+.saveButton:hover, .optionButton:hover, .cancelButton:hover {
+  /*Maciej miał tu transform, ale mi się bardziej to podoba*/
+  /*Jeżeli ktoś będzie chciał zmiany to nie ma problemu*/
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+.saveButton:active, .optionButton:active, .cancelButton:active {
+  transform: scale(1.03);
+}
+.cancelButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  color: #6d28d9;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+}
