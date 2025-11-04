@@ -1,5 +1,5 @@
 import React, {useState}  from "react";
-import styles from "../../../css/features/Settings.module.css"
+import styles from "../../../../css/features/settings/Help.module.css"
 import { Sparkles} from "lucide-react";
 import HelpQuestion from "./HelpQuestion.jsx";
 

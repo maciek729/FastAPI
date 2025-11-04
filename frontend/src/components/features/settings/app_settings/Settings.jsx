@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import styles from "../../../css/features/Settings.module.css"
+import styles from "../../../../css/features/settings/Settings.module.css"
 import SettingsSelectElement from './SettingsSelectElement';
 
 const ThemeOptions = [
@@ -14,10 +14,8 @@ const LanguageOptions = [
 ];
 
 export default function Settings({userData}) {
-    // Domyslny motyw to biały
     const [theme, setTheme] = useState("light");
 
-    // Domyslny jezyk to polski
     const [language, setLanguage] = useState("pl");
 
     const handleThemeChange = (event) => {
@@ -31,16 +29,11 @@ export default function Settings({userData}) {
     return (
         <div className={styles.settingsMainContainer}>
             
-            {/* Nagłówek */}
              <div className={styles.titleContainer}>
                 <h2 className={styles.title}>Ustawienia ogólne</h2>
                 <p className={styles.subtitle}>Dostosuj aplikację według swoich preferencji.</p>
             </div>
-
-            {/* Opcje ustawień */}
-            <div className={styles.sectionHeader}>
-                <p>Mam zamiar też dodać sekcje do tych ustawień teraz już nie mam na to czasu</p>
-            </div>
+            
             <div className={styles.settingsGroup}>
                 <SettingsSelectElement
                     id="theme-select"

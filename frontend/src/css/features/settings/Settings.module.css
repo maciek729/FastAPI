@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.titleContainer h2 {
+  font-weight:800;
+  margin-bottom: 15px;
+}
+
+.titleContainer {
+    text-align: center;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    margin-top: 0;
+}
+
+.subtitle {
+    font-size: 0.9375rem;
+    color: #64748b;
+    font-weight: 400;
+    margin-top: 0;
+}
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  max-width: 800px;
+  margin: 1rem auto 0rem auto;
+  justify-content: center;
+  text-align: center;
+}
+.settingsGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    width: 80%;
+    max-width: 800px;
+    margin: 0 auto 2rem auto;
+}
+
+.settingsGroup {
+    flex-basis: calc(50% - 1rem); 
+    min-width: 250px; 
+}
+
+.settingsMainContainer {
+    width: 100%;
+    margin: 2rem auto;
+}
+

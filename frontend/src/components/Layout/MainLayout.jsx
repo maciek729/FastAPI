@@ -5,9 +5,10 @@ import Dashboard from "../features/dashboard/Dashboard";
 import Chat from "../features/chat/Chat";
 import NotebookView from "../features/notebook/NotebookView";
 import styles from "../../css/layout/MainLayout.module.css";
-import Settings from "../features/settings/Settings";
-import UserSettings from "../features/settings/UserSettings";
-import Help from '../features/settings/Help';
+import Settings from "../features/settings/app_settings/Settings";
+import UserSettings from "../features/settings/user_settings/UserSettings";
+import Help from '../features/settings/help/Help';
+import NotificationView from "../features/settings/notifications/NotificationView";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -124,6 +125,9 @@ export default function MainLayout() {
 
       case 'help':
         return <Help userData={userData}/>;
+
+      case 'notifications':
+        return <NotificationView />;
       
       case 'notebook':
         return selectedNotebook ? (
