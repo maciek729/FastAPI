@@ -1,6 +1,6 @@
 import React from "react";
 import { Settings, User, Palette, HelpCircle, Bell} from "lucide-react";
-import styles from "../../../css/layout/Sidebar.module.css";
+import styles from "../../../css/layout/SidebarFooter.module.css";
 
 const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
 

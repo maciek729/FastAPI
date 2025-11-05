@@ -51,7 +51,7 @@ async def send_contact_email(user_email: EmailStr, title: str, message_content: 
     if not admin_email:
         raise ValueError("MAIL_FROM not configured")
 
-    body = f"Od: {user_email}\nTemat: {title}\n\nWiadomość:\n{message_content}"
+    body = f"Temat: {title}\n\nWiadomość:\n{message_content}"
 
     message = MessageSchema(
         subject=f"NOWA WIADOMOŚĆ KONTAKTOWA: {title}",
