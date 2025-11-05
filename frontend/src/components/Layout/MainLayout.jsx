@@ -118,16 +118,20 @@ export default function MainLayout() {
         return <Chat key={getChatKey()} />;
 
       case 'settings':
-        return <Settings userData={userData}/>
+        return <Settings userData={userData} onGoToSection={handleGoToSection}/>
+        // Przekazuje ustawieniom onGoToSection, aby z ich poziomu mozna bylo wejsc
+        // do innych ustawien (np. powiadomien, ustawienia konta)
+        // potrzebuje tego, ze wzgledu na przyciski Zarzadzaj
+        // Jesli wiki to czytasz to mozesz ten komentarz usunąć
 
       case 'user_settings':
-        return <UserSettings userData={userData} />
+        return <UserSettings userData={userData}/>
 
       case 'help':
         return <Help userData={userData}/>;
 
       case 'notifications':
-        return <NotificationView />;
+        return <NotificationView userData={userData}/>;
       
       case 'notebook':
         return selectedNotebook ? (

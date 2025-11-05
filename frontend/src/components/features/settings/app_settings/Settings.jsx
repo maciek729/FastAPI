@@ -13,12 +13,32 @@ const LanguageOptions = [
     { value: 'en', label: 'English (Angielski)' }
 ];
 
-export default function Settings({userData}) {
+export default function Settings({userData, onGoToSection}) {
+    // Obsluga zmiany ustawien
     const [theme, setTheme] = useState("light");
-
     const [language, setLanguage] = useState("pl");
 
+    // Wartosci z bazy danych (które ma już zapisane)
+    // Potrzebne do porównania czy są jakieś zmiany
+    // i do przywrócenia ustawień przy anulowaniu
+    // i do wyswietlenia komunikatu "Masz niezapisane zmiany"
+    const [savedTheme, setSavedTheme] = useState("light");
+    const [savedLanguage, setSavedLanguage] = useState("pl");
+
     const [saved, setSaved] = useState(false);
+
+    /*
+    To użyć, gdy będę mieć theme i language w tabeli usera
+    useEffect(() => {
+        if (userData) {
+            setTheme(userData.theme || "light");
+            setLanguage(userData.language || "pl");
+            setSavedTheme(userData.theme || "light");
+            setSavedLanguage(userData.language || "pl");
+        }
+    }, [userData]);
+    */
+    const hasUnsavedChanges = (theme !== savedTheme) || (language !== savedLanguage);
 
     const handleThemeChange = (event) => {
         setTheme(event.target.value);
@@ -29,16 +49,23 @@ export default function Settings({userData}) {
     };
 
     const handleSave = () => {
+        setSavedTheme(theme);
+        setSavedLanguage(language);
         setSaved(true);
         setTimeout(() => {
             setSaved(false);
         }, 3000);
     };
 
+    const handleCancel = () => {
+        setTheme(savedTheme);
+        setLanguage(savedLanguage);
+    }
+
     return (
         <div className={styles.settingsMainContainer}>
             
-             <div className={styles.titleContainer}>
+            <div className={styles.titleContainer}>
                 <h2 className={styles.title}>Ustawienia</h2>
                 {/*<p className={styles.subtitle}>Dostosuj aplikację według swoich preferencji.</p>*/}
             </div>
@@ -52,7 +79,7 @@ export default function Settings({userData}) {
                             <label className={styles.sectionTitle}>Konto</label>
                             <label className={styles.optionLabel}>Zmień swoje dane, edytuj hasło lub e-mail i zarządzaj bezpieczeństwem konta.</label>
                         </div>    
-                        <button className={styles.optionButton}>Zarządzaj</button>
+                        <button className={styles.optionButton} onClick={()=>onGoToSection('user_settings')}>Zarządzaj</button>
                     </div>
                 </div>
         
@@ -111,20 +138,23 @@ export default function Settings({userData}) {
                             <label className={styles.sectionTitle}>Powiadomienia</label>
                             <label className={styles.optionLabel}>Skonfiguruj swoje preferencje dotyczące powiadomień powiadomień.</label>
                         </div>
-                        <button className={styles.optionButton}>Zarządzaj</button>
+                        <button className={styles.optionButton} onClick={()=>onGoToSection('notifications')}>Zarządzaj</button>
                     </div>
                 </div>
             </div>
 
-            {/* Komunikat */}
-            <div className={`${styles.infoMessage} ${saved ? styles.show : ''}`}>
+            {/* Komunikaty */}
+            <div className={`${styles.savedMessage} ${saved ? styles.show : ''}`}>
                 <p>Pomyślnie zapisano.</p>
+            </div>
+            <div className={`${styles.unsavedMessage} ${hasUnsavedChanges ? styles.show : ''}`}>
+                <p>Masz niezapisane zmiany.</p>
             </div>
 
             {/* Przyciski */}
             <div className={styles.buttonsContainer}>
-                <button className={styles.saveButton} onClick={handleSave}>Zapisz zmiany</button>
-                <button className={styles.cancelButton}>Anuluj</button>
+                <button className={styles.saveButton} onClick={handleSave} disabled={!hasUnsavedChanges}>Zapisz zmiany</button>
+                <button className={styles.cancelButton} onClick={handleCancel} disabled={!hasUnsavedChanges}>Anuluj</button>
             </div>
         </div>
     );

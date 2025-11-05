@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { LogOut } from "lucide-react";
 import UserMenu from "./UserMenu";
-import styles from "../../../css/layout/Sidebar.module.css";
+import styles from "../../../css/layout/SidebarFooter.module.css";
 
 const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
