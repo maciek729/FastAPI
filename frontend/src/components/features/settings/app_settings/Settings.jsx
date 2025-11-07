@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import styles from "../../../../css/features/settings/Settings.module.css"
 import SettingsSelectElement from './SettingsSelectElement';
 
@@ -15,15 +15,15 @@ const LanguageOptions = [
 
 export default function Settings({userData, onGoToSection}) {
     // Obsluga zmiany ustawien
-    const [theme, setTheme] = useState("light");
+    const [theme, setTheme] = useState("light"); 
     const [language, setLanguage] = useState("pl");
 
     // Wartosci z bazy danych (które ma już zapisane)
     // Potrzebne do porównania czy są jakieś zmiany
     // i do przywrócenia ustawień przy anulowaniu
     // i do wyswietlenia komunikatu "Masz niezapisane zmiany"
-    const [savedTheme, setSavedTheme] = useState("light");
-    const [savedLanguage, setSavedLanguage] = useState("pl");
+    const [savedTheme, setSavedTheme] = useState("light"); // muszę zmienić na userData.theme
+    const [savedLanguage, setSavedLanguage] = useState("pl"); // userData.language
 
     const [saved, setSaved] = useState(false);
 
@@ -38,6 +38,22 @@ export default function Settings({userData, onGoToSection}) {
         }
     }, [userData]);
     */
+    useEffect(() => {
+        if (savedTheme === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+        } else if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (savedTheme === 'system') {
+            // automatyczne dopasowanie do systemu
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+    }, [savedTheme]);
+
     const hasUnsavedChanges = (theme !== savedTheme) || (language !== savedLanguage);
 
     const handleThemeChange = (event) => {

@@ -17,8 +17,8 @@
     align-items: center;
     padding: 0.75rem 1rem;
     cursor: pointer;
-    background-color: #f7f2fd;
-    color: #54189d;
+    background-color: var(--inner_section_bg);
+    color: var(--info_msg_text);
     font-weight: 600;
     font-size: 1rem;
     transition: all 0.2s ease;
@@ -36,11 +36,11 @@
 .content {
     max-height: 0;
     overflow: hidden;
-    background: white;
-    color: #0f172a;
+    background: var(--inner_inner_section_bg);
+    color: var(--subtitle);
     transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out; 
     padding: 0 1rem;
-    font-size: 13px;;
+    font-size: 13px;
 }
 
 .open {
@@ -57,7 +57,7 @@
   width: 80%;
   max-width: 800px;
   margin: 2rem auto;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--inner_section_bg);
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 0.875rem;
   padding: 2rem;
@@ -82,7 +82,7 @@
 .helpTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--title);
   text-align: center;
   margin-top:0;
   margin-bottom:0;
@@ -102,8 +102,8 @@
   border-radius: 0.625rem;
   font-size: 1rem;
   font-family: inherit;
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.8);
+  color: var(--subtitle);
+  background: var(--inner_inner_section_bg);
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -113,7 +113,7 @@
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
   outline: none;
-  background: white;
+  background: var(--inner_inner_section_bg);
 }
 
 .textArea {
@@ -148,7 +148,7 @@
 .statusMessage {
   margin-top: 1rem;
   text-align: center;
-  color: #64748b;
+  color: var(--subtitle);
   font-size: 0.9375rem;
 }
 
@@ -186,7 +186,7 @@
 .title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--title);
     margin-bottom: 0.5rem;
     letter-spacing: -0.02em;
     margin-top: 0;
@@ -194,7 +194,7 @@
 
 .subtitle {
     font-size: 0.9375rem;
-    color: #64748b;
+    color: var(--subtitle);
     font-weight: 400;
     margin-top: 0;
 }

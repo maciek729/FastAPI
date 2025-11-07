@@ -7,7 +7,7 @@
   top: 0;
   height: 100vh;
   width: 240px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--outer_section_bg);
   backdrop-filter: blur(20px);
   border-right: 1px solid rgba(148, 163, 184, 0.1);
   transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -193,12 +193,12 @@
 }
 
 .sectionTitle:hover {
-  background: rgba(139, 92, 246, 0.05);
-  color: #8b5cf6;
+  background: var(--sidebar_section_hover_bg);
+  color: var(--sidebar_section_hover_text);
 }
 
 .sidebarSection.expanded .sectionTitle {
-  color: #8b5cf6;
+  color: var(--purple_brighter);
 }
 
 .sectionIcon {
@@ -277,7 +277,7 @@
   padding: 0.5rem 0.75rem;
   margin-bottom: 2px;
   margin-left: 1.5rem;
-  color: #64748b;
+  color: var(--sidebar_notebook_hover_text);
   cursor: pointer;
   border-radius: 6px;
   font-size: 0.875rem;
@@ -288,14 +288,14 @@
 }
 
 .notebookItem:hover {
-  background: rgba(139, 92, 246, 0.05);
-  color: #475569;
+  background: var(--sidebar_notebook_hover_bg);
+  color: var(--sidebar_notebook_hover_text);
   border-left-color: rgba(139, 92, 246, 0.3);
 }
 
 .notebookItem.active {
   background: rgba(139, 92, 246, 0.08);
-  color: #8b5cf6;
+  color:var(--purple_brighter);
   font-weight: 600;
   border-left-color: #8b5cf6;
 }

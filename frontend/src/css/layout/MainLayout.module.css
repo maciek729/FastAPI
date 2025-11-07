@@ -6,7 +6,7 @@
   position: relative;
   height: 100vh;
   width: 100vw;
-  background: linear-gradient(135deg, #fdfeff 0%, #f8f9fd 50%, #f3f4f9 100%);
+  background: var(--outer_section_bg);
   font-family: 'Inter', sans-serif;
   overflow: hidden;
   display: flex;
