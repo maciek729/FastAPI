@@ -22,7 +22,7 @@
 .title {
   font-size: 1.75rem;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--title);
   margin-bottom: 0.1rem;
   letter-spacing: -0.02em;
   margin-top: 0;
@@ -37,7 +37,7 @@
 
 /* Sekcje */
 .sectionContainer {
-  background: white;
+  background: var(--inner_section_bg);
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 12px;
   padding: 0.6rem 1.5rem;
@@ -60,7 +60,7 @@
   justify-content: space-between;
   padding-top: 0.6rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid var(--border_gray);
 }
 .textWrapper {
   display: flex;
@@ -68,15 +68,16 @@
   gap: 0.2rem;
 }
 .sectionTitle {
+  color: var(--title);
   font-size: 1rem;
   font-weight: 600;
-  padding-bottom: 0.1rem;;
+  padding-bottom: 0.1rem;
 }
 .optionLabel {
   justify-content: center;
   padding-right: 1rem;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--subtitle);
 }
 /*Tu nadpisz styl przycisków Zarządzaj
 gdyby komuś się nie podobało, że wyglądają tak samo jak Zapisz zmiany
@@ -144,9 +145,9 @@ Pozdro*/
   max-height: 0;
   overflow: hidden;
   padding: 0 1.5rem;
-  background-color: #dcfce7;
+  background-color: var(--success_bg);
+  color: var(--success_text);
   border-radius: 8px;
-  color: #1e293b;
   font-size: 0.9375rem;
   opacity: 0;
   transform: translateY(-15px);
@@ -159,7 +160,6 @@ Pozdro*/
     margin-top 0.3s ease-in-out;
 }
 .savedMessage p {
-  color: #14532d;
   font-weight: 500;
   font-style: italic;
   margin: 0;
@@ -178,9 +178,8 @@ Pozdro*/
   max-height: 0;
   overflow: hidden;
   padding: 0 1.5rem;
-  background-color: #f5f3ff;
+  background-color: var(--info_msg_bg);
   border-radius: 8px;
-  color: #1e293b;
   font-size: 0.9375rem;
   opacity: 0;
   transform: translateY(-15px);
@@ -193,7 +192,7 @@ Pozdro*/
     margin-top 0.3s ease-in-out;
 }
 .unsavedMessage p {
-  color: #6d28d9;
+  color: var(--info_msg_text);
   font-weight: 500;
   font-style: italic;
   margin: 0;
@@ -220,7 +219,7 @@ Pozdro*/
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.125rem;
-  background:  linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -248,14 +247,14 @@ Pozdro*/
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-  color: #6d28d9;
+  background: var(--white_btn_bg);
+  color: var(--white_btn_text);
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px var(--white_btn_box_shadow);
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   padding: 0.75rem 2rem;

@@ -16,7 +16,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--inner_section_bg);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   flex-shrink: 0;
@@ -29,13 +29,13 @@
 }
 
 .headerIcon {
-  color: #8b5cf6;
+  color: var(--purple_brighter);
 }
 
 .chatTitle {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
 }
 
@@ -44,10 +44,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: var(--white_into_purple_btn);
+  border: 1px solid var(--darker_subtitle);
   border-radius: 8px;
-  color: #64748b;
+  color: var(--subtitle);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -98,31 +98,31 @@
   justify-content: center;
   height: 100%;
   text-align: center;
-  color: #64748b;
+  color: var(--subtitle);
   gap: 1rem;
 }
 
 .emptyIcon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  background: var(--white_into_purple_btn_bg);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #8b5cf6;
+  color: var(--purple_into_white_text);
 }
 
 .emptyState h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
 }
 
 .emptyState p {
   font-size: 1rem;
-  color: #64748b;
+  color: var(--subtitle);
   margin: 0;
 }
 
@@ -171,9 +171,9 @@
 }
 
 .assistantMessage .avatar {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: var(--inner_section_bg);
+  color: var(--purple_brighter);
+  border: 1px solid var(--border_gray);
 }
 
 .messageContent {
@@ -192,9 +192,9 @@
 }
 
 .assistantMessage .messageContent {
-  background: white;
-  color: #1e293b;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: var(--inner_section_bg);
+  color: var(--title);
+  border: 1px solid var(--border_gray);
   border-bottom-left-radius: 4px;
 }
 
@@ -203,8 +203,8 @@
   display: flex;
   gap: 4px;
   padding: 0.875rem 1.125rem;
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: var(--inner_section_bg);
+  border: 1px solid var(--border_gray);
   border-radius: 12px;
   border-bottom-left-radius: 4px;
 }
@@ -238,11 +238,12 @@
 
 /* File Preview */
 .filePreview {
+  color: var(--title);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.875rem 1.25rem;
-  background: rgba(139, 92, 246, 0.05);
+  background: var(--file_msg_bg);
   border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 10px;
   margin: 0 2rem;
@@ -251,7 +252,8 @@
 
 .filePreview button {
   padding: 0.375rem 0.875rem;
-  background: white;
+  background: var(--white_into_purple_btn_bg);
+  color: var(--white_into_purple_btn_text);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 6px;
   font-size: 0.875rem;
@@ -261,7 +263,7 @@
 }
 
 .filePreview button:hover {
-  background: #8b5cf6;
+  background: var(--purple_btn_hover);
   color: white;
   border-color: #8b5cf6;
 }
@@ -272,7 +274,7 @@
   align-items: flex-end;
   gap: 0.75rem;
   padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--inner_section_bg);
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(148, 163, 184, 0.1);
   flex-shrink: 0;
@@ -284,10 +286,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: var(--inner_inner_section_bg);
+  border: 1px solid var(--border_gray);
   border-radius: 10px;
-  color: #64748b;
+  color: var(--subtitle);
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -296,7 +298,7 @@
 .uploadBtn:hover {
   background: rgba(139, 92, 246, 0.05);
   border-color: rgba(139, 92, 246, 0.3);
-  color: #8b5cf6;
+  color: var(--purple_brighter);
 }
 
 .input {
@@ -304,12 +306,12 @@
   min-height: 40px;
   max-height: 120px;
   padding: 0.625rem 1rem;
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: var(--inner_inner_section_bg);
+  border: 1px solid var(--border_gray);
   border-radius: 10px;
   font-size: 0.9375rem;
   line-height: 1.5;
-  color: #1e293b;
+  color: var(--title);
   resize: none;
   outline: none;
   font-family: 'Inter', sans-serif;

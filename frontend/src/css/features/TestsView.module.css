@@ -54,10 +54,10 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 3rem 2rem;
-  background: white;
-  border: 2px dashed rgba(148, 163, 184, 0.2);
+  background: var(--inner_section_bg);
+  border: 2px dashed var(--border_gray);
   border-radius: 12px;
-  color: #64748b;
+  color: var(--subtitle);
 }
 
 .emptyState p {
@@ -70,7 +70,7 @@
 .loading {
   text-align: center;
   padding: 3rem 2rem;
-  color: #64748b;
+  color: var(--subtitle);
   font-size: 1rem;
   font-weight: 500;
 }
@@ -97,7 +97,7 @@
 .notebookTitle {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
   white-space: nowrap;
 }
@@ -161,8 +161,8 @@
   align-items: center;
   gap: 0.375rem;
   padding: 0.5rem 0.875rem;
-  background: white;
-  color: #ef4444;
+  background: var(--red_btn_bg);
+  color: var(--red_btn_text);
   border: 2px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
   font-weight: 600;
@@ -188,8 +188,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.875rem;
-  background: white;
-  border: 2px solid rgba(148, 163, 184, 0.15);
+  background: var(--inner_section_bg);
+  border: 2px solid var(--border_gray);
   border-radius: 8px;
   flex: 1;
   min-width: 180px;
@@ -203,7 +203,7 @@
 }
 
 .searchBox svg {
-  color: #94a3b8;
+  color: var(--subtitle);
   flex-shrink: 0;
 }
 
@@ -213,13 +213,13 @@
   background: transparent;
   flex: 1;
   font-size: 0.875rem;
-  color: #1e293b;
+  color: var(--title);
   font-family: 'Inter', sans-serif;
   width: 100%;
 }
 
 .searchInput::placeholder {
-  color: #94a3b8;
+  color: var(--subtitle);
 }
 
 .filterSelect {
@@ -227,8 +227,8 @@
   border: 2px solid rgba(148, 163, 184, 0.15);
   border-radius: 8px;
   font-size: 0.875rem;
-  color: #334155;
-  background: white;
+  color: var(--subtitle);
+  background: var(--inner_inner_section_bg);
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -242,7 +242,7 @@
 }
 
 .filterSelect:hover {
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: var(--border_gray);
 }
 
 .filterSelect:focus {
@@ -254,8 +254,8 @@
 /* ========== TEST CARDS ========== */
 
 .testCard {
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: var(--inner_section_bg);
+  border: 1px solid var(--border_gray);
   border-radius: 12px;
   padding: 1rem;
   cursor: grab;
@@ -311,7 +311,7 @@
 .testTitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
   flex: 1;
   display: -webkit-box;
@@ -394,14 +394,14 @@
 
 .testDate {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--subtitle);
   font-weight: 500;
 }
 
 .btnDetails {
   padding: 0.5rem 0.875rem;
-  background: white;
-  color: #8b5cf6;
+  background: var(--white_btn_bg);
+  color: var(--white_btn_text);
   border: 2px solid rgba(139, 92, 246, 0.3);
   border-radius: 8px;
   font-size: 0.8125rem;
@@ -482,15 +482,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 2rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(249, 250, 251, 0.8);
+  border-bottom: 1px solid var(--border_gray);
+  background: var(--inner_section_bg);
   flex-shrink: 0;
 }
 
 .modalTitle {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
   line-height: 1.2;
 }
@@ -522,6 +522,7 @@
 /* ========== TEST QUESTIONS ========== */
 
 .testQuestions {
+  background: var(--inner_section_bg);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -550,7 +551,7 @@
 
 .questionBlock {
   padding: 1.25rem;
-  background: rgba(249, 250, 251, 0.5);
+  background: var(--inner_inner_section_bg);
   border: 1px solid rgba(139, 92, 246, 0.1);
   border-radius: 10px;
 }
@@ -558,7 +559,7 @@
 .questionNumber {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #8b5cf6;
+  color: var(--purple_brighter);
   margin: 0 0 0.75rem 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -567,7 +568,7 @@
 .questionText {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--title);
   margin: 0 0 0.625rem 0;
   line-height: 1.4;
 }
@@ -590,8 +591,8 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.25rem;
-  background: white;
-  border: 2px solid rgba(148, 163, 184, 0.2);
+  background: var(--inner_inner_section_bg);
+  border: 2px solid var(--border_gray);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -625,7 +626,7 @@
 .optionValue {
   flex: 1;
   font-size: 0.9375rem;
-  color: #334155;
+  color: var(--title);
 }
 
 /* ========== RESULTS ========== */
@@ -636,8 +637,8 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem 1.5rem;
-  background: rgba(249, 250, 251, 0.8);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  background: var(--inner_inner_section_bg);
+  border-bottom: 1px solid var(--border_gray);
   gap: 0.875rem;
   flex-shrink: 0;
 }
@@ -666,7 +667,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: white;
+  background: var(--subtitle);
 }
 
 .scorePercentage {
@@ -683,18 +684,19 @@
 
 .scoreText {
   font-size: 0.8125rem;
-  color: #334155;
+  color: var(--title);
   margin: 0;
 }
 
 .scoreText strong {
-  color: #1e293b;
+  color: var(--title);
   font-weight: 700;
 }
 
 /* ========== ANSWERS LIST ========== */
 
 .answersList {
+  background: var(--inner_inner_section_bg);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -748,14 +750,14 @@
 .answerHeader h3 {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #8b5cf6;
+  color: var(--purple_brighter);
   margin: 0;
 }
 
 .answerLabel {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--subtitle);
   margin: 0.5rem 0 0.25rem 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -763,8 +765,8 @@
 
 .correctAnswer {
   font-size: 0.875rem;
-  color: #15803d;
-  background: rgba(74, 222, 128, 0.1);
+  color: var(--correct_answer_text);
+  background: var(--correct_answer_bg);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   margin: 0;
@@ -774,8 +776,8 @@
 
 .wrongAnswer {
   font-size: 0.875rem;
-  color: #dc2626;
-  background: rgba(248, 113, 113, 0.1);
+  color: var(--wrong_answer_text);
+  background: var(--wrong_answer_bg);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   margin: 0;
@@ -809,6 +811,7 @@
 }
 
 .detailsContent {
+  background: var(--inner_inner_section_bg);
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -830,20 +833,20 @@
 .detailSectionLabel {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--subtitle);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .detailValue {
   font-size: 0.9375rem;
-  color: #1e293b;
+  color: var(--subtitle);
   font-weight: 500;
 }
 
 .topicDescription {
   font-size: 0.9375rem;
-  color: #475569;
+  color: var(--subtitle);
   line-height: 1.6;
   margin: 0;
   font-weight: 400;
@@ -883,13 +886,14 @@
 }
 
 .btnResultsLarge {
-  background: white;
-  color: #8b5cf6;
+  background: var(--white_btn_bg);
+  color: var(--white_btn_text);
   border: 2px solid rgba(139, 92, 246, 0.3);
 }
 
 .btnResultsLarge:hover {
-  background: rgba(139, 92, 246, 0.05);
+  background: var(--white_btn_hover_bg);
+  color: var(--white_btn_hover_text);
   border-color: #8b5cf6;
   transform: translateY(-2px);
 }
@@ -897,7 +901,7 @@
 /* ========== FOLDER STYLES ========== */
 
 .folderCard {
-  background: linear-gradient(135deg, #fff 0%, #fefaf5 100%);
+  background: var(--inner_section_bg);
   border: 2px solid rgba(245, 158, 11, 0.2);
   border-radius: 12px;
   padding: 1.25rem;
@@ -953,7 +957,7 @@
 .folderName {
   font-weight: 700;
   font-size: 0.9375rem;
-  color: #1e293b;
+  color: var(--title);
   line-height: 1.2;
   max-width: 100%;
   overflow: hidden;
@@ -990,9 +994,9 @@
 }
 
 .btnFolderOptions {
-  background: white;
+  background: var(--inner_inner_section_bg);
   border: none;
-  color: #6b7280;
+  color: var(--subtitle);
   cursor: pointer;
   padding: 0.375rem;
   border-radius: 8px;
@@ -1007,7 +1011,7 @@
 }
 
 .btnFolderOptions:hover {
-  background: #f3f4f6;
+  background: var(--inner_section_bg);
   transform: scale(1.1);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -1016,9 +1020,9 @@
   position: absolute;
   top: 3rem;
   right: 0.75rem;
-  background: white;
+  background: var(--inner_section_bg);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--border_gray);
   z-index: 10;
   min-width: 150px;
   overflow: hidden;
@@ -1028,16 +1032,16 @@
   width: 100%;
   padding: 0.75rem 1rem;
   border: none;
-  background: white;
+  background: var(--inner_section_bg);
   text-align: left;
   cursor: pointer;
   transition: background 0.2s ease;
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--subtitle);
 }
 
 .folderMenu button:hover {
-  background: #f3f4f6;
+  background: var(--inner_inner_section_bg);
 }
 
 .folderMenu .deleteFolderBtn {
@@ -1050,7 +1054,6 @@
 }
 
 .folderMenu .deleteFolderBtn:hover {
-  background: #fee2e2;
   transform: none;
   box-shadow: none;
 }
@@ -1183,4 +1186,17 @@
   .scorePercentage {
     font-size: 1.75rem;
   }
+}
+.modal {
+  background: var(--inner_section_bg);
+  border-radius: 12px;
+  max-width: 750px;
+  width: 85%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+  position: relative;
 }

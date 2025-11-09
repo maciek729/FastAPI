@@ -48,14 +48,14 @@
 .title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--title);
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
 }
 
 .subtitle {
   font-size: 0.9375rem;
-  color: #64748b;
+  color: var(--subtitle);
   font-weight: 400;
 }
 
@@ -200,10 +200,10 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 3rem 1rem;
-  color: #64748b;
+  color: var(--subtitle);
   font-size: 1rem;
-  background: rgba(255, 255, 255, 0.5);
-  border: 2px dashed rgba(148, 163, 184, 0.2);
+  background: var(--inner_section_bg);
+  border: 2px dashed var(--darker_subtitle);
   border-radius: 0.875rem;
 }
 
