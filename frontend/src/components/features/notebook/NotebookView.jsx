@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MessageCircle, FileText, Zap, ClipboardCheck } from "lucide-react";
 import Chat from "../chat/Chat";
 import FilesView from "../notebook/FilesView";
-import FlashcardsView from "../notebook/FlashcardsView";
+import FlashcardsView from "../flashcard/FlashcardsView";
 import TestsView from "../notebook/TestsView";
 import styles from "../../../css/features/NotebookView.module.css";
 
@@ -45,7 +45,12 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                         refreshNotebook={refreshNotebook}
                     />
                 )}
-                {activeTab === "flashcards" && <FlashcardsView />}
+                {activeTab === "flashcards" && (
+                    <FlashcardsView
+                        notebookId={details?.id}
+                        userData={userData}
+                    />
+                )}
                 {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
             </div>
         </div>

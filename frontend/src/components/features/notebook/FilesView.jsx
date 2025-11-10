@@ -159,7 +159,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
 
                 <div className={styles.cardsContainer}>
                     {details.notes && details.notes.length > 0 ? (
-                        details.notes.map((note) => (
+                        details.notes.filter(note => note.type !== "Fiszki").map((note) => (
                             <div 
                                 key={note.id} 
                                 className={styles.noteCard}
