@@ -1,0 +1,209 @@
+.sidebarFooter {
+  margin-top: auto;
+  padding: 0.875rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-shrink: 0;
+  min-height: 68px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: pointer;
+}
+.sidebar.collapsed .sidebarFooter {
+  flex-direction: column;
+  padding: 0.75rem 0.5rem;
+  justify-content: center;
+}
+.userProfile {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  transition: opacity 0.15s ease, width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.sidebar.collapsed .userProfile {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25);
+  flex-shrink: 0;
+}
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+.userName {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.logoutBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+  margin-left:auto;
+}
+.sidebar.collapsed .logoutBtn {
+  display: none;
+}
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+.logoutBtn:active {
+  transform: scale(0.95);
+}
+.userAvatarCollapsed {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.userAvatarCollapsed:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 8px rgba(139, 92, 246, 0.35);
+}
+.logoutBtnCollapsed {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+.logoutBtnCollapsed:hover {
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+.logoutBtnCollapsed:active {
+  transform: scale(0.95);
+}
+.userProfileWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.userMenu {
+  position: fixed;
+  bottom: 68px;
+  left: 0;
+  width: 240px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 6px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 61;
+  animation: slideUpFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.userMenuCollapsed {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 6px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 10;
+  min-width: 140px;
+  animation: slideUpFadeInCollapsed 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.sidebar.collapsed .userMenu {
+  width: 60px;
+}
+
+.menuItem {
+  color: #8b5cf6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.menuItem:hover {
+  background: #f5f5f5;
+}
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpFadeInCollapsed {
+  from {
+    opacity: 0;
+    transform: translateY(12px) translateX(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+}
