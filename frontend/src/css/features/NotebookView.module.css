@@ -17,9 +17,9 @@
   display: flex;
   gap: 0.25rem;
   padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--inner_section_bg);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid var(--border_gray);
   flex-shrink: 0;
 }
 
@@ -34,7 +34,7 @@
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--subtitle);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
@@ -43,12 +43,12 @@
 
 .tab:hover {
   background: rgba(139, 92, 246, 0.05);
-  color: #8b5cf6;
+  color: var(--purple_brighter);
 }
 
 .tab.active {
   background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  color: var(--purple_brighter);
   font-weight: 600;
 }
 
@@ -64,6 +64,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  color: var(--title);
 }
 
 .tabContainer::-webkit-scrollbar {
@@ -113,7 +114,7 @@
 .notebookTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
 }
 
@@ -176,8 +177,8 @@
 
 /* Note Card */
 .noteCard {
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: var(--inner_section_bg);
+  border: 1px solid var(--border_gray);
   border-radius: 12px;
   padding: 1.5rem;
   cursor: pointer;
@@ -205,7 +206,7 @@
 .noteTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
   flex: 1;
 }
@@ -221,7 +222,7 @@
 
 .noteContent {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--subtitle);
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
@@ -236,7 +237,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  border-top: 1px solid var(--border_gray);
   margin-top: auto;
 }
 
@@ -251,10 +252,10 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 3rem 2rem;
-  background: white;
-  border: 2px dashed rgba(148, 163, 184, 0.2);
+  background: var(--inner_section_bg);
+  border: 2px dashed var(--border_gray);
   border-radius: 12px;
-  color: #64748b;
+  color: var(--subtitle);
 }
 
 .emptyState p {
@@ -267,7 +268,7 @@
 .loading {
   text-align: center;
   padding: 3rem 2rem;
-  color: #64748b;
+  color: var(--subtitle);
   font-size: 1rem;
   font-weight: 500;
 }
@@ -302,9 +303,9 @@
 
 /* Modal */
 .modal {
-  background: white;
+  background: var(--inner_section_bg);
   border-radius: 12px;
-  padding: 0;
+  padding: 2rem; /* Dodałem tu padding, bo nie mogłem znieść patrzenia na to bez paddingu*/
   max-width: 750px;
   width: 85%;
   max-height: 90vh;
@@ -328,11 +329,12 @@
 }
 
 .modalTitle {
-  font-size: 0.875rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--title);
   margin: 0;
   line-height: 1.2;
+  margin-bottom: 1rem;
 }
 
 .formGrid {
@@ -352,7 +354,7 @@
 .formGrid .formGroup label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--subtitle);
   line-height: 1.25rem;
   min-height: 1.25rem;
   margin: 0;
@@ -362,16 +364,24 @@
 
 .formGrid .formGroup input {
   padding: 0.625rem 0.875rem;
-  border: 2px solid rgba(148, 163, 184, 0.15);
+  border: 2px solid var(--border_gray);
   border-radius: 6px;
   font-size: 0.875rem;
-  color: #1e293b;
-  background: white;
+  color: var(--title);
+  background: var(--inner_inner_section_bg);
   font-family: 'Inter', sans-serif;
   transition: all 0.2s ease;
   height: auto;
   line-height: 1.5;
   margin: 0;
+}
+.formGrid .formGroup input[type="number"]::-webkit-inner-spin-button,
+.formGrid .formGroup input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.formGrid .formGroup input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .formGridFull {
@@ -399,9 +409,9 @@
   align-items: center;
   justify-content: center;
   padding: 0.75rem;
-  border: 2px solid rgba(148, 163, 184, 0.15);
+  border: 2px solid var(--white_btn_box_shadow);
   border-radius: 8px;
-  background: white;
+  background: var(--white_btn_bg);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
@@ -410,22 +420,22 @@
 
 .radioLabel:hover {
   border-color: rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.02);
+  background: var(--white_btn_hover_bg);
 }
 
 .radioOption input[type="radio"]:checked + .radioLabel {
-  border-color: #8b5cf6;
+  border-color: var(--purple_brighter);
   background: rgba(139, 92, 246, 0.08);
 }
 
 .radioText {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--white_btn_text);
 }
 
 .radioOption input[type="radio"]:checked + .radioLabel .radioText {
-  color: #8b5cf6;
+  color: var(--purple_brighter);
 }
 
 .fileUploadWrapper {
@@ -442,11 +452,11 @@
 .fileLabel {
   display: block;
   padding: 0.625rem 0.875rem;
-  border: 2px solid rgba(148, 163, 184, 0.15);
+  border: 2px solid var(--border_gray);
   border-radius: 6px;
   font-size: 0.875rem;
-  color: #334155;
-  background: white;
+  color: var(--subtitle);
+  background: var(--inner_inner_section_bg);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
@@ -479,7 +489,7 @@
 .formGroup label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--title);
   min-height: 1.25rem;
   display: block;
 }
@@ -488,19 +498,20 @@
 .formGroup textarea,
 .formGroup select {
   padding: 0.625rem 0.875rem;
-  border: 2px solid rgba(148, 163, 184, 0.15);
+  border: 2px solid var(--border_gray);
   border-radius: 6px;
   font-size: 0.875rem;
-  color: #1e293b;
-  background: white;
+  color: var(--subtitle);
+  background: var(--inner_section_bg);
   font-family: 'Inter', sans-serif;
   transition: all 0.2s ease;
 }
 
 .formGroup select {
+  transition: none;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23334155' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-image: var(--select_arrow);
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2.5rem;
@@ -511,13 +522,25 @@
 .formGroup select:focus {
   outline: none;
   border-color: #8b5cf6;
-  background: white;
+  background: var(--inner_inner_section_bg);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+.formGroup select:focus {
+  background-image: var(--select_arrow_up);
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
 }
 
 .formGroup textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+select
+
+select option {
+  background-color: var(--select_bg);
+  color: var(--subtitle);
 }
 
 /* Modal form content scrollbar */
@@ -546,7 +569,7 @@
   gap: 0.75rem;
   padding: 1rem 2rem;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(249, 250, 251, 0.8);
+  background: var(--inner_section_bg);
   flex-shrink: 0;
   min-height: 60px;
 }
@@ -566,14 +589,14 @@
 }
 
 .btnCancel {
-  background: white;
-  color: #64748b;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: var(--inner_inner_inner_section_bg);
+  color: var(--subtitle);
+  border: 1px solid rgba(148, 163, 184, 0.003);
 }
 
 .btnCancel:hover {
-  background: rgba(148, 163, 184, 0.05);
-  color: #374151;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
 
 .btnSubmit {
@@ -633,8 +656,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.125rem;
-  background: white;
-  color: #8b5cf6;
+  background: var(--white_btn_bg);
+  color: var(--white_btn_text);
   border: 2px solid #8b5cf6;
   border-radius: 8px;
   font-weight: 600;
@@ -660,8 +683,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.875rem 2rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(249, 250, 251, 0.8);
+  border-bottom: 1px solid var(--border_gray);
+  background: var(--inner_section_bg);
   flex-shrink: 0;
   min-height: 50px;
 }
@@ -669,7 +692,7 @@
 .closeBtn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--white_btn_text);
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
@@ -680,8 +703,8 @@
 }
 
 .closeBtn:hover {
-  background: rgba(148, 163, 184, 0.1);
-  color: #1e293b;
+  background: var(--white_btn_hover_bg);
+  color: var(--white_btn_hover_text);
 }
 
 /* Add Collaborator Form */
@@ -734,7 +757,7 @@
 .collaboratorsTitle {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--subtitle);
   margin: 0 0 1rem 0;
 }
 
@@ -803,9 +826,9 @@
   text-align: center;
   padding: 2rem 1rem;
   background: rgba(148, 163, 184, 0.05);
-  border: 2px dashed rgba(148, 163, 184, 0.2);
+  border: 2px dashed var(--border_gray);
   border-radius: 8px;
-  color: #64748b;
+  color: var(--subtitle);
 }
 
 .emptyCollaborators p {

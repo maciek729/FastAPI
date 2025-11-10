@@ -53,7 +53,7 @@
 .userName {
   font-weight: 600;
   font-size: 0.875rem;
-  color: #1e293b;
+  color: var(--title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -64,10 +64,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--white_into_purple_btn_bg);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
-  color: #64748b;
+  color: var(--white_into_purple_btn_text);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
@@ -112,10 +112,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--white_into_purple_btn_bg);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
-  color: #64748b;
+  color: var(--white_into_purple_btn_text);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
@@ -139,7 +139,7 @@
   bottom: 68px;
   left: 0;
   width: 240px;
-  background: #fff;
+  background: var(--inner_inner_section_bg);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
   padding: 6px 0;
@@ -155,7 +155,7 @@
   left: 50%;
   transform: translateX(-50%);
   margin-bottom: 8px;
-  background: #fff;
+  background: var(--inner_inner_section_bg);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 8px;
   padding: 6px 0;
@@ -171,7 +171,7 @@
 }
 
 .menuItem {
-  color: #8b5cf6;
+  color: var(--purple_brighter);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -184,7 +184,7 @@
 }
 
 .menuItem:hover {
-  background: #f5f5f5;
+  background: var(--user_menu_hover);
 }
 @keyframes slideUpFadeIn {
   from {
