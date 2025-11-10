@@ -5,6 +5,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 // Helper function to render text with math formulas
 const MathText = ({ text }) => {
@@ -375,9 +376,24 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
     const getSourceLabel = (sourceType) => {
         const labels = {
-            'manual': { text: 'Ręczny opis', color: '#8b5cf6' },
-            'file': { text: 'Z pliku', color: '#3b82f6' },
-            'note': { text: 'Z notatki', color: '#10b981' }
+            'manual': { 
+                text: 'Ręczny opis', 
+                color: 'var(--purple_brighter)',
+                bg: 'var(--purple_brighter_bg)',
+                border: 'var(--purple_brighter_border)'
+            },
+            'file': {
+                text: 'Z pliku', 
+                color: '#3b82f6',
+                bg: '#3b82f615',
+                border: '#3b82f640'
+            },
+            'note': {
+                text: 'Z notatki',
+                color: '#10b981',
+                bg: '#10b98115',
+                border: '#10b98140'
+            }
         };
         return labels[sourceType] || labels['manual'];
     };
@@ -1068,9 +1084,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                     <span
                                         className={styles.sourceLabel}
                                         style={{
-                                            backgroundColor: `${getSourceLabel(test.source_type).color}15`,
+                                            backgroundColor: getSourceLabel(test.source_type).bg,
                                             color: getSourceLabel(test.source_type).color,
-                                            border: `1px solid ${getSourceLabel(test.source_type).color}40`
+                                            border: `1px solid ${getSourceLabel(test.source_type).border}`
                                         }}
                                     >
                                         {getSourceLabel(test.source_type).text}
@@ -1197,9 +1213,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                     <span
                                         className={styles.sourceLabel}
                                         style={{
-                                            backgroundColor: `${getSourceLabel(test.source_type).color}15`,
+                                            backgroundColor: getSourceLabel(test.source_type).bg,
                                             color: getSourceLabel(test.source_type).color,
-                                            border: `1px solid ${getSourceLabel(test.source_type).color}40`
+                                            border: `1px solid ${getSourceLabel(test.source_type).border}`
                                         }}
                                     >
                                         {getSourceLabel(test.source_type).text}
@@ -1227,7 +1243,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             {/* Create Folder Modal */}
             {showCreateFolderModal && (
                 <div className={sharedStyles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                    <div className={sharedStyles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
                         <div className={sharedStyles.modalHeader}>
                             <h2 className={sharedStyles.modalTitle}>Utwórz nowy folder</h2>
                             <button
@@ -1326,7 +1342,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         <form onSubmit={handleGenerateTest} style={{display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0}}>
                             <div className="modal-form-content" style={{padding: '1.5rem 2rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', minHeight: 0}}>
                                 <div>
-                                    <label style={{fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.75rem', display: 'block'}}>
+                                    <label style={{fontSize: '0.875rem', fontWeight: 600, color: 'var(--subtitle)', marginBottom: '0.75rem', display: 'block'}}>
                                         Źródło materiału
                                     </label>
                                 <div className={sharedStyles.sourceOptions}>
@@ -1461,7 +1477,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                 </div>
 
                                 <div>
-                                    <label style={{fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.75rem', display: 'block'}}>
+                                    <label style={{fontSize: '0.875rem', fontWeight: 600, color: 'var(--subtitle)', marginBottom: '0.75rem', display: 'block'}}>
                                         Typ pytań
                                     </label>
                                     <div className={sharedStyles.sourceOptions}>
@@ -1713,9 +1729,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                     <span
                                         className={styles.sourceLabel}
                                         style={{
-                                            backgroundColor: `${getSourceLabel(selectedTest.source_type).color}15`,
+                                            backgroundColor: getSourceLabel(selectedTest.source_type).bg,
                                             color: getSourceLabel(selectedTest.source_type).color,
-                                            border: `1px solid ${getSourceLabel(selectedTest.source_type).color}40`
+                                            border: `1px solid ${getSourceLabel(selectedTest.source_type).border}`
                                         }}
                                     >
                                         {getSourceLabel(selectedTest.source_type).text}

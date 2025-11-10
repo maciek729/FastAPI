@@ -22,7 +22,7 @@
 .title {
   font-size: 1.75rem;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--title);
   margin-bottom: 0.1rem;
   letter-spacing: -0.02em;
   margin-top: 0;
@@ -37,7 +37,7 @@
 
 /* Sekcje */
 .sectionContainer {
-  background: white;
+  background: var(--inner_section_bg);
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 12px;
   padding: 0.6rem 1.5rem;
@@ -60,7 +60,7 @@
   justify-content: space-between;
   padding-top: 0.6rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid var(--border_gray);
 }
 .textWrapper {
   display: flex;
@@ -140,6 +140,7 @@ No ale jeśli ktoś by chciał to można odkomentować
 }
 
 .sectionTitle {
+  color: var(--title);
   font-size: 1rem;
   font-weight: 600;
   padding-bottom: 0.1rem;;
@@ -148,7 +149,7 @@ No ale jeśli ktoś by chciał to można odkomentować
   justify-content: center;
   padding-right: 1rem;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--subtitle);
 }
 /*Tu nadpisz styl przycisków Zarządzaj
 gdyby komuś się nie podobało, że wyglądają tak samo jak Zapisz zmiany
@@ -337,8 +338,8 @@ Pozdro*/
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1.125rem;
-  background:  linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
-  color: #be123c;
+  background: linear-gradient(135deg, #ea5a74 0%, #be123c 100%);
+  color: rgba(255, 255, 255, 0.822);
   border: none;
   border-radius: 8px;
   font-weight: 600;
