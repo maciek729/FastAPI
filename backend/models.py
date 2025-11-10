@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 
 class Users(Base):
@@ -131,17 +131,66 @@ class UserAnswers(Base):
     selected_answer = Column(String)
     is_correct = Column(Boolean)
     answered_at = Column(DateTime)
+    
+class FlashcardSets(Base):
+    __tablename__ = "flashcard_sets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    note_id = Column(Integer, ForeignKey("notes.id"), unique=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"), index=True)
+    
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    difficulty = Column(String, default="średni")
+    total_cards = Column(Integer, default=0)
+    
+    source_notes = Column(Text, nullable=True)
+    source_files = Column(Text, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    flashcards = relationship("Flashcards", back_populates="flashcard_set", cascade="all, delete-orphan")
+    note = relationship("Notes")
+
 
 class Flashcards(Base):
     __tablename__ = "flashcards"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    note_id = Column(Integer, ForeignKey("notes.id"))
-    question = Column(String)
-    answer = Column(String)
-    created_at = Column(DateTime)
-    is_shared = Column(Boolean, default=False)
+    flashcard_set_id = Column(Integer, ForeignKey("flashcard_sets.id"), index=True, nullable=False)
+    
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    position = Column(Integer, default=0, index=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    flashcard_set = relationship("FlashcardSets", back_populates="flashcards")
+    reviews = relationship("FlashcardReviews", back_populates="flashcard", cascade="all, delete-orphan")
+
+
+class FlashcardReviews(Base):
+    __tablename__ = "flashcard_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    flashcard_id = Column(Integer, ForeignKey("flashcards.id"), index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    
+    status = Column(String, default="new")
+    repetitions = Column(Integer, default=0)
+    interval = Column(Integer, default=0)
+    
+    last_review = Column(DateTime, nullable=True)
+    next_review = Column(DateTime, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    flashcard = relationship("Flashcards", back_populates="reviews")
+
+
 
 class PDFUploads(Base):
     __tablename__ = "pdf_uploads"
