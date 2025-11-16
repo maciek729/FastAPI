@@ -99,7 +99,6 @@ async def upload_file(file: UploadFile = File(...)):
         
         file_content_base64 = base64.b64encode(content).decode('utf-8')
         
-        # Dodaj plik do aktualnej sesji
         current_session_files.append({
             "filename": file.filename,
             "mime_type": mime_type,
