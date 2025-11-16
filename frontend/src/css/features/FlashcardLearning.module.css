@@ -22,19 +22,20 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
-    background: white;
-    border: 2px solid #e2e8f0;
+    background: var(--white_btn_bg);
+    border: 2px solid var(--white_btn_box_shadow);
     border-radius: 10px;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--white_btn_text);
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
 .backBtn:hover {
-    background: #f7fafc;
-    border-color: #cbd5e0;
+    color: var(--purple_brighter);
+    background: rgba(139, 92, 246, 0.05);
+    border-color: var(--purple_brighter);
 }
 
 .progress {
@@ -47,13 +48,13 @@
 .progress > span {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--subtitle);
     text-align: right;
 }
 
 .progressBar {
     height: 8px;
-    background: #e2e8f0;
+    background: var(--inner_section_bg);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -84,7 +85,7 @@
 }
 
 .loading p {
-    color: #718096;
+    color: var(--subtitle);
     font-size: 1rem;
 }
 
@@ -119,13 +120,13 @@
 
 .completion h2 {
     font-size: 2rem;
-    color: #2d3748;
+    color: var(--title);
     margin: 0 0 0.5rem 0;
 }
 
 .completion p {
     font-size: 1.125rem;
-    color: #718096;
+    color: var(--subtitle);
     margin: 0 0 2rem 0;
 }
 
@@ -135,7 +136,7 @@
     gap: 2rem;
     margin-bottom: 2rem;
     padding: 2rem;
-    background: white;
+    background: var(--inner_section_bg);
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -150,12 +151,12 @@
 .completionStatValue {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #6c63ff;
+    color: var(--darker_blue);
 }
 
 .completionStatLabel {
     font-size: 0.875rem;
-    color: #718096;
+    color: var(--subtitle);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -208,14 +209,14 @@
 }
 
 .btnBack {
-    background: white;
-    color: #4a5568;
-    border: 2px solid #e2e8f0;
+    background: var(--white_btn_bg);
+    color: var(--white_btn_text);
+    border: 2px solid var(--white_btn_box_shadow);
 }
 
 .btnBack:hover {
-    background: #f7fafc;
-    border-color: #cbd5e0;
+    background: var(--white_btn_hover_bg);
+    border-color: var(--white_btn_box_shadow);
 }
 
 @media (max-width: 768px) {

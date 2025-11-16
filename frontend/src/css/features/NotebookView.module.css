@@ -591,7 +591,7 @@ select option {
 .btnCancel {
   background: var(--inner_inner_inner_section_bg);
   color: var(--subtitle);
-  border: 1px solid rgba(148, 163, 184, 0.003);
+  border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .btnCancel:hover {
@@ -772,7 +772,7 @@ select option {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: rgba(139, 92, 246, 0.03);
+  background: var(--inner_inner_section_bg);
   border: 1px solid rgba(139, 92, 246, 0.1);
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -780,7 +780,7 @@ select option {
 
 .collaboratorItem:hover {
   background: rgba(139, 92, 246, 0.05);
-  border-color: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
 }
 
 .collaboratorAvatar {
@@ -801,7 +801,7 @@ select option {
   flex: 1;
   font-size: 0.9375rem;
   font-weight: 500;
-  color: #1e293b;
+  color: var(--title);
 }
 
 .btnRemove {

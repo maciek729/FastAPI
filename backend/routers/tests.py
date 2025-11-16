@@ -30,7 +30,7 @@ if not GEMINI_API_KEY:
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         print("[SUCCESS] Gemini client initialized for tests router")
     except Exception as e:
         print(f"[ERROR] Błąd inicjalizacji klienta Gemini w tests router: {e}")

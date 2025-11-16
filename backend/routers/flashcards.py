@@ -475,7 +475,7 @@ Wygeneruj fiszki:"""
             total_cards=len(flashcards_data),
             source_notes=None,
             source_files=json.dumps([file.filename]),
-            cfreated_at=datetime.utcnow(),
+            created_at=datetime.utcnow(),
             updated_at=datetime.utcnow()
         )
         db.add(flashcard_set)

@@ -17,3 +17,7 @@ __pycache__/
 
 #database file
 database.py
+
+# to u mnie tylko, gdyz korzystam z darmowej wersji Gemini
+/routers/ai.py
+/routers/tests.py
