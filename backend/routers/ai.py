@@ -17,7 +17,7 @@ if not GEMINI_API_KEY:
 else:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         print("[SUCCESS] Gemini client initialized successfully")
     except Exception as e:
         print(f"[ERROR] Błąd inicjalizacji klienta Gemini: {e}")
@@ -172,7 +172,7 @@ async def api_status():
         "gemini_configured": bool(GEMINI_API_KEY and model),
         "has_files": bool(current_session_files),
         "files_count": len(current_session_files),
-        "model": "gemini-2.0-flash-exp"
+        "model": "gemini-2.5-flash"
     }
 
 @router.get("/files")
