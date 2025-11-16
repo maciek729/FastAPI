@@ -138,7 +138,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.125rem;
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: var(--inner_section_bg);
   border: none;
@@ -560,4 +560,371 @@
   .setsList {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* Drag and Drop Styles */
+.setCard {
+  cursor: grab;
+  user-select: none;
+}
+
+.setCard:active {
+  cursor: grabbing;
+}
+
+.setCard.dragOver {
+  background: rgba(139, 92, 246, 0.05);
+  border: 2px dashed #8b5cf6;
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+}
+
+.setCard.dragNotAllowed {
+  background: rgba(239, 68, 68, 0.05);
+  border: 2px dashed #ef4444;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Pinned Card Styles */
+.setCard.pinnedCard {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.05) 100%);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.setCard.pinnedCard:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
+}
+
+/* Pin Button Styles */
+.pinSetBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: 24px;
+}
+
+.pinSetBtn:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.pinSetBtn.pinned {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.pinSetBtn.pinned:hover {
+  background: rgba(139, 92, 246, 0.25);
+  color: #7c3aed;
+}
+
+
+/* Folder Styles */
+.folderCard {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 146, 60, 0.05) 100%);
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+  height: auto;
+  min-height: 120px;
+  position: relative;
+  user-select: none;
+}
+
+.folderCard:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+  transform: translateY(-2px);
+}
+
+.folderCard:active {
+  cursor: grabbing;
+}
+
+.folderCard.dragOverFolder {
+  background: rgba(245, 158, 11, 0.15);
+  border: 2px dashed #f59e0b;
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+}
+
+.folderCard.dragOver {
+  background: rgba(245, 158, 11, 0.12);
+  border: 2px dashed #f59e0b;
+  transform: scale(1.02);
+}
+
+.folderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.folderTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.folderTitle h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folderStats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.folderCount {
+  font-size: 0.875rem;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.folderMenuBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.folderMenuBtn:hover {
+  background: rgba(100, 116, 139, 0.1);
+  color: #475569;
+}
+
+.folderMenu {
+  position: absolute;
+  top: 3rem;
+  right: 1rem;
+  background: white;
+  border: 2px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  min-width: 140px;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: white;
+  border: none;
+  color: #334155;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.menuItem:hover {
+  background: rgba(139, 92, 246, 0.08);
+  color: #7c3aed;
+}
+
+.menuItemDanger {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: white;
+  border: none;
+  color: #ef4444;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.menuItemDanger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+}
+
+/* Folder Button */
+.addFolderBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.addFolderBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.addFolderBtn:active {
+  transform: translateY(0);
+}
+
+/* Modal Styles */
+.modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 0 2rem;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.formGroup input {
+  padding: 0.75rem;
+  border: 2px solid rgba(148, 163, 184, 0.15);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btnCancel {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #64748b;
+  border: 2px solid rgba(100, 116, 139, 0.2);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btnCancel:hover {
+  background: rgba(100, 116, 139, 0.05);
+  border-color: #64748b;
+}
+
+.btnSubmit {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-family: 'Inter', sans-serif;
+}
+
+.btnSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.btnSubmit:active {
+  transform: translateY(0);
 }

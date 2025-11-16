@@ -365,27 +365,28 @@ async def generate_test_from_file(
         # Extract text or prepare image data
         file_extension = "." + file.filename.split(".")[-1].lower()
 
-        # Determine mime type for images
+        # Determine mime type for files
         mime_types = {
             ".jpg": "image/jpeg",
             ".jpeg": "image/jpeg",
             ".png": "image/png",
-            ".webp": "image/webp"
+            ".webp": "image/webp",
+            ".pdf": "application/pdf"
         }
 
         if file_extension in mime_types:
-            # For images, send directly to Gemini for OCR/analysis
-            image_mime = mime_types[file_extension]
+            # For images and PDFs, send directly to Gemini
+            file_mime = mime_types[file_extension]
             questions_data = generate_test_with_gemini(
                 topic,
                 num_questions,
                 question_type,
                 context_text=None,
                 image_data=file_content,
-                image_mime=image_mime
+                image_mime=file_mime
             )
         else:
-            # Extract text from document
+            # Extract text from document (DOCX, TXT)
             extracted_text = extract_text_from_file(file_content, file.filename)
 
             if not extracted_text.strip():
