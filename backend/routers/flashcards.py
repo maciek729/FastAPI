@@ -79,12 +79,15 @@ class FlashcardSetOut(BaseModel):
     note_id: int
     user_id: int
     notebook_id: int
+    folder_id: Optional[int] = None
     title: str
     description: Optional[str]
     difficulty: str
     total_cards: int
     source_notes: Optional[str]
     source_files: Optional[str]
+    grid_position: Optional[int] = None
+    is_pinned: bool = False
     created_at: datetime
     updated_at: datetime
     flashcards: List[FlashcardOut] = []
@@ -841,3 +844,107 @@ def reorder_flashcards(request: ReorderRequest, db: db_dependency):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Błąd podczas zmiany kolejności: {str(e)}"
         )
+
+
+class UpdatePinRequest(BaseModel):
+    is_pinned: bool
+
+
+class UpdatePositionRequest(BaseModel):
+    grid_position: int
+
+
+@router.patch("/set/{set_id}/pin")
+async def update_flashcard_set_pin(set_id: int, request: UpdatePinRequest, db: db_dependency):
+    """Toggle pin status for flashcard set"""
+    flashcard_set = db.query(FlashcardSets).filter(FlashcardSets.id == set_id).first()
+    if not flashcard_set:
+        raise HTTPException(status_code=404, detail="Flashcard set not found")
+
+    flashcard_set.is_pinned = request.is_pinned
+    db.commit()
+    db.refresh(flashcard_set)
+
+    return {"message": "Pin status updated successfully", "is_pinned": flashcard_set.is_pinned}
+
+
+@router.patch("/set/{set_id}/position")
+async def update_flashcard_set_position(set_id: int, request: UpdatePositionRequest, db: db_dependency):
+    """Update grid position for flashcard set"""
+    flashcard_set = db.query(FlashcardSets).filter(FlashcardSets.id == set_id).first()
+    if not flashcard_set:
+        raise HTTPException(status_code=404, detail="Flashcard set not found")
+
+    flashcard_set.grid_position = request.grid_position
+    db.commit()
+    db.refresh(flashcard_set)
+
+    return {"message": "Position updated successfully", "grid_position": flashcard_set.grid_position}
+
+
+class CopyFlashcardSetRequest(BaseModel):
+    target_notebook_id: int
+    user_id: int
+
+
+@router.post("/set/{set_id}/copy", response_model=FlashcardSetOut, status_code=status.HTTP_201_CREATED)
+async def copy_flashcard_set_to_notebook(set_id: int, request: CopyFlashcardSetRequest, db: db_dependency):
+    """Copy flashcard set to another notebook"""
+    original_set = db.query(FlashcardSets).filter(FlashcardSets.id == set_id).first()
+    if not original_set:
+        raise HTTPException(status_code=404, detail="Flashcard set not found")
+
+    # Create a new note for the copied flashcard set
+    new_note = Notes(
+        user_id=request.user_id,
+        notebook_id=request.target_notebook_id,
+        title=original_set.title,
+        content=f"Zestaw {original_set.total_cards} fiszek (kopia)",
+        type="Fiszki",
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+        is_shared=False
+    )
+    db.add(new_note)
+    db.commit()
+    db.refresh(new_note)
+
+    # Create new flashcard set
+    new_set = FlashcardSets(
+        note_id=new_note.id,
+        user_id=request.user_id,
+        notebook_id=request.target_notebook_id,
+        title=original_set.title,
+        description=original_set.description,
+        difficulty=original_set.difficulty,
+        total_cards=original_set.total_cards,
+        source_notes=original_set.source_notes,
+        source_files=original_set.source_files,
+        grid_position=None,
+        is_pinned=False,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    db.add(new_set)
+    db.commit()
+    db.refresh(new_set)
+
+    # Copy all flashcards from original set
+    original_flashcards = db.query(Flashcards).filter(
+        Flashcards.flashcard_set_id == set_id
+    ).order_by(Flashcards.position).all()
+
+    for flashcard in original_flashcards:
+        new_flashcard = Flashcards(
+            flashcard_set_id=new_set.id,
+            question=flashcard.question,
+            answer=flashcard.answer,
+            position=flashcard.position,
+            created_at=datetime.utcnow()
+        )
+        db.add(new_flashcard)
+
+    db.commit()
+    db.refresh(new_set)
+
+    return new_set
