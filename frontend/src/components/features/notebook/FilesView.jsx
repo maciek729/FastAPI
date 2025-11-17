@@ -11,6 +11,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
     const [selectedNote, setSelectedNote] = useState(null);
     const [collaboratorUsername, setCollaboratorUsername] = useState('');
     const [collaborators, setCollaborators] = useState([]);
+    const [isLoadingDetails, setIsLoadingDetails] = useState(true);
     const [newNote, setNewNote] = useState({
         title: '',
         content: '',
@@ -36,10 +37,20 @@ export default function FilesView({ details, userData, refreshNotebook }) {
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
 
     useEffect(() => {
-        if (details?.is_shared && details?.id) {
+        setIsLoadingDetails(true);
+        
+        const loadingTimer = setTimeout(() => {
+            setIsLoadingDetails(false);
+        }, 400);
+
+        return () => clearTimeout(loadingTimer);
+    }, [details?.id]);
+
+    useEffect(() => {
+        if (details?.is_shared && details?.id && !isLoadingDetails) {
             fetchCollaborators();
         }
-    }, [details?.id, details?.is_shared]);
+    }, [details?.id, details?.is_shared, isLoadingDetails]);
 
     useEffect(() => {
         if (details?.notes) {
@@ -75,6 +86,15 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             console.error('Error fetching collaborators:', err);
         }
     };
+
+    if (isLoadingDetails) {
+        return (
+            <div className={styles.loading}>
+                <div className={styles.loadingSpinner}></div>
+                <p>Ładowanie notatnika...</p>
+            </div>
+        );
+    }
 
     if (!details) return <div className={styles.loading}>Ładowanie notatnika...</div>;
 
@@ -810,7 +830,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                     )}
                 </div>
 
-                {/* Modal dodawania notatki */}
                 {showAddNoteModal && (
                     <div className={styles.modalOverlay} onClick={() => setShowAddNoteModal(false)}>
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -861,7 +880,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                     </div>
                 )}
 
-                {/* Modal współtwórców */}
                 {showCollaboratorModal && (
                     <div className={styles.modalOverlay} onClick={() => setShowCollaboratorModal(false)}>
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from "../../../css/features/Dashboard.module.css";
+import { getNotebooks } from '../../../services/notebookService';
 
 export default function Dashboard({ userData, onSelectNotebook }) {
   const [notebooks, setNotebooks] = useState([]);
@@ -14,14 +15,10 @@ export default function Dashboard({ userData, onSelectNotebook }) {
   const fetchNotebooks = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/notebooks/list', {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setNotebooks(data);
-      }
-    } catch (error) {
+      const data = await getNotebooks();
+      setNotebooks(data);
+    } 
+    catch (error) {
       console.error('Błąd pobierania notatników:', error);
     } finally {
       setIsLoading(false);
@@ -31,18 +28,9 @@ export default function Dashboard({ userData, onSelectNotebook }) {
   const handleCreateNotebook = async () => {
     const name = prompt('Podaj nazwę notatnika:');
     if (!name) return;
-
     try {
-      const response = await fetch('http://localhost:8000/notebooks/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name })
-      });
-
-      if (response.ok) {
-        fetchNotebooks();
-      }
+      await createNotebook(name);
+      fetchNotebooks();
     } catch (error) {
       console.error('Błąd tworzenia notatnika:', error);
     }
