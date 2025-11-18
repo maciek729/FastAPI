@@ -132,6 +132,82 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 // Show success message
                 alert(`Folder skopiowany do notatnika "${targetNotebook.name}"`);
             }
+            // Check if this is a note being dragged
+            else if (dragData.type === 'note') {
+                // Don't copy if dropping on the same notebook
+                if (dragData.sourceNotebookId === targetNotebook.id) {
+                    return;
+                }
+
+                // Copy note to target notebook
+                const response = await axios.post(
+                    `http://localhost:8000/notes/${dragData.noteId}/copy`,
+                    {
+                        target_notebook_id: targetNotebook.id,
+                        user_id: dragData.userId
+                    }
+                );
+
+                // Show success message
+                alert(`Notatka skopiowana do notatnika "${targetNotebook.name}"`);
+            }
+            // Check if this is a note folder being dragged
+            else if (dragData.type === 'note-folder') {
+                // Don't copy if dropping on the same notebook
+                if (dragData.sourceNotebookId === targetNotebook.id) {
+                    return;
+                }
+
+                // Copy note folder to target notebook
+                const response = await axios.post(
+                    `http://localhost:8000/note-folders/${dragData.folderId}/copy`,
+                    {
+                        target_notebook_id: targetNotebook.id,
+                        user_id: dragData.userId
+                    }
+                );
+
+                // Show success message
+                alert(`Folder skopiowany do notatnika "${targetNotebook.name}"`);
+            }
+            // Check if this is a flashcard set being dragged
+            else if (dragData.type === 'flashcard-set') {
+                // Don't copy if dropping on the same notebook
+                if (dragData.sourceNotebookId === targetNotebook.id) {
+                    return;
+                }
+
+                // Copy flashcard set to target notebook
+                const response = await axios.post(
+                    `http://localhost:8000/flashcards/set/${dragData.setId}/copy`,
+                    {
+                        target_notebook_id: targetNotebook.id,
+                        user_id: dragData.userId
+                    }
+                );
+
+                // Show success message
+                alert(`Zestaw fiszek skopiowany do notatnika "${targetNotebook.name}"`);
+            }
+            // Check if this is a flashcard set folder being dragged
+            else if (dragData.type === 'flashcard-set-folder') {
+                // Don't copy if dropping on the same notebook
+                if (dragData.sourceNotebookId === targetNotebook.id) {
+                    return;
+                }
+
+                // Copy flashcard set folder to target notebook
+                const response = await axios.post(
+                    `http://localhost:8000/flashcard-set-folders/${dragData.folderId}/copy`,
+                    {
+                        target_notebook_id: targetNotebook.id,
+                        user_id: dragData.userId
+                    }
+                );
+
+                // Show success message
+                alert(`Folder fiszek skopiowany do notatnika "${targetNotebook.name}"`);
+            }
         } catch (error) {
             console.error('Error copying:', error);
             alert('Błąd kopiowania');

@@ -39,12 +39,15 @@ class NoteOut(BaseModel):
     id: int
     user_id: int
     notebook_id: int
+    folder_id: int | None = None
     title: str
     content: str
     type: str
     created_at: datetime
     updated_at: datetime
     is_shared: bool
+    grid_position: int | None = None
+    is_pinned: bool = False
 
     class Config:
         from_attributes = True
@@ -209,3 +212,82 @@ def get_lock_status(note_id: int, db: db_dependency):
             del note_locks[note_id]
     
     return {"locked": False}
+
+
+# Pin and Position endpoints for drag-and-drop functionality
+
+class UpdatePinRequest(BaseModel):
+    is_pinned: bool
+
+
+class UpdatePositionRequest(BaseModel):
+    grid_position: int
+
+
+@router.patch("/{note_id}/pin")
+async def update_note_pin(note_id: int, request: UpdatePinRequest, db: db_dependency):
+    """
+    Pin or unpin a note to keep it at the top of the list
+    """
+    note = db.query(Notes).filter(Notes.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    note.is_pinned = request.is_pinned
+    db.commit()
+    db.refresh(note)
+
+    return {"message": "Pin status updated successfully", "is_pinned": note.is_pinned}
+
+
+@router.patch("/{note_id}/position")
+async def update_note_position(note_id: int, request: UpdatePositionRequest, db: db_dependency):
+    """
+    Update the grid position of a note for drag-and-drop ordering
+    """
+    note = db.query(Notes).filter(Notes.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    note.grid_position = request.grid_position
+    db.commit()
+    db.refresh(note)
+
+    return {"message": "Position updated successfully", "grid_position": note.grid_position}
+
+
+# Copy note to another notebook
+
+class CopyNoteRequest(BaseModel):
+    target_notebook_id: int
+    user_id: int
+
+
+@router.post("/{note_id}/copy", response_model=NoteOut, status_code=status.HTTP_201_CREATED)
+async def copy_note_to_notebook(note_id: int, request: CopyNoteRequest, db: db_dependency):
+    """
+    Copy a note to another notebook
+    """
+    # Get the original note
+    original_note = db.query(Notes).filter(Notes.id == note_id).first()
+    if not original_note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    # Create a new note in the target notebook
+    new_note = Notes(
+        user_id=request.user_id,
+        notebook_id=request.target_notebook_id,
+        title=original_note.title,
+        content=original_note.content,
+        type=original_note.type,
+        is_shared=False,  # New copy starts as not shared
+        grid_position=None,  # Will be set by frontend drag-and-drop
+        is_pinned=False,  # New copy starts unpinned
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    db.add(new_note)
+    db.commit()
+    db.refresh(new_note)
+
+    return new_note

@@ -17,13 +17,13 @@
 }
 
 .headerIcon {
-    color: #6c63ff;
+    color: var(--purple_brighter);
 }
 
 .title {
     font-size: 1.75rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--title);
     margin: 0;
 }
 
@@ -33,7 +33,8 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: #f7fafc;
+    background: var(--white_btn_bg);
+    color: var(--white_btn_text);
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -41,7 +42,8 @@
 }
 
 .closeBtn:hover {
-    background: #e2e8f0;
+    background: var(--white_btn_hover_bg);
+    color: var(--white_btn_text);
 }
 
 .form {
@@ -51,17 +53,17 @@
 }
 
 .formSection {
-    background: white;
+    background: var(--inner_section_bg);
     border-radius: 16px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--flashcards_section_border);
 }
 
 .sectionTitle {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--title);
     margin: 0 0 1.5rem 0;
 }
 
@@ -85,31 +87,32 @@
 .radioLabel {
     display: block;
     padding: 1rem;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--white_btn_box_shadow);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
-    background: white;
+    background: var(--white_btn_bg);
 }
 
 .radioOption input[type="radio"]:checked + .radioLabel {
-    border-color: #6c63ff;
-    background: #f0edff;
+    border-color: var(--purple_brighter);
+    background: rgba(139, 92, 246, 0.08);
 }
 
 .radioLabel:hover {
-    border-color: #cbd5e0;
+    border-color: rgba(139, 92, 246, 0.3);
+    border-color: var(--purple_brighter);
 }
 
 .radioText {
     font-size: 0.9375rem;
     font-weight: 500;
-    color: #2d3748;
+    color: var(--white_btn_text);
 }
 
 .radioOption input[type="radio"]:checked + .radioLabel .radioText {
-    color: #6c63ff;
+    color: var(--purple_brighter);
     font-weight: 600;
 }
 
@@ -126,19 +129,19 @@
 .fileLabel {
     display: block;
     padding: 0.75rem 1rem;
-    border: 2px dashed #cbd5e0;
+    border: 2px dashed var(--darker_subtitle);
     border-radius: 10px;
     cursor: pointer;
     text-align: center;
-    color: #718096;
+    color: var(--subtitle);
     transition: all 0.2s ease;
-    background: #f7fafc;
+    background: var(--inner_inner_section_bg);
 }
 
 .fileLabel:hover {
-    border-color: #6c63ff;
-    color: #6c63ff;
-    background: #f0edff;
+    border-color: var(--purple_brighter);
+    color: var(--purple_brighter);
+    background: var(--inner_section_bg);
 }
 
 .formGroup {
@@ -153,16 +156,18 @@
     display: block;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #4a5568;
+    color: var(--subtitle);
     margin-bottom: 0.5rem;
 }
 
 .formGroup input[type="text"],
 .formGroup textarea,
 .formGroup select {
+    background: var(--inner_inner_section_bg);
+    color: var(--title);
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--white_btn_box_shadow);
     border-radius: 10px;
     font-size: 1rem;
     transition: all 0.2s ease;
@@ -173,7 +178,7 @@
 .formGroup textarea:focus,
 .formGroup select:focus {
     outline: none;
-    border-color: #6c63ff;
+    border-color: var(--purple_brighter);
     box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
 }
 
@@ -192,7 +197,7 @@
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: #e2e8f0;
+    background: var(--darker_subtitle);
     outline: none;
     margin-top: 0.5rem;
 }
@@ -202,7 +207,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #6c63ff;
+    background: var(--purple_brighter);
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -215,7 +220,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #6c63ff;
+    background: var(--purple_brighter);
     cursor: pointer;
     border: none;
 }
@@ -228,7 +233,7 @@
     justify-content: center;
     padding: 3rem 1rem;
     text-align: center;
-    color: #718096;
+    color: var(--subtitle);
 }
 
 .spinner {
@@ -252,20 +257,20 @@
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--white_btn_box_shadow);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .noteItem:hover {
-    border-color: #cbd5e0;
-    background: #f7fafc;
+    border-color: var(--white_btn_box_shadow);
+    background: var(--white_btn_hover_bg);
 }
 
 .noteItem.selected {
-    border-color: #6c63ff;
-    background: #f0edff;
+    border-color: var(--purple_brighter);
+    background: rgba(139, 92, 246, 0.08);
 }
 
 .checkbox {
@@ -275,13 +280,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6c63ff;
+    color: var(--purple_brighter);
 }
 
 .unchecked {
     width: 20px;
     height: 20px;
-    border: 2px solid #cbd5e0;
+    border: 2px solid var(--white_btn_box_shadow);
     border-radius: 4px;
 }
 
@@ -292,13 +297,13 @@
 .noteInfo h4 {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--title);
     margin: 0 0 0.25rem 0;
 }
 
 .noteInfo p {
     font-size: 0.8125rem;
-    color: #718096;
+    color: var(--subtitle);
     margin: 0;
     line-height: 1.5;
 }
@@ -317,7 +322,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 1rem;
-    border: none;
+    border: 1px solid rgba(148, 163, 184, 0.3);
     border-radius: 12px;
     font-size: 1rem;
     font-weight: 600;
@@ -326,12 +331,14 @@
 }
 
 .btnCancel {
-    background: #f7fafc;
-    color: #4a5568;
+    background: var(--inner_inner_inner_section_bg);
+    color: var(--subtitle);
 }
 
 .btnCancel:hover:not(:disabled) {
-    background: #e2e8f0;
+    background: var(--inner_inner_section_bg);
+    color: var(--title);
+    transform: translateY(-2px);
 }
 
 .btnSubmit {

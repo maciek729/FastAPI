@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { 
     Save, X, Trash2, Bold, Italic, Underline, 
     AlignLeft, AlignCenter, AlignRight, List, ListOrdered,
     Type, Calendar, Image, Lock, Eye
 } from 'lucide-react';
 import styles from '../../../css/features/NoteEditor.module.css';
+import { lockNoteFunction, unlockNoteFunction, checkLockStatusFunction, updateNote, deleteNote } from '../../../services/noteService';
 
 export default function NoteEditor({ note, onClose, onSave, onDelete, userData }) {
     const [title, setTitle] = useState(note.title);
@@ -38,15 +38,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const lockNote = async () => {
         try {
-            const response = await axios.post(`http://localhost:8000/notes/${note.id}/lock`, null, {
-                params: { user_id: userData.id }
-            });
+            const responseData = await lockNoteFunction(note.id, userData.id);
             
-            if (response.data.can_edit) {
+            if (responseData.can_edit) {
                 setIsReadOnly(false);
             } else {
                 setIsReadOnly(true);
-                setLockedByUsername(response.data.locked_by_username);
+                setLockedByUsername(responseData.locked_by_username);
             }
         } catch (err) {
             console.error('Error locking note:', err);
@@ -56,9 +54,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const unlockNote = async () => {
         try {
-            await axios.post(`http://localhost:8000/notes/${note.id}/unlock`, null, {
-                params: { user_id: userData.id }
-            });
+            await unlockNoteFunction(note.id, userData.id);
         } catch (err) {
             console.error('Error unlocking note:', err);
         }
@@ -66,12 +62,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const checkLockStatus = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/notes/${note.id}/lock-status`);
+            const responseData = await checkLockStatusFunction(note.id);
             
-            if (response.data.locked) {
-                if (response.data.locked_by_user_id !== userData.id) {
+            if (responseData.locked) {
+                if (responseData.locked_by_user_id !== userData.id) {
                     setIsReadOnly(true);
-                    setLockedByUsername(response.data.locked_by_username);
+                    setLockedByUsername(responseData.locked_by_username);
                 }
             }
         } catch (err) {
@@ -143,7 +139,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
         setIsSaving(true);
         try {
             const updatedContent = editorRef.current.innerHTML;
-            await axios.put(`http://localhost:8000/notes/${note.id}`, {
+            
+            await updateNote(note.id, {
                 title: title,
                 content: updatedContent,
                 type: note.type,
@@ -156,7 +153,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
             alert('Notatka zapisana!');
         } catch (err) {
             console.error(err);
-            alert('Błąd zapisywania notatki');
+            alert(err.message || 'Błąd zapisywania notatki');
         } finally {
             setIsSaving(false);
         }
@@ -170,13 +167,14 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
         if (!window.confirm('Czy na pewno chcesz usunąć tę notatkę?')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/notes/${note.id}`);
+            await deleteNote(note.id);
+            
             onDelete(note.id);
             alert('Notatka usunięta!');
             onClose();
         } catch (err) {
             console.error(err);
-            alert('Błąd usuwania notatki');
+            alert(err.message || 'Błąd usuwania notatki');
         }
     };
 

@@ -104,6 +104,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [selectedTest, setSelectedTest] = useState(null);
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
     const [editingFolder, setEditingFolder] = useState(null);
+    const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
 
     useEffect(() => {
         if (userData?.id && notebookId) {
@@ -500,6 +501,52 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         } catch (err) {
             console.error('Error moving test:', err);
             alert("Błąd przenoszenia testu");
+        }
+    };
+
+    // Breadcrumb drag handlers - for dragging items to parent folder
+    const handleBreadcrumbDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverBreadcrumb(true);
+    };
+
+    const handleBreadcrumbDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverBreadcrumb(false);
+    };
+
+    const handleBreadcrumbDrop = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverBreadcrumb(false);
+
+        const parentFolderId = currentFolder?.parent_folder_id || null;
+
+        // Handle test drop
+        if (draggedTest) {
+            try {
+                await handleMoveTestToFolder(draggedTest.test.id, parentFolderId);
+                setDraggedTest(null);
+            } catch (err) {
+                console.error('Error moving test to parent folder:', err);
+            }
+        }
+
+        // Handle folder drop
+        if (draggedFolder) {
+            try {
+                await axios.patch(`http://localhost:8000/test-folders/${draggedFolder.folder.id}/move`, {
+                    parent_folder_id: parentFolderId
+                });
+                setDraggedFolder(null);
+                await fetchFolders();
+                fetchTests();
+            } catch (err) {
+                console.error('Error moving folder to parent:', err);
+                alert("Błąd przenoszenia folderu");
+            }
         }
     };
 
@@ -907,7 +954,22 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                 <ArrowLeft size={20} />
                                 Powrót
                             </button>
-                            <h1 className={styles.notebookTitle} style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                            <h1
+                                className={styles.notebookTitle}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.5rem',
+                                    borderRadius: '8px',
+                                    transition: 'all 0.2s ease',
+                                    backgroundColor: dragOverBreadcrumb ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
+                                    border: dragOverBreadcrumb ? '2px dashed #f59e0b' : '2px solid transparent'
+                                }}
+                                onDragOver={handleBreadcrumbDragOver}
+                                onDragLeave={handleBreadcrumbDragLeave}
+                                onDrop={handleBreadcrumbDrop}
+                            >
                                 <Folder size={24} style={{color: '#f59e0b'}} />
                                 {currentFolder.name}
                             </h1>

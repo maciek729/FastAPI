@@ -37,7 +37,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
 
             {/* Tab Content */}
             <div className={styles.tabContainer}>
-                {activeTab === "chat" && <Chat />}
+                {activeTab === "chat" && <Chat userId={userData.id} notebookId = {details?.id}/>}
                 {activeTab === "files" && (
                     <FilesView
                         details={details}

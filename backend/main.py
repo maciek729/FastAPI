@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, status
 from models import Base
 from database import engine
-from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, test_folders, flashcards
+from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, test_folders, note_folders, flashcards, flashcard_set_folders
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,5 +32,7 @@ app.include_router(notebooks.router)
 app.include_router(notes.router)
 app.include_router(tests.router)
 app.include_router(test_folders.router)
+app.include_router(note_folders.router)
 app.include_router(contact.router)
 app.include_router(flashcards.router)
+app.include_router(flashcard_set_folders.router)
