@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from "../../../css/features/Dashboard.module.css";
-import { getNotebooks } from '../../../services/notebookService';
+import { getNotebooks, createNotebook } from '../../../services/notebookService';
 
 export default function Dashboard({ userData, onSelectNotebook }) {
   const [notebooks, setNotebooks] = useState([]);

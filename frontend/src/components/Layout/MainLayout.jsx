@@ -20,10 +20,8 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [notebookSection, setNotebookSection] = useState('overview');
 
-  // 1. NOWA FUNKCJA DO ZMIANY SEKCJI
   const handleGoToSection = (sectionId) => {
     setActiveSection(sectionId);
-    // Upewnij się, że opuszczasz widok notatnika, jeśli przechodzisz do innej sekcji
     if (sectionId !== 'notebook') {
         setSelectedNotebook(null);
     }
@@ -119,10 +117,6 @@ export default function MainLayout() {
 
       case 'settings':
         return <Settings userData={userData} onGoToSection={handleGoToSection}/>
-        // Przekazuje ustawieniom onGoToSection, aby z ich poziomu mozna bylo wejsc
-        // do innych ustawien (np. powiadomien, ustawienia konta)
-        // potrzebuje tego, ze wzgledu na przyciski Zarzadzaj
-        // Jesli wiki to czytasz to mozesz ten komentarz usunąć
 
       case 'user_settings':
         return <UserSettings userData={userData}/>
@@ -168,7 +162,6 @@ export default function MainLayout() {
         handleLogout={handleLogout}
         onSelectNotebook={handleSelectNotebook}
         onGoToDashboard={handleBackToDashboard}
-        // 2. PRZEKAŻ FUNKCJĘ DALEJ, ABY SIDEBAR MÓGŁ JĄ UŻYĆ
         onGoToSection={handleGoToSection}
       />
       

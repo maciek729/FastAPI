@@ -3,6 +3,8 @@ import axios from "axios";
 import { UserPlus, X, Pin, Folder, ArrowLeft, MoreVertical } from 'lucide-react';
 import NoteEditor from './NoteEditor';
 import styles from "../../../css/features/NotebookView.module.css";
+import { getCollaborators, addCollaborator, removeCollaborator } from '../../../services/notebookService';
+import { createNote} from '../../../services/noteService';
 
 export default function FilesView({ details, userData, refreshNotebook }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
@@ -38,7 +40,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
 
     useEffect(() => {
         setIsLoadingDetails(true);
-        
+
         const loadingTimer = setTimeout(() => {
             setIsLoadingDetails(false);
         }, 400);
@@ -80,8 +82,8 @@ export default function FilesView({ details, userData, refreshNotebook }) {
 
     const fetchCollaborators = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/notebooks/${details.id}/collaborators`);
-            setCollaborators(response.data);
+            const data = await getCollaborators(details.id);
+            setCollaborators(data);
         } catch (err) {
             console.error('Error fetching collaborators:', err);
         }
@@ -106,19 +108,20 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             return;
         }
 
-        try {
-            const response = await axios.post("http://localhost:8000/notes/create", {
-                user_id: userData.id,
-                notebook_id: details.id,
-                title: newNote.title,
-                content: newNote.content,
-                type: newNote.type,
-                is_shared: false
-            });
+        const notePayload = {
+            user_id: userData.id,
+            notebook_id: details.id,
+            title: newNote.title,
+            content: newNote.content,
+            type: newNote.type,
+            is_shared: false
+        };
 
-            // If we're inside a folder, move the note to that folder
+        try {
+            const responseData = await createNote(notePayload);
+
             if (currentFolder) {
-                await handleMoveNoteToFolder(response.data.id, currentFolder.id);
+                await handleMoveNoteToFolder(responseData.id, currentFolder.id);
             }
 
             alert("Notatka dodana!");
@@ -136,15 +139,14 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!collaboratorUsername.trim()) return alert("Podaj nazwę użytkownika");
 
         try {
-            await axios.post(`http://localhost:8000/notebooks/${details.id}/add-collaborator`, {
-                username: collaboratorUsername
-            });
+            await addCollaborator(details.id, collaboratorUsername);
             alert(`Dodano użytkownika ${collaboratorUsername}`);
             setCollaboratorUsername('');
             setShowCollaboratorModal(false);
             fetchCollaborators();
         } catch (err) {
-            alert(err.response?.data?.detail || "Błąd dodawania współtwórcy");
+            console.error('Błąd dodawania:', err);
+            alert(err.message || "Błąd dodawania współtwórcy");
         }
     };
 
@@ -152,11 +154,13 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!window.confirm('Czy na pewno chcesz usunąć tego współtwórcę?')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/notebooks/${details.id}/collaborator/${userId}`);
+            await removeCollaborator(details.id, userId);
+
             alert('Współtwórca usunięty');
             fetchCollaborators();
         } catch (err) {
-            alert(err.response?.data?.detail || "Błąd usuwania współtwórcy");
+            console.error('Błąd usuwania:', err);
+            alert(err.message || "Błąd usuwania współtwórcy");
         }
     };
 
@@ -185,14 +189,14 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             return 'Dziś';
         }
         const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-        if (diffDays <= 0) return 'Dziś'; 
+        if (diffDays <= 0) return 'Dziś';
         if (diffDays === 1) return '1 dzień temu';
         if (diffDays <= 7) return `${diffDays} dni temu`;
         return date.toLocaleDateString('pl-PL');
     };
 
     const getTypeColor = (type) => {
-        switch(type?.toLowerCase()) {
+        switch (type?.toLowerCase()) {
             case 'notatka': return '#6c63ff';
             case 'test': return '#4cafef';
             case 'fiszki': return '#ff6f61';
@@ -211,41 +215,34 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             filtered = filtered.filter(note => !note.folder_id);
         }
 
-        // Sort notes: pinned first, then by grid_position, then by date
         filtered = [...filtered].sort((a, b) => {
-            // First, pinned notes always come first
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
 
-            // For pinned notes, sort by grid_position
             if (a.is_pinned && b.is_pinned) {
                 if (a.grid_position !== null && b.grid_position !== null) {
                     return a.grid_position - b.grid_position;
                 }
             }
 
-            // For non-pinned notes, sort by grid_position
             if (!a.is_pinned && !b.is_pinned) {
                 if (a.grid_position !== null && b.grid_position !== null) {
                     return a.grid_position - b.grid_position;
                 }
             }
 
-            // Default to date
             return new Date(b.created_at) - new Date(a.created_at);
         });
 
         return filtered;
     };
 
-    // Pin toggle handler
     const handleTogglePin = async (noteId, isPinned, e) => {
         e.stopPropagation();
         try {
             await axios.patch(`http://localhost:8000/notes/${noteId}/pin`, {
                 is_pinned: isPinned
             });
-            // Update local state
             setNotes(prevNotes =>
                 prevNotes.map(note =>
                     note.id === noteId ? { ...note, is_pinned: isPinned } : note
@@ -257,7 +254,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         }
     };
 
-    // Folder handlers
     const handleCreateFolder = async (e) => {
         e.preventDefault();
         if (!newFolderName.trim()) return;
@@ -332,7 +328,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             });
             console.log('Backend response:', response.data);
 
-            // Update local state immediately to show the change
             setNotes(prevNotes => {
                 const updated = prevNotes.map(note =>
                     note.id === noteId ? { ...note, folder_id: folderId } : note
@@ -341,10 +336,8 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                 return updated;
             });
 
-            // Fetch folders to update counts
             await fetchFolders();
 
-            // Refresh notebook to get latest data from backend
             await refreshNotebook();
 
         } catch (err) {
@@ -353,13 +346,11 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         }
     };
 
-    // Drag handlers
     const handleDragStart = (e, note, index) => {
         setDraggedNote({ note, index });
         e.dataTransfer.effectAllowed = 'move';
         e.currentTarget.style.opacity = '0.5';
 
-        // Add note data to dataTransfer for drag-to-copy to sidebar
         e.dataTransfer.setData('application/json', JSON.stringify({
             type: 'note',
             noteId: note.id,
@@ -382,7 +373,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         const targetNote = filteredNotes[index];
         const draggedNoteData = draggedNote?.note;
 
-        // Allow drag over only if both notes have same pinned status
         if (draggedNoteData && targetNote) {
             if (draggedNoteData.is_pinned === targetNote.is_pinned) {
                 e.dataTransfer.dropEffect = 'move';
@@ -414,24 +404,20 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         const draggedNoteData = draggedNote.note;
         const targetNote = filteredNotes[dropIndex];
 
-        // Prevent dropping pinned note on unpinned note and vice versa
         if (draggedNoteData.is_pinned !== targetNote.is_pinned) {
             setDragOverIndex(null);
             return;
         }
 
-        // Reorder notes locally
         const newNotes = [...filteredNotes];
         const [removed] = newNotes.splice(draggedNote.index, 1);
         newNotes.splice(dropIndex, 0, removed);
 
-        // Update grid positions
         const updatedNotes = newNotes.map((note, idx) => ({
             ...note,
             grid_position: idx
         }));
 
-        // Update local state immediately
         setNotes(prevNotes => {
             const allNotes = [...prevNotes];
             updatedNotes.forEach(updated => {
@@ -443,7 +429,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             return allNotes;
         });
 
-        // Update backend
         try {
             await Promise.all(
                 updatedNotes.map(note =>
@@ -454,13 +439,12 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             );
         } catch (err) {
             console.error('Error updating note positions:', err);
-            refreshNotebook(); // Revert on error
+            refreshNotebook();
         }
 
         setDragOverIndex(null);
     };
 
-    // Folder drag handlers for reordering
     const handleFolderCardDragStart = (e, folder, index) => {
         setDraggedFolder({ folder, index });
         e.dataTransfer.effectAllowed = 'move';
@@ -538,7 +522,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         setDragOverFolderIndex(null);
     };
 
-    // Drag note to folder handlers
     const handleFolderDragOver = (e, folderId) => {
         e.preventDefault();
         e.stopPropagation();
@@ -566,7 +549,6 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         }
     };
 
-    // Breadcrumb drag handlers - for dragging items to parent folder
     const handleBreadcrumbDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -656,7 +638,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     onDragLeave={handleBreadcrumbDragLeave}
                                     onDrop={handleBreadcrumbDrop}
                                 >
-                                    <Folder size={24} style={{color: '#f59e0b'}} />
+                                    <Folder size={24} style={{ color: '#f59e0b' }} />
                                     {currentFolder.name}
                                 </h1>
                             </>
@@ -840,7 +822,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     <input
                                         type="text"
                                         value={newNote.title}
-                                        onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                                        onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
                                         placeholder="Tytuł notatki"
                                     />
                                 </div>
@@ -848,7 +830,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     <label>Treść</label>
                                     <textarea
                                         value={newNote.content}
-                                        onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                                        onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
                                         placeholder="Treść notatki..."
                                     />
                                 </div>
@@ -856,7 +838,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     <label>Typ</label>
                                     <select
                                         value={newNote.type}
-                                        onChange={(e) => setNewNote({...newNote, type: e.target.value})}
+                                        onChange={(e) => setNewNote({ ...newNote, type: e.target.value })}
                                     >
                                         <option value="Notatka">Notatka</option>
                                         <option value="Test">Test</option>
@@ -864,8 +846,8 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     </select>
                                 </div>
                                 <div className={styles.modalActions}>
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         className={styles.btnCancel}
                                         onClick={() => setShowAddNoteModal(false)}
                                     >
@@ -885,7 +867,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                             <div className={styles.modalHeader}>
                                 <h2 className={styles.modalTitle}>Zarządzaj współtwórcami</h2>
-                                <button 
+                                <button
                                     className={styles.closeBtn}
                                     onClick={() => setShowCollaboratorModal(false)}
                                 >
@@ -948,7 +930,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                 {/* Create Folder Modal */}
                 {showCreateFolderModal && (
                     <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                        <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
+                        <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
                             <div className={styles.modalHeader}>
                                 <h2 className={styles.modalTitle}>Utwórz nowy folder</h2>
                                 <button
@@ -958,7 +940,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     <X size={20} />
                                 </button>
                             </div>
-                            <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
+                            <form onSubmit={handleCreateFolder} style={{ padding: '2rem' }}>
                                 <div className={styles.formGroup}>
                                     <label>Nazwa folderu</label>
                                     <input
@@ -990,7 +972,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                 {/* Rename Folder Modal */}
                 {editingFolder && (
                     <div className={styles.modalOverlay} onClick={() => setEditingFolder(null)}>
-                        <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
+                        <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
                             <div className={styles.modalHeader}>
                                 <h2 className={styles.modalTitle}>Zmień nazwę folderu</h2>
                                 <button
@@ -1000,13 +982,13 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                     <X size={20} />
                                 </button>
                             </div>
-                            <form onSubmit={handleRenameFolder} style={{padding: '2rem'}}>
+                            <form onSubmit={handleRenameFolder} style={{ padding: '2rem' }}>
                                 <div className={styles.formGroup}>
                                     <label>Nowa nazwa</label>
                                     <input
                                         type="text"
                                         value={editingFolder.name}
-                                        onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
+                                        onChange={(e) => setEditingFolder({ ...editingFolder, name: e.target.value })}
                                         placeholder="Wpisz nową nazwę folderu..."
                                         autoFocus
                                         required
