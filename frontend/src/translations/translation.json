@@ -1,0 +1,682 @@
+{
+  "pl": {
+    "sidebar": {
+      "personalSpace": "Osobista",
+      "sharedSpace": "Wspólna",
+      "dashboard": "Pulpit",
+      "collapseSidebar": "Zwiń panel boczny",
+      "expandSidebar": "Rozwiń panel boczny",
+      "addNotebook": "Dodaj notatnik",
+      "addPersonalNotebook": "Dodaj osobisty notatnik",
+      "addSharedNotebook": "Dodaj wspólny notatnik",
+      "noNotebooks": "Brak notatników",
+      "notebookNamePrompt": "Podaj nazwę notatnika:",
+      "copySuccess": {
+        "test": "Test skopiowany do notatnika \"{notebookName}\"",
+        "folder": "Folder skopiowany do notatnika \"{notebookName}\"",
+        "note": "Notatka skopiowana do notatnika \"{notebookName}\"",
+        "noteFolder": "Folder skopiowany do notatnika \"{notebookName}\"",
+        "flashcardSet": "Zestaw fiszek skopiowany do notatnika \"{notebookName}\"",
+        "flashcardSetFolder": "Folder fiszek skopiowany do notatnika \"{notebookName}\""
+      },
+      "errors": {
+        "fetchNotebooks": "Błąd pobierania notatników",
+        "addNotebook": "Błąd dodawania notatnika",
+        "copy": "Błąd kopiowania"
+      },
+      "userMenu": {
+        "settings": "Ustawienia",
+        "logout": "Wyloguj",
+        "dashboard": "Pulpit",
+        "study": "Nauka",
+        "tests": "Testy",
+        "flashcards": "Fiszki",
+        "notes": "Notatki"
+      }
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "account": "Konto",
+      "accountDescription": "Zmień swoje dane, edytuj hasło lub e-mail i zarządzaj bezpieczeństwem konta.",
+      "manage": "Zarządzaj",
+      "theme": "Motyw",
+      "themeDescription": "Dostosuj wygląd aplikacji.",
+      "themeOptions": {
+        "light": "Jasny",
+        "dark": "Ciemny",
+        "system": "Systemowy"
+      },
+      "language": "Język",
+      "languageDescription": "Wybierz preferowany język aplikacji.",
+      "languageOptions": {
+        "polish": "Polski (Polish)",
+        "english": "English (Angielski)"
+      },
+      "notifications": "Powiadomienia",
+      "notificationsDescription": "Skonfiguruj swoje preferencje dotyczące powiadomień.",
+      "saveChanges": "Zapisz zmiany",
+      "cancel": "Anuluj",
+      "savedMessage": "Pomyślnie zapisano.",
+      "unsavedMessage": "Masz niezapisane zmiany."
+    },
+    "intro": {
+      "logo": "zdAI to!",
+      "nav": {
+        "features": "Funkcje",
+        "benefits": "Korzyści",
+        "testimonials": "Opinie"
+      },
+      "auth": {
+        "login": "Zaloguj się",
+        "start": "Rozpocznij",
+        "startFree": "Rozpocznij za darmo"
+      },
+      "hero": {
+        "badge": "Wspierane przez AI • Zaufane przez 10,000+ uczniów",
+        "title1": "Twoja osobista ",
+        "title2": "AI nauka",
+        "title3": " rewolucja",
+        "description": "zdAI to! łączy w sobie inteligentną konwersację AI, łatwe notatowanie i inteligentne narzędzia do generowania materiałów edukacyjnych - wszystko w jednym, pięknie zaprojektowanym miejscu.",
+        "startFree": "Zacznij za darmo",
+        "seeHow": "Zobacz jak działa",
+        "stats": {
+          "students": "Aktywnych uczniów",
+          "flashcards": "Utworzonych fiszek",
+          "rating": "Ocena użytkowników"
+        }
+      },
+      "features": {
+        "title1": "Wszystko czego potrzebujesz ",
+        "title2": "w jednym miejscu",
+        "description": "Kompleksowy ekosystem do nauki, zaprojektowany aby Ci pomóc osiągnąć więcej",
+        "aiChat": {
+          "title": "Porozmawiaj z AI Study Buddy",
+          "description": "Uzyskaj natychmiastowe odpowiedzi, wyjaśnienia i spersonalizowane wskazówki na dowolny temat. Twój prywatny korepetytor dostępny 24/7.",
+          "highlight": "Inteligentne odpowiedzi w sekundach"
+        },
+        "notes": {
+          "title": "Bezproblemowe robienie notatek",
+          "description": "Rób jasne, zwięzłe notatki bezpośrednio w zdAI. Organizuj je łatwo i uzyskuj dostęp w dowolnym miejscu i czasie.",
+          "highlight": "Synchronizacja w chmurze"
+        },
+        "materials": {
+          "title": "Generuj skuteczne materiały",
+          "description": "Przekształć swoje notatki w niestandardowe fiszki i testy sprawdzające. Ucz się mądrzej, a nie ciężej.",
+          "highlight": "AI tworzy idealne fiszki"
+        },
+        "organization": {
+          "title": "Scentralizowane centrum nauki",
+          "description": "Przechowuj wszystkie materiały do nauki - notatki, fiszki, quizy - starannie zorganizowane w jednym miejscu.",
+          "highlight": "Wszystko w jednym miejscu"
+        }
+      },
+      "benefits": {
+        "title1": "Ucz się ",
+        "title2": "mądrzej",
+        "title3": ", nie ciężej",
+        "saveTime": "Oszczędzaj czas",
+        "saveTimeDesc": "AI automatycznie tworzy fiszki i quizy z Twoich notatek",
+        "instantHelp": "Uzyskaj natychmiastową pomoc",
+        "instantHelpDesc": "24/7 dostęp do AI asystenta nauki dla każdego tematu",
+        "stayOrganized": "Zachowaj porządek",
+        "stayOrganizedDesc": "Wszystkie materiały do nauki w jednym, zorganizowanym miejscu"
+      },
+      "testimonials": {
+        "title1": "Co mówią ",
+        "title2": "nasi użytkownicy",
+        "testimonial1": "\"zdAI to! całkowicie zmieniło moje podejście do nauki. AI asystent jest niesamowity!\"",
+        "testimonial2": "\"Najlepsza aplikacja do nauki jakiej używałem. Automatyczne fiszki oszczędzają mi godziny!\"",
+        "testimonial3": "\"Wreszcie wszystkie moje notatki w jednym miejscu. Interfejs jest piękny i intuicyjny.\"",
+        "highSchoolStudent": "Uczennica liceum",
+        "universityStudent": "Student uniwersytetu",
+        "graduate": "Maturzystka"
+      },
+      "cta": {
+        "title": "Gotowy na rewolucję w nauce?",
+        "description": "Dołącz do tysięcy uczniów, którzy już odkryli moc AI w nauce. Rozpocznij swoją przygodę już dziś - całkowicie za darmo!",
+        "createAccount": "Stwórz konto teraz",
+        "freeStart": "Darmowy start • Bez zobowiązań",
+        "rating": "4.9/5 z 2,500+ opinii"
+      },
+      "footer": {
+        "terms": "Warunki użytkowania",
+        "privacy": "Polityka prywatności",
+        "contact": "Kontakt",
+        "copyright": "© 2025 zdAI to! Wszystkie prawa zastrzeżone."
+      }
+    },
+    "help": {
+      "title": "Pomoc i kontakt",
+      "subtitle": "Masz pytania? Sprawdź najczęstsze pytania lub skontaktuj się z nami!",
+      "question1": "Jak mogę zresetować moje hasło?",
+      "answer1": "Aby zresetować swoje hasło, przejdź do strony logowania i kliknij na link 'Zapomniałeś hasła?'. Postępuj zgodnie z instrukcjami, aby ustawić nowe hasło.",
+      "question2": "Jak mogę skontaktować się z zespołem wsparcia?",
+      "answer2": "Aby skontaktować się z naszym zespołem wsparcia, wypełnij poniższy formularz kontaktowy, a my odpowiemy na Twoją wiadomość tak szybko, jak to możliwe.",
+      "contactTitle": "Skontaktuj się z nami",
+      "titlePlaceholder": "Tytuł...",
+      "messagePlaceholder": "Treść wiadomości...",
+      "sendButton": "Wyślij",
+      "sending": "Wysyłanie...",
+      "successMessage": "Wiadomość została wysłana!",
+      "errorMessage": "Wystąpił błąd podczas wysyłania wiadomości.",
+      "connectionError": "Błąd połączenia z serwerem, spróbuj ponownie później."
+    },
+    "notebook": {
+      "tabs": {
+        "chat": "Chat z AI",
+        "files": "Moje Pliki",
+        "flashcards": "Fiszki",
+        "tests": "Sprawdziany"
+      }
+    },
+    "noteEditor": {
+      "imageError": "Proszę wybrać plik obrazu!",
+      "sizeError": "Plik jest za duży! Maksymalny rozmiar to 5MB.",
+      "lockedError": "Notatka jest edytowana przez innego użytkownika!",
+      "titleError": "Tytuł nie może być pusty!",
+      "deleteLockedError": "Nie możesz usunąć notatki, która jest edytowana przez innego użytkownika!",
+      "deleteConfirm": "Czy na pewno chcesz usunąć tę notatkę?",
+      "saveSuccess": "Notatka zapisana!",
+      "saveError": "Błąd zapisywania notatki",
+      "deleteSuccess": "Notatka usunięta!",
+      "deleteError": "Błąd usuwania notatki",
+      "readOnlyMessage": "Tryb tylko do odczytu - {username} edytuje tę notatkę",
+      "titlePlaceholder": "Tytuł notatki",
+      "deleteTitle": "Usuń notatkę",
+      "saveTitle": "Zapisz zmiany",
+      "saving": "Zapisywanie...",
+      "saveButton": "Zapisz",
+      "preview": "Podgląd",
+      "closeTitle": "Zamknij",
+      "bold": "Pogrubienie",
+      "italic": "Kursywa",
+      "underline": "Podkreślenie",
+      "alignLeft": "Wyrównaj do lewej",
+      "alignCenter": "Wyśrodkuj",
+      "alignRight": "Wyrównaj do prawej",
+      "bulletList": "Lista wypunktowana",
+      "numberedList": "Lista numerowana",
+      "insertImage": "Wstaw zdjęcie",
+      "small": "Mały",
+      "normal": "Normalny",
+      "large": "Duży",
+      "veryLarge": "Bardzo duży",
+      "createdAt": "Utworzono"
+    },
+    "flashcard": {
+      "question": "Pytanie",
+      "answer": "Odpowiedź",
+      "showAnswer": "Pokaż odpowiedź",
+      "dontKnow": "Nie umiem",
+      "know": "Umiem"
+    },
+    "flashcardGenerator": {
+      "title": "Generuj nowe fiszki",
+      "close": "Zamknij",
+      "sourceTitle": "Źródło materiału",
+      "manual": "Ręczny opis",
+      "fromFile": "Z pliku",
+      "fromNote": "Z notatki",
+      "uploadFile": "Załącz plik (PDF, DOCX, TXT, lub obraz)",
+      "chooseFile": "Wybierz plik",
+      "basicInfo": "Podstawowe informacje",
+      "setTitle": "Tytuł zestawu",
+      "titlePlaceholder": "np. Historia Polski - Średniowiecze",
+      "materialDescription": "Opis materiału",
+      "descriptionPlaceholder": "Opisz materiał, z którego mają być wygenerowane fiszki...",
+      "descriptionOptional": "Opis (opcjonalnie)",
+      "additionalInfo": "Dodatkowe informacje o zestawie...",
+      "generationParams": "Parametry generowania",
+      "cardCount": "Liczba fiszek",
+      "difficulty": "Poziom trudności",
+      "easy": "Łatwy",
+      "medium": "Średni",
+      "hard": "Trudny",
+      "selectSources": "Wybierz źródła",
+      "selected": "wybranych",
+      "loadingNotes": "Ładowanie notatek...",
+      "noNotes": "Brak notatek w tym notatniku",
+      "cancel": "Anuluj",
+      "generating": "Generowanie...",
+      "generateCards": "Generuj fiszki",
+      "titleError": "Podaj tytuł zestawu fiszek!",
+      "descriptionError": "Podaj opis materiału do wygenerowania fiszek!",
+      "fileError": "Załącz plik!",
+      "noteError": "Wybierz przynajmniej jedną notatkę!",
+      "success": "Fiszki zostały wygenerowane!",
+      "unknownError": "Nieznany błąd",
+      "generationError": "Błąd podczas generowania fiszek"
+    },
+    "flashcardLearning": {
+      "loading": "Ładowanie fiszek...",
+      "saveError": "Błąd podczas zapisywania postępu",
+      "sessionCompleted": "Sesja ukończona!",
+      "set": "Zestaw",
+      "know": "Umiem",
+      "dontKnow": "Nie umiem",
+      "score": "Wynik",
+      "restartAll": "Wszystkie fiszki od nowa",
+      "repeatIncorrect": "Powtórz fiszki których nie umiem ({count})",
+      "backToList": "Wróć do listy",
+      "back": "Wróć"
+    },
+    "flashcardSetManager": {
+      "loading": "Ładowanie fiszek...",
+      "updateSuccess": "Zestaw zaktualizowany!",
+      "updateError": "Błąd podczas aktualizacji zestawu",
+      "emptyFields": "Pytanie i odpowiedź nie mogą być puste!",
+      "cardUpdateSuccess": "Fiszka zaktualizowana!",
+      "cardUpdateError": "Błąd podczas aktualizacji fiszki",
+      "deleteConfirm": "Czy na pewno chcesz usunąć tę fiszkę?",
+      "cardDeleteSuccess": "Fiszka usunięta!",
+      "cardDeleteError": "Błąd podczas usuwania fiszki",
+      "cardAddSuccess": "Fiszka dodana!",
+      "cardAddError": "Błąd podczas dodawania fiszki",
+      "back": "Powrót",
+      "setTitlePlaceholder": "Tytuł zestawu",
+      "setDescriptionPlaceholder": "Opis zestawu (opcjonalnie)",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "editSet": "Edytuj zestaw",
+      "addNewCard": "Dodaj nową fiszkę",
+      "questionPlaceholder": "Pytanie",
+      "answerPlaceholder": "Odpowiedź",
+      "addCard": "Dodaj fiszkę",
+      "editCard": "Edytuj fiszkę",
+      "saveChanges": "Zapisz zmiany",
+      "questionLabel": "P",
+      "answerLabel": "O",
+      "edit": "Edytuj",
+      "delete": "Usuń"
+    },
+    "dashboard": {
+      "welcome": "Witaj z powrotem, {username}!",
+      "subtitle": "Wybierz notatnik lub utwórz nowy",
+      "createNotebook": "Utwórz nowy notatnik",
+      "loading": "Ładowanie notatników...",
+      "noNotebooks": "Brak notatników. Utwórz swój pierwszy!",
+      "fetchError": "Błąd pobierania notatników",
+      "createError": "Błąd tworzenia notatnika",
+      "notebookNamePrompt": "Podaj nazwę notatnika:"
+    },
+    "chat": {
+      "title": "Chat z AI",
+      "clear": "Wyczyść",
+      "saveSelected": "Zapisz zaznaczone jako notatkę",
+      "saveSingle": "Zapisz pojedynczy dymek",
+      "selectForNote": "Zaznacz do notatki",
+      "startConversation": "Zacznij konwersację",
+      "startDescription": "Zadaj pytanie lub prześlij plik, aby rozpocząć",
+      "fileUploaded": "Przesłano plik: {fileName}",
+      "fileSuccess": "Plik \"{fileName}\" został pomyślnie przetworzony!",
+      "fileError": "Błąd przetwarzania pliku",
+      "connectionError": "Błąd połączenia z serwerem",
+      "serverError": "Przepraszam, wystąpił błąd.",
+      "saveSuccess": "Notatka zapisana!",
+      "saveError": "Nie udało się zapisać notatki",
+      "upload": "Prześlij",
+      "uploadFile": "Prześlij plik",
+      "messagePlaceholder": "Napisz wiadomość..."
+    },
+    "userSettings": {
+      "title": "Konto",
+      "profilePhoto": "Zdjęcie profilowe",
+      "profilePhotoDescription": "Zmień swoje zdjęcie.",
+      "username": "Nazwa użytkownika",
+      "email": "Adres e-mail",
+      "password": "Hasło",
+      "passwordDescription": "Zmień swoje hasło.",
+      "deleteAccount": "Deaktywuj / Usuń konto ?",
+      "edit": "Edytuj",
+      "change": "Zmień",
+      "deleteAccountButton": "Usuń konto"
+    },
+    "userMenu": {
+      "profile": "Profil",
+      "settings": "Ustawienia",
+      "notifications": "Powiadomienia",
+      "help": "Pomoc"
+    }
+  },
+
+
+  "en": {
+    "sidebar": {
+      "personalSpace": "Personal",
+      "sharedSpace": "Shared",
+      "dashboard": "Dashboard",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "addNotebook": "Add notebook",
+      "addPersonalNotebook": "Add personal notebook",
+      "addSharedNotebook": "Add shared notebook",
+      "noNotebooks": "No notebooks yet",
+      "notebookNamePrompt": "Enter notebook name:",
+      "copySuccess": {
+        "test": "Test copied to notebook \"{notebookName}\"",
+        "folder": "Folder copied to notebook \"{notebookName}\"",
+        "note": "Note copied to notebook \"{notebookName}\"",
+        "noteFolder": "Folder copied to notebook \"{notebookName}\"",
+        "flashcardSet": "Flashcard set copied to notebook \"{notebookName}\"",
+        "flashcardSetFolder": "Flashcard folder copied to notebook \"{notebookName}\""
+      },
+      "errors": {
+        "fetchNotebooks": "Error loading notebooks",
+        "addNotebook": "Error adding notebook",
+        "copy": "Error copying"
+      },
+      "userMenu": {
+        "settings": "Settings",
+        "logout": "Logout",
+        "dashboard": "Dashboard",
+        "study": "Study",
+        "tests": "Tests",
+        "flashcards": "Flashcards",
+        "notes": "Notes"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "account": "Account",
+      "accountDescription": "Change your data, edit password or email, and manage account security.",
+      "manage": "Manage",
+      "theme": "Theme",
+      "themeDescription": "Customize the appearance of the application.",
+      "themeOptions": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "language": "Language",
+      "languageDescription": "Choose your preferred application language.",
+      "languageOptions": {
+        "polish": "Polski (Polish)",
+        "english": "English (Angielski)"
+      },
+      "notifications": "Notifications",
+      "notificationsDescription": "Configure your notification preferences.",
+      "saveChanges": "Save changes",
+      "cancel": "Cancel",
+      "savedMessage": "Successfully saved.",
+      "unsavedMessage": "You have unsaved changes."
+    },
+    "intro": {
+      "logo": "zdAI to!",
+      "nav": {
+        "features": "Features",
+        "benefits": "Benefits",
+        "testimonials": "Testimonials"
+      },
+      "auth": {
+        "login": "Log In",
+        "start": "Get Started",
+        "startFree": "Start for Free"
+      },
+      "hero": {
+        "badge": "AI-Powered • Trusted by 10,000+ Students",
+        "title1": "Your Personal ",
+        "title2": "AI Learning",
+        "title3": " Revolution",
+        "description": "zdAI to! combines smart AI conversation, easy note-taking, and intelligent educational material generation tools - all in one beautifully designed place.",
+        "startFree": "Start for Free",
+        "seeHow": "See How It Works",
+        "stats": {
+          "students": "Active Students",
+          "flashcards": "Flashcards Created",
+          "rating": "User Rating"
+        }
+      },
+      "features": {
+        "title1": "Everything You Need ",
+        "title2": "in One Place",
+        "description": "Comprehensive learning ecosystem designed to help you achieve more",
+        "aiChat": {
+          "title": "Chat with AI Study Buddy",
+          "description": "Get instant answers, explanations, and personalized guidance on any topic. Your private tutor available 24/7.",
+          "highlight": "Intelligent responses in seconds"
+        },
+        "notes": {
+          "title": "Seamless Note-Taking",
+          "description": "Take clear, concise notes directly in zdAI. Organize them easily and access them anywhere, anytime.",
+          "highlight": "Cloud synchronization"
+        },
+        "materials": {
+          "title": "Generate Effective Materials",
+          "description": "Transform your notes into custom flashcards and practice tests. Learn smarter, not harder.",
+          "highlight": "AI creates perfect flashcards"
+        },
+        "organization": {
+          "title": "Centralized Learning Hub",
+          "description": "Store all your learning materials - notes, flashcards, quizzes - neatly organized in one place.",
+          "highlight": "Everything in one place"
+        }
+      },
+      "benefits": {
+        "title1": "Learn ",
+        "title2": "Smarter",
+        "title3": ", Not Harder",
+        "saveTime": "Save Time",
+        "saveTimeDesc": "AI automatically creates flashcards and quizzes from your notes",
+        "instantHelp": "Get Instant Help",
+        "instantHelpDesc": "24/7 access to AI learning assistant for any topic",
+        "stayOrganized": "Stay Organized",
+        "stayOrganizedDesc": "All your learning materials in one organized place"
+      },
+      "testimonials": {
+        "title1": "What Our ",
+        "title2": "Users Say",
+        "testimonial1": "\"zdAI to! completely changed my approach to learning. The AI assistant is amazing!\"",
+        "testimonial2": "\"The best learning app I've ever used. Automatic flashcards save me hours!\"",
+        "testimonial3": "\"Finally all my notes in one place. The interface is beautiful and intuitive.\"",
+        "highSchoolStudent": "High School Student",
+        "universityStudent": "University Student",
+        "graduate": "Graduate"
+      },
+      "cta": {
+        "title": "Ready for a Learning Revolution?",
+        "description": "Join thousands of students who have already discovered the power of AI in learning. Start your adventure today - completely free!",
+        "createAccount": "Create Account Now",
+        "freeStart": "Free Start • No Commitment",
+        "rating": "4.9/5 from 2,500+ reviews"
+      },
+      "footer": {
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "contact": "Contact",
+        "copyright": "© 2025 zdAI to! All rights reserved."
+      }
+    },
+     "help": {
+      "title": "Help and Contact",
+      "subtitle": "Have questions? Check out frequently asked questions or contact us!",
+      "question1": "How can I reset my password?",
+      "answer1": "To reset your password, go to the login page and click on the 'Forgot password?' link. Follow the instructions to set a new password.",
+      "question2": "How can I contact the support team?",
+      "answer2": "To contact our support team, fill out the contact form below and we'll respond to your message as soon as possible.",
+      "contactTitle": "Contact Us",
+      "titlePlaceholder": "Title...",
+      "messagePlaceholder": "Message content...",
+      "sendButton": "Send",
+      "sending": "Sending...",
+      "successMessage": "Message has been sent!",
+      "errorMessage": "An error occurred while sending the message.",
+      "connectionError": "Connection error with the server, please try again later."
+    },
+    "notebook": {
+      "tabs": {
+        "chat": "AI Chat",
+        "files": "My Files",
+        "flashcards": "Flashcards",
+        "tests": "Tests"
+      }
+    },
+    "noteEditor": {
+      "imageError": "Please select an image file!",
+      "sizeError": "File is too large! Maximum size is 5MB.",
+      "lockedError": "Note is being edited by another user!",
+      "titleError": "Title cannot be empty!",
+      "deleteLockedError": "You cannot delete a note that is being edited by another user!",
+      "deleteConfirm": "Are you sure you want to delete this note?",
+      "saveSuccess": "Note saved!",
+      "saveError": "Error saving note",
+      "deleteSuccess": "Note deleted!",
+      "deleteError": "Error deleting note",
+      "readOnlyMessage": "Read-only mode - {username} is editing this note",
+      "titlePlaceholder": "Note title",
+      "deleteTitle": "Delete note",
+      "saveTitle": "Save changes",
+      "saving": "Saving...",
+      "saveButton": "Save",
+      "preview": "Preview",
+      "closeTitle": "Close",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "alignLeft": "Align left",
+      "alignCenter": "Center",
+      "alignRight": "Align right",
+      "bulletList": "Bulleted list",
+      "numberedList": "Numbered list",
+      "insertImage": "Insert image",
+      "small": "Small",
+      "normal": "Normal",
+      "large": "Large",
+      "veryLarge": "Very large",
+      "createdAt": "Created at"
+    },
+    "flashcard": {
+      "question": "Question",
+      "answer": "Answer",
+      "showAnswer": "Show answer",
+      "dontKnow": "Don't know",
+      "know": "Know"
+    },
+    "flashcardGenerator": {
+      "title": "Generate New Flashcards",
+      "close": "Close",
+      "sourceTitle": "Material Source",
+      "manual": "Manual Description",
+      "fromFile": "From File",
+      "fromNote": "From Note",
+      "uploadFile": "Upload File (PDF, DOCX, TXT, or image)",
+      "chooseFile": "Choose File",
+      "basicInfo": "Basic Information",
+      "setTitle": "Set Title",
+      "titlePlaceholder": "e.g., Polish History - Middle Ages",
+      "materialDescription": "Material Description",
+      "descriptionPlaceholder": "Describe the material from which flashcards should be generated...",
+      "descriptionOptional": "Description (optional)",
+      "additionalInfo": "Additional information about the set...",
+      "generationParams": "Generation Parameters",
+      "cardCount": "Number of cards",
+      "difficulty": "Difficulty Level",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "selectSources": "Select Sources",
+      "selected": "selected",
+      "loadingNotes": "Loading notes...",
+      "noNotes": "No notes in this notebook",
+      "cancel": "Cancel",
+      "generating": "Generating...",
+      "generateCards": "Generate Flashcards",
+      "titleError": "Enter flashcard set title!",
+      "descriptionError": "Enter material description for generating flashcards!",
+      "fileError": "Attach a file!",
+      "noteError": "Select at least one note!",
+      "success": "Flashcards have been generated!",
+      "unknownError": "Unknown error",
+      "generationError": "Error during flashcard generation"
+    },
+    "flashcardLearning": {
+      "loading": "Loading flashcards...",
+      "saveError": "Error saving progress",
+      "sessionCompleted": "Session completed!",
+      "set": "Set",
+      "know": "Know",
+      "dontKnow": "Don't know",
+      "score": "Score",
+      "restartAll": "All flashcards from start",
+      "repeatIncorrect": "Repeat flashcards I don't know ({count})",
+      "backToList": "Back to list",
+      "back": "Back"
+    },
+    "flashcardSetManager": {
+      "loading": "Loading flashcards...",
+      "updateSuccess": "Set updated!",
+      "updateError": "Error updating set",
+      "emptyFields": "Question and answer cannot be empty!",
+      "cardUpdateSuccess": "Flashcard updated!",
+      "cardUpdateError": "Error updating flashcard",
+      "deleteConfirm": "Are you sure you want to delete this flashcard?",
+      "cardDeleteSuccess": "Flashcard deleted!",
+      "cardDeleteError": "Error deleting flashcard",
+      "cardAddSuccess": "Flashcard added!",
+      "cardAddError": "Error adding flashcard",
+      "back": "Back",
+      "setTitlePlaceholder": "Set title",
+      "setDescriptionPlaceholder": "Set description (optional)",
+      "save": "Save",
+      "cancel": "Cancel",
+      "editSet": "Edit set",
+      "addNewCard": "Add new flashcard",
+      "questionPlaceholder": "Question",
+      "answerPlaceholder": "Answer",
+      "addCard": "Add flashcard",
+      "editCard": "Edit flashcard",
+      "saveChanges": "Save changes",
+      "questionLabel": "Q",
+      "answerLabel": "A",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dashboard": {
+      "welcome": "Welcome back, {username}!",
+      "subtitle": "Select a notebook or create a new one",
+      "createNotebook": "Create new notebook",
+      "loading": "Loading notebooks...",
+      "noNotebooks": "No notebooks. Create your first one!",
+      "fetchError": "Error loading notebooks",
+      "createError": "Error creating notebook",
+      "notebookNamePrompt": "Enter notebook name:"
+    },
+    "chat": {
+      "title": "AI Chat",
+      "clear": "Clear",
+      "saveSelected": "Save selected as note",
+      "saveSingle": "Save single bubble",
+      "selectForNote": "Select for note",
+      "startConversation": "Start conversation",
+      "startDescription": "Ask a question or upload a file to begin",
+      "fileUploaded": "File uploaded: {fileName}",
+      "fileSuccess": "File \"{fileName}\" has been successfully processed!",
+      "fileError": "File processing error",
+      "connectionError": "Server connection error",
+      "serverError": "Sorry, an error occurred.",
+      "saveSuccess": "Note saved!",
+      "saveError": "Failed to save note",
+      "upload": "Upload",
+      "uploadFile": "Upload file",
+      "messagePlaceholder": "Write a message..."
+    },
+    "userSettings": {
+      "title": "Account",
+      "profilePhoto": "Profile Photo",
+      "profilePhotoDescription": "Change your photo.",
+      "username": "Username",
+      "email": "Email Address",
+      "password": "Password",
+      "passwordDescription": "Change your password.",
+      "deleteAccount": "Deactivate / Delete Account?",
+      "edit": "Edit",
+      "change": "Change",
+      "deleteAccountButton": "Delete Account"
+    },
+    "userMenu": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "notifications": "Notifications",
+      "help": "Help"
+    }
+  }
+}
