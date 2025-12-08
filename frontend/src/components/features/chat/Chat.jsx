@@ -7,6 +7,7 @@ import {
   ResetSession,
   ClearFiles
 }  from "../../../services/aiService";
+import { createNote } from "../../../services/noteService";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 
@@ -102,17 +103,13 @@ export default function Chat({ userId, notebookId }) {
     if (selectedMessages.length === 0) return;
     const content = selectedMessages.map(i => messages[i].content).join("\n\n");
     try {
-      await fetch("http://localhost:8000/notes/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          notebook_id: notebookId,
-          title: content.slice(0, 50),
-          content,
-          type: "Chat AI",
-          is_shared: false
-        })
+      await createNote({
+        user_id: userId,
+        notebook_id: notebookId,
+        title: content.slice(0, 50),//WIEM ZMIENIE TO ALE MI SIĘ DZISIAJ NIE CHCE <3
+        content,
+        type: "Chat AI",
+        is_shared: false
       });
       alert(t('chat.saveSuccess'));
       setSelectedMessages([]);
@@ -124,17 +121,13 @@ export default function Chat({ userId, notebookId }) {
 
   const saveBotMessageAsNote = async (content) => {
     try {
-      await fetch("http://localhost:8000/notes/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          notebook_id: notebookId,
-          title: content.slice(0, 50),
-          content,
-          type: "Chat AI",
-          is_shared: false
-        })
+      await createNote({
+        user_id: userId,
+        notebook_id: notebookId,
+        title: content.slice(0, 50),
+        content,
+        type: "Chat AI",
+        is_shared: false
       });
       alert(t('chat.saveSuccess'));
     } catch (error) {

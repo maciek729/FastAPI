@@ -197,10 +197,12 @@
       "bulletList": "Lista wypunktowana",
       "numberedList": "Lista numerowana",
       "insertImage": "Wstaw zdjęcie",
-      "small": "Mały",
-      "normal": "Normalny",
-      "large": "Duży",
-      "veryLarge": "Bardzo duży",
+      "fontSize": {
+        "small": "Mały",
+        "normal": "Normalny",
+        "large": "Duży",
+        "veryLarge": "Bardzo duży"
+      },
       "createdAt": "Utworzono"
     },
     "flashcard": {
@@ -538,9 +540,12 @@
       "bulletList": "Bulleted list",
       "numberedList": "Numbered list",
       "insertImage": "Insert image",
-      "small": "Small",
-      "normal": "Normal",
-      "large": "Large",
+      "fontSize": {
+        "small": "Small",
+        "normal": "Normal",
+        "large": "Large",
+        "veryLarge": "Very large"
+      },
       "veryLarge": "Very large",
       "createdAt": "Created at"
     },

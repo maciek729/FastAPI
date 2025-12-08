@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { 
     Save, X, Trash2, Bold, Italic, Underline, 
     AlignLeft, AlignCenter, AlignRight, List, ListOrdered,
     Type, Calendar, Image, Lock, Eye
 } from 'lucide-react';
 import styles from '../../../css/features/NoteEditor.module.css';
+import { lockNoteFunction, unlockNoteFunction, checkLockStatusFunction, updateNote, deleteNote } from '../../../services/noteService';
+import { useLanguage } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 export default function NoteEditor({ note, onClose, onSave, onDelete, userData }) {
     const [title, setTitle] = useState(note.title);
@@ -16,6 +18,25 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
     const editorRef = useRef(null);
     const fileInputRef = useRef(null);
     const lockCheckIntervalRef = useRef(null)
+    const { language, changeLanguage } = useLanguage();
+    
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     useEffect(() => {
         if (editorRef.current && note.content) {
@@ -38,15 +59,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const lockNote = async () => {
         try {
-            const response = await axios.post(`http://localhost:8000/notes/${note.id}/lock`, null, {
-                params: { user_id: userData.id }
-            });
+            const responseData = await lockNoteFunction(note.id, userData.id);
             
-            if (response.data.can_edit) {
+            if (responseData.can_edit) {
                 setIsReadOnly(false);
             } else {
                 setIsReadOnly(true);
-                setLockedByUsername(response.data.locked_by_username);
+                setLockedByUsername(responseData.locked_by_username);
             }
         } catch (err) {
             console.error('Error locking note:', err);
@@ -56,9 +75,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const unlockNote = async () => {
         try {
-            await axios.post(`http://localhost:8000/notes/${note.id}/unlock`, null, {
-                params: { user_id: userData.id }
-            });
+            await unlockNoteFunction(note.id, userData.id);
         } catch (err) {
             console.error('Error unlocking note:', err);
         }
@@ -66,12 +83,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const checkLockStatus = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/notes/${note.id}/lock-status`);
+            const responseData = await checkLockStatusFunction(note.id);
             
-            if (response.data.locked) {
-                if (response.data.locked_by_user_id !== userData.id) {
+            if (responseData.locked) {
+                if (responseData.locked_by_user_id !== userData.id) {
                     setIsReadOnly(true);
-                    setLockedByUsername(response.data.locked_by_username);
+                    setLockedByUsername(responseData.locked_by_username);
                 }
             }
         } catch (err) {
@@ -143,7 +160,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
         setIsSaving(true);
         try {
             const updatedContent = editorRef.current.innerHTML;
-            await axios.put(`http://localhost:8000/notes/${note.id}`, {
+            
+            await updateNote(note.id, {
                 title: title,
                 content: updatedContent,
                 type: note.type,
@@ -156,7 +174,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
             alert('Notatka zapisana!');
         } catch (err) {
             console.error(err);
-            alert('Błąd zapisywania notatki');
+            alert(err.message || 'Błąd zapisywania notatki');
         } finally {
             setIsSaving(false);
         }
@@ -170,13 +188,14 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
         if (!window.confirm('Czy na pewno chcesz usunąć tę notatkę?')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/notes/${note.id}`);
+            await deleteNote(note.id);
+            
             onDelete(note.id);
             alert('Notatka usunięta!');
             onClose();
         } catch (err) {
             console.error(err);
-            alert('Błąd usuwania notatki');
+            alert(err.message || 'Błąd usuwania notatki');
         }
     };
 
@@ -205,7 +224,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                 {isReadOnly && (
                     <div className={styles.readOnlyBanner}>
                         <Lock size={16} />
-                        <span>Tryb tylko do odczytu - {lockedByUsername} edytuje tę notatkę</span>
+                        <span>{t('noteEditor.readOnlyMessage', { username: lockedByUsername })}</span>
                     </div>
                 )}
                 {/* Header */}
@@ -216,7 +235,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             value={title}
                             onChange={(e) => !isReadOnly && setTitle(e.target.value)}
                             className={styles.titleInput}
-                            placeholder="Tytuł notatki"
+                            placeholder={t('noteEditor.titlePlaceholder')}
                             disabled={isReadOnly}
                         />
                     </div>
@@ -226,7 +245,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                                 <button 
                                     className={styles.deleteBtn}
                                     onClick={handleDelete}
-                                    title="Usuń notatkę"
+                                    title={t('noteEditor.deleteTitle')}
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -234,23 +253,23 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                                     className={styles.saveBtn}
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    title="Zapisz zmiany"
+                                    title={t('noteEditor.saveTitle')}
                                 >
                                     <Save size={18} />
-                                    {isSaving ? 'Zapisywanie...' : 'Zapisz'}
+                                    {isSaving ? t('noteEditor.saving') : t('noteEditor.saveButton')}
                                 </button>
                             </>
                         )}
                         {isReadOnly && (
                             <div className={styles.readOnlyIndicator}>
                                 <Eye size={18} />
-                                <span>Podgląd</span>
+                                <span>{t('noteEditor.preview')}</span>
                             </div>
                         )}
                         <button 
                             className={styles.closeBtn}
                             onClick={onClose}
-                            title="Zamknij"
+                            title={t('noteEditor.closeTitle')}
                         >
                             <X size={20} />
                         </button>
@@ -264,21 +283,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('bold')}
-                                title="Pogrubienie (Ctrl+B)"
+                                title={`${t('noteEditor.bold')} (Ctrl+B)`}
                             >
                                 <Bold size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('italic')}
-                                title="Kursywa (Ctrl+I)"
+                                title={`${t('noteEditor.italic')} (Ctrl+I)`}
                             >
                                 <Italic size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('underline')}
-                                title="Podkreślenie (Ctrl+U)"
+                                title={`${t('noteEditor.underline')} (Ctrl+U)`}
                             >
                                 <Underline size={18} />
                             </button>
@@ -290,21 +309,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyLeft')}
-                                title="Wyrównaj do lewej"
+                                title={t('noteEditor.alignLeft')}
                             >
                                 <AlignLeft size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyCenter')}
-                                title="Wyśrodkuj"
+                                title={t('noteEditor.alignCenter')}
                             >
                                 <AlignCenter size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyRight')}
-                                title="Wyrównaj do prawej"
+                                title={t('noteEditor.alignRight')}
                             >
                                 <AlignRight size={18} />
                             </button>
@@ -316,14 +335,14 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertUnorderedList')}
-                                title="Lista wypunktowana"
+                                title={t('noteEditor.bulletList')}
                             >
                                 <List size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertOrderedList')}
-                                title="Lista numerowana"
+                                title={t('noteEditor.numberedList')}
                             >
                                 <ListOrdered size={18} />
                             </button>
@@ -342,7 +361,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => fileInputRef.current?.click()}
-                                title="Wstaw zdjęcie"
+                                title={t('noteEditor.insertImage')}
                             >
                                 <Image size={18} />
                             </button>
@@ -356,10 +375,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                                 onChange={(e) => execCommand('fontSize', e.target.value)}
                                 defaultValue="3"
                             >
-                                <option value="1">Mały</option>
-                                <option value="3">Normalny</option>
-                                <option value="5">Duży</option>
-                                <option value="7">Bardzo duży</option>
+                                <option value="1">{t('noteEditor.fontSize.small')}</option>
+                                <option value="3">{t('noteEditor.fontSize.normal')}</option>
+                                <option value="5">{t('noteEditor.fontSize.large')}</option>
+                                <option value="7">{t('noteEditor.fontSize.veryLarge')}</option>
                             </select>
                         </div>
                     </div>
@@ -381,13 +400,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                     <div className={styles.footerInfo}>
                         <span className={styles.noteType} style={{
                             backgroundColor: note.type === 'Notatka' ? '#6c63ff' : 
-                                           note.type === 'Test' ? '#4cafef' : '#ff6f61'
+                                        note.type === 'Test' ? '#4cafef' : '#ff6f61'
                         }}>
                             {note.type}
                         </span>
                         <span className={styles.footerDate}>
                             <Calendar size={14} />
-                            Utworzono: {formatDate(note.created_at)}
+                            {t('noteEditor.createdAt')}: {formatDate(note.created_at)}
                         </span>
                     </div>
                 </div>

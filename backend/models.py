@@ -76,15 +76,29 @@ class Notes(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)  # parent folder
     title = Column(String)
     content = Column(String)
     type = Column(String(50), default="Notatka")
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     is_shared = Column(Boolean, default=False)
+    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
+    is_pinned = Column(Boolean, default=False)  # whether note is pinned to top
 
     # 🔼 RELACJA DO NOTEBOOKA
     notebook = relationship("Notebooks", back_populates="notes")
+
+class NoteFolders(Base):
+    __tablename__ = "note_folders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String)
+    parent_folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)  # for nested folders
+    grid_position = Column(Integer, nullable=True)
+    created_at = Column(DateTime)
 
 class TestFolders(Base):
     __tablename__ = "test_folders"
@@ -132,6 +146,18 @@ class UserAnswers(Base):
     is_correct = Column(Boolean)
     answered_at = Column(DateTime)
     
+class FlashcardSetFolders(Base):
+    __tablename__ = "flashcard_set_folders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String)
+    parent_folder_id = Column(Integer, ForeignKey("flashcard_set_folders.id"), nullable=True)  # for nested folders
+    grid_position = Column(Integer, nullable=True)
+    created_at = Column(DateTime)
+
+
 class FlashcardSets(Base):
     __tablename__ = "flashcard_sets"
 
@@ -139,18 +165,22 @@ class FlashcardSets(Base):
     note_id = Column(Integer, ForeignKey("notes.id"), unique=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     notebook_id = Column(Integer, ForeignKey("notebooks.id"), index=True)
-    
+    folder_id = Column(Integer, ForeignKey("flashcard_set_folders.id"), nullable=True)  # parent folder
+
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     difficulty = Column(String, default="średni")
     total_cards = Column(Integer, default=0)
-    
+
     source_notes = Column(Text, nullable=True)
     source_files = Column(Text, nullable=True)
-    
+
+    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
+    is_pinned = Column(Boolean, default=False)  # whether flashcard set is pinned to top
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     flashcards = relationship("Flashcards", back_populates="flashcard_set", cascade="all, delete-orphan")
     note = relationship("Notes")
 

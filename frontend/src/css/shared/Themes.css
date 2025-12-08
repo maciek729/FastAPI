@@ -18,14 +18,15 @@
     --white_into_purple_btn_text: #64748b;
     --purple_into_white_text: #8b5cf6;
     --purple_brighter: #8b5cf6;
+    --purple_brighter_brighter: #8b5cf6;
     --purple_brighter_bg: #8b5cf615;
     --purple_brighter_border: #8b5cf640;
     --purple_btn_bg: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     --purple_btn_text: white;
     --purple_btn_hover: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    --white_btn_bg: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-    --white_btn_text: #6d28d9;
-    --white_btn_hover_bg: rgba(148, 163, 184, 0.1);
+    --white_btn_bg: linear-gradient(135deg, #f8f7fe 0%, #f7f5fd 100%);
+    --white_btn_text: #9e75df;
+    --white_btn_hover_bg: rgba(148, 163, 184, 0.15);
     --white_btn_hover_text: #1e293b;
     --white_btn_box_shadow: rgba(139, 92, 246, 0.3);
     --select_arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23334155' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
@@ -42,6 +43,13 @@
     --sidebar_section_hover_text: #8b5cf6;
     --sidebar_notebook_hover_bg: rgba(139, 92, 246, 0.05);
     --sidebar_notebook_hover_text: #475569;
+    --flashcards_section_border: #e2e8f0;
+    --darker_blue: #6c63ff;
+    --red_white_btn_bg: #fff5f5;
+    --red_white_btn_border: #fed7d7;
+    --red_white_btn_border_hover: #fc8181;
+    --flashcards_green_border: #68d391;
+    --flashcards_green_bg: #f0fff4;
 }
 
 /* Motyw Ciemny */ 
@@ -64,15 +72,16 @@
     --white_into_purple_btn_text: white;
     --purple_into_white_text: white;
     --purple_brighter: #ad8afc;
+    --purple_brighter_brighter: #baa1f4;
     --purple_brighter_bg: #8b5cf615;
-    --purple_brighter_border: #8b5cf640;
+    --purple_brighter_border: #8c60f2b7;
     --purple_btn_bg: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     --purple_btn_text: white;
     --purple_btn_hover: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     --white_btn_bg: linear-gradient(135deg, #2a2a35 0%, #343445 100%);
     --white_btn_text: #c4b5fd;
     --white_btn_box_shadow: rgba(100, 86, 135, 0.4);
-    --white_btn_hover_bg: linear-gradient(135deg, #343445 0%, #3f3f54 100%);
+    --white_btn_hover_bg: linear-gradient(135deg, #3c3c4a 0%, #3f3f54 100%);
     --white_btn_hover_text: #ffffff;
     --select_arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     --select_arrow_up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 3L11 8H1z'/%3E%3C/svg%3E");
@@ -88,4 +97,12 @@
     --sidebar_section_hover_text: #8b5cf6;
     --sidebar_notebook_hover_bg: rgba(204, 187, 243, 0.10);
     --sidebar_notebook_hover_text: #c0c4c9;
+    --flashcards_section_border: rgba(255, 255, 255, 0.174);
+    --darker_blue: #9e99fe;
+    --red_white_btn_bg: rgba(239, 68, 68, 0.1);
+    --red_white_btn_border: rgba(239, 68, 68, 0.2);
+    --red_white_btn_border_hover: rgba(239, 68, 68, 0.5);
+    --flashcards_green_border: #3a5740;
+    --flashcards_green_bg: rgba(58, 87, 64, 0.5);
+    --flashcards_green_border_hover: rgb(85, 148, 98);
 }
