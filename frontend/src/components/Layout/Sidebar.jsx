@@ -1,19 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import axios from "axios";
 import { Lock, Users, Plus, ChevronRight, Sparkles, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
 import styles from "../../css/layout/Sidebar.module.css";
 import UserFooter from "../features/sidebar_user_menu/UserFooter";
 import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
+import { LanguageContext } from "../../translations/LanguageContext";
+import translations from "../../translations/translation.json";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
-    const [spaces] = useState([
-        { id: 'personal', name: 'Osobista', icon: Lock },
-        { id: 'shared', name: 'Wspólna', icon: Users }
-    ]);
+    const { language } = useContext(LanguageContext);
+    
+    const t = useCallback((key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    }, [language]);
+
+    const [spaces, setSpaces] = useState([]);
     const [expandedSpaces, setExpandedSpaces] = useState(['personal', 'shared']);
     const [notebooks, setNotebooks] = useState({});
     const [selectedNotebook, setSelectedNotebook] = useState(null);
     const [dragOverNotebook, setDragOverNotebook] = useState(null);
+
+    useEffect(() => {
+        setSpaces([
+            { id: 'personal', name: t('sidebar.personalSpace'), icon: Lock },
+            { id: 'shared', name: t('sidebar.sharedSpace'), icon: Users }
+        ]);
+    }, [t]);
 
     useEffect(() => {
         if (userData?.id) {
@@ -32,12 +58,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
             });
             setNotebooks(prev => ({ ...prev, [spaceType]: response.data }));
         } catch (error) {
-            console.error('Błąd pobierania notatników:', error);
+            console.error(t('sidebar.errors.fetchNotebooks'), error);
         }
     };
 
     const handleAddNotebook = async (spaceType) => {
-        const name = prompt('Podaj nazwę notatnika:');
+        const name = prompt(t('sidebar.notebookNamePrompt'));
         if (!name) return;
         try {
             await axios.post('http://localhost:8000/notebooks/create', {
@@ -48,7 +74,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
             });
             fetchNotebooks(spaceType);
         } catch (error) {
-            alert('Błąd dodawania notatnika: ' + (error.response?.data?.detail || error.message));
+            alert(t('sidebar.errors.addNotebook') + ': ' + (error.response?.data?.detail || error.message));
         }
     };
 
@@ -94,15 +120,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         try {
             const dragData = JSON.parse(e.dataTransfer.getData('application/json'));
 
-            // Check if this is a test being dragged
             if (dragData.type === 'test') {
-                // Don't copy if dropping on the same notebook
                 if (dragData.sourceNotebookId === targetNotebook.id) {
                     return;
                 }
 
-                // Copy test to target notebook
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:8000/tests/${dragData.testId}/copy`,
                     {
                         target_notebook_id: targetNotebook.id,
@@ -110,18 +133,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     }
                 );
 
-                // Show success message
-                alert(`Test skopiowany do notatnika "${targetNotebook.name}"`);
+                alert(t('sidebar.copySuccess.test', { notebookName: targetNotebook.name }));
             }
-            // Check if this is a folder being dragged
             else if (dragData.type === 'folder') {
-                // Don't copy if dropping on the same notebook
                 if (dragData.sourceNotebookId === targetNotebook.id) {
                     return;
                 }
 
-                // Copy folder to target notebook
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:8000/test-folders/${dragData.folderId}/copy`,
                     {
                         target_notebook_id: targetNotebook.id,
@@ -129,18 +148,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     }
                 );
 
-                // Show success message
-                alert(`Folder skopiowany do notatnika "${targetNotebook.name}"`);
+                alert(t('sidebar.copySuccess.folder', { notebookName: targetNotebook.name }));
             }
-            // Check if this is a note being dragged
             else if (dragData.type === 'note') {
-                // Don't copy if dropping on the same notebook
                 if (dragData.sourceNotebookId === targetNotebook.id) {
                     return;
                 }
 
-                // Copy note to target notebook
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:8000/notes/${dragData.noteId}/copy`,
                     {
                         target_notebook_id: targetNotebook.id,
@@ -148,18 +163,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     }
                 );
 
-                // Show success message
-                alert(`Notatka skopiowana do notatnika "${targetNotebook.name}"`);
+                alert(t('sidebar.copySuccess.note', { notebookName: targetNotebook.name }));
             }
-            // Check if this is a note folder being dragged
             else if (dragData.type === 'note-folder') {
-                // Don't copy if dropping on the same notebook
                 if (dragData.sourceNotebookId === targetNotebook.id) {
                     return;
                 }
 
-                // Copy note folder to target notebook
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:8000/note-folders/${dragData.folderId}/copy`,
                     {
                         target_notebook_id: targetNotebook.id,
@@ -167,18 +178,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     }
                 );
 
-                // Show success message
-                alert(`Folder skopiowany do notatnika "${targetNotebook.name}"`);
+                alert(t('sidebar.copySuccess.noteFolder', { notebookName: targetNotebook.name }));
             }
-            // Check if this is a flashcard set being dragged
             else if (dragData.type === 'flashcard-set') {
-                // Don't copy if dropping on the same notebook
                 if (dragData.sourceNotebookId === targetNotebook.id) {
                     return;
                 }
 
-                // Copy flashcard set to target notebook
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:8000/flashcards/set/${dragData.setId}/copy`,
                     {
                         target_notebook_id: targetNotebook.id,
@@ -186,18 +193,14 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     }
                 );
 
-                // Show success message
-                alert(`Zestaw fiszek skopiowany do notatnika "${targetNotebook.name}"`);
+                alert(t('sidebar.copySuccess.flashcardSet', { notebookName: targetNotebook.name }));
             }
-            // Check if this is a flashcard set folder being dragged
             else if (dragData.type === 'flashcard-set-folder') {
-                // Don't copy if dropping on the same notebook
                 if (dragData.sourceNotebookId === targetNotebook.id) {
                     return;
                 }
 
-                // Copy flashcard set folder to target notebook
-                const response = await axios.post(
+                await axios.post(
                     `http://localhost:8000/flashcard-set-folders/${dragData.folderId}/copy`,
                     {
                         target_notebook_id: targetNotebook.id,
@@ -205,12 +208,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     }
                 );
 
-                // Show success message
-                alert(`Folder fiszek skopiowany do notatnika "${targetNotebook.name}"`);
+                alert(t('sidebar.copySuccess.flashcardSetFolder', { notebookName: targetNotebook.name }));
             }
         } catch (error) {
-            console.error('Error copying:', error);
-            alert('Błąd kopiowania');
+            console.error(t('sidebar.errors.copy'), error);
+            alert(t('sidebar.errors.copy'));
         }
     };
 
@@ -218,13 +220,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         <aside className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''}`}>
             <div className={styles.sidebarInner}>
 
-                {/* Header with Toggle */}
                 <div className={styles.sidebarHeader}>
                     <div 
                         className={styles.brandContainer}
                         onClick={handleBrandClick}
                         style={{ cursor: 'pointer' }}
-                        title="Go to Dashboard"
+                        title={t('sidebar.dashboard')}
                     >
                         <div className={styles.brandIcon}>
                             <Sparkles size={20} />
@@ -238,13 +239,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     <button 
                         className={styles.toggleBtn}
                         onClick={toggleSidebar}
-                        title={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                        title={isSidebarOpen ? t('sidebar.collapseSidebar') : t('sidebar.expandSidebar')}
                     >
                         {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className={styles.sidebarContent}>
                     {spaces.map((space) => {
                         const SpaceIcon = space.icon;
@@ -282,14 +282,13 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                         <button 
                                             className={styles.addBtn}
                                             onClick={() => handleAddNotebook(space.id)}
-                                            title={`Add ${space.name} notebook`}
+                                            title={space.id === 'personal' ? t('sidebar.addPersonalNotebook') : t('sidebar.addSharedNotebook')}
                                         >
                                             <Plus size={16} />
                                         </button>
                                     )}
                                 </div>
 
-                                {/* Notebook List */}
                                 {isExpanded && isSidebarOpen && (
                                     <div className={styles.notebookList}>
                                         {notebooks[space.id]?.map((notebook) => (
@@ -307,7 +306,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                         ))}
                                         {(!notebooks[space.id] || notebooks[space.id].length === 0) && (
                                             <div className={styles.emptyNotebooks}>
-                                                No notebooks yet
+                                                {t('sidebar.noNotebooks')}
                                             </div>
                                         )}
                                     </div>
@@ -317,21 +316,20 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })}
                 </div>
 
-                {/* User Footer */}
                 <div className={styles.sidebarFooter}>
                     {isSidebarOpen ? (
                         <UserFooter
                             userData={userData}
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
-                            onSettingsClick={() => console.log("Otwórz ustawienia")}
+                            onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
                         />
                     ) : (
                         <UserFooterCollapsed
                             userData={userData}
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
-                            onSettingsClick={() => console.log("Otwórz ustawienia")}
+                            onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
                         />
                     )}
                 </div>

@@ -1,13 +1,34 @@
-import React, {useState}  from "react";
+import React, {useState, useContext} from "react";
 import styles from "../../../../css/features/settings/Help.module.css"
 import { Sparkles} from "lucide-react";
 import HelpQuestion from "./HelpQuestion.jsx";
+import { LanguageContext } from "../../../../translations/LanguageContext";
+import translations from "../../../../translations/translation.json";
 
 export default function Help({userData}) {
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,15 +53,15 @@ export default function Help({userData}) {
             const data = await response.json();
 
             if (response.ok) {
-                setStatus(data.message || "Wiadomość została wysłana!");
+                setStatus(data.message || t('help.successMessage'));
                 setTitle("");
                 setMessage("");
             } else {
-                setStatus(data.detail || "Wystąpił błąd podczas wysyłania wiadomości.");
+                setStatus(data.detail || t('help.errorMessage'));
             }
         } catch (error) {
             console.error("Błąd sieci lub serwera:", error);
-            setStatus("Błąd połączenia z serwerem., spróbuj ponownie później.");
+            setStatus(t('help.connectionError'));
         } finally {
             setIsLoading(false);
         }
@@ -48,37 +69,34 @@ export default function Help({userData}) {
 
     return (
         <div className={styles.formWrapper}>
-            {/* Nagłówek */}
             <div className={styles.titleContainer}>
-                <h2 className={styles.title}>Pomoc i kontakt</h2>
-                <p className={styles.subtitle}>Masz pytania? Sprawdź najczęstsze pytania lub skontaktuj się z nami!</p>
+                <h2 className={styles.title}>{t('help.title')}</h2>
+                <p className={styles.subtitle}>{t('help.subtitle')}</p>
             </div>
 
-            {/* Pytania i odpowiedzi */}
             <HelpQuestion
                 question="Jeżeli byście chcieli to mogę dodać nową sekcję kontakt"
                 answer="i tam wówczas umieszczę formularz. Bo nie wiedziałem, gdzie go umieścić, więc na razie jest tutaj"
             />
 
             <HelpQuestion
-                question="Jak mogę zresetować moje hasło?"
-                answer="Aby zresetować swoje hasło, przejdź do strony logowania i kliknij na link 'Zapomniałeś hasła?'. Postępuj zgodnie z instrukcjami, aby ustawić nowe hasło."
+                question={t('help.question1')}
+                answer={t('help.answer1')}
             />
             <HelpQuestion
-                question="Jak mogę skontaktować się z zespołem wsparcia?"
-                answer="Aby skontaktować się z naszym zespołem wsparcia, wypełnij poniższy formularz kontaktowy, a my odpowiemy na Twoją wiadomość tak szybko, jak to możliwe."
+                question={t('help.question2')}
+                answer={t('help.answer2')}
             />
 
-            {/* Formularz */}
             <form className={styles.helpContainer} onSubmit={handleSubmit}>
                 <div className={styles.formContainer}>
                     <Sparkles size={20} className={styles.brandIcon}/>
-                    <h2 className={styles.helpTitle}>Skontaktuj się z nami</h2>
+                    <h2 className={styles.helpTitle}>{t('help.contactTitle')}</h2>
                 </div>
 
                 <input
                     type="text"
-                    placeholder="Tytuł..."
+                    placeholder={t('help.titlePlaceholder')}
                     value={title}
                     onChange={(t) => setTitle(t.target.value)}
                     className={styles.inputTitle}
@@ -87,7 +105,7 @@ export default function Help({userData}) {
                 />
 
                 <textarea
-                    placeholder="Treść wiadomości..."
+                    placeholder={t('help.messagePlaceholder')}
                     value={message}
                     onChange={(m) => setMessage(m.target.value)}
                     className={styles.textArea}
@@ -96,11 +114,13 @@ export default function Help({userData}) {
                 />
 
                 <button type="submit" className={styles.sendButton} disabled={isLoading}>
-                    {isLoading ? "Wysyłanie..." : "Wyślij"}
+                    {isLoading ? t('help.sending') : t('help.sendButton')}
                 </button>
 
                 {status && <p className={styles.statusMessage}>{status}</p>}
             </form>
-        </div>  
+        </div>  
     );
 }
+
+
