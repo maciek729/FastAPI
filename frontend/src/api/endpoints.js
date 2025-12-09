@@ -1,6 +1,12 @@
 import API_BASE_URL from './config';
 
 const ENDPOINTS = {
+  AI:{
+    UPLOAD: `${API_BASE_URL}/ai/upload`,
+    CLEAR: `${API_BASE_URL}/ai/clear_files`,
+    CHAT: `${API_BASE_URL}/ai/chat`,
+    RESET: `${API_BASE_URL}/ai/reset_session`,
+  },
   NOTEBOOKS: {
     LIST: `${API_BASE_URL}/notebooks/list`,
     CREATE: `${API_BASE_URL}/notebooks/create`,

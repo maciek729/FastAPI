@@ -1,10 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styles from "../../../css/features/Dashboard.module.css";
 import { getNotebooks, createNotebook } from '../../../services/notebookService';
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 export default function Dashboard({ userData, onSelectNotebook }) {
   const [notebooks, setNotebooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { language } = useContext(LanguageContext);
+
+  const t = (key, params = {}) => {
+    const keys = key.split('.');
+    let translation = translations[language];
+    
+    for (const k of keys) {
+      translation = translation?.[k];
+      if (!translation) return key;
+    }
+    
+    if (typeof translation === 'string' && Object.keys(params).length > 0) {
+      return translation.replace(/\{(\w+)\}/g, (match, key) => {
+        return params[key] || match;
+      });
+    }
+    
+    return translation || key;
+  };
 
   useEffect(() => {
     if (userData) {
@@ -19,20 +40,28 @@ export default function Dashboard({ userData, onSelectNotebook }) {
       setNotebooks(data);
     } 
     catch (error) {
-      console.error('Błąd pobierania notatników:', error);
+      console.error(t('dashboard.fetchError'), error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCreateNotebook = async () => {
-    const name = prompt('Podaj nazwę notatnika:');
+    const name = prompt(t('dashboard.notebookNamePrompt'));
     if (!name) return;
     try {
       await createNotebook(name);
       fetchNotebooks();
     } catch (error) {
-      console.error('Błąd tworzenia notatnika:', error);
+      console.error(t('dashboard.createError'), error);
+    }
+  };
+
+  const getFileCountText = (count) => {
+    if (language === 'pl') {
+      return `${count} ${count === 1 ? 'plik' : count >= 2 && count <= 4 ? 'pliki' : 'plików'}`;
+    } else {
+      return `${count} ${count === 1 ? 'file' : 'files'}`;
     }
   };
 
@@ -40,23 +69,25 @@ export default function Dashboard({ userData, onSelectNotebook }) {
     <div className={styles.dashboardContainer}>
       <div className={styles.notebookSelection}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Witaj z powrotem, {userData?.username}!</h1>
-          <p className={styles.subtitle}>Wybierz notatnik lub utwórz nowy</p>
+          <h1 className={styles.title}>
+            {t('dashboard.welcome', { username: userData?.username })}
+          </h1>
+          <p className={styles.subtitle}>{t('dashboard.subtitle')}</p>
         </div>
 
         <div className={styles.actions}>
           <button className={styles.createButton} onClick={handleCreateNotebook}>
-            + Utwórz nowy notatnik
+            + {t('dashboard.createNotebook')}
           </button>
         </div>
 
         {isLoading ? (
-          <div className={styles.loading}>Ładowanie notatników...</div>
+          <div className={styles.loading}>{t('dashboard.loading')}</div>
         ) : (
           <div className={styles.notebooksGrid}>
             {notebooks.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>Brak notatników. Utwórz swój pierwszy!</p>
+                <p>{t('dashboard.noNotebooks')}</p>
               </div>
             ) : (
               notebooks.map((notebook) => (
@@ -68,7 +99,7 @@ export default function Dashboard({ userData, onSelectNotebook }) {
                   <div className={styles.notebookIcon}>📚</div>
                   <h3 className={styles.notebookName}>{notebook.name}</h3>
                   <p className={styles.notebookInfo}>
-                    {notebook.files_count || 0} {notebook.files_count === 1 ? 'plik' : 'pliki'}
+                    {getFileCountText(notebook.files_count || 0)}
                   </p>
                 </div>
               ))

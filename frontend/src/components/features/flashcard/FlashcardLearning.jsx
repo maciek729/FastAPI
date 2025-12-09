@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { ArrowLeft, RotateCw, Award, Loader } from "lucide-react";
 import FlashcardCard from "./FlashcardCard";
 import styles from "../../../css/features/FlashcardLearning.module.css";
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
-    const [allFlashcards, setAllFlashcards] = useState([]); // Pełny oryginalny zestaw
+    const [allFlashcards, setAllFlashcards] = useState([]);
     const [flashcards, setFlashcards] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -17,6 +19,25 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
     });
     const [incorrectCards, setIncorrectCards] = useState([]);
     const [showCompletion, setShowCompletion] = useState(false);
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     useEffect(() => {
         fetchFlashcards();
@@ -26,7 +47,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
         try {
             setLoading(true);
             const response = await axios.get(`http://localhost:8000/flashcards/set/${flashcardSet.id}/cards`);
-            setAllFlashcards(response.data); // Zapisz oryginalny zestaw
+            setAllFlashcards(response.data);
             setFlashcards(response.data);
             setSessionStats(prev => ({...prev, total: response.data.length}));
         } catch (error) {
@@ -62,7 +83,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
                 setShowCompletion(true);
             }
         } catch (error) {
-            alert("Błąd podczas zapisywania postępu");
+            alert(t('flashcardLearning.saveError'));
         }
     };
 
@@ -96,7 +117,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
         return (
             <div className={styles.loading}>
                 <Loader className={styles.spinner} size={48} />
-                <p>Ładowanie fiszek...</p>
+                <p>{t('flashcardLearning.loading')}</p>
             </div>
         );
     }
@@ -109,37 +130,37 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
         return (
             <div className={styles.completion}>
                 <Award className={styles.completionIcon} size={64} />
-                <h2>Sesja ukończona!</h2>
-                <p>Zestaw: "{flashcardSet.title}"</p>
+                <h2>{t('flashcardLearning.sessionCompleted')}</h2>
+                <p>{t('flashcardLearning.set')}: "{flashcardSet.title}"</p>
 
                 <div className={styles.completionStats}>
                     <div className={styles.completionStat}>
                         <span className={styles.completionStatValue}>{sessionStats.correct}</span>
-                        <span className={styles.completionStatLabel}>Umiem</span>
+                        <span className={styles.completionStatLabel}>{t('flashcardLearning.know')}</span>
                     </div>
                     <div className={styles.completionStat}>
                         <span className={styles.completionStatValue}>{sessionStats.incorrect}</span>
-                        <span className={styles.completionStatLabel}>Nie umiem</span>
+                        <span className={styles.completionStatLabel}>{t('flashcardLearning.dontKnow')}</span>
                     </div>
                     <div className={styles.completionStat}>
                         <span className={styles.completionStatValue}>{percentageCorrect}%</span>
-                        <span className={styles.completionStatLabel}>Wynik</span>
+                        <span className={styles.completionStatLabel}>{t('flashcardLearning.score')}</span>
                     </div>
                 </div>
 
                 <div className={styles.completionActions}>
                     <button className={styles.btnRestart} onClick={handleRestart}>
                         <RotateCw size={18} />
-                        Wszystkie fiszki od nowa
+                        {t('flashcardLearning.restartAll')}
                     </button>
                     {incorrectCards.length > 0 && (
                         <button className={styles.btnRepeatIncorrect} onClick={handleRepeatIncorrect}>
                             <RotateCw size={18} />
-                            Powtórz fiszki których nie umiem ({incorrectCards.length})
+                            {t('flashcardLearning.repeatIncorrect', { count: incorrectCards.length })}
                         </button>
                     )}
                     <button className={styles.btnBack} onClick={onBack}>
-                        Wróć do listy
+                        {t('flashcardLearning.backToList')}
                     </button>
                 </div>
             </div>
@@ -153,7 +174,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={onBack}>
                     <ArrowLeft size={20} />
-                    Wróć
+                    {t('flashcardLearning.back')}
                 </button>
                 <div className={styles.progress}>
                     <span>{currentIndex + 1} / {flashcards.length}</span>
