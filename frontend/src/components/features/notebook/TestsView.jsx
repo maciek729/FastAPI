@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import axios from "axios";
 import { Plus, X, Play, BarChart, Trash2, CheckCircle, Search, Filter, Pin, Folder, FolderOpen, ChevronRight, MoreVertical, ArrowLeft } from 'lucide-react';
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import * as testsService from '../../../services/testsService';
 
 // Helper function to render text with math formulas
 const MathText = ({ text }) => {
@@ -118,8 +118,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!notebookId) return;
 
         try {
-            const response = await axios.get(`http://localhost:8000/tests/list?user_id=${userData.id}&notebook_id=${notebookId}`);
-            setTests(response.data);
+            const data = await testsService.fetchTests(userData.id, notebookId);
+            setTests(data);
         } catch (err) {
             console.error('Error fetching tests:', err);
         }
@@ -129,8 +129,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!notebookId) return;
 
         try {
-            const response = await axios.get(`http://localhost:8000/test-folders/list?user_id=${userData.id}&notebook_id=${notebookId}`);
-            setFolders(response.data);
+            const data = await testsService.fetchTestFolders(userData.id, notebookId);
+            setFolders(data);
         } catch (err) {
             console.error('Error fetching folders:', err);
         }
@@ -144,12 +144,11 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
         console.log('Pobieranie notatek dla notebook:', notebookId);
         try {
-            const response = await axios.get(`http://localhost:8000/notes/list/${notebookId}`);
-            console.log('Pobrane notatki:', response.data);
-            setNotes(response.data);
+            const data = await testsService.fetchNotes(notebookId);
+            console.log('Pobrane notatki:', data);
+            setNotes(data);
         } catch (err) {
             console.error('Error fetching notes:', err);
-            console.error('Response:', err.response);
         }
     };
 
@@ -205,14 +204,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                     formData.append('folder_id', currentFolder.id);
                 }
 
-                await axios.post("http://localhost:8000/tests/generate-from-file", formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                await testsService.generateTestFromFile(formData);
             } else {
-                // Generate from manual input or note
-                await axios.post("http://localhost:8000/tests/generate", {
+                await testsService.generateTest({
                     user_id: userData.id,
                     notebook_id: notebookId,
                     title: newTest.title,
@@ -245,9 +239,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const handleStartTest = async (test) => {
         setShowDetailsModal(false);
         try {
-            const response = await axios.get(`http://localhost:8000/tests/${test.id}`);
-            setCurrentTest(response.data);
-            setCurrentQuestions(response.data.questions);
+            const data = await testsService.getTest(test.id);
+            setCurrentTest(data);
+            setCurrentQuestions(data.questions);
             setUserAnswers({});
             setShowTakeTestModal(true);
         } catch (err) {
@@ -300,16 +294,14 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
         setLoading(true);
         try {
-            // Submit all answers
             for (const question of currentQuestions) {
                 const answer = userAnswers[question.id];
                 if (answer) {
-                    // Convert answer to JSON string
                     const answerString = Array.isArray(answer)
                         ? JSON.stringify(answer)
                         : JSON.stringify([answer]);
 
-                    await axios.post("http://localhost:8000/tests/submit-answer", {
+                    await testsService.submitAnswer({
                         user_id: userData.id,
                         test_question_id: question.id,
                         selected_answer: answerString
@@ -317,11 +309,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 }
             }
 
-            // Get results
-            const resultsResponse = await axios.get(
-                `http://localhost:8000/tests/results/${currentTest.id}?user_id=${userData.id}`
-            );
-            setTestResults(resultsResponse.data);
+            const results = await testsService.getTestResults(currentTest.id, userData.id);
+            setTestResults(results);
             setShowTakeTestModal(false);
             setShowResultsModal(true);
         } catch (err) {
@@ -335,10 +324,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const handleViewResults = async (test) => {
         setShowDetailsModal(false);
         try {
-            const response = await axios.get(
-                `http://localhost:8000/tests/results/${test.id}?user_id=${userData.id}`
-            );
-            setTestResults(response.data);
+            const results = await testsService.getTestResults(test.id, userData.id);
+            setTestResults(results);
             setShowResultsModal(true);
         } catch (err) {
             console.error('Error loading results:', err);
@@ -350,7 +337,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!window.confirm('Czy na pewno chcesz usunąć ten test?')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/tests/${testId}?user_id=${userData.id}`);
+            await testsService.deleteTest(testId, userData.id);
             alert('Test usunięty');
             fetchTests();
         } catch (err) {
@@ -401,10 +388,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
     const handleTogglePin = async (testId, isPinned) => {
         try {
-            await axios.patch(`http://localhost:8000/tests/${testId}/pin`, {
-                is_pinned: isPinned
-            });
-            // Update local state
+            await testsService.togglePinTest(testId, isPinned);
             setTests(prevTests =>
                 prevTests.map(test =>
                     test.id === testId ? { ...test, is_pinned: isPinned } : test
@@ -432,7 +416,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!newFolderName.trim()) return;
 
         try {
-            await axios.post('http://localhost:8000/test-folders/create', {
+            await testsService.createTestFolder({
                 notebook_id: notebookId,
                 user_id: userData.id,
                 name: newFolderName,
@@ -466,7 +450,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/test-folders/${folderId}`);
+            await testsService.deleteTestFolder(folderId);
             fetchFolders();
             fetchTests();
         } catch (err) {
@@ -480,9 +464,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!editingFolder || !editingFolder.name.trim()) return;
 
         try {
-            await axios.patch(`http://localhost:8000/test-folders/${editingFolder.id}/rename`, {
-                name: editingFolder.name
-            });
+            await testsService.renameTestFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
             fetchFolders();
         } catch (err) {
@@ -493,10 +475,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
     const handleMoveTestToFolder = async (testId, folderId) => {
         try {
-            await axios.post('http://localhost:8000/test-folders/move-test', {
-                test_id: testId,
-                folder_id: folderId
-            });
+            await testsService.moveTestToFolder(testId, folderId);
             fetchTests();
         } catch (err) {
             console.error('Error moving test:', err);
@@ -534,12 +513,9 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             }
         }
 
-        // Handle folder drop
         if (draggedFolder) {
             try {
-                await axios.patch(`http://localhost:8000/test-folders/${draggedFolder.folder.id}/move`, {
-                    parent_folder_id: parentFolderId
-                });
+                await testsService.moveTestFolder(draggedFolder.folder.id, parentFolderId);
                 setDraggedFolder(null);
                 await fetchFolders();
                 fetchTests();
@@ -702,18 +678,14 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             return allTests;
         });
 
-        // Update backend
         try {
             await Promise.all(
                 updatedTests.map(test =>
-                    axios.patch(`http://localhost:8000/tests/${test.id}/position`, {
-                        grid_position: test.grid_position
-                    })
+                    testsService.updateTestPosition(test.id, test.grid_position)
                 )
             );
         } catch (err) {
             console.error('Error updating test positions:', err);
-            // Revert on error
             fetchTests();
         }
 
@@ -809,18 +781,14 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             return allFolders;
         });
 
-        // Update backend
         try {
             await Promise.all(
                 updatedFolders.map(folder =>
-                    axios.patch(`http://localhost:8000/test-folders/${folder.id}/position`, {
-                        grid_position: folder.grid_position
-                    })
+                    testsService.updateTestFolderPosition(folder.id, folder.grid_position)
                 )
             );
         } catch (err) {
             console.error('Error updating folder positions:', err);
-            // Revert on error
             fetchFolders();
         }
 
