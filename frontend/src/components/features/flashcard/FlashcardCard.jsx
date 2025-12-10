@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { XCircle, CheckCircle } from "lucide-react";
 import styles from "../../../css/features/FlashcardCard.module.css";
@@ -16,6 +17,16 @@ export default function FlashcardCard({ question, answer, onReview }) {
         setIsFlipped(false);
     };
 
+    const getFontSize = (text) => {
+        const length = text.length;
+        if (length > 500) return "0.75rem";
+        if (length > 300) return "0.875rem";
+        if (length > 200) return "1rem";
+        if (length > 100) return "1.125rem";
+        if (length > 50) return "1.25rem";
+        return "1.5rem";
+    };
+
     return (
         <div className={styles.cardContainer}>
             <div className={styles.cardScene}>
@@ -23,7 +34,7 @@ export default function FlashcardCard({ question, answer, onReview }) {
                     <div className={`${styles.cardFace} ${styles.cardFront}`}>
                         <div className={styles.cardLabel}>Pytanie</div>
                         <div className={styles.cardContent}>
-                            <p>{question}</p>
+                            <p style={{ fontSize: getFontSize(question) }}>{question}</p>
                         </div>
                         <button className={styles.flipBtn} onClick={handleFlipCard}>
                             Pokaż odpowiedź
@@ -33,7 +44,7 @@ export default function FlashcardCard({ question, answer, onReview }) {
                     <div className={`${styles.cardFace} ${styles.cardBack}`}>
                         <div className={styles.cardLabel}>Odpowiedź</div>
                         <div className={styles.cardContent}>
-                            <p>{answer}</p>
+                            <p style={{ fontSize: getFontSize(answer) }}>{answer}</p>
                         </div>
                     </div>
                 </div>
