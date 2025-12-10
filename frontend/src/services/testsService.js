@@ -208,7 +208,7 @@ export const updateTestFolderPosition = async (folderId, gridPosition) => {
 };
 
 export const fetchNotes = async (notebookId) => {
-  const response = await fetch(ENDPOINTS.TESTS.NOTES.LIST(notebookId), {
+  const response = await fetch(ENDPOINTS.NOTES.LIST(notebookId), {
     credentials: 'include',
   });
   if (!response.ok) {

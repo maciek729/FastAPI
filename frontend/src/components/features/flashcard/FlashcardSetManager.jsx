@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { ArrowLeft, Edit2, Trash2, GripVertical, Plus, X, Check } from "lucide-react";
 import styles from "../../../css/features/FlashcardSetManager.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import { getFlashcardSetCards, updateFlashcardSet, updateFlashcard, deleteFlashcard, createFlashcard, reorderFlashcards } from '../../../services/flashcardService';
 
 export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     const [flashcards, setFlashcards] = useState([]);
@@ -46,8 +46,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     const fetchFlashcards = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/flashcards/set/${flashcardSet.id}/cards`);
-            setFlashcards(response.data);
+            const data = await getFlashcardSetCards(flashcardSet.id);
+            setFlashcards(data);
         } catch (error) {
         } finally {
             setLoading(false);
@@ -56,7 +56,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
 
     const handleUpdateSet = async () => {
         try {
-            await axios.put(`http://localhost:8000/flashcards/set/${flashcardSet.id}`, {
+            await updateFlashcardSet(flashcardSet.id, {
                 title: setTitle,
                 description: setDescription
             });
@@ -65,7 +65,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             setEditingSet(false);
             onBack();
         } catch (error) {
-            alert(`${t('flashcardSetManager.updateError')}: ${error.response?.data?.detail || error.message}`);
+            alert(`${t('flashcardSetManager.updateError')}: ${error.message}`);
         }
     };
 
@@ -76,7 +76,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
         }
 
         try {
-            await axios.put(`http://localhost:8000/flashcards/card/${editingCard}`, {
+            await updateFlashcard(editingCard, {
                 question: editQuestion.trim(),
                 answer: editAnswer.trim()
             });
@@ -100,7 +100,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
         if (!window.confirm(t('flashcardSetManager.deleteConfirm'))) return;
 
         try {
-            await axios.delete(`http://localhost:8000/flashcards/card/${cardId}`);
+            await deleteFlashcard(cardId);
             fetchFlashcards();
             alert(t('flashcardSetManager.cardDeleteSuccess'));
         } catch (error) {
@@ -115,7 +115,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
         }
 
         try {
-            await axios.post(`http://localhost:8000/flashcards/card`, {
+            await createFlashcard({
                 flashcard_set_id: flashcardSet.id,
                 question: newQuestion.trim(),
                 answer: newAnswer.trim()
@@ -163,7 +163,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
         setDragOverIndex(null);
 
         try {
-            await axios.post(`http://localhost:8000/flashcards/reorder`, {
+            await reorderFlashcards({
                 set_id: flashcardSet.id,
                 card_positions: newFlashcards.map((card, idx) => ({
                     card_id: card.id,

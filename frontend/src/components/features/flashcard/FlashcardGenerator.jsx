@@ -1,9 +1,10 @@
 import { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { X, Loader, Sparkles, CheckSquare } from "lucide-react";
 import styles from "../../../css/features/FlashcardGenerator.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import { generateFlashcards, generateFlashcardsFromFile } from '../../../services/flashcardService';
+import ENDPOINTS from '../../../api/endpoints';
 
 export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCancel }) {
     const [formData, setFormData] = useState({
@@ -45,9 +46,15 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
     const fetchNotes = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/notes/list/${notebookId}`);
-            setNotes(response.data.filter(note => note.type !== "Fiszki"));
+            const response = await fetch(ENDPOINTS.NOTES.LIST(notebookId), {
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setNotes(data.filter(note => note.type !== "Fiszki"));
+            }
         } catch (error) {
+            console.error('Error fetching notes:', error);
         } finally {
             setLoading(false);
         }
@@ -98,13 +105,9 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 requestData.append("count", formData.count);
                 requestData.append("file", uploadFile);
 
-                await axios.post("http://localhost:8000/flashcards/generate-from-file", requestData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
-                });
+                await generateFlashcardsFromFile(requestData);
             } else {
-                await axios.post("http://localhost:8000/flashcards/generate", {
+                await generateFlashcards({
                     user_id: userId,
                     notebook_id: notebookId,
                     title: formData.title,

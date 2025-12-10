@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { ArrowLeft, RotateCw, Award, Loader } from "lucide-react";
 import FlashcardCard from "./FlashcardCard";
 import styles from "../../../css/features/FlashcardLearning.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import { getFlashcardSetCards, reviewFlashcard } from '../../../services/flashcardService';
 
 export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
     const [allFlashcards, setAllFlashcards] = useState([]);
@@ -46,10 +46,10 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
     const fetchFlashcards = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/flashcards/set/${flashcardSet.id}/cards`);
-            setAllFlashcards(response.data);
-            setFlashcards(response.data);
-            setSessionStats(prev => ({...prev, total: response.data.length}));
+            const data = await getFlashcardSetCards(flashcardSet.id);
+            setAllFlashcards(data);
+            setFlashcards(data);
+            setSessionStats(prev => ({...prev, total: data.length}));
         } catch (error) {
         } finally {
             setLoading(false);
@@ -60,7 +60,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
         const currentCard = flashcards[currentIndex];
 
         try {
-            await axios.post("http://localhost:8000/flashcards/review", {
+            await reviewFlashcard({
                 flashcard_id: currentCard.id,
                 user_id: userId,
                 quality: knows ? "umiem" : "nie_umiem"
