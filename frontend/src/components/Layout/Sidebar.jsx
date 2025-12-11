@@ -1,11 +1,12 @@
 import { useEffect, useState, useContext, useCallback } from "react";
-import axios from "axios";
 import { Lock, Users, Plus, ChevronRight, Sparkles, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
 import styles from "../../css/layout/Sidebar.module.css";
 import UserFooter from "../features/sidebar_user_menu/UserFooter";
 import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
+import { getNotebooks, createNotebook } from "../../services/notebookService";
+import ENDPOINTS from "../../api/endpoints";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
     const { language } = useContext(LanguageContext);
@@ -50,13 +51,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
 
     const fetchNotebooks = async (spaceType) => {
         try {
-            const response = await axios.get('http://localhost:8000/notebooks/list', {
-                params: {
-                    created_by: userData.id,
-                    space_type: spaceType 
-                }
-            });
-            setNotebooks(prev => ({ ...prev, [spaceType]: response.data }));
+            const data = await getNotebooks(userData.id, spaceType);
+            setNotebooks(prev => ({ ...prev, [spaceType]: data }));
         } catch (error) {
             console.error(t('sidebar.errors.fetchNotebooks'), error);
         }
@@ -66,7 +62,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         const name = prompt(t('sidebar.notebookNamePrompt'));
         if (!name) return;
         try {
-            await axios.post('http://localhost:8000/notebooks/create', {
+            await createNotebook({
                 name: name,
                 created_by: userData.id,
                 space_type: spaceType,
@@ -74,7 +70,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
             });
             fetchNotebooks(spaceType);
         } catch (error) {
-            alert(t('sidebar.errors.addNotebook') + ': ' + (error.response?.data?.detail || error.message));
+            alert(t('sidebar.errors.addNotebook') + ': ' + error.message);
         }
     };
 
@@ -125,13 +121,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await axios.post(
-                    `http://localhost:8000/tests/${dragData.testId}/copy`,
-                    {
+                await fetch(ENDPOINTS.TESTS.COPY(dragData.testId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
                         target_notebook_id: targetNotebook.id,
                         user_id: dragData.userId
-                    }
-                );
+                    })
+                });
 
                 alert(t('sidebar.copySuccess.test', { notebookName: targetNotebook.name }));
             }
@@ -140,13 +138,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await axios.post(
-                    `http://localhost:8000/test-folders/${dragData.folderId}/copy`,
-                    {
+                await fetch(ENDPOINTS.TESTS.FOLDERS.COPY(dragData.folderId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
                         target_notebook_id: targetNotebook.id,
                         user_id: dragData.userId
-                    }
-                );
+                    })
+                });
 
                 alert(t('sidebar.copySuccess.folder', { notebookName: targetNotebook.name }));
             }
@@ -155,13 +155,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await axios.post(
-                    `http://localhost:8000/notes/${dragData.noteId}/copy`,
-                    {
+                await fetch(ENDPOINTS.NOTES.COPY(dragData.noteId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
                         target_notebook_id: targetNotebook.id,
                         user_id: dragData.userId
-                    }
-                );
+                    })
+                });
 
                 alert(t('sidebar.copySuccess.note', { notebookName: targetNotebook.name }));
             }
@@ -170,13 +172,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await axios.post(
-                    `http://localhost:8000/note-folders/${dragData.folderId}/copy`,
-                    {
+                await fetch(ENDPOINTS.NOTES.FOLDERS.COPY(dragData.folderId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
                         target_notebook_id: targetNotebook.id,
                         user_id: dragData.userId
-                    }
-                );
+                    })
+                });
 
                 alert(t('sidebar.copySuccess.noteFolder', { notebookName: targetNotebook.name }));
             }
@@ -185,13 +189,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await axios.post(
-                    `http://localhost:8000/flashcards/set/${dragData.setId}/copy`,
-                    {
+                await fetch(ENDPOINTS.FLASHCARDS.COPY_SET(dragData.setId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
                         target_notebook_id: targetNotebook.id,
                         user_id: dragData.userId
-                    }
-                );
+                    })
+                });
 
                 alert(t('sidebar.copySuccess.flashcardSet', { notebookName: targetNotebook.name }));
             }
@@ -200,13 +206,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await axios.post(
-                    `http://localhost:8000/flashcard-set-folders/${dragData.folderId}/copy`,
-                    {
+                await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.COPY(dragData.folderId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
                         target_notebook_id: targetNotebook.id,
                         user_id: dragData.userId
-                    }
-                );
+                    })
+                });
 
                 alert(t('sidebar.copySuccess.flashcardSetFolder', { notebookName: targetNotebook.name }));
             }

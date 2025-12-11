@@ -9,6 +9,7 @@ import Settings from "../features/settings/app_settings/Settings";
 import UserSettings from "../features/settings/user_settings/UserSettings";
 import Help from '../features/settings/help/Help';
 import NotificationView from "../features/settings/notifications/NotificationView";
+import API_BASE_URL from "../../api/config";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -64,7 +65,7 @@ export default function MainLayout() {
       return;
     }
 
-    fetch('http://localhost:8000/user/', {
+    fetch(`${API_BASE_URL}/user/`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => {
@@ -81,9 +82,9 @@ export default function MainLayout() {
     setSelectedNotebook(notebook);
     setActiveSection('notebook');
     setNotebookSection('files');
-    
+
     const token = getCookie('access_token');
-    fetch(`http://localhost:8000/notebooks/${notebook.id}`, {
+    fetch(`${API_BASE_URL}/notebooks/${notebook.id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())

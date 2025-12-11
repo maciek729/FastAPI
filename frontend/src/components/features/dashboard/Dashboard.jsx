@@ -36,9 +36,12 @@ export default function Dashboard({ userData, onSelectNotebook }) {
   const fetchNotebooks = async () => {
     setIsLoading(true);
     try {
-      const data = await getNotebooks();
-      setNotebooks(data);
-    } 
+      const [personalData, sharedData] = await Promise.all([
+        getNotebooks(userData.id, 'personal'),
+        getNotebooks(userData.id, 'shared')
+      ]);
+      setNotebooks([...personalData, ...sharedData]);
+    }
     catch (error) {
       console.error(t('dashboard.fetchError'), error);
     } finally {
@@ -50,7 +53,12 @@ export default function Dashboard({ userData, onSelectNotebook }) {
     const name = prompt(t('dashboard.notebookNamePrompt'));
     if (!name) return;
     try {
-      await createNotebook(name);
+      await createNotebook({
+        name: name,
+        created_by: userData.id,
+        space_type: 'personal',
+        is_shared: false
+      });
       fetchNotebooks();
     } catch (error) {
       console.error(t('dashboard.createError'), error);
