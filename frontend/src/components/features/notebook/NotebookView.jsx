@@ -3,7 +3,7 @@ import { MessageCircle, FileText, Zap, ClipboardCheck } from "lucide-react";
 import Chat from "../chat/Chat";
 import FilesView from "../notebook/FilesView";
 import FlashcardsView from "../flashcard/FlashcardsView";
-import TestsView from "../notebook/TestsView";
+import TestsView from "../tests/TestsView";
 import styles from "../../../css/features/NotebookView.module.css";
 import { Headphones } from "lucide-react";
 import PodcastView from "../podcast/PodcastView";

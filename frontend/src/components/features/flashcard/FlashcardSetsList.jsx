@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { BookOpen, Trash2, Play, Brain, Settings, Pin, Folder, MoreVertical } from "lucide-react";
 import styles from "../../../css/features/FlashcardsView.module.css";
-import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition } from '../../../services/flashcardService';
+import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
 
-export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, onStartLearning, onManageSet, onDelete, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
+export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
     const [progress, setProgress] = useState({});
     const [loadingProgress, setLoadingProgress] = useState({});
 
@@ -24,7 +24,20 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
     }, [draggedSet, draggedFolder, onDragStateChange]);
 
     useEffect(() => {
-        setLocalSets(sets);
+        // Only update localSets if the sets prop has meaningfully changed
+        // Don't compare with localSets to avoid resetting optimistic updates
+        setLocalSets(prevLocalSets => {
+            // Sort by ID before comparing to avoid order differences
+            const sortById = (a, b) => a.id - b.id;
+            const setsString = JSON.stringify(sets.map(s => ({ id: s.id, grid_position: s.grid_position, is_pinned: s.is_pinned, folder_id: s.folder_id })).sort(sortById));
+            const localSetsString = JSON.stringify(prevLocalSets.map(s => ({ id: s.id, grid_position: s.grid_position, is_pinned: s.is_pinned, folder_id: s.folder_id })).sort(sortById));
+
+            // Only update if the data has actually changed
+            if (setsString !== localSetsString) {
+                return sets;
+            }
+            return prevLocalSets;
+        });
     }, [sets]);
 
     useEffect(() => {
@@ -160,10 +173,28 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             grid_position: idx
         }));
 
-        setLocalSets(updatedSets);
+        // Find only the sets whose position actually changed
+        const setsToUpdate = updatedSets.filter(set => {
+            const originalSet = sortedSets.find(s => s.id === set.id);
+            return originalSet && originalSet.grid_position !== set.grid_position;
+        });
+
+        // Update local state immediately
+        setLocalSets(prevSets => {
+            const allSets = [...prevSets];
+            updatedSets.forEach(updated => {
+                const idx = allSets.findIndex(s => s.id === updated.id);
+                if (idx !== -1) {
+                    allSets[idx] = updated;
+                }
+            });
+            return allSets;
+        });
+
         try {
+            // Only update sets whose position actually changed
             await Promise.all(
-                updatedSets.map(set =>
+                setsToUpdate.map(set =>
                     updateFlashcardSetPosition(set.id, set.grid_position)
                 )
             );
@@ -255,12 +286,26 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         e.stopPropagation();
         setDragOverFolder(null);
 
+        // Handle set drop
         if (draggedSet) {
             try {
                 await onMoveSetToFolder(draggedSet.set.id, folderId);
                 setDraggedSet(null);
             } catch (err) {
                 console.error('Error dropping set into folder:', err);
+            }
+        }
+
+        // Handle folder drop
+        if (draggedFolder) {
+            try {
+                await moveFlashcardFolder(draggedFolder.folder.id, folderId);
+                setDraggedFolder(null);
+                await onRefreshFolders(); // Refresh folders
+                onDelete(); // Refresh flashcard sets
+            } catch (err) {
+                console.error('Error moving folder into folder:', err);
+                alert("Błąd przenoszenia folderu");
             }
         }
     };
@@ -346,7 +391,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                             }}
                             onDrop={(e) => {
                                 if (draggedFolder) {
-                                    handleFolderCardDrop(e, index);
+                                    handleFolderDrop(e, folder.id);
                                 } else if (draggedSet) {
                                     handleFolderDrop(e, folder.id);
                                 }
