@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Plus, Search, X, Folder } from "lucide-react";
 import FlashcardGenerator from "./FlashcardGenerator";
 import FlashcardSetsList from "./FlashcardSetsList";
 import FlashcardLearning from "./FlashcardLearning";
 import FlashcardSetManager from "./FlashcardSetManager";
 import styles from "../../../css/features/FlashcardsView.module.css";
+import { getFlashcardSets, getFlashcardFolders, createFlashcardFolder, deleteFlashcardFolder, renameFlashcardFolder, moveFlashcardFolder, moveFlashcardSetToFolder } from '../../../services/flashcardService';
+import ENDPOINTS from '../../../api/endpoints';
 
 export default function FlashcardsView({ notebookId, userData }) {
     const [view, setView] = useState("list");
@@ -17,7 +18,6 @@ export default function FlashcardsView({ notebookId, userData }) {
     const [filterDifficulty, setFilterDifficulty] = useState('all');
     const [sortBy, setSortBy] = useState('date_desc');
 
-    // Folder state
     const [folders, setFolders] = useState([]);
     const [currentFolder, setCurrentFolder] = useState(null);
     const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
@@ -38,8 +38,8 @@ export default function FlashcardsView({ notebookId, userData }) {
     const fetchFlashcardSets = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/flashcards/sets/${notebookId}`);
-            setFlashcardSets(response.data);
+            const data = await getFlashcardSets(notebookId);
+            setFlashcardSets(data);
         } catch (error) {
         } finally {
             setLoading(false);
@@ -48,13 +48,8 @@ export default function FlashcardsView({ notebookId, userData }) {
 
     const fetchFolders = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/flashcard-set-folders/list', {
-                params: {
-                    notebook_id: notebookId,
-                    user_id: userData.id
-                }
-            });
-            setFolders(response.data);
+            const data = await getFlashcardFolders(userData.id, notebookId);
+            setFolders(data);
         } catch (err) {
             console.error('Error fetching folders:', err);
         }
@@ -91,13 +86,12 @@ export default function FlashcardsView({ notebookId, userData }) {
         setSortBy('date_desc');
     };
 
-    // Folder handlers
     const handleCreateFolder = async (e) => {
         e.preventDefault();
         if (!newFolderName.trim()) return;
 
         try {
-            await axios.post('http://localhost:8000/flashcard-set-folders/create', {
+            await createFlashcardFolder({
                 notebook_id: notebookId,
                 user_id: userData.id,
                 name: newFolderName,
@@ -129,7 +123,7 @@ export default function FlashcardsView({ notebookId, userData }) {
         if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Zestawy fiszek zostaną przeniesione do głównego widoku.')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/flashcard-set-folders/${folderId}`);
+            await deleteFlashcardFolder(folderId);
             if (currentFolder?.id === folderId) {
                 setCurrentFolder(null);
             }
@@ -146,9 +140,7 @@ export default function FlashcardsView({ notebookId, userData }) {
         if (!editingFolder || !editingFolder.name.trim()) return;
 
         try {
-            await axios.patch(`http://localhost:8000/flashcard-set-folders/${editingFolder.id}/rename`, {
-                name: editingFolder.name
-            });
+            await renameFlashcardFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
             fetchFolders();
         } catch (err) {
@@ -186,7 +178,6 @@ export default function FlashcardsView({ notebookId, userData }) {
         return filtered;
     };
 
-    // Breadcrumb drag handlers - for dragging items to parent folder
     const handleBreadcrumbDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -206,15 +197,10 @@ export default function FlashcardsView({ notebookId, userData }) {
 
         const parentFolderId = currentFolder?.parent_folder_id || null;
 
-        // Handle flashcard set drop
         if (draggedSet) {
             try {
-                await axios.post('http://localhost:8000/flashcard-set-folders/move-set', {
-                    set_id: draggedSet.set.id,
-                    folder_id: parentFolderId
-                });
+                await moveFlashcardSetToFolder(draggedSet.set.id, parentFolderId);
 
-                // Update local state immediately
                 setFlashcardSets(prevSets =>
                     prevSets.map(set =>
                         set.id === draggedSet.set.id ? { ...set, folder_id: parentFolderId } : set
@@ -229,12 +215,9 @@ export default function FlashcardsView({ notebookId, userData }) {
             }
         }
 
-        // Handle folder drop
         if (draggedFolder) {
             try {
-                await axios.patch(`http://localhost:8000/flashcard-set-folders/${draggedFolder.folder.id}/move`, {
-                    parent_folder_id: parentFolderId
-                });
+                await moveFlashcardFolder(draggedFolder.folder.id, parentFolderId);
                 setDraggedFolder(null);
                 await fetchFolders();
                 fetchFlashcardSets();
@@ -386,19 +369,14 @@ export default function FlashcardsView({ notebookId, userData }) {
                 onRenameFolder={(folder) => setEditingFolder(folder)}
                 onMoveSetToFolder={async (setId, folderId) => {
                     try {
-                        await axios.post('http://localhost:8000/flashcard-set-folders/move-set', {
-                            set_id: setId,
-                            folder_id: folderId
-                        });
+                        await moveFlashcardSetToFolder(setId, folderId);
 
-                        // Update local state immediately to avoid loading screen
                         setFlashcardSets(prevSets =>
                             prevSets.map(set =>
                                 set.id === setId ? { ...set, folder_id: folderId } : set
                             )
                         );
 
-                        // Fetch folders to update counts
                         await fetchFolders();
                     } catch (err) {
                         console.error('Error moving set:', err);
@@ -424,7 +402,6 @@ export default function FlashcardsView({ notebookId, userData }) {
                 </div>
             )}
 
-            {/* Create Folder Modal */}
             {showCreateFolderModal && (
                 <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
@@ -466,7 +443,6 @@ export default function FlashcardsView({ notebookId, userData }) {
                 </div>
             )}
 
-            {/* Rename Folder Modal */}
             {editingFolder && (
                 <div className={styles.modalOverlay} onClick={() => setEditingFolder(null)}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>

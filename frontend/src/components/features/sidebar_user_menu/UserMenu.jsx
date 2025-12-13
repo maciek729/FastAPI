@@ -1,8 +1,29 @@
-import React from "react";
-import { Settings, User, Palette, HelpCircle, Bell} from "lucide-react";
+import React, { useContext } from "react";
+import { Settings, User, Palette, HelpCircle, Bell } from "lucide-react";
 import styles from "../../../css/layout/SidebarFooter.module.css";
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     const handleMenuClick = (id) => {
         if (onGoToSection) {
@@ -14,22 +35,22 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
     const menuItems = [
         {
             id: 'user_settings',
-            label: 'Profil',
+            label: t('userMenu.profile'),
             icon: User
         },
         {
             id: 'settings',
-            label: 'Ustawienia',
+            label: t('userMenu.settings'),
             icon: Settings,
         },
         {
             id: 'notifications',
-            label: 'Powiadomienia',
+            label: t('userMenu.notifications'),
             icon: Bell,
         },
         {
             id: 'help',
-            label: 'Pomoc',
+            label: t('userMenu.help'),
             icon: HelpCircle,
         }
     ];

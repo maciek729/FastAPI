@@ -1,21 +1,22 @@
 import ENDPOINTS from '../api/endpoints';
 
-export const getNotebooks = async () => {
-  const response = await fetch(ENDPOINTS.NOTEBOOKS.LIST, {
+export const getNotebooks = async (createdBy, spaceType) => {
+  const response = await fetch(ENDPOINTS.NOTEBOOKS.LIST(createdBy, spaceType), {
     credentials: 'include',
   });
   if (!response.ok) throw new Error('Failed to fetch notebooks');
   return await response.json();
 };
 
-export const createNotebook = async (name) => {
+export const createNotebook = async (data) => {
   const response = await fetch(ENDPOINTS.NOTEBOOKS.CREATE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(data),
   });
   if (!response.ok) throw new Error('Failed to create notebook');
+  return await response.json();
 };
 
 export const getCollaborators = async (notebookId) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { MessageCircle, FileText, Zap, ClipboardCheck } from "lucide-react";
 import Chat from "../chat/Chat";
 import FilesView from "../notebook/FilesView";
@@ -7,16 +7,37 @@ import TestsView from "../notebook/TestsView";
 import styles from "../../../css/features/NotebookView.module.css";
 import { Headphones } from "lucide-react";
 import PodcastView from "../podcast/PodcastView";
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen }) {
     const [activeTab, setActiveTab] = useState("files");
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     const tabs = [
-        { id: "chat", label: "Chat z AI", icon: MessageCircle },
-        { id: "files", label: "Moje Pliki", icon: FileText },
-        { id: "flashcards", label: "Fiszki", icon: Zap },
-        { id: "tests", label: "Sprawdziany", icon: ClipboardCheck },
-        { id: "podcasts", label: "Podcasty", icon: Headphones }
+        { id: "chat", label: t('notebook.tabs.chat'), icon: MessageCircle },
+        { id: "files", label: t('notebook.tabs.files'), icon: FileText },
+        { id: "flashcards", label: t('notebook.tabs.flashcards'), icon: Zap },
+        { id: "tests", label: t('notebook.tabs.tests'), icon: ClipboardCheck },
+        { id: "podcasts", label: t('notebook.tabs.podcasts'), icon: Headphones }
     ];
 
     return (

@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useContext } from "react";
 import { X, Loader, Sparkles, CheckSquare } from "lucide-react";
 import styles from "../../../css/features/FlashcardGenerator.module.css";
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
+import { generateFlashcards, generateFlashcardsFromFile } from '../../../services/flashcardService';
+import ENDPOINTS from '../../../api/endpoints';
 
 export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCancel }) {
     const [formData, setFormData] = useState({
@@ -16,6 +19,25 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
     const [uploadFile, setUploadFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     useEffect(() => {
         fetchNotes();
@@ -24,9 +46,15 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
     const fetchNotes = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/notes/list/${notebookId}`);
-            setNotes(response.data.filter(note => note.type !== "Fiszki"));
+            const response = await fetch(ENDPOINTS.NOTES.LIST(notebookId), {
+                credentials: 'include'
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setNotes(data.filter(note => note.type !== "Fiszki"));
+            }
         } catch (error) {
+            console.error('Error fetching notes:', error);
         } finally {
             setLoading(false);
         }
@@ -45,22 +73,22 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
         e.preventDefault();
 
         if (!formData.title.trim()) {
-            alert("Podaj tytuł zestawu fiszek!");
+            alert(t('flashcardGenerator.titleError'));
             return;
         }
 
         if (formData.source_type === "manual" && !formData.description.trim()) {
-            alert("Podaj opis materiału do wygenerowania fiszek!");
+            alert(t('flashcardGenerator.descriptionError'));
             return;
         }
 
         if (formData.source_type === "file" && !uploadFile) {
-            alert("Załącz plik!");
+            alert(t('flashcardGenerator.fileError'));
             return;
         }
 
         if (formData.source_type === "note" && formData.source_note_ids.length === 0) {
-            alert("Wybierz przynajmniej jedną notatkę!");
+            alert(t('flashcardGenerator.noteError'));
             return;
         }
 
@@ -77,13 +105,9 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 requestData.append("count", formData.count);
                 requestData.append("file", uploadFile);
 
-                await axios.post("http://localhost:8000/flashcards/generate-from-file", requestData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data"
-                    }
-                });
+                await generateFlashcardsFromFile(requestData);
             } else {
-                await axios.post("http://localhost:8000/flashcards/generate", {
+                await generateFlashcards({
                     user_id: userId,
                     notebook_id: notebookId,
                     title: formData.title,
@@ -95,11 +119,11 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 });
             }
 
-            alert("Fiszki zostały wygenerowane!");
+            alert(t('flashcardGenerator.success'));
             onSuccess();
         } catch (error) {
-            const errorMessage = error.response?.data?.detail || error.message || "Nieznany błąd";
-            alert("Błąd podczas generowania fiszek: " + errorMessage);
+            const errorMessage = error.response?.data?.detail || error.message || t('flashcardGenerator.unknownError');
+            alert(t('flashcardGenerator.generationError') + ": " + errorMessage);
         } finally {
             setGenerating(false);
         }
@@ -110,16 +134,16 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
                     <Sparkles className={styles.headerIcon} size={24} />
-                    <h2 className={styles.title}>Generuj nowe fiszki</h2>
+                    <h2 className={styles.title}>{t('flashcardGenerator.title')}</h2>
                 </div>
-                <button className={styles.closeBtn} onClick={onCancel}>
+                <button className={styles.closeBtn} onClick={onCancel} title={t('flashcardGenerator.close')}>
                     <X size={20} />
                 </button>
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
                 <div className={styles.formSection}>
-                    <h3 className={styles.sectionTitle}>Źródło materiału</h3>
+                    <h3 className={styles.sectionTitle}>{t('flashcardGenerator.sourceTitle')}</h3>
                     <div className={styles.sourceOptions}>
                         <div className={styles.radioOption}>
                             <input
@@ -132,7 +156,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                                 disabled={generating}
                             />
                             <label htmlFor="source-manual" className={styles.radioLabel}>
-                                <span className={styles.radioText}>Ręczny opis</span>
+                                <span className={styles.radioText}>{t('flashcardGenerator.manual')}</span>
                             </label>
                         </div>
                         <div className={styles.radioOption}>
@@ -146,7 +170,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                                 disabled={generating}
                             />
                             <label htmlFor="source-file" className={styles.radioLabel}>
-                                <span className={styles.radioText}>Z pliku</span>
+                                <span className={styles.radioText}>{t('flashcardGenerator.fromFile')}</span>
                             </label>
                         </div>
                         <div className={styles.radioOption}>
@@ -160,7 +184,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                                 disabled={generating}
                             />
                             <label htmlFor="source-note" className={styles.radioLabel}>
-                                <span className={styles.radioText}>Z notatki</span>
+                                <span className={styles.radioText}>{t('flashcardGenerator.fromNote')}</span>
                             </label>
                         </div>
                     </div>
@@ -169,7 +193,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 {formData.source_type === 'file' && (
                     <div className={styles.formSection}>
                         <div className={styles.formGroup}>
-                            <label>Załącz plik (PDF, DOCX, TXT, lub obraz)</label>
+                            <label>{t('flashcardGenerator.uploadFile')}</label>
                             <div className={styles.fileUploadWrapper}>
                                 <input
                                     type="file"
@@ -187,7 +211,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                                     className={styles.fileInput}
                                 />
                                 <label htmlFor="file-upload" className={styles.fileLabel}>
-                                    {uploadFile ? uploadFile.name : 'Wybierz plik'}
+                                    {uploadFile ? uploadFile.name : t('flashcardGenerator.chooseFile')}
                                 </label>
                             </div>
                         </div>
@@ -195,26 +219,26 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 )}
 
                 <div className={styles.formSection}>
-                    <h3 className={styles.sectionTitle}>Podstawowe informacje</h3>
+                    <h3 className={styles.sectionTitle}>{t('flashcardGenerator.basicInfo')}</h3>
 
                     <div className={styles.formGroup}>
-                        <label>Tytuł zestawu *</label>
+                        <label>{t('flashcardGenerator.setTitle')} *</label>
                         <input
                             type="text"
                             value={formData.title}
                             onChange={(e) => setFormData({...formData, title: e.target.value})}
-                            placeholder="np. Historia Polski - Średniowiecze"
+                            placeholder={t('flashcardGenerator.titlePlaceholder')}
                             required
                         />
                     </div>
 
                     {formData.source_type === 'manual' && (
                         <div className={styles.formGroup}>
-                            <label>Opis materiału *</label>
+                            <label>{t('flashcardGenerator.materialDescription')} *</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                placeholder="Opisz materiał, z którego mają być wygenerowane fiszki..."
+                                placeholder={t('flashcardGenerator.descriptionPlaceholder')}
                                 rows={5}
                                 required
                             />
@@ -223,11 +247,11 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
 
                     {formData.source_type !== 'manual' && (
                         <div className={styles.formGroup}>
-                            <label>Opis (opcjonalnie)</label>
+                            <label>{t('flashcardGenerator.descriptionOptional')}</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                placeholder="Dodatkowe informacje o zestawie..."
+                                placeholder={t('flashcardGenerator.additionalInfo')}
                                 rows={3}
                             />
                         </div>
@@ -235,11 +259,11 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 </div>
 
                 <div className={styles.formSection}>
-                    <h3 className={styles.sectionTitle}>Parametry generowania</h3>
+                    <h3 className={styles.sectionTitle}>{t('flashcardGenerator.generationParams')}</h3>
 
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label>Liczba fiszek: {formData.count}</label>
+                            <label>{t('flashcardGenerator.cardCount')}: {formData.count}</label>
                             <input
                                 type="range"
                                 min="5"
@@ -251,14 +275,14 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label>Poziom trudności</label>
+                            <label>{t('flashcardGenerator.difficulty')}</label>
                             <select
                                 value={formData.difficulty}
                                 onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
                             >
-                                <option value="łatwy">Łatwy</option>
-                                <option value="średni">Średni</option>
-                                <option value="trudny">Trudny</option>
+                                <option value="łatwy">{t('flashcardGenerator.easy')}</option>
+                                <option value="średni">{t('flashcardGenerator.medium')}</option>
+                                <option value="trudny">{t('flashcardGenerator.hard')}</option>
                             </select>
                         </div>
                     </div>
@@ -267,17 +291,17 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 {formData.source_type === 'note' && (
                     <div className={styles.formSection}>
                         <h3 className={styles.sectionTitle}>
-                            Wybierz źródła ({formData.source_note_ids.length} wybranych)
+                            {t('flashcardGenerator.selectSources')} ({formData.source_note_ids.length} {t('flashcardGenerator.selected')})
                         </h3>
 
                         {loading ? (
                             <div className={styles.loadingNotes}>
                                 <Loader className={styles.spinner} size={24} />
-                                <p>Ładowanie notatek...</p>
+                                <p>{t('flashcardGenerator.loadingNotes')}</p>
                             </div>
                         ) : notes.length === 0 ? (
                             <div className={styles.emptyNotes}>
-                                <p>Brak notatek w tym notatniku</p>
+                                <p>{t('flashcardGenerator.noNotes')}</p>
                             </div>
                         ) : (
                             <div className={styles.notesList}>
@@ -315,7 +339,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                         onClick={onCancel}
                         disabled={generating}
                     >
-                        Anuluj
+                        {t('flashcardGenerator.cancel')}
                     </button>
                     <button
                         type="submit"
@@ -325,12 +349,12 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                         {generating ? (
                             <>
                                 <Loader className={styles.spinner} size={18} />
-                                Generowanie...
+                                {t('flashcardGenerator.generating')}
                             </>
                         ) : (
                             <>
                                 <Sparkles size={18} />
-                                Generuj fiszki
+                                {t('flashcardGenerator.generateCards')}
                             </>
                         )}
                     </button>

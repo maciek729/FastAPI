@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useContext } from "react";
 import { ArrowLeft, Edit2, Trash2, GripVertical, Plus, X, Check } from "lucide-react";
 import styles from "../../../css/features/FlashcardSetManager.module.css";
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
+import { getFlashcardSetCards, updateFlashcardSet, updateFlashcard, deleteFlashcard, createFlashcard, reorderFlashcards } from '../../../services/flashcardService';
 
 export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     const [flashcards, setFlashcards] = useState([]);
@@ -17,6 +19,25 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     const [newAnswer, setNewAnswer] = useState("");
     const [editQuestion, setEditQuestion] = useState("");
     const [editAnswer, setEditAnswer] = useState("");
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     useEffect(() => {
         fetchFlashcards();
@@ -25,8 +46,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     const fetchFlashcards = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/flashcards/set/${flashcardSet.id}/cards`);
-            setFlashcards(response.data);
+            const data = await getFlashcardSetCards(flashcardSet.id);
+            setFlashcards(data);
         } catch (error) {
         } finally {
             setLoading(false);
@@ -35,27 +56,27 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
 
     const handleUpdateSet = async () => {
         try {
-            await axios.put(`http://localhost:8000/flashcards/set/${flashcardSet.id}`, {
+            await updateFlashcardSet(flashcardSet.id, {
                 title: setTitle,
                 description: setDescription
             });
 
-            alert("Zestaw zaktualizowany!");
+            alert(t('flashcardSetManager.updateSuccess'));
             setEditingSet(false);
             onBack();
         } catch (error) {
-            alert(`Błąd podczas aktualizacji zestawu: ${error.response?.data?.detail || error.message}`);
+            alert(`${t('flashcardSetManager.updateError')}: ${error.message}`);
         }
     };
 
     const handleUpdateCard = async () => {
         if (!editQuestion.trim() || !editAnswer.trim()) {
-            alert("Pytanie i odpowiedź nie mogą być puste!");
+            alert(t('flashcardSetManager.emptyFields'));
             return;
         }
 
         try {
-            await axios.put(`http://localhost:8000/flashcards/card/${editingCard}`, {
+            await updateFlashcard(editingCard, {
                 question: editQuestion.trim(),
                 answer: editAnswer.trim()
             });
@@ -63,9 +84,9 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             setEditingCard(null);
             setEditQuestion("");
             setEditAnswer("");
-            alert("Fiszka zaktualizowana!");
+            alert(t('flashcardSetManager.cardUpdateSuccess'));
         } catch (error) {
-            alert("Błąd podczas aktualizacji fiszki");
+            alert(t('flashcardSetManager.cardUpdateError'));
         }
     };
 
@@ -76,25 +97,25 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     };
 
     const handleDeleteCard = async (cardId) => {
-        if (!window.confirm("Czy na pewno chcesz usunąć tę fiszkę?")) return;
+        if (!window.confirm(t('flashcardSetManager.deleteConfirm'))) return;
 
         try {
-            await axios.delete(`http://localhost:8000/flashcards/card/${cardId}`);
+            await deleteFlashcard(cardId);
             fetchFlashcards();
-            alert("Fiszka usunięta!");
+            alert(t('flashcardSetManager.cardDeleteSuccess'));
         } catch (error) {
-            alert("Błąd podczas usuwania fiszki");
+            alert(t('flashcardSetManager.cardDeleteError'));
         }
     };
 
     const handleAddCard = async () => {
         if (!newQuestion.trim() || !newAnswer.trim()) {
-            alert("Pytanie i odpowiedź nie mogą być puste!");
+            alert(t('flashcardSetManager.emptyFields'));
             return;
         }
 
         try {
-            await axios.post(`http://localhost:8000/flashcards/card`, {
+            await createFlashcard({
                 flashcard_set_id: flashcardSet.id,
                 question: newQuestion.trim(),
                 answer: newAnswer.trim()
@@ -104,9 +125,9 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             setNewAnswer("");
             setShowAddCard(false);
             fetchFlashcards();
-            alert("Fiszka dodana!");
+            alert(t('flashcardSetManager.cardAddSuccess'));
         } catch (error) {
-            alert("Błąd podczas dodawania fiszki");
+            alert(t('flashcardSetManager.cardAddError'));
         }
     };
 
@@ -142,7 +163,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
         setDragOverIndex(null);
 
         try {
-            await axios.post(`http://localhost:8000/flashcards/reorder`, {
+            await reorderFlashcards({
                 set_id: flashcardSet.id,
                 card_positions: newFlashcards.map((card, idx) => ({
                     card_id: card.id,
@@ -150,7 +171,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                 }))
             });
         } catch (error) {
-            fetchFlashcards(); // Revert on error
+            fetchFlashcards();
         }
     };
 
@@ -159,7 +180,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             <div className={styles.managerContainer}>
                 <div className={styles.loading}>
                     <div className={styles.spinner}></div>
-                    <p>Ładowanie fiszek...</p>
+                    <p>{t('flashcardSetManager.loading')}</p>
                 </div>
             </div>
         );
@@ -170,7 +191,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             <div className={styles.header}>
                 <button className={styles.backBtn} onClick={onBack}>
                     <ArrowLeft size={20} />
-                    Powrót
+                    {t('flashcardSetManager.back')}
                 </button>
 
                 <div className={styles.setInfo}>
@@ -181,19 +202,19 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                                 value={setTitle}
                                 onChange={(e) => setSetTitle(e.target.value)}
                                 className={styles.titleInput}
-                                placeholder="Tytuł zestawu"
+                                placeholder={t('flashcardSetManager.setTitlePlaceholder')}
                             />
                             <textarea
                                 value={setDescription}
                                 onChange={(e) => setSetDescription(e.target.value)}
                                 className={styles.descriptionInput}
-                                placeholder="Opis zestawu (opcjonalnie)"
+                                placeholder={t('flashcardSetManager.setDescriptionPlaceholder')}
                                 rows={2}
                             />
                             <div className={styles.setEditActions}>
                                 <button className={styles.btnSave} onClick={handleUpdateSet}>
                                     <Check size={18} />
-                                    Zapisz
+                                    {t('flashcardSetManager.save')}
                                 </button>
                                 <button className={styles.btnCancel} onClick={() => {
                                     setEditingSet(false);
@@ -201,7 +222,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                                     setSetDescription(flashcardSet.description || "");
                                 }}>
                                     <X size={18} />
-                                    Anuluj
+                                    {t('flashcardSetManager.cancel')}
                                 </button>
                             </div>
                         </div>
@@ -211,7 +232,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                             {flashcardSet.description && <p>{flashcardSet.description}</p>}
                             <button className={styles.btnEdit} onClick={() => setEditingSet(true)}>
                                 <Edit2 size={16} />
-                                Edytuj zestaw
+                                {t('flashcardSetManager.editSet')}
                             </button>
                         </div>
                     )}
@@ -225,25 +246,25 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                     setNewAnswer("");
                 }}>
                     <div className={styles.addCardForm} onClick={(e) => e.stopPropagation()}>
-                        <h3>Dodaj nową fiszkę</h3>
+                        <h3>{t('flashcardSetManager.addNewCard')}</h3>
                         <textarea
                             value={newQuestion}
                             onChange={(e) => setNewQuestion(e.target.value)}
                             className={styles.addQuestionInput}
-                            placeholder="Pytanie"
+                            placeholder={t('flashcardSetManager.questionPlaceholder')}
                             rows={3}
                         />
                         <textarea
                             value={newAnswer}
                             onChange={(e) => setNewAnswer(e.target.value)}
                             className={styles.addAnswerInput}
-                            placeholder="Odpowiedź"
+                            placeholder={t('flashcardSetManager.answerPlaceholder')}
                             rows={3}
                         />
                         <div className={styles.addCardActions}>
                             <button className={styles.btnSaveNewCard} onClick={handleAddCard}>
                                 <Check size={18} />
-                                Dodaj fiszkę
+                                {t('flashcardSetManager.addCard')}
                             </button>
                             <button className={styles.btnCancelNewCard} onClick={() => {
                                 setShowAddCard(false);
@@ -251,7 +272,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                                 setNewAnswer("");
                             }}>
                                 <X size={18} />
-                                Anuluj
+                                {t('flashcardSetManager.cancel')}
                             </button>
                         </div>
                     </div>
@@ -265,25 +286,25 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                     setEditAnswer("");
                 }}>
                     <div className={styles.addCardForm} onClick={(e) => e.stopPropagation()}>
-                        <h3>Edytuj fiszkę</h3>
+                        <h3>{t('flashcardSetManager.editCard')}</h3>
                         <textarea
                             value={editQuestion}
                             onChange={(e) => setEditQuestion(e.target.value)}
                             className={styles.addQuestionInput}
-                            placeholder="Pytanie"
+                            placeholder={t('flashcardSetManager.questionPlaceholder')}
                             rows={3}
                         />
                         <textarea
                             value={editAnswer}
                             onChange={(e) => setEditAnswer(e.target.value)}
                             className={styles.addAnswerInput}
-                            placeholder="Odpowiedź"
+                            placeholder={t('flashcardSetManager.answerPlaceholder')}
                             rows={3}
                         />
                         <div className={styles.addCardActions}>
                             <button className={styles.btnSaveNewCard} onClick={handleUpdateCard}>
                                 <Check size={18} />
-                                Zapisz zmiany
+                                {t('flashcardSetManager.saveChanges')}
                             </button>
                             <button className={styles.btnCancelNewCard} onClick={() => {
                                 setEditingCard(null);
@@ -291,7 +312,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                                 setEditAnswer("");
                             }}>
                                 <X size={18} />
-                                Anuluj
+                                {t('flashcardSetManager.cancel')}
                             </button>
                         </div>
                     </div>
@@ -324,11 +345,11 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                             </div>
                             <div className={styles.cardContent}>
                                 <div className={styles.cardSide}>
-                                    <span className={styles.cardLabel}>P</span>
+                                    <span className={styles.cardLabel}>{t('flashcardSetManager.questionLabel')}</span>
                                     <p className={getTextSizeClass(card.question)}>{card.question}</p>
                                 </div>
                                 <div className={styles.cardSide}>
-                                    <span className={styles.cardLabel}>O</span>
+                                    <span className={styles.cardLabel}>{t('flashcardSetManager.answerLabel')}</span>
                                     <p className={getTextSizeClass(card.answer)}>{card.answer}</p>
                                 </div>
                             </div>
@@ -336,14 +357,14 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                                 <button
                                     className={styles.btnEditCard}
                                     onClick={() => handleStartEdit(card)}
-                                    title="Edytuj"
+                                    title={t('flashcardSetManager.edit')}
                                 >
                                     <Edit2 size={16} />
                                 </button>
                                 <button
                                     className={styles.btnDeleteCard}
                                     onClick={() => handleDeleteCard(card.id)}
-                                    title="Usuń"
+                                    title={t('flashcardSetManager.delete')}
                                 >
                                     <Trash2 size={16} />
                                 </button>
