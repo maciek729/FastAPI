@@ -166,7 +166,8 @@
         "chat": "Chat z AI",
         "files": "Moje Pliki",
         "flashcards": "Fiszki",
-        "tests": "Sprawdziany"
+        "tests": "Sprawdziany",
+        "podcasts": "Podcasty"
       }
     },
     "noteEditor": {
@@ -509,7 +510,8 @@
         "chat": "AI Chat",
         "files": "My Files",
         "flashcards": "Flashcards",
-        "tests": "Tests"
+        "tests": "Tests",
+        "podcasts": "Podcasts"
       }
     },
     "noteEditor": {

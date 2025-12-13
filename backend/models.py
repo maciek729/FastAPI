@@ -231,3 +231,17 @@ class PDFUploads(Base):
     file_path = Column(String)
     upload_date = Column(DateTime)
     ai_extracted_text = Column(String)
+
+class Podcasts(Base):
+    __tablename__ = "podcasts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    title = Column(String)
+    script_content = Column(Text)
+    file_path = Column(String)
+    file_url = Column(String)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -5,7 +5,7 @@ from routers import contact, auth, index, admin, users, ai, notebooks, notes, te
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-
+from routers import podcasts
 
 app = FastAPI()
 
@@ -18,6 +18,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/healthy")
 def health_check():
@@ -36,3 +38,4 @@ app.include_router(note_folders.router)
 app.include_router(contact.router)
 app.include_router(flashcards.router)
 app.include_router(flashcard_set_folders.router)
+app.include_router(podcasts.router)

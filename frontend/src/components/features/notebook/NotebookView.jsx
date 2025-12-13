@@ -5,6 +5,8 @@ import FilesView from "../notebook/FilesView";
 import FlashcardsView from "../flashcard/FlashcardsView";
 import TestsView from "../notebook/TestsView";
 import styles from "../../../css/features/NotebookView.module.css";
+import { Headphones } from "lucide-react";
+import PodcastView from "../podcast/PodcastView";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 
@@ -34,7 +36,8 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         { id: "chat", label: t('notebook.tabs.chat'), icon: MessageCircle },
         { id: "files", label: t('notebook.tabs.files'), icon: FileText },
         { id: "flashcards", label: t('notebook.tabs.flashcards'), icon: Zap },
-        { id: "tests", label: t('notebook.tabs.tests'), icon: ClipboardCheck }
+        { id: "tests", label: t('notebook.tabs.tests'), icon: ClipboardCheck },
+        { id: "podcasts", label: t('notebook.tabs.podcasts'), icon: Headphones }
     ];
 
     return (
@@ -73,6 +76,12 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                     />
                 )}
                 {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
+                {activeTab === "podcasts" && (
+                    <PodcastView 
+                        notebookId={details?.id} 
+                        userData={userData} 
+                    />
+                )}
             </div>
         </div>
     );
