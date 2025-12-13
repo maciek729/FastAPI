@@ -7,8 +7,8 @@ import uuid
 from datetime import datetime
 from database import SessionLocal
 from models import Podcasts, Notes
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 import wave
 
 router = APIRouter(
