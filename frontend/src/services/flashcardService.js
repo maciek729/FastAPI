@@ -136,8 +136,7 @@ export const deleteFlashcard = async (cardId) => {
 };
 
 export const getFlashcardFolders = async (userId, notebookId) => {
-  const url = `${ENDPOINTS.FLASHCARDS.FOLDERS.LIST}?user_id=${userId}&notebook_id=${notebookId}`;
-  const response = await fetch(url, {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.LIST(notebookId, userId), {
     credentials: 'include',
   });
   if (!response.ok) throw new Error('Failed to fetch flashcard folders');
@@ -145,7 +144,7 @@ export const getFlashcardFolders = async (userId, notebookId) => {
 };
 
 export const createFlashcardFolder = async (data) => {
-  const response = await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.CREATE, {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.CREATE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -156,7 +155,7 @@ export const createFlashcardFolder = async (data) => {
 };
 
 export const deleteFlashcardFolder = async (folderId) => {
-  const response = await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.DELETE(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.DELETE(folderId), {
     method: 'DELETE',
     credentials: 'include',
   });
@@ -164,7 +163,7 @@ export const deleteFlashcardFolder = async (folderId) => {
 };
 
 export const renameFlashcardFolder = async (folderId, newName) => {
-  const response = await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.RENAME(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.RENAME(folderId), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -174,7 +173,7 @@ export const renameFlashcardFolder = async (folderId, newName) => {
 };
 
 export const moveFlashcardFolder = async (folderId, parentFolderId) => {
-  const response = await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.MOVE(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.MOVE(folderId), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -184,7 +183,7 @@ export const moveFlashcardFolder = async (folderId, parentFolderId) => {
 };
 
 export const moveFlashcardSetToFolder = async (setId, folderId) => {
-  const response = await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.MOVE_SET, {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.MOVE_ITEM, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -194,7 +193,7 @@ export const moveFlashcardSetToFolder = async (setId, folderId) => {
 };
 
 export const updateFlashcardFolderPosition = async (folderId, position) => {
-  const response = await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.UPDATE_POSITION(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.UPDATE_POSITION(folderId), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',

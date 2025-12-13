@@ -68,7 +68,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
 
     const fetchFolders = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/note-folders/list', {
+            const response = await axios.get('http://localhost:8000/folders/notes/list', {
                 params: {
                     notebook_id: details.id,
                     user_id: userData.id
@@ -259,7 +259,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!newFolderName.trim()) return;
 
         try {
-            await axios.post('http://localhost:8000/note-folders/create', {
+            await axios.post('http://localhost:8000/folders/notes/create', {
                 notebook_id: details.id,
                 user_id: userData.id,
                 name: newFolderName,
@@ -291,7 +291,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Notatki zostaną przeniesione do głównego widoku.')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/note-folders/${folderId}`);
+            await axios.delete(`http://localhost:8000/folders/notes/${folderId}`);
             if (currentFolder?.id === folderId) {
                 setCurrentFolder(null);
             }
@@ -308,7 +308,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!editingFolder || !editingFolder.name.trim()) return;
 
         try {
-            await axios.patch(`http://localhost:8000/note-folders/${editingFolder.id}/rename`, {
+            await axios.patch(`http://localhost:8000/folders/notes/${editingFolder.id}/rename`, {
                 name: editingFolder.name
             });
             setEditingFolder(null);
@@ -322,7 +322,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
     const handleMoveNoteToFolder = async (noteId, folderId) => {
         try {
             console.log('Moving note:', noteId, 'to folder:', folderId);
-            const response = await axios.post('http://localhost:8000/note-folders/move-note', {
+            const response = await axios.post('http://localhost:8000/folders/notes/move-item', {
                 note_id: noteId,
                 folder_id: folderId
             });
@@ -509,7 +509,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         try {
             await Promise.all(
                 updatedFolders.map(folder =>
-                    axios.patch(`http://localhost:8000/note-folders/${folder.id}/position`, {
+                    axios.patch(`http://localhost:8000/folders/notes/${folder.id}/position`, {
                         grid_position: folder.grid_position
                     })
                 )
@@ -539,12 +539,28 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         e.stopPropagation();
         setDragOverFolder(null);
 
+        // Handle note drop
         if (draggedNote) {
             try {
                 await handleMoveNoteToFolder(draggedNote.note.id, folderId);
                 setDraggedNote(null);
             } catch (err) {
                 console.error('Error dropping note into folder:', err);
+            }
+        }
+
+        // Handle folder drop
+        if (draggedFolder) {
+            try {
+                await axios.patch(`http://localhost:8000/folders/notes/${draggedFolder.folder.id}/move`, {
+                    parent_folder_id: folderId
+                });
+                setDraggedFolder(null);
+                await fetchFolders();
+                refreshNotebook();
+            } catch (err) {
+                console.error('Error moving folder into folder:', err);
+                alert("Błąd przenoszenia folderu");
             }
         }
     };
@@ -581,7 +597,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         // Handle folder drop
         if (draggedFolder) {
             try {
-                await axios.patch(`http://localhost:8000/note-folders/${draggedFolder.folder.id}/move`, {
+                await axios.patch(`http://localhost:8000/folders/notes/${draggedFolder.folder.id}/move`, {
                     parent_folder_id: parentFolderId
                 });
                 setDraggedFolder(null);
@@ -707,7 +723,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                 }}
                                 onDrop={(e) => {
                                     if (draggedFolder) {
-                                        handleFolderCardDrop(e, index);
+                                        handleFolderDrop(e, folder.id);
                                     } else if (draggedNote) {
                                         handleFolderDrop(e, folder.id);
                                     }

@@ -115,7 +115,7 @@ export const updateTestPosition = async (testId, gridPosition) => {
 };
 
 export const fetchTestFolders = async (userId, notebookId) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.LIST(notebookId, userId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.LIST(notebookId, userId), {
     credentials: 'include',
   });
   if (!response.ok) {
@@ -126,7 +126,7 @@ export const fetchTestFolders = async (userId, notebookId) => {
 };
 
 export const createTestFolder = async (folderData) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.CREATE, {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.CREATE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -140,7 +140,7 @@ export const createTestFolder = async (folderData) => {
 };
 
 export const deleteTestFolder = async (folderId) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.DELETE(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.DELETE(folderId), {
     method: 'DELETE',
     credentials: 'include',
   });
@@ -152,7 +152,7 @@ export const deleteTestFolder = async (folderId) => {
 };
 
 export const renameTestFolder = async (folderId, name) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.RENAME(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.RENAME(folderId), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -166,7 +166,7 @@ export const renameTestFolder = async (folderId, name) => {
 };
 
 export const moveTestFolder = async (folderId, parentFolderId) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.MOVE(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.MOVE(folderId), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -180,7 +180,7 @@ export const moveTestFolder = async (folderId, parentFolderId) => {
 };
 
 export const moveTestToFolder = async (testId, folderId) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.MOVE_TEST, {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.MOVE_ITEM, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -194,7 +194,7 @@ export const moveTestToFolder = async (testId, folderId) => {
 };
 
 export const updateTestFolderPosition = async (folderId, gridPosition) => {
-  const response = await fetch(ENDPOINTS.TESTS.FOLDERS.UPDATE_POSITION(folderId), {
+  const response = await fetch(ENDPOINTS.FOLDERS.TESTS.UPDATE_POSITION(folderId), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
