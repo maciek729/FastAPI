@@ -82,6 +82,11 @@ const ENDPOINTS = {
       COPY: (folderId) => `${API_BASE_URL}/flashcard-set-folders/${folderId}/copy`,
     },
   },
+  PODCASTS: {
+    LIST: (notebookId) => `${API_BASE_URL}/podcasts/list?notebook_id=${notebookId}`,
+    GENERATE: `${API_BASE_URL}/podcasts/generate`,
+    DELETE: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}`, 
+  },
   USERS: {
     LOGIN: `${API_BASE_URL}/auth/login`,
     LOGOUT: `${API_BASE_URL}/auth/logout`,

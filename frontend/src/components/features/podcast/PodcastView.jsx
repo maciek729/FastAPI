@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { Mic, Play, Pause, Trash2, CheckSquare, Square, RefreshCw, Headphones } from 'lucide-react';
 import styles from '../../../css/features/PodcastView.module.css'; 
+
+import { fetchPodcasts as fetchPodcasts, generatePodcast, deletePodcast } from '../../../services/podcastService';
+import { getNotes } from '../../../services/noteService';
 
 export default function PodcastView({ notebookId, userData }) {
     const [podcasts, setPodcasts] = useState([]);
@@ -16,49 +18,48 @@ export default function PodcastView({ notebookId, userData }) {
     const audioRef = useRef(null);
 
     useEffect(() => {
-        fetchPodcasts();
-        fetchNotes();
+        if (notebookId) {
+            loadPodcasts();
+            loadNotes();
+        }
     }, [notebookId]);
 
-    const fetchPodcasts = async () => {
+    const loadPodcasts = async () => {
         try {
-            const res = await axios.get(`http://localhost:8000/podcasts/list?notebook_id=${notebookId}`);
-            setPodcasts(res.data);
+            const data = await fetchPodcasts(notebookId);
+            setPodcasts(data);
         } catch (err) {
-            console.error(err);
+            console.error("Błąd pobierania podcastów:", err);
         }
     };
 
-    const fetchNotes = async () => {
+    const loadNotes = async () => {
         try {
-            const res = await axios.get(`http://localhost:8000/notes/notebook/${notebookId}`); 
-            setNotes(res.data);
+            const data = await getNotes(notebookId); 
+            setNotes(data);
         } catch (err) {
-            console.error(err);
+            console.error("Błąd pobierania notatek:", err);
         }
     };
 
     const handleGenerate = async () => {
-        if (!topic || selectedNoteIds.length === 0) {
-            alert("Wpisz temat i wybierz przynajmniej jedną notatkę.");
+        if (!topic) {
+            alert("Wpisz temat podcastu.");
             return;
         }
 
         setIsGenerating(true);
         try {
-            await axios.post('http://localhost:8000/podcasts/generate', {
-                notebook_id: notebookId,
-                user_id: userData.id,
-                topic: topic,
-                note_ids: selectedNoteIds
-            });
+            // note_ids są teraz opcjonalne (mogą być puste)
+            await generatePodcast(notebookId, userData.id, topic, selectedNoteIds);
+            
             setTopic('');
             setSelectedNoteIds([]);
             setShowCreator(false);
-            fetchPodcasts();
+            loadPodcasts();
         } catch (err) {
             console.error(err);
-            alert("Błąd generowania podcastu. Sprawdź konsolę.");
+            alert("Błąd generowania podcastu: " + err.message);
         } finally {
             setIsGenerating(false);
         }
@@ -97,10 +98,11 @@ export default function PodcastView({ notebookId, userData }) {
     const handleDelete = async (id) => {
         if(!window.confirm("Usunąć podcast?")) return;
         try {
-            await axios.delete(`http://localhost:8000/podcasts/${id}`);
-            fetchPodcasts();
+            await deletePodcast(id);
+            loadPodcasts();
         } catch(err) {
             console.error(err);
+            alert("Nie udało się usunąć podcastu.");
         }
     };
 
@@ -127,18 +129,22 @@ export default function PodcastView({ notebookId, userData }) {
                         className={styles.input}
                     />
                     
-                    <p className={styles.label}>Wybierz materiały źródłowe:</p>
+                    <p className={styles.label}>Wybierz materiały źródłowe (opcjonalne):</p>
                     <div className={styles.notesList}>
-                        {notes.map(note => (
-                            <div 
-                                key={note.id} 
-                                className={`${styles.noteItem} ${selectedNoteIds.includes(note.id) ? styles.selected : ''}`}
-                                onClick={() => toggleNoteSelection(note.id)}
-                            >
-                                {selectedNoteIds.includes(note.id) ? <CheckSquare size={16}/> : <Square size={16}/>}
-                                <span>{note.title}</span>
-                            </div>
-                        ))}
+                        {notes.length === 0 ? (
+                            <p style={{color: '#888', fontStyle: 'italic', fontSize: '0.9rem'}}>Brak notatek w tym notatniku.</p>
+                        ) : (
+                            notes.map(note => (
+                                <div 
+                                    key={note.id} 
+                                    className={`${styles.noteItem} ${selectedNoteIds.includes(note.id) ? styles.selected : ''}`}
+                                    onClick={() => toggleNoteSelection(note.id)}
+                                >
+                                    {selectedNoteIds.includes(note.id) ? <CheckSquare size={16}/> : <Square size={16}/>}
+                                    <span>{note.title}</span>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     <button 

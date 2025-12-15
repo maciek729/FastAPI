@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Annotated
 import os
 import uuid
 from datetime import datetime
@@ -10,6 +10,9 @@ from models import Podcasts, Notes
 from google import genai
 from google.genai import types
 import wave
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter(
     prefix="/podcasts",
@@ -23,6 +26,8 @@ def get_db():
     finally:
         db.close()
 
+db_dependency = Annotated[Session, Depends(get_db)]
+
 UPLOAD_DIR = "static/podcasts"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -30,7 +35,7 @@ class PodcastCreateRequest(BaseModel):
     notebook_id: int
     user_id: int
     topic: str
-    note_ids: List[int]
+    note_ids: Optional[List[int]] = [] 
 
 class PodcastResponse(BaseModel):
     id: int
@@ -42,12 +47,20 @@ class PodcastResponse(BaseModel):
 def create_script(topic: str, context_text: str, api_key: str):
     client = genai.Client(api_key=api_key)
     
+    reference_section = ""
+    if context_text.strip():
+        reference_section = f"""
+    Here is the reference material (notes) you MUST base the discussion on:
+    {context_text}
+    """
+    else:
+        reference_section = "No specific reference notes provided. Base the discussion on general knowledge about the topic."
+
     prompt = f"""
     Write a short, engaging podcast dialogue between two hosts: Joe and Jane.
     The topic of the discussion is: {topic}.
     
-    Here is the reference material (notes) you MUST base the discussion on:
-    {context_text}
+    {reference_section}
     
     Rules:
     1. Keep it natural and conversational.
@@ -59,7 +72,7 @@ def create_script(topic: str, context_text: str, api_key: str):
     """
     
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         contents=prompt
     )
     return response.text
@@ -104,22 +117,22 @@ def create_audio(script_text: str, output_path: str, api_key: str):
         wf.writeframes(pcm_data)
 
 
-@router.post("/generate", response_model=PodcastResponse)
-async def generate_podcast(request: PodcastCreateRequest, db: Session = Depends(get_db)):
+@router.post("/generate", response_model=PodcastResponse, status_code=status.HTTP_201_CREATED)
+async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise HTTPException(status_code=500, detail="Brak klucza API Gemini")
 
-    notes = db.query(Notes).filter(Notes.id.in_(request.note_ids)).all()
-    if not notes:
-        raise HTTPException(status_code=400, detail="Nie wybrano poprawnych notatek")
+    context_text = ""
+    if request.note_ids:
+        notes = db.query(Notes).filter(Notes.id.in_(request.note_ids)).all()
+        if notes:
+            context_text = "\n\n".join([f"Note Title: {n.title}\nContent: {n.content}" for n in notes])
     
-    context_text = "\n\n".join([f"Note Title: {n.title}\nContent: {n.content}" for n in notes])
-
     try:
         script = create_script(request.topic, context_text, api_key)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd generowania scenariusza: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Błąd generowania scenariusza (AI): {str(e)}")
 
     filename = f"{uuid.uuid4()}.wav"
     file_path = os.path.join(UPLOAD_DIR, filename)
@@ -127,7 +140,7 @@ async def generate_podcast(request: PodcastCreateRequest, db: Session = Depends(
     try:
         create_audio(script, file_path, api_key)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd generowania audio: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Błąd generowania audio (TTS): {str(e)}")
 
     file_url = f"http://localhost:8000/static/podcasts/{filename}" 
     
@@ -147,11 +160,11 @@ async def generate_podcast(request: PodcastCreateRequest, db: Session = Depends(
     return new_podcast
 
 @router.get("/list", response_model=List[PodcastResponse])
-async def list_podcasts(notebook_id: int, db: Session = Depends(get_db)):
+async def list_podcasts(notebook_id: int, db: db_dependency):
     return db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).order_by(Podcasts.created_at.desc()).all()
 
-@router.delete("/{podcast_id}")
-async def delete_podcast(podcast_id: int, db: Session = Depends(get_db)):
+@router.delete("/{podcast_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_podcast(podcast_id: int, db: db_dependency):
     podcast = db.query(Podcasts).filter(Podcasts.id == podcast_id).first()
     if not podcast:
         raise HTTPException(status_code=404, detail="Podcast nie znaleziony")
