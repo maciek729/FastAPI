@@ -76,15 +76,15 @@ class Notes(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
-    folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)  # parent folder
+    folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)
     title = Column(String)
     content = Column(String)
     type = Column(String(50), default="Notatka")
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     is_shared = Column(Boolean, default=False)
-    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
-    is_pinned = Column(Boolean, default=False)  # whether note is pinned to top
+    grid_position = Column(Integer, nullable=True)
+    is_pinned = Column(Boolean, default=False)
 
     # 🔼 RELACJA DO NOTEBOOKA
     notebook = relationship("Notebooks", back_populates="notes")

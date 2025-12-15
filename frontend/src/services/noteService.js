@@ -68,3 +68,16 @@ export const checkLockStatusFunction = async (noteId) => {
     }
     return await response.json();
 };
+
+export const getNotes = async (notebookId) => {
+    const response = await fetch(ENDPOINTS.NOTES.LIST(notebookId), {
+        method: 'GET',
+        credentials: 'include',
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({ detail: 'Nieznany błąd serwera' }));
+        throw new Error(errorBody.detail || 'Failed to fetch notes');
+    }
+    return await response.json();
+};
