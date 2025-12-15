@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus, Search, X, Folder } from "lucide-react";
 import FlashcardGenerator from "./FlashcardGenerator";
 import FlashcardSetsList from "./FlashcardSetsList";
@@ -149,7 +149,7 @@ export default function FlashcardsView({ notebookId, userData }) {
         }
     };
 
-    const getFilteredAndSortedSets = () => {
+    const filteredAndSortedSets = useMemo(() => {
         let filtered = flashcardSets;
 
         if (searchQuery) {
@@ -176,7 +176,7 @@ export default function FlashcardsView({ notebookId, userData }) {
         });
 
         return filtered;
-    };
+    }, [flashcardSets, searchQuery, filterDifficulty, sortBy]);
 
     const handleBreadcrumbDragOver = (e) => {
         e.preventDefault();
@@ -355,7 +355,7 @@ export default function FlashcardsView({ notebookId, userData }) {
             </div>
 
             <FlashcardSetsList
-                sets={getFilteredAndSortedSets()}
+                sets={filteredAndSortedSets}
                 loading={loading}
                 userId={userData.id}
                 notebookId={notebookId}
@@ -364,6 +364,7 @@ export default function FlashcardsView({ notebookId, userData }) {
                 onStartLearning={handleStartLearning}
                 onManageSet={handleManageSet}
                 onDelete={fetchFlashcardSets}
+                onRefreshFolders={fetchFolders}
                 onOpenFolder={openFolder}
                 onDeleteFolder={handleDeleteFolder}
                 onRenameFolder={(folder) => setEditingFolder(folder)}

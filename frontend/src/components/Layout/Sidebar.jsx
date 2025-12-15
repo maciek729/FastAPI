@@ -138,7 +138,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await fetch(ENDPOINTS.TESTS.FOLDERS.COPY(dragData.folderId), {
+                await fetch(ENDPOINTS.FOLDERS.TESTS.COPY(dragData.folderId), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -172,7 +172,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await fetch(ENDPOINTS.NOTES.FOLDERS.COPY(dragData.folderId), {
+                await fetch(ENDPOINTS.FOLDERS.NOTES.COPY(dragData.folderId), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -206,7 +206,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     return;
                 }
 
-                await fetch(ENDPOINTS.FLASHCARDS.FOLDERS.COPY(dragData.folderId), {
+                await fetch(ENDPOINTS.FOLDERS.FLASHCARDS.COPY(dragData.folderId), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

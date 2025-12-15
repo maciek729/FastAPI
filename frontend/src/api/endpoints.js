@@ -22,14 +22,9 @@ const ENDPOINTS = {
     UPDATE: (noteId) => `${API_BASE_URL}/notes/${noteId}`,
     DELETE: (noteId) => `${API_BASE_URL}/notes/${noteId}`,
     COPY: (noteId) => `${API_BASE_URL}/notes/${noteId}/copy`,
-
     LOCK: (noteId) => `${API_BASE_URL}/notes/${noteId}/lock`,
     UNLOCK: (noteId) => `${API_BASE_URL}/notes/${noteId}/unlock`,
     LOCK_STATUS: (noteId) => `${API_BASE_URL}/notes/${noteId}/lock-status`,
-
-    FOLDERS: {
-      COPY: (folderId) => `${API_BASE_URL}/note-folders/${folderId}/copy`,
-    },
   },
   TESTS: {
     LIST: (notebookId, userId) => `${API_BASE_URL}/tests/list?user_id=${userId}&notebook_id=${notebookId}`,
@@ -42,15 +37,8 @@ const ENDPOINTS = {
     TOGGLE_PIN: (testId) => `${API_BASE_URL}/tests/${testId}/pin`,
     UPDATE_POSITION: (testId) => `${API_BASE_URL}/tests/${testId}/position`,
     COPY: (testId) => `${API_BASE_URL}/tests/${testId}/copy`,
-    FOLDERS: {
-      LIST: (notebookId, userId) => `${API_BASE_URL}/test-folders/list?user_id=${userId}&notebook_id=${notebookId}`,
-      CREATE: `${API_BASE_URL}/test-folders/create`,
-      DELETE: (folderId) => `${API_BASE_URL}/test-folders/${folderId}`,
-      RENAME: (folderId) => `${API_BASE_URL}/test-folders/${folderId}/rename`,
-      MOVE: (folderId) => `${API_BASE_URL}/test-folders/${folderId}/move`,
-      MOVE_TEST: `${API_BASE_URL}/test-folders/move-test`,
-      UPDATE_POSITION: (folderId) => `${API_BASE_URL}/test-folders/${folderId}/position`,
-      COPY: (folderId) => `${API_BASE_URL}/test-folders/${folderId}/copy`,
+    NOTES: {
+      LIST: (notebookId) => `${API_BASE_URL}/notes/list/${notebookId}`,
     },
   },
   FLASHCARDS: {
@@ -71,15 +59,37 @@ const ENDPOINTS = {
       UPDATE: (cardId) => `${API_BASE_URL}/flashcards/card/${cardId}`,
       DELETE: (cardId) => `${API_BASE_URL}/flashcards/card/${cardId}`,
     },
-    FOLDERS: {
-      LIST: `${API_BASE_URL}/flashcard-set-folders/list`,
-      CREATE: `${API_BASE_URL}/flashcard-set-folders/create`,
-      DELETE: (folderId) => `${API_BASE_URL}/flashcard-set-folders/${folderId}`,
-      RENAME: (folderId) => `${API_BASE_URL}/flashcard-set-folders/${folderId}/rename`,
-      MOVE: (folderId) => `${API_BASE_URL}/flashcard-set-folders/${folderId}/move`,
-      MOVE_SET: `${API_BASE_URL}/flashcard-set-folders/move-set`,
-      UPDATE_POSITION: (folderId) => `${API_BASE_URL}/flashcard-set-folders/${folderId}/position`,
-      COPY: (folderId) => `${API_BASE_URL}/flashcard-set-folders/${folderId}/copy`,
+  },
+  FOLDERS: {
+    NOTES: {
+      LIST: (notebookId, userId) => `${API_BASE_URL}/folders/notes/list?user_id=${userId}&notebook_id=${notebookId}`,
+      CREATE: `${API_BASE_URL}/folders/notes/create`,
+      DELETE: (folderId) => `${API_BASE_URL}/folders/notes/${folderId}`,
+      RENAME: (folderId) => `${API_BASE_URL}/folders/notes/${folderId}/rename`,
+      MOVE: (folderId) => `${API_BASE_URL}/folders/notes/${folderId}/move`,
+      MOVE_ITEM: `${API_BASE_URL}/folders/notes/move-item`,
+      UPDATE_POSITION: (folderId) => `${API_BASE_URL}/folders/notes/${folderId}/position`,
+      COPY: (folderId) => `${API_BASE_URL}/folders/notes/${folderId}/copy`,
+    },
+    TESTS: {
+      LIST: (notebookId, userId) => `${API_BASE_URL}/folders/tests/list?user_id=${userId}&notebook_id=${notebookId}`,
+      CREATE: `${API_BASE_URL}/folders/tests/create`,
+      DELETE: (folderId) => `${API_BASE_URL}/folders/tests/${folderId}`,
+      RENAME: (folderId) => `${API_BASE_URL}/folders/tests/${folderId}/rename`,
+      MOVE: (folderId) => `${API_BASE_URL}/folders/tests/${folderId}/move`,
+      MOVE_ITEM: `${API_BASE_URL}/folders/tests/move-item`,
+      UPDATE_POSITION: (folderId) => `${API_BASE_URL}/folders/tests/${folderId}/position`,
+      COPY: (folderId) => `${API_BASE_URL}/folders/tests/${folderId}/copy`,
+    },
+    FLASHCARDS: {
+      LIST: (notebookId, userId) => `${API_BASE_URL}/folders/flashcards/list?user_id=${userId}&notebook_id=${notebookId}`,
+      CREATE: `${API_BASE_URL}/folders/flashcards/create`,
+      DELETE: (folderId) => `${API_BASE_URL}/folders/flashcards/${folderId}`,
+      RENAME: (folderId) => `${API_BASE_URL}/folders/flashcards/${folderId}/rename`,
+      MOVE: (folderId) => `${API_BASE_URL}/folders/flashcards/${folderId}/move`,
+      MOVE_ITEM: `${API_BASE_URL}/folders/flashcards/move-item`,
+      UPDATE_POSITION: (folderId) => `${API_BASE_URL}/folders/flashcards/${folderId}/position`,
+      COPY: (folderId) => `${API_BASE_URL}/folders/flashcards/${folderId}/copy`,
     },
   },
   PODCASTS: {
