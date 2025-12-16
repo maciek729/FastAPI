@@ -101,6 +101,12 @@ const ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/auth/login`,
     LOGOUT: `${API_BASE_URL}/auth/logout`,
   },
+  AUTH: {
+    REGISTER: `${API_BASE_URL}/auth/`,
+    LOGIN: `${API_BASE_URL}/auth/token`,
+    FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+    RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  },
 };
 
 export default ENDPOINTS;

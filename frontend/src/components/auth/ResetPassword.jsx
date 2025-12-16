@@ -1,21 +1,17 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import styles from "../../css/shared/Auth.module.css";
+import { ResetPassword as ResetPasswordService } from "../../services/authService";
 
 function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const [form, setForm] = useState({ newPassword: "", confirmPassword: "" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -35,24 +31,9 @@ function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("token", token);
-      formData.append("new_password", form.newPassword);
-
-      const res = await fetch("http://localhost:8000/auth/reset-password", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "Resetowanie hasła nie powiodło się");
-      }
-
+      await ResetPasswordService(token, form.newPassword);
       setMessage("Hasło zostało zaktualizowane pomyślnie! Przekierowanie do logowania...");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       setError(err.message);
     } finally {

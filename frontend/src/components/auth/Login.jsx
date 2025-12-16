@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
+import { LoginUser } from "../../services/authService";
 
 function Login() {
   const navigate = useNavigate();
@@ -15,20 +16,9 @@ function Login() {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    
+
     try {
-      const res = await fetch("http://localhost:8000/auth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(form),
-      });
-      
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "Nieprawidłowe dane logowania");
-      }
-      
-      const data = await res.json();
+      const data = await LoginUser(form);
       document.cookie = `access_token=${data.access_token}; path=/`;
       navigate("/dashboard");
     } catch (err) {
@@ -40,7 +30,6 @@ function Login() {
 
   return (
     <div className={styles.authContainer}>
-      {/* Back to Intro Button */}
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
         <span>Powrót do strony głównej</span>
