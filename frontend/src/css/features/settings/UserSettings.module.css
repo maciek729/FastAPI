@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .settingsMainContainer {
-  max-width: 1400px; /*Szerokosc maksymalna tak jak u macieja w przestrzeniach*/
+  max-width: 1400px;
   width: 80%;
   flex-direction: column;
   display: flex;
@@ -348,4 +348,33 @@ Pozdro*/
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
   font-family: 'Inter', sans-serif;  
+}
+.userAvatar {
+    width: 55px;
+    height: 55px;
+    background-color: var(--primary_color);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.userAvatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.clickableAvatar {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.clickableAvatar:hover {
+    opacity: 0.85;
 }

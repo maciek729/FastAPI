@@ -100,6 +100,13 @@ const ENDPOINTS = {
   USERS: {
     LOGIN: `${API_BASE_URL}/auth/login`,
     LOGOUT: `${API_BASE_URL}/auth/logout`,
+    GET_CURRENT: `${API_BASE_URL}/user/`,
+    CHANGE_USERNAME: (username) => `${API_BASE_URL}/user/username/${username}`,
+    CHECK_AVAILABILITY: (username) => `${API_BASE_URL}/user/check-availability/${username}`,
+    REQUEST_PASSWORD_RESET: `${API_BASE_URL}/auth/forgot-password`, // Monika tego endpointa uzyj
+    CHANGE_PASSWORD: `${API_BASE_URL}/user/password`, // ja to tu daje, gdyz ja mam tez u siebie zmiane hasla przez maila
+    UPLOAD_AVATAR: `${API_BASE_URL}/user/avatar`,
+    DELETE_ACCOUNT: `${API_BASE_URL}/user/`,
   },
 };
 

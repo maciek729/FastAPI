@@ -63,8 +63,33 @@ async def change_phonenumber(user: user_dependency, db: db_dependency,
     db.add(user_model)
     db.commit()
 
+@router.get("/check-availability/{username}", status_code=status.HTTP_200_OK)
+async def check_username_availability(username: str, db: db_dependency):
+    user_exists = db.query(Users).filter(Users.username == username).first()
 
+    if user_exists:
+        return {"available": False, "message": "Nazwa użytkownika jest zajęta."}
+    
+    return {"available": True, "message": "Nazwa użytkownika jest dostępna."}
 
+@router.put("/username/{username}", status_code=status.HTTP_204_NO_CONTENT)
+async def change_username(user: user_dependency, db: db_dependency, username: str):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Authentication Failed')
+
+    existing_user = db.query(Users).filter(Users.username == username).first()
+    
+    if existing_user and existing_user.id != user.get('id'):
+        raise HTTPException(status_code=400, detail='Nazwa użytkownika jest już zajęta')
+
+    user_model = db.query(Users).filter(Users.id == user.get('id')).first()
+    
+    if user_model is None:
+        raise HTTPException(status_code=404, detail='User not found')
+
+    user_model.username = username
+    db.add(user_model)
+    db.commit()
 
 
 
