@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
+import { RegisterUser } from "../../services/authService";
 
 function Register() {
   const navigate = useNavigate();
@@ -14,36 +15,20 @@ function Register() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
     setError("");
-    
+
     if (form.password !== form.password2) {
       setError("Hasła nie pasują do siebie");
       return;
     }
-    
+
     setIsLoading(true);
-    
     try {
-      const payload = { ...form };
-      delete payload.password2;
-      
-      const res = await fetch("http://localhost:8000/auth/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "Rejestracja nie powiodła się");
-      }
-      
+      await RegisterUser(form);
       alert("Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.");
       navigate("/login");
     } catch (err) {
@@ -55,7 +40,6 @@ function Register() {
 
   return (
     <div className={styles.authContainer}>
-      {/* Back to Intro Button */}
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
         <span>Powrót do strony głównej</span>

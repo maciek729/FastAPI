@@ -108,6 +108,12 @@ const ENDPOINTS = {
     UPLOAD_AVATAR: `${API_BASE_URL}/user/avatar`,
     DELETE_ACCOUNT: `${API_BASE_URL}/user/`,
   },
+  AUTH: {
+    REGISTER: `${API_BASE_URL}/auth/`,
+    LOGIN: `${API_BASE_URL}/auth/token`,
+    FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
+    RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  },
 };
 
 export default ENDPOINTS;
