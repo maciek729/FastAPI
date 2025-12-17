@@ -38,15 +38,21 @@ export default function Settings({userData, onGoToSection}) {
         { value: 'en', label: t('settings.languageOptions.english') }
     ];
 
+    // Local Storage
+    const getInitialTheme = () => {
+        const savedTheme = localStorage.getItem('appTheme');
+        return savedTheme ? savedTheme : 'light';
+    }
+
     // Obsluga zmiany ustawien
-    const [theme, setTheme] = useState("light"); 
+    const [theme, setTheme] = useState(getInitialTheme());
     const [selectedLanguage, setSelectedLanguage] = useState(language);
 
     // Wartosci z bazy danych (które ma już zapisane)
     // Potrzebne do porównania czy są jakieś zmiany
     // i do przywrócenia ustawień przy anulowaniu
     // i do wyswietlenia komunikatu "Masz niezapisane zmiany"
-    const [savedTheme, setSavedTheme] = useState("light"); // muszę zmienić na userData.theme
+    const [savedTheme, setSavedTheme] = useState(getInitialTheme()); // muszę zmienić na userData.theme
     const [savedLanguage, setSavedLanguage] = useState(language); // userData.language
 
     const [saved, setSaved] = useState(false);
@@ -89,6 +95,7 @@ export default function Settings({userData, onGoToSection}) {
     };
 
     const handleSave = () => {
+        localStorage.setItem('appTheme', theme);
         setSavedTheme(theme);
         setSavedLanguage(selectedLanguage);
         changeLanguage(selectedLanguage);

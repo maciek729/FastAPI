@@ -97,6 +97,7 @@ Pozdro*/
   position: relative;
   cursor: pointer;
   margin-left: auto;
+  color-scheme: dark;
 }
 .optionSelect {
   appearance: none;
@@ -113,10 +114,12 @@ Pozdro*/
   cursor: pointer;
   padding-right: 2.5rem; 
   width: 100%;
+  color-scheme: dark;
 }
 .optionSelect option {
   color: black;
   background: white;
+  color-scheme: dark;
 }
 .selectWrapper::after {
   content: '';

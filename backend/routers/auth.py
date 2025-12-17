@@ -259,3 +259,19 @@ async def reset_password(
     return {"message": "Password updated successfully"}
 
 
+@router.get("/check-availability/{username}", status_code=status.HTTP_200_OK)
+async def check_username_availability(username: str, db: db_dependency):
+    """
+    Sprawdza, czy podana nazwa użytkownika jest już zajęta.
+    Zwraca True, jeśli nazwa jest dostępna (nie istnieje w bazie).
+    Zwraca False, jeśli nazwa jest zajęta.
+    """
+    # Sprawdzamy, czy istnieje użytkownik o takiej nazwie
+    user_exists = db.query(Users).filter(Users.username == username).first()
+
+    if user_exists:
+        # Jeśli znaleziono użytkownika, to nazwa jest ZAJĘTA (nie jest dostępna)
+        return {"available": False, "message": "Nazwa użytkownika jest zajęta."}
+    
+    # Jeśli nie znaleziono, nazwa jest DOSTĘPNA
+    return {"available": True, "message": "Nazwa użytkownika jest dostępna."}

@@ -5,19 +5,39 @@ import styles from "../../../css/layout/SidebarFooter.module.css";
 
 const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState(null); // Stan na avatar
     const menuRef = useRef(null);
 
     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
+    const loadAvatar = () => {
+        const localAvatar = localStorage.getItem('user_avatar');
+        if (localAvatar) {
+            setAvatarUrl(localAvatar);
+        } else if (userData?.avatarUrl) {
+            setAvatarUrl(userData.avatarUrl);
+        } else {
+            setAvatarUrl(null);
+        }
+    };
+
     useEffect(() => {
+        loadAvatar();
+        
+        window.addEventListener("storage", loadAvatar);
+
         const handleClickOutside = (e) => {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
                 setIsMenuOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            window.removeEventListener("storage", loadAvatar);
+        };
+    }, [userData]);
 
     return (
         <>
@@ -27,7 +47,15 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
                     onClick={toggleMenu}
                     title={userData?.username || "User"}
                 >
-                    {userData?.name?.charAt(0) || userData?.username?.charAt(0) || "U"}
+                    {avatarUrl ? (
+                        <img 
+                            src={avatarUrl} 
+                            alt="User" 
+                            className={styles.userAvatarImg} 
+                        />
+                    ) : (
+                        userData?.name?.charAt(0) || userData?.username?.charAt(0) || "U"
+                    )}
                 </div>
 
                 {isMenuOpen && (
