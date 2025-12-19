@@ -1,18 +1,82 @@
-import { useState, useContext } from "react";
-import { MessageCircle, FileText, Zap, ClipboardCheck } from "lucide-react";
+import { useState, useContext, useCallback, useEffect } from "react";
+import { Users, MessageCircle, FileText, Zap, ClipboardCheck, Headphones } from "lucide-react";
 import Chat from "../chat/Chat";
 import FilesView from "../notebook/FilesView";
 import FlashcardsView from "../flashcard/FlashcardsView";
 import TestsView from "../tests/TestsView";
 import styles from "../../../css/features/NotebookView.module.css";
-import { Headphones } from "lucide-react";
 import PodcastView from "../podcast/PodcastView";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import GroupChatSidebar from "../group_chat/GroupChatSidebar";
 
 export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen }) {
+    const notebookId = details?.id;
+    
     const [activeTab, setActiveTab] = useState("files");
+    const [isGroupChatOpen, setIsGroupChatOpen] = useState(() => {
+        if (!notebookId) return false;
+        const savedStates = localStorage.getItem('groupChat_open_states');
+        if (savedStates) {
+            const states = JSON.parse(savedStates);
+            return states[notebookId] || false;
+        }
+        return false;
+    });
+    
+    const [chatWidth, setChatWidth] = useState(350);
+    const [isResizing, setIsResizing] = useState(false);
+
     const { language } = useContext(LanguageContext);
+
+    const isShared = details?.space_type === 'shared' || details?.is_shared === true;
+    
+    const startResizing = useCallback((e) => {
+        e.preventDefault();
+        setIsResizing(true);
+    }, []);
+
+    const stopResizing = useCallback(() => {
+        setIsResizing(false);
+    }, []);
+
+    const resize = useCallback((e) => {
+        if (isResizing) {
+            const newWidth = window.innerWidth - e.clientX;
+            
+            if (newWidth > 250 && newWidth < window.innerWidth * 0.5) {
+                setChatWidth(newWidth);
+            }
+        }
+    }, [isResizing]);
+
+    useEffect(() => {
+        if (!notebookId) return;
+
+        const savedStates = localStorage.getItem('groupChat_open_states');
+        const states = savedStates ? JSON.parse(savedStates) : {};
+        
+        states[notebookId] = isGroupChatOpen;
+        
+        localStorage.setItem('groupChat_open_states', JSON.stringify(states));
+    }, [isGroupChatOpen, notebookId]);
+
+    useEffect(() => {
+        if (isResizing) {
+            window.addEventListener("mousemove", resize);
+            window.addEventListener("mouseup", stopResizing);
+            document.body.style.cursor = 'col-resize';
+        } else {
+            window.removeEventListener("mousemove", resize);
+            window.removeEventListener("mouseup", stopResizing);
+            document.body.style.cursor = 'default';
+        }
+
+        return () => {
+            window.removeEventListener("mousemove", resize);
+            window.removeEventListener("mouseup", stopResizing);
+        };
+    }, [isResizing, resize, stopResizing]);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');
@@ -57,31 +121,57 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                         </button>
                     );
                 })}
+                {isShared && (
+                    <>
+                        <div className={styles.separator} />
+                        <button
+                            className={`${styles.tab} ${isGroupChatOpen ? styles.active : ""}`}
+                            onClick={() => setIsGroupChatOpen(!isGroupChatOpen)}
+                        >
+                            <Users size={18} />
+                            <span>{t('Czat grupowy')}</span>
+                        </button>
+                    </>
+                )}
             </div>
 
-            {/* Tab Content */}
-            <div className={styles.tabContainer}>
-                {activeTab === "chat" && <Chat userId={userData.id} notebookId = {details?.id}/>}
-                {activeTab === "files" && (
-                    <FilesView
-                        details={details}
-                        userData={userData}
-                        refreshNotebook={refreshNotebook}
-                    />
-                )}
-                {activeTab === "flashcards" && (
-                    <FlashcardsView
-                        notebookId={details?.id}
-                        userData={userData}
-                    />
-                )}
-                {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
-                {activeTab === "podcasts" && (
-                    <PodcastView 
-                        notebookId={details?.id} 
-                        userData={userData} 
-                    />
-                )}
+            {/* Tab Content & Sidebar */}
+            <div className={styles.mainLayout}>
+                <div className={styles.tabContainer}>
+                    {activeTab === "chat" && <Chat userId={userData.id} notebookId={details?.id}/>}
+                    {activeTab === "files" && (
+                        <FilesView
+                            details={details}
+                            userData={userData}
+                            refreshNotebook={refreshNotebook}
+                        />
+                    )}
+                    {activeTab === "flashcards" && (
+                        <FlashcardsView
+                            notebookId={details?.id}
+                            userData={userData}
+                        />
+                    )}
+                    {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
+                    {activeTab === "podcasts" && (
+                        <PodcastView 
+                            notebookId={details?.id} 
+                            userData={userData} 
+                        />
+                    )}
+                </div>
+
+                <GroupChatSidebar 
+                    isOpen={isGroupChatOpen} 
+                    onClose={() => setIsGroupChatOpen(false)}
+                    notebookId={details?.id}
+                    userData={userData}
+                    t={t}
+                    width={chatWidth}
+                    onResizeStart={startResizing}
+                    chatName = {details?.name}
+                    isShared={isShared}
+                />
             </div>
         </div>
     );

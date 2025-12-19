@@ -83,10 +83,17 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         );
     };
 
-    const handleNotebookClick = (notebook) => {
+    const handleNotebookClick = (notebook, spaceId) => {
         if (!isSidebarOpen) return;
-        setSelectedNotebook(notebook);
-        onSelectNotebook(notebook); 
+
+        const notebookWithSpace = { 
+            ...notebook, 
+            space_type: spaceId, 
+            is_shared: spaceId === 'shared'
+        };
+
+        setSelectedNotebook(notebookWithSpace);
+        onSelectNotebook(notebookWithSpace); 
     };
 
     const handleBrandClick = () => {
@@ -303,7 +310,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                             <div
                                                 key={notebook.id}
                                                 className={`${styles.notebookItem} ${selectedNotebook?.id === notebook.id ? styles.active : ''} ${dragOverNotebook === notebook.id ? styles.dragOver : ''}`}
-                                                onClick={() => handleNotebookClick(notebook)}
+                                                onClick={() => handleNotebookClick(notebook, space.id)}
                                                 onDragOver={(e) => handleDragOver(e, notebook)}
                                                 onDragLeave={handleDragLeave}
                                                 onDrop={(e) => handleDrop(e, notebook)}

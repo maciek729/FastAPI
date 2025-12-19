@@ -1,0 +1,88 @@
+.messagesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+.messageWrapper {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+.otherMessage {
+    align-self: flex-start;
+}
+.ownMessage {
+    align-self: flex-end;
+}
+
+.senderName {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--purple_brighter);
+    margin-bottom: 0.25rem;
+    margin-left: 0.5rem;
+}
+
+.bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.otherMessage .bubble {
+    background: var(--inner_inner_section_bg);
+    border: 1px solid var(--border_gray);
+    color: var(--title);
+    border-bottom-left-radius: 2px;
+}
+
+.ownMessage .bubble {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.messageText {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.messageTime {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+    display: block;
+    text-align: right;
+}
+
+.ownMessage .messageTime {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.otherMessage .messageTime {
+    color: var(--subtitle);
+}
+.messageLink {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 500;
+    word-break: break-all;
+    transition: opacity 0.2s;
+}
+
+.messageLink:hover {
+    opacity: 0.8;
+}
+
+.otherMessage .messageLink {
+    color: var(--purple_brighter);
+}
+
+.ownMessage .messageLink {
+    text-decoration-thickness: 2px;
+}

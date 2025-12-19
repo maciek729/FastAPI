@@ -1,0 +1,170 @@
+.sideGroupChat {
+    position: relative;
+    height: 100%;
+    min-width: 250px;
+    background: var(--inner_section_bg);
+    border-left: 1px solid var(--border_gray);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    z-index: 10;
+    transition: background 0.3s ease;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.resizer {
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    position: absolute;
+    left: -3px;
+    top: 0;
+    z-index: 20;
+    transition: background 0.2s ease;
+}
+
+.resizer:hover {
+    background: rgba(139, 92, 246, 0.4);
+}
+
+.sideChatHeader {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border_gray);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--inner_section_bg);
+    flex-shrink: 0;
+}
+
+.sideChatTitle {
+    font-weight: 600;
+    color: var(--title);
+    font-size: 1rem;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sideChatCloseBtn, .toggleScrollBtn {
+    background: transparent;
+    border: none;
+    color: var(--subtitle);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.sideChatCloseBtn:hover, .toggleScrollBtn:hover {
+    background: var(--inner_inner_section_bg);
+    color: var(--purple_brighter);
+}
+
+.toggleScrollBtn {
+    opacity: 0.5;
+}
+
+.scrollActive {
+    color: var(--purple_brighter);
+    opacity: 1;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.sideChatContent {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    word-break: break-word;
+}
+
+.sideChatContent::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sideChatContent::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sideChatContent::-webkit-scrollbar-thumb {
+    background: var(--border_gray);
+    border-radius: 10px;
+}
+
+.inputArea {
+    padding: 1rem;
+    border-top: 1px solid var(--border_gray);
+    background: var(--inner_section_bg);
+    flex-shrink: 0;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--inner_inner_section_bg);
+    padding: 0.5rem;
+    border-radius: 12px;
+    border: 2px solid var(--border_gray);
+}
+
+.messageInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--title);
+    font-size: 0.875rem;
+    outline: none;
+    padding: 0.25rem 0.5rem;
+}
+
+.iconButton {
+    background: transparent;
+    border: none;
+    color: var(--subtitle);
+    cursor: pointer;
+    display: flex;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.iconButton:hover {
+    color: var(--purple_brighter);
+}
+
+.sendButton {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border: none;
+    color: white;
+    padding: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+}
+
+.sendButton:disabled {
+    background: var(--border_gray);
+    opacity: 0.6;
+    cursor: not-allowed;
+}

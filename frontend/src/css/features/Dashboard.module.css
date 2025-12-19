@@ -147,7 +147,7 @@
 
 /* Notebook Card */
 .notebookCard {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--inner_section_bg);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 0.875rem;
@@ -164,7 +164,7 @@
 }
 
 .notebookCard:hover {
-  background: white;
+  background: var(--inner_inner_section_bg);
   border-color: rgba(139, 92, 246, 0.3);
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
   transform: translateY(-2px);
@@ -174,7 +174,7 @@
   font-size: 2rem;
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  background: var(--inner_inner_inner_section_bg);
   border-radius: 0.875rem;
   display: flex;
   align-items: center;
@@ -184,14 +184,14 @@
 .notebookName {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--title);
   margin: 0;
   word-break: break-word;
 }
 
 .notebookInfo {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--subtitle);
   margin: 0;
 }
 
