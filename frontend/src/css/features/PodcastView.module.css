@@ -86,6 +86,7 @@
 /* Creator Card */
 .creatorCard {
     background: white;
+    color: #333;
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -100,6 +101,8 @@
     border-radius: 8px;
     margin-bottom: 1rem;
     font-size: 1rem;
+    background: white;
+    color: #333;
 }
 
 .notesList {
@@ -120,6 +123,7 @@
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: white;
+    color: #333;
     border: 1px solid #ddd;
     border-radius: 20px;
     cursor: pointer;
@@ -205,6 +209,7 @@
 /* Podcast Card */
 .podcastCard {
     background: white;
+    color: #333;
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     padding: 1rem;
@@ -268,6 +273,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: #333;
 }
 
 .date {

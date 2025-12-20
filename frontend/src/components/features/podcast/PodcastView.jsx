@@ -356,7 +356,7 @@ export default function PodcastView({ notebookId, userData }) {
                 <div className={styles.creatorCard}>
                     <h3>Nowy Podcast</h3>
                     <input 
-                        type="text" placeholder="O czym ma być podcast?" 
+                        type="text" placeholder="O czym ma być podcast? Jeżeli wybierasz z notatki, to podaj tylko tytuł podcastu." 
                         value={topic} onChange={(e) => setTopic(e.target.value)}
                         className={styles.input}
                     />

@@ -7,10 +7,12 @@ import uuid
 from datetime import datetime
 from database import SessionLocal
 from models import Podcasts, Notes, PodcastFolders
-import google.generativeai as genai
-from google.generativeai import types
 import wave
+import io
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+from supabase import create_client, Client
 
 load_dotenv()
 
@@ -18,6 +20,15 @@ router = APIRouter(
     prefix="/podcasts",
     tags=["podcasts"],
 )
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    print("OSTRZEŻENIE: Brak konfiguracji Supabase. Upload plików nie zadziała.")
+    supabase = None
 
 def get_db():
     db = SessionLocal()
@@ -28,10 +39,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-UPLOAD_DIR = "static/podcasts"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# --- MODELS Pydantic ---
 class PodcastCreateRequest(BaseModel):
     notebook_id: int
     user_id: int
@@ -71,6 +78,9 @@ class PodcastResponse(BaseModel):
     is_pinned: bool = False
     grid_position: Optional[int] = 0
 
+    class Config:
+        from_attributes = True
+
 class FolderResponse(BaseModel):
     id: int
     name: str
@@ -78,7 +88,9 @@ class FolderResponse(BaseModel):
     grid_position: Optional[int]
     created_at: datetime
 
-# --- EXISTING LOGIC (Helpers) ---
+    class Config:
+        from_attributes = True
+
 def create_script(topic: str, context_text: str, api_key: str):
     client = genai.Client(api_key=api_key)
     reference_section = ""
@@ -99,12 +111,26 @@ def create_script(topic: str, context_text: str, api_key: str):
     3. Do not add narration, scene descriptions, or asterisks. just the lines.
     4. Speak in Polish unless the topic suggests otherwise.
     """
-    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+    
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite", 
+        contents=prompt
+    )
     return response.text
 
-def create_audio(script_text: str, output_path: str, api_key: str):
-    client = genai.Client(api_key=api_key)
+def generate_and_upload_audio(script_text: str, api_key: str) -> str:
+    """
+    Generuje audio, zapisuje je do pamięci RAM (BytesIO),
+    wysyła do Supabase Storage i zwraca publiczny URL.
+    """
+    if not supabase:
+        raise Exception("Supabase client not initialized")
+
+    client = genai.Client(
+        api_key=api_key)
+    
     prompt = f"TTS the following conversation:\n{script_text}"
+    
     response = client.models.generate_content(
         model="gemini-2.5-flash-preview-tts",
         contents=prompt,
@@ -120,12 +146,38 @@ def create_audio(script_text: str, output_path: str, api_key: str):
             )
         )
     )
-    pcm_data = response.candidates[0].content.parts[0].inline_data.data
-    with wave.open(output_path, "wb") as wf:
+    
+    try:
+        pcm_data = response.candidates[0].content.parts[0].inline_data.data
+    except (AttributeError, IndexError):
+        raise Exception("Model AI nie zwrócił danych audio.")
+
+    wav_buffer = io.BytesIO()
+    with wave.open(wav_buffer, "wb") as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
         wf.setframerate(24000)
         wf.writeframes(pcm_data)
+    
+    wav_buffer.seek(0)
+    
+    filename = f"{uuid.uuid4()}.wav"
+    storage_path = f"generated/{filename}" 
+
+    try:
+        supabase.storage.from_("podcasts").upload(
+            path=storage_path,
+            file=wav_buffer.getvalue(),
+            file_options={"content-type": "audio/wav"}
+        )
+        
+        public_url = supabase.storage.from_("podcasts").get_public_url(storage_path)
+        
+        return public_url, storage_path
+
+    except Exception as e:
+        print(f"Supabase Upload Error: {e}")
+        raise Exception(f"Błąd wysyłania pliku do Supabase: {e}")
 
 # --- ENDPOINTS ---
 
@@ -144,24 +196,22 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     try:
         script = create_script(request.topic, context_text, api_key)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd generowania scenariusza (AI): {str(e)}")
+        print(f"Error Script: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd AI (Scenariusz): {str(e)}")
 
-    filename = f"{uuid.uuid4()}.wav"
-    file_path = os.path.join(UPLOAD_DIR, filename)
-    
     try:
-        create_audio(script, file_path, api_key)
+        file_url, storage_path = generate_and_upload_audio(script, api_key)
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd generowania audio (TTS): {str(e)}")
+        print(f"Error Audio/Upload: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd generowania/uploadu audio: {str(e)}")
 
-    file_url = f"http://localhost:8000/static/podcasts/{filename}" 
-    
     new_podcast = Podcasts(
         notebook_id=request.notebook_id,
         user_id=request.user_id,
         title=request.topic,
         script_content=script,
-        file_path=file_path,
+        file_path=storage_path,
         file_url=file_url,
         folder_id=request.parent_folder_id
     )
@@ -181,29 +231,19 @@ async def delete_podcast(podcast_id: int, db: db_dependency):
     if not podcast:
         raise HTTPException(status_code=404, detail="Podcast nie znaleziony")
     
-    if os.path.exists(podcast.file_path):
-        try:
-            os.remove(podcast.file_path)
-        except OSError:
-            pass
-        
+    if podcast.file_url:
+        path_to_delete = podcast.file_url.split("/podcasts/")[-1] 
+        try: supabase.storage.from_("podcasts").remove([path_to_delete])
+        except: pass
+
     db.delete(podcast)
     db.commit()
     return {"message": "Usunięto pomyślnie"}
 
-# --- FOLDER & MANAGEMENT ENDPOINTS ---
-
 @router.post("/folders/create", response_model=FolderResponse)
 async def create_podcast_folder(request: FolderCreateRequest, db: db_dependency):
-    new_folder = PodcastFolders(
-        notebook_id=request.notebook_id,
-        user_id=request.user_id,
-        name=request.name,
-        parent_folder_id=request.parent_folder_id
-    )
-    db.add(new_folder)
-    db.commit()
-    db.refresh(new_folder)
+    new_folder = PodcastFolders(notebook_id=request.notebook_id, user_id=request.user_id, name=request.name, parent_folder_id=request.parent_folder_id)
+    db.add(new_folder); db.commit(); db.refresh(new_folder)
     return new_folder
 
 @router.get("/folders/list", response_model=List[FolderResponse])
@@ -213,75 +253,56 @@ async def list_podcast_folders(notebook_id: int, db: db_dependency):
 @router.delete("/folders/{folder_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_podcast_folder(folder_id: int, db: db_dependency):
     folder = db.query(PodcastFolders).filter(PodcastFolders.id == folder_id).first()
-    if not folder:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    
+    if not folder: raise HTTPException(status_code=404, detail="Folder not found")
     podcasts_in_folder = db.query(Podcasts).filter(Podcasts.folder_id == folder_id).all()
-    for p in podcasts_in_folder:
-        p.folder_id = None
-        
-    db.delete(folder)
-    db.commit()
+    for p in podcasts_in_folder: p.folder_id = None
+    db.delete(folder); db.commit()
 
 @router.patch("/{podcast_id}/rename")
 async def rename_podcast(podcast_id: int, request: RenameRequest, db: db_dependency):
     podcast = db.query(Podcasts).filter(Podcasts.id == podcast_id).first()
-    if not podcast:
-        raise HTTPException(status_code=404, detail="Podcast not found")
-    podcast.title = request.name
-    db.commit()
+    if not podcast: raise HTTPException(status_code=404, detail="Podcast not found")
+    podcast.title = request.name; db.commit()
     return {"message": "Updated"}
 
 @router.patch("/{podcast_id}/pin")
 async def pin_podcast(podcast_id: int, request: PinUpdate, db: db_dependency):
     podcast = db.query(Podcasts).filter(Podcasts.id == podcast_id).first()
-    if not podcast:
-        raise HTTPException(status_code=404, detail="Podcast not found")
-    podcast.is_pinned = request.is_pinned
-    db.commit()
+    if not podcast: raise HTTPException(status_code=404, detail="Podcast not found")
+    podcast.is_pinned = request.is_pinned; db.commit()
     return {"message": "Updated"}
 
 @router.patch("/{podcast_id}/position")
 async def update_podcast_position(podcast_id: int, request: PositionUpdate, db: db_dependency):
     podcast = db.query(Podcasts).filter(Podcasts.id == podcast_id).first()
-    if not podcast:
-        raise HTTPException(status_code=404, detail="Podcast not found")
-    podcast.grid_position = request.grid_position
-    db.commit()
+    if not podcast: raise HTTPException(status_code=404, detail="Podcast not found")
+    podcast.grid_position = request.grid_position; db.commit()
     return {"message": "Updated"}
 
 @router.post("/folders/move-item")
 async def move_podcast_to_folder(request: MoveItemRequest, db: db_dependency):
     podcast = db.query(Podcasts).filter(Podcasts.id == request.item_id).first()
-    if not podcast:
-        raise HTTPException(status_code=404, detail="Podcast not found")
-    podcast.folder_id = request.folder_id
-    db.commit()
+    if not podcast: raise HTTPException(status_code=404, detail="Podcast not found")
+    podcast.folder_id = request.folder_id; db.commit()
     return {"id": podcast.id, "folder_id": podcast.folder_id}
 
 @router.patch("/folders/{folder_id}/rename")
 async def rename_folder(folder_id: int, request: RenameRequest, db: db_dependency):
     folder = db.query(PodcastFolders).filter(PodcastFolders.id == folder_id).first()
-    if not folder:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    folder.name = request.name
-    db.commit()
+    if not folder: raise HTTPException(status_code=404, detail="Folder not found")
+    folder.name = request.name; db.commit()
     return {"message": "Updated"}
 
 @router.patch("/folders/{folder_id}/position")
 async def update_folder_position(folder_id: int, request: PositionUpdate, db: db_dependency):
     folder = db.query(PodcastFolders).filter(PodcastFolders.id == folder_id).first()
-    if not folder:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    folder.grid_position = request.grid_position
-    db.commit()
+    if not folder: raise HTTPException(status_code=404, detail="Folder not found")
+    folder.grid_position = request.grid_position; db.commit()
     return {"message": "Updated"}
 
 @router.patch("/folders/{folder_id}/move")
 async def move_folder(folder_id: int, request: MoveFolderRequest, db: db_dependency):
     folder = db.query(PodcastFolders).filter(PodcastFolders.id == folder_id).first()
-    if not folder:
-        raise HTTPException(status_code=404, detail="Folder not found")
-    folder.parent_folder_id = request.parent_folder_id
-    db.commit()
+    if not folder: raise HTTPException(status_code=404, detail="Folder not found")
+    folder.parent_folder_id = request.parent_folder_id; db.commit()
     return {"message": "Updated"}
