@@ -82,6 +82,7 @@ export default function MainLayout() {
     setSelectedNotebook(notebook);
     setActiveSection('notebook');
     setNotebookSection('files');
+    setNotebookDetails(notebook);
 
     const token = getCookie('access_token');
     fetch(`${API_BASE_URL}/notebooks/${notebook.id}`, {
@@ -90,7 +91,7 @@ export default function MainLayout() {
       .then(res => res.json())
       .then(data => {
         console.log("Pobrane szczegóły notatnika:", data);
-        setNotebookDetails(data);
+        setNotebookDetails(prev => ({...prev, ...data}));
       })
       .catch(err => console.error('Error fetching notebook:', err));
   };
@@ -153,6 +154,30 @@ export default function MainLayout() {
         );
     }
   };
+
+  useEffect(() => {
+    const applyTheme = () => {
+        const savedTheme = localStorage.getItem('appTheme') || 'light';
+        
+        if (savedTheme === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+        } else if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (savedTheme === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+    };
+
+    applyTheme();
+    
+    window.addEventListener('storage', applyTheme);
+    return () => window.removeEventListener('storage', applyTheme);
+  }, []);
 
   return (
     <div className={styles.mainLayout}>
