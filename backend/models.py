@@ -260,3 +260,15 @@ class Podcasts(Base):
     is_pinned = Column(Boolean, default=False)
     
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class NotebookMessages(Base):
+    __tablename__ = 'notebook_messages'
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    content = Column(Text)
+    type = Column(String, default="text") # 'text', 'resource_share', 'image'
+    created_at = Column(DateTime, default=datetime.utcnow)
+    user = relationship("Users")
+    notebook = relationship("Notebooks")
