@@ -3,8 +3,6 @@ from sqlalchemy.orm import Session
 from typing import List, Dict
 import json
 from datetime import datetime
-
-# IMPORTY TWOICH MODUŁÓW
 from database import SessionLocal
 from models import Notebooks, NotebookCollaborator, Users, NotebookMessages
 
@@ -13,15 +11,12 @@ router = APIRouter(
     tags=["group-chat"]
 )
 
-# --- POMOCNICZE ---
 def format_time(dt: datetime):
     """Formatowanie czasu do czytelnej postaci HH:MM"""
     return dt.strftime("%H:%M")
 
-# --- MENEDŻER POŁĄCZEŃ ---
 class ConnectionManager:
     def __init__(self):
-        # Słownik: { notebook_id: [lista_websocketów] }
         self.active_connections: Dict[int, List[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, notebook_id: int):
@@ -49,8 +44,6 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-# --- ENDPOINTY HTTP ---
-
 @router.get("/{notebook_id}/history")
 async def get_chat_history(notebook_id: int):
     """Pobiera historyczne wiadomości z bazy danych dla konkretnego notatnika"""
@@ -73,13 +66,11 @@ async def get_chat_history(notebook_id: int):
     finally:
         db.close()
 
-# --- ENDPOINT WEBSOCKET ---
 
 @router.websocket("/ws/{notebook_id}/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: int):
     db = SessionLocal()
     try:
-        # 1. WERYFIKACJA DOSTĘPU
         is_owner = db.query(Notebooks).filter(
             Notebooks.id == notebook_id, 
             Notebooks.created_by == user_id
@@ -93,16 +84,12 @@ async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: in
         if not is_owner and not is_collaborator:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
             return
-
-        # 2. AKCEPTACJA POŁĄCZENIA
         await manager.connect(websocket, notebook_id)
 
         while True:
-            # Oczekiwanie na wiadomość
             data = await websocket.receive_text()
             message_json = json.loads(data)
             
-            # 3. ZAPIS DO BAZY DANYCH (PERSYSTENCJA)
             new_msg = NotebookMessages(
                 notebook_id=notebook_id,
                 user_id=user_id,
@@ -114,10 +101,8 @@ async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: in
             db.commit()
             db.refresh(new_msg)
 
-            # Pobranie danych nadawcy do broadcastu
             user = db.query(Users).filter(Users.id == user_id).first()
             
-            # 4. ROZESŁANIE (BROADCAST) DO INNYCH
             broadcast_data = {
                 "id": new_msg.id,
                 "senderId": user_id,
