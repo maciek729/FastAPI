@@ -3,29 +3,13 @@ import { LogOut } from "lucide-react";
 import UserMenu from "./UserMenu";
 import styles from "../../../css/layout/SidebarFooter.module.css";
 
-const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
+const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSection }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [avatarUrl, setAvatarUrl] = useState(null); // Stan na avatar
     const menuRef = useRef(null);
 
     const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-    const loadAvatar = () => {
-        const localAvatar = localStorage.getItem('user_avatar');
-        if (localAvatar) {
-            setAvatarUrl(localAvatar);
-        } else if (userData?.avatarUrl) {
-            setAvatarUrl(userData.avatarUrl);
-        } else {
-            setAvatarUrl(null);
-        }
-    };
-
     useEffect(() => {
-        loadAvatar();
-        
-        window.addEventListener("storage", loadAvatar);
-
         const handleClickOutside = (e) => {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
                 setIsMenuOpen(false);
@@ -35,9 +19,21 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
         
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-            window.removeEventListener("storage", loadAvatar);
         };
-    }, [userData]);
+    }, []);
+
+    const renderAvatarContent = () => {
+        if (userData?.avatar_url) {
+            return (
+                <img 
+                    src={userData.avatar_url} 
+                    alt="User" 
+                    className={styles.userAvatarImg} 
+                />
+            );
+        }
+        return userData?.username?.charAt(0).toUpperCase() || "U";
+    };
 
     return (
         <>
@@ -45,29 +41,28 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
                 <div
                     className={styles.userAvatarCollapsed}
                     onClick={toggleMenu}
+                    role="button"
+                    tabIndex="0"
                     title={userData?.username || "User"}
                 >
-                    {avatarUrl ? (
-                        <img 
-                            src={avatarUrl} 
-                            alt="User" 
-                            className={styles.userAvatarImg} 
-                        />
-                    ) : (
-                        userData?.name?.charAt(0) || userData?.username?.charAt(0) || "U"
-                    )}
+                    {renderAvatarContent()}
                 </div>
 
                 {isMenuOpen && (
                     <UserMenu
                         isCollapsed
+                        onGoToSection={onGoToSection}
                         onSettingsClick={onSettingsClick}
                         onClose={() => setIsMenuOpen(false)}
                     />
                 )}
             </div>
 
-            <button className={styles.logoutBtnCollapsed} onClick={handleLogout} title="Wyloguj">
+            <button 
+                className={styles.logoutBtnCollapsed} 
+                onClick={handleLogout} 
+                title="Wyloguj"
+            >
                 <LogOut size={18} />
             </button>
         </>

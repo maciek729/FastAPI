@@ -92,6 +92,12 @@ def authenticate_user(identifier: str, password: str, db):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Please verify your email before logging in"
         )
+    
+    if getattr(user, 'is_archived', False) is True:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="To konto zostało zarchiwizowane. Skontaktuj się z administratorem."
+        )
 
     return user
 

@@ -5,13 +5,18 @@ import MessageList from "./MessageList";
 import ChatInput from './ChatInput';
 
 const GroupChatSidebar = ({ isOpen, onClose, width, onResizeStart, notebookId, userData, t, chatName }) => {
-    const storageKey = `groupChat_autoScroll_${notebookId}`;
+    const autoScrollObjKey = 'groupChat_autoscroll_states';
 
     const [messages, setMessages] = useState([]);
+    
     const [autoScroll, setAutoScroll] = useState(() => {
         if (!notebookId) return true;
-        const savedState = localStorage.getItem(storageKey);
-        return savedState !== null ? JSON.parse(savedState) : true;
+        const saved = localStorage.getItem(autoScrollObjKey);
+        if (saved) {
+            const states = JSON.parse(saved);
+            return states[notebookId] !== undefined ? states[notebookId] : true;
+        }
+        return true;
     });
 
     const socketRef = useRef(null);
@@ -36,10 +41,8 @@ const GroupChatSidebar = ({ isOpen, onClose, width, onResizeStart, notebookId, u
     useEffect(() => {
         if (isOpen && notebookId && userData?.id) {
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-            
             const wsUrl = `${protocol}://localhost:8000/group-chat/ws/${notebookId}/${userData.id}`;
             
-            console.log("Łączenie z czatem...", wsUrl);
             socketRef.current = new WebSocket(wsUrl);
 
             socketRef.current.onmessage = (event) => {
@@ -49,10 +52,6 @@ const GroupChatSidebar = ({ isOpen, onClose, width, onResizeStart, notebookId, u
                     return [...prev, newMessage];
                 });
             };
-
-            socketRef.current.onopen = () => console.log("Połączono z serwerem czatu");
-            socketRef.current.onclose = () => console.log("Rozłączono z serwerem czatu");
-            socketRef.current.onerror = (err) => console.error("Błąd WebSocket:", err);
 
             return () => {
                 if (socketRef.current) {
@@ -70,9 +69,12 @@ const GroupChatSidebar = ({ isOpen, onClose, width, onResizeStart, notebookId, u
 
     useEffect(() => {
         if (notebookId) {
-            localStorage.setItem(storageKey, JSON.stringify(autoScroll));
+            const saved = localStorage.getItem(autoScrollObjKey);
+            const states = saved ? JSON.parse(saved) : {};
+            states[notebookId] = autoScroll;
+            localStorage.setItem(autoScrollObjKey, JSON.stringify(states));
         }
-    }, [autoScroll, notebookId, storageKey]);
+    }, [autoScroll, notebookId]);
 
     useEffect(() => {
         if (isOpen) {
@@ -89,8 +91,6 @@ const GroupChatSidebar = ({ isOpen, onClose, width, onResizeStart, notebookId, u
             };
 
             socketRef.current.send(JSON.stringify(payload));
-        } else {
-            console.error("Nie można wysłać wiadomości - brak połączenia z serwerem.");
         }
     };
 

@@ -24,7 +24,13 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         return false;
     });
     
-    const [chatWidth, setChatWidth] = useState(350);
+    const [chatWidth, setChatWidth] = useState(() => {
+        if (!notebookId) return 350;
+        const saved = localStorage.getItem('groupChat_widths');
+        const widths = saved ? JSON.parse(saved) : {};
+        return widths[notebookId] || 350;
+    });
+
     const [isResizing, setIsResizing] = useState(false);
 
     const { language } = useContext(LanguageContext);
@@ -77,6 +83,22 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
             window.removeEventListener("mouseup", stopResizing);
         };
     }, [isResizing, resize, stopResizing]);
+
+    useEffect(() => {
+        if (notebookId) {
+            const saved = localStorage.getItem('groupChat_widths');
+            const widths = saved ? JSON.parse(saved) : {};
+            setChatWidth(widths[notebookId] || 350);
+        }
+    }, [notebookId]);
+
+    useEffect(() => {
+        if (!notebookId) return;
+        const saved = localStorage.getItem('groupChat_widths');
+        const widths = saved ? JSON.parse(saved) : {};
+        widths[notebookId] = chatWidth;
+        localStorage.setItem('groupChat_widths', JSON.stringify(widths));
+    }, [chatWidth, notebookId]);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');

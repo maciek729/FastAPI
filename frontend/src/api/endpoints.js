@@ -119,7 +119,8 @@ const ENDPOINTS = {
     REQUEST_PASSWORD_RESET: `${API_BASE_URL}/auth/forgot-password`, // Monika tego endpointa uzyj
     CHANGE_PASSWORD: `${API_BASE_URL}/user/password`, // ja to tu daje, gdyz ja mam tez u siebie zmiane hasla przez maila
     UPLOAD_AVATAR: `${API_BASE_URL}/user/avatar`,
-    DELETE_ACCOUNT: `${API_BASE_URL}/user/`,
+    DELETE_AVATAR: `${API_BASE_URL}/user/avatar`,
+    DELETE_ACCOUNT: `${API_BASE_URL}/user/delete-account`,
   },
   AUTH: {
     REGISTER: `${API_BASE_URL}/auth/`,

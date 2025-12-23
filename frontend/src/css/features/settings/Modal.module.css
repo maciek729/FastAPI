@@ -4,27 +4,22 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* Darken and blur the background */
     background-color: rgba(0, 0, 0, 0.6); 
     backdrop-filter: blur(5px); 
-    
-    /* Center the modal */
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    /* Ensure it's on top of everything */
     z-index: 1000; 
 }
 
 .modalContent {
-    background: white;
+    background: var(--inner_section_bg);
     padding: 30px;
     border-radius: 12px;
     width: 90%;
-    max-width: 450px; /* Rectangular shape */
+    max-width: 450px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    position: relative; /* For the close button */
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -38,12 +33,12 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: #333;
+    color: var(--title);
     padding: 5px;
 }
 
 .modalTitle {
-    color: #333;
+    color: var(--title);
     font-size: 20px;
     margin-bottom: 10px;
     border-bottom: 1px solid #eee;
@@ -57,16 +52,20 @@
     gap: 5px;
 }
 
+.displayRow {
+    flex-direction: row;;
+}
+
 .currentLabel,
 .newLabel {
     font-weight: 600;
-    color: #555;
+    color: var(--subtitle);
     font-size: 14px;
 }
 
 .currentValue {
     font-style: italic;
-    color: #777;
+    color: var(--subtitle);
     font-size: 14px;
 }
 
@@ -75,6 +74,8 @@
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 16px;
+    background-color: var(--inner_inner_section_bg);
+    color: var(--title);
 }
 
 .buttonContainer {
@@ -113,4 +114,68 @@
     font-size: 0.85rem;
     margin: 5px 0 0 0;
     font-weight: 500;
+}
+
+.avatarModal {
+    max-width: 500px !important;
+    width: 90% !important;
+}
+
+.uploadContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.cropperWrapper {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin-top: 15px;
+    background-color: #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.zoomSlider {
+    padding: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoomSlider input {
+    width: 100%;
+    cursor: pointer;
+}
+
+.cancelButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  color: #6d28d9;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+  margin-right: 10px;
+}
+
+.saveButton:hover, .optionButton:hover, .cancelButton:hover, .deleteAccountButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+.saveButton:active, .optionButton:active, .cancelButton:active, .deleteAccountButton:active {
+  transform: scale(1.03);
 }

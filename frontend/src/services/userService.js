@@ -63,5 +63,36 @@ export const uploadAvatar = async (file, token) => {
     });
 
     if (!response.ok) throw new Error('Błąd przesyłania awatara');
-    return await response.json(); // Zwraca np. nowy URL avatara
+    return await response.json();
+};
+
+export const deleteAvatar = async (token) => {
+    const response = await fetch(ENDPOINTS.USERS.DELETE_AVATAR, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Błąd usuwania awatara');
+    }
+    return true;
+};
+
+export const archiveUserAccount = async (token) => {
+    const response = await fetch(ENDPOINTS.USERS.DELETE_ACCOUNT, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Nie udało się usunąć konta');
+    }
+    return true;
 };

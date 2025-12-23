@@ -20,6 +20,10 @@ class Users(Base):
     reset_password_token = Column(String, nullable=True)
     reset_password_token_expires = Column(DateTime, nullable=True)
 
+    avatar_url = Column(String, nullable=True)
+
+    is_archived = Column(Boolean, default=False, nullable=True)
+
 class Groups(Base):
     __tablename__ = 'groups'
 
