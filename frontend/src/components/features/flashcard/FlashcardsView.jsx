@@ -8,7 +8,7 @@ import styles from "../../../css/features/FlashcardsView.module.css";
 import { getFlashcardSets, getFlashcardFolders, createFlashcardFolder, deleteFlashcardFolder, renameFlashcardFolder, moveFlashcardFolder, moveFlashcardSetToFolder } from '../../../services/flashcardService';
 import ENDPOINTS from '../../../api/endpoints';
 
-export default function FlashcardsView({ notebookId, userData }) {
+export default function FlashcardsView({ notebookId, userData, highlightedItemId }) {
     const [view, setView] = useState("list");
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [flashcardSets, setFlashcardSets] = useState([]);
@@ -34,6 +34,20 @@ export default function FlashcardsView({ notebookId, userData }) {
             fetchFolders();
         }
     }, [notebookId]);
+
+    useEffect(() => {
+        if (highlightedItemId && flashcardSets.length > 0) {
+            const targetSet = flashcardSets.find(s => s.id === highlightedItemId);
+            if (targetSet && targetSet.folder_id) {
+                const folderToOpen = folders.find(f => f.id === targetSet.folder_id);
+                if (folderToOpen) {
+                    setCurrentFolder(folderToOpen);
+                }
+            } else if (targetSet && !targetSet.folder_id) {
+                setCurrentFolder(null); // Jeśli element jest w głównym widoku
+            }
+        }
+    }, [highlightedItemId, flashcardSets, folders]);
 
     const fetchFlashcardSets = async () => {
         try {
@@ -361,6 +375,7 @@ export default function FlashcardsView({ notebookId, userData }) {
                 notebookId={notebookId}
                 folders={folders}
                 currentFolder={currentFolder}
+                highlightedItemId={highlightedItemId}
                 onStartLearning={handleStartLearning}
                 onManageSet={handleManageSet}
                 onDelete={fetchFlashcardSets}

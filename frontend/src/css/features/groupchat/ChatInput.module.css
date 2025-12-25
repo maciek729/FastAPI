@@ -1,20 +1,8 @@
-.iconButton {
-    background: transparent;
-    border: none;
-    color: var(--subtitle);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.iconButton:hover {
+.inputArea {
+    position: relative;
+    padding: 1rem;
     background: var(--inner_section_bg);
-    color: var(--purple_brighter);
+    border-top: 1px solid var(--border_gray);
 }
 
 .inputWrapper {
@@ -27,6 +15,11 @@
     border-radius: 12px;
     border: 2px solid var(--border_gray);
     transition: all 0.2s ease;
+    position: relative;
+}
+
+.inputWrapper:focus-within {
+    border-color: var(--purple_brighter);
 }
 
 .messageInput {
@@ -39,15 +32,6 @@
     padding: 0.5rem;
 }
 
-.ownMessage {
-    align-self: flex-end;
-    animation: popIn 0.2s ease-out;
-}
-
-@keyframes popIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
 .plusButton {
     background: transparent;
     border: none;
@@ -58,7 +42,7 @@
     justify-content: center;
     padding: 4px;
     border-radius: 50%;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 }
 
@@ -74,8 +58,8 @@
 
 .attachmentMenu {
     position: absolute;
-    bottom: 75px;
-    left: 15px;
+    bottom: calc(100% - 5px);
+    left: 1rem;
     background: var(--inner_inner_section_bg);
     border: 1px solid var(--border_gray);
     border-radius: 12px;
@@ -83,9 +67,9 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
     z-index: 1001;
-    min-width: 140px;
+    min-width: 160px;
     animation: slideUp 0.2s ease-out;
 }
 
@@ -105,8 +89,9 @@
     font-size: 0.9rem;
     cursor: pointer;
     border-radius: 8px;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
     width: 100%;
+    text-align: left;
 }
 
 .menuItem:hover {
@@ -116,8 +101,33 @@
 
 .menuItem svg {
     color: var(--subtitle);
+    transition: color 0.2s ease;
 }
 
 .menuItem:hover svg {
     color: var(--purple_brighter);
+}
+
+.sendButton {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.sendButton:disabled {
+    background: var(--border_gray);
+    opacity: 0.5;
+    cursor: not-allowed;
 }

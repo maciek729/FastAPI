@@ -6,7 +6,7 @@ import styles from "../../../css/features/NotebookView.module.css";
 import { getCollaborators, addCollaborator, removeCollaborator } from '../../../services/notebookService';
 import { createNote} from '../../../services/noteService';
 
-export default function FilesView({ details, userData, refreshNotebook }) {
+export default function FilesView({ details, userData, refreshNotebook, highlightedItemId }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
     const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
     const [showNoteEditor, setShowNoteEditor] = useState(false);
@@ -65,6 +65,41 @@ export default function FilesView({ details, userData, refreshNotebook }) {
             fetchFolders();
         }
     }, [details?.id, userData?.id]);
+
+    useEffect(() => {
+        if (highlightedItemId) {
+            // Krótkie opóźnienie, aby komponent zdążył się wyrenderować
+            const timer = setTimeout(() => {
+                const element = document.getElementById(`note-card-${highlightedItemId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 150);
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId]);
+
+    useEffect(() => {
+        if (highlightedItemId && notes.length > 0 && folders.length > 0) {
+            // 1. Znajdź notatkę, która ma być podświetlona
+            const targetNote = notes.find(n => n.id === highlightedItemId);
+            
+            if (targetNote) {
+                // 2. Jeśli notatka jest w folderze, a my nie jesteśmy w tym folderze...
+                if (targetNote.folder_id && (!currentFolder || currentFolder.id !== targetNote.folder_id)) {
+                    const folderToOpen = folders.find(f => f.id === targetNote.folder_id);
+                    if (folderToOpen) {
+                        console.log("Automatyczne otwieranie folderu dla notatki:", folderToOpen.name);
+                        setCurrentFolder(folderToOpen); // Teraz to zadziała, bo jesteśmy w FilesView
+                    }
+                } 
+                // 3. Jeśli notatka jest w widoku głównym, a my jesteśmy w jakimś folderze...
+                else if (!targetNote.folder_id && currentFolder !== null) {
+                    setCurrentFolder(null);
+                }
+            }
+        }
+    }, [highlightedItemId, notes, folders]);
 
     const fetchFolders = async () => {
         try {
@@ -776,11 +811,19 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                             const isBeingDragged = draggedNote?.note.id === note.id;
                             const isDragOver = dragOverIndex === index;
                             const isDragNotAllowed = dragNotAllowedIndex === index;
+                            const isHighlighted = highlightedItemId === note.id;
 
                             return (
                                 <div
                                     key={note.id}
-                                    className={`${styles.noteCard} ${note.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''} ${isDragNotAllowed ? styles.dragNotAllowed : ''}`}
+                                    id={`note-card-${note.id}`}
+                                    className={`
+                                        ${styles.noteCard} 
+                                        ${note.is_pinned ? styles.pinnedCard : ''} 
+                                        ${isDragOver ? styles.dragOver : ''} 
+                                        ${isDragNotAllowed ? styles.dragNotAllowed : ''}
+                                        ${isHighlighted ? styles.highlighted : ''}
+                                    `}
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, note, index)}
                                     onDragEnd={handleDragEnd}

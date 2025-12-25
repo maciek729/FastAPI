@@ -3,7 +3,7 @@ import { BookOpen, Trash2, Play, Brain, Settings, Pin, Folder, MoreVertical } fr
 import styles from "../../../css/features/FlashcardsView.module.css";
 import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
 
-export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
+export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, highlightedItemId, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
     const [progress, setProgress] = useState({});
     const [loadingProgress, setLoadingProgress] = useState({});
 
@@ -47,6 +47,21 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             });
         }
     }, [localSets, userId]);
+
+    useEffect(() => {
+        // Zmieniono z highlightedId na highlightedItemId
+        if (highlightedItemId) { 
+            // Małe opóźnienie, aby upewnić się, że folder zdążył się otworzyć
+            const timer = setTimeout(() => {
+                // Zmieniono z highlightedId na highlightedItemId
+                const element = document.getElementById(`set-card-${highlightedItemId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId]);
 
     const fetchProgress = async (setId) => {
         if (progress[setId] !== undefined) return;
@@ -458,11 +473,19 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 const isBeingDragged = draggedSet?.set.id === set.id;
                 const isDragOver = dragOverIndex === index;
                 const isDragNotAllowed = dragNotAllowedIndex === index;
+                const isHighlighted = highlightedItemId === set.id;
 
                 return (
                     <div
+                        id={`set-card-${set.id}`}
                         key={set.id}
-                        className={`${styles.setCard} ${set.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''} ${isDragNotAllowed ? styles.dragNotAllowed : ''}`}
+                        className={`
+                            ${styles.setCard} 
+                            ${set.is_pinned ? styles.pinnedCard : ''} 
+                            ${isDragOver ? styles.dragOver : ''} 
+                            ${isDragNotAllowed ? styles.dragNotAllowed : ''}
+                            ${isHighlighted ? styles.highlighted : ''}
+                        `}
                         draggable
                         onDragStart={(e) => handleDragStart(e, set, index)}
                         onDragEnd={handleDragEnd}

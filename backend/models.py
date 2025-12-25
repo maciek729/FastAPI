@@ -276,3 +276,5 @@ class NotebookMessages(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     user = relationship("Users")
     notebook = relationship("Notebooks")
+    is_edited = Column(Boolean, default=False, nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=True)

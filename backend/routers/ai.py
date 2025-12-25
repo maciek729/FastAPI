@@ -67,7 +67,7 @@ def get_gemini_response(messages: list, files: list = None) -> str:
                 contents.append(file_part)
         
         response = client.models.generate_content(
-            model="gemini-1.5-flash", 
+            model="gemini-2.5-flash", 
             contents=contents
         )
         return response.text
@@ -179,7 +179,7 @@ async def api_status():
         "gemini_configured": bool(GEMINI_API_KEY and client),
         "has_files": bool(current_session_files),
         "files_count": len(current_session_files),
-        "model": "gemini-1.5-flash"
+        "model": "gemini-2.5-flash"
     }
 
 @router.get("/files")

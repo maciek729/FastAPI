@@ -259,7 +259,7 @@ def generate_test_with_gemini(topic: str, num_questions: int, question_type: str
             contents.append(image_part)
 
         response = client.models.generate_content(
-            model="gemini-1.5-flash", 
+            model="gemini-2.5-flash", 
             contents=contents
         )
 
