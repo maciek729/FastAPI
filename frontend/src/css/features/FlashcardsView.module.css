@@ -928,3 +928,26 @@
 .btnSubmit:active {
   transform: translateY(0);
 }
+.highlighted {
+    border: 2px solid var(--purple_brighter) !important;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    transform: scale(1.03);
+    z-index: 10;
+    position: relative;
+    animation: pulseHighlight 2s infinite;
+}
+
+@keyframes pulseHighlight {
+    0% {
+        box-shadow: 0 0 5px rgba(139, 92, 246, 0.4);
+        border-color: var(--purple_brighter);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(139, 92, 246, 0.7);
+        border-color: #a78bfa;
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(139, 92, 246, 0.4);
+        border-color: var(--purple_brighter);
+    }
+}

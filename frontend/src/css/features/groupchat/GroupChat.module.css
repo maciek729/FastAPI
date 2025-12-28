@@ -168,3 +168,148 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.resourcePickerOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--inner_inner_section_bg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.resourcePickerHeader {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border_gray);
+    font-weight: 600;
+    color: var(--title);
+}
+
+.closePicker {
+    cursor: pointer;
+    color: var(--subtitle);
+    transition: color 0.2s;
+}
+
+.closePicker:hover {
+    color: #ff4d4d;
+}
+
+.resourcePickerList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.resourcePickerList h4 {
+    margin: 15px 10px 5px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--subtitle);
+    letter-spacing: 0.5px;
+}
+
+.resourceItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin: 4px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.resourceItem:hover {
+    background: var(--inner_section_bg);
+    border-color: var(--purple_brighter);
+}
+
+.resourceItem span {
+    font-size: 14px;
+    color: var(--title);
+}
+
+.resourceItem svg {
+    color: var(--purple_brighter);
+}
+
+.bubbleGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    position: relative;
+}
+
+.ownMessage .bubbleGroup {
+    flex-direction: row-reverse;
+}
+
+.optionsContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.messageWrapper:hover .optionsContainer {
+    opacity: 1;
+}
+
+.contextMenu {
+    position: absolute;
+    background: var(--inner_inner_section_bg);
+    border: 1px solid var(--border_gray);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    min-width: 130px;
+    overflow: hidden;
+    bottom: 100%; 
+    margin-bottom: 5px;
+}
+
+.ownMessage .contextMenu {
+    right: 0;
+}
+
+.otherMessage .contextMenu {
+    left: 0;
+}
+
+.contextMenu button {
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: none;
+    color: var(--title);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.contextMenu button:hover {
+    background-color: var(--inner_section_bg);
+}
+
+.deleteBtn {
+    color: #ff4d4d !important;
+}

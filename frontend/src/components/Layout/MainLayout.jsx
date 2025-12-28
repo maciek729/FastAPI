@@ -21,13 +21,6 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [notebookSection, setNotebookSection] = useState('overview');
 
-  const handleGoToSection = (sectionId) => {
-    setActiveSection(sectionId);
-    if (sectionId !== 'notebook') {
-        setSelectedNotebook(null);
-    }
-  };
-
   const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -54,11 +47,7 @@ export default function MainLayout() {
     navigate('/login');
   }, [navigate]);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  useEffect(() => {
+  const fetchUserData = useCallback(() => {
     const token = getCookie('access_token');
     if (!token) {
       navigate('/login');
@@ -72,11 +61,38 @@ export default function MainLayout() {
         if (!res.ok) throw new Error('Unauthorized');
         return res.json();
       })
-      .then(data => setUserData(data))
-      .catch(() => {
+      .then(data => {
+        console.log("Dane użytkownika pobrane/zaktualizowane:", data);
+        setUserData(data);
+      })
+      .catch((err) => {
+        console.error("Błąd pobierania danych użytkownika:", err);
         handleLogout();
       });
   }, [navigate, handleLogout]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  useEffect(() => {
+    window.addEventListener("refreshUserData", fetchUserData);
+    
+    return () => {
+      window.removeEventListener("refreshUserData", fetchUserData);
+    };
+  }, [fetchUserData]);
+
+  const handleGoToSection = (sectionId) => {
+    setActiveSection(sectionId);
+    if (sectionId !== 'notebook') {
+        setSelectedNotebook(null);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   const handleSelectNotebook = (notebook) => {
     setSelectedNotebook(notebook);
@@ -90,7 +106,6 @@ export default function MainLayout() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Pobrane szczegóły notatnika:", data);
         setNotebookDetails(prev => ({...prev, ...data}));
       })
       .catch(err => console.error('Error fetching notebook:', err));
@@ -158,7 +173,6 @@ export default function MainLayout() {
   useEffect(() => {
     const applyTheme = () => {
         const savedTheme = localStorage.getItem('appTheme') || 'light';
-        
         if (savedTheme === 'light') {
             document.documentElement.removeAttribute('data-theme');
         } else if (savedTheme === 'dark') {
@@ -174,7 +188,6 @@ export default function MainLayout() {
     };
 
     applyTheme();
-    
     window.addEventListener('storage', applyTheme);
     return () => window.removeEventListener('storage', applyTheme);
   }, []);

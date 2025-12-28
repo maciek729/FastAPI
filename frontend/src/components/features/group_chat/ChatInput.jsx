@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { SendHorizontal, Smile, Image as ImageIcon, Plus } from "lucide-react";
+import { SendHorizontal, Smile, Image as ImageIcon, Plus, FileText } from "lucide-react";
 import styles from "../../../css/features/groupchat/ChatInput.module.css";
 
-const ChatInput = ({ onSendMessage, t }) => {
+const ChatInput = ({ onSendMessage, t, onOpenResourcePicker }) => {
     const [text, setText] = useState("");
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -23,13 +22,8 @@ const ChatInput = ({ onSendMessage, t }) => {
         if (text.trim()) {
             onSendMessage(text, 'text');
             setText("");
-            setShowEmojiPicker(false);
             setIsMenuOpen(false);
         }
-    };
-
-    const handleEmojiClick = (emojiData) => {
-        setText(prev => prev + emojiData.emoji);
     };
 
     return (
@@ -37,29 +31,32 @@ const ChatInput = ({ onSendMessage, t }) => {
             {isMenuOpen && (
                 <div className={styles.attachmentMenu}>
                     <button 
+                        type="button"
                         className={styles.menuItem} 
-                        onClick={() => { setIsMenuOpen(false); }}
+                        onClick={() => { console.log("Emoji"); setIsMenuOpen(false); }}
                     >
                         <Smile size={18} />
                         <span>Emoji</span>
                     </button>
                     <button 
+                        type="button"
                         className={styles.menuItem} 
-                        onClick={() => { console.log("Otwórz GIF"); setIsMenuOpen(false); }}
+                        onClick={() => { console.log("GIF"); setIsMenuOpen(false); }}
                     >
                         <ImageIcon size={18} />
                         <span>GIF</span>
                     </button>
-                </div>
-            )}
-
-            {showEmojiPicker && (
-                <div className={styles.emojiPickerContainer}>
-                    <EmojiPicker 
-                        onEmojiClick={handleEmojiClick}
-                        width="100%"
-                        height={350}
-                    />
+                    <button 
+                        type="button"
+                        className={styles.menuItem} 
+                        onClick={() => { 
+                            onOpenResourcePicker(); 
+                            setIsMenuOpen(false); 
+                        }}
+                    >
+                        <FileText size={18} />
+                        <span>Zasób</span>
+                    </button>
                 </div>
             )}
 
@@ -78,7 +75,7 @@ const ChatInput = ({ onSendMessage, t }) => {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     className={styles.messageInput}
-                    onFocus={() => { setIsMenuOpen(false); setShowEmojiPicker(false); }}
+                    onFocus={() => setIsMenuOpen(false)}
                 />
 
                 <button 

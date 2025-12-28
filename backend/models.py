@@ -20,6 +20,10 @@ class Users(Base):
     reset_password_token = Column(String, nullable=True)
     reset_password_token_expires = Column(DateTime, nullable=True)
 
+    avatar_url = Column(String, nullable=True)
+
+    is_archived = Column(Boolean, default=False, nullable=True)
+
 class Groups(Base):
     __tablename__ = 'groups'
 
@@ -260,3 +264,17 @@ class Podcasts(Base):
     is_pinned = Column(Boolean, default=False)
     
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class NotebookMessages(Base):
+    __tablename__ = 'notebook_messages'
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    content = Column(Text)
+    type = Column(String, default="text") # 'text', 'resource_share', 'image'
+    created_at = Column(DateTime, default=datetime.utcnow)
+    user = relationship("Users")
+    notebook = relationship("Notebooks")
+    is_edited = Column(Boolean, default=False, nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=True)

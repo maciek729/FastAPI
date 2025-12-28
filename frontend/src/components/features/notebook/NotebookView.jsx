@@ -12,6 +12,7 @@ import GroupChatSidebar from "../group_chat/GroupChatSidebar";
 
 export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen }) {
     const notebookId = details?.id;
+    const [highlightedItemId, setHighlightedItemId] = useState(null);
     
     const [activeTab, setActiveTab] = useState("files");
     const [isGroupChatOpen, setIsGroupChatOpen] = useState(() => {
@@ -23,8 +24,30 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         }
         return false;
     });
+
+    const handleNavigateToResource = (resourceData) => {
+        const type = resourceData.itemType;
+        const id = resourceData.itemId;
+
+        setHighlightedItemId(id);
+        
+        if (type === 'note') setActiveTab('files');
+        else if (type === 'test') setActiveTab('tests');
+        else if (type === 'flashcards') setActiveTab('flashcards');
+        else if (type === 'podcast') setActiveTab('podcasts');
+        
+        // Opcjonalnie: tutaj możesz dodać logikę, która przekaże resourceData.itemId 
+        // do konkretnego widoku, aby go podświetlić, jeśli Twoje widoki to obsługują.
+        setTimeout(() => setHighlightedItemId(null), 10000);
+    };
     
-    const [chatWidth, setChatWidth] = useState(350);
+    const [chatWidth, setChatWidth] = useState(() => {
+        if (!notebookId) return 350;
+        const saved = localStorage.getItem('groupChat_widths');
+        const widths = saved ? JSON.parse(saved) : {};
+        return widths[notebookId] || 350;
+    });
+
     const [isResizing, setIsResizing] = useState(false);
 
     const { language } = useContext(LanguageContext);
@@ -77,6 +100,22 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
             window.removeEventListener("mouseup", stopResizing);
         };
     }, [isResizing, resize, stopResizing]);
+
+    useEffect(() => {
+        if (notebookId) {
+            const saved = localStorage.getItem('groupChat_widths');
+            const widths = saved ? JSON.parse(saved) : {};
+            setChatWidth(widths[notebookId] || 350);
+        }
+    }, [notebookId]);
+
+    useEffect(() => {
+        if (!notebookId) return;
+        const saved = localStorage.getItem('groupChat_widths');
+        const widths = saved ? JSON.parse(saved) : {};
+        widths[notebookId] = chatWidth;
+        localStorage.setItem('groupChat_widths', JSON.stringify(widths));
+    }, [chatWidth, notebookId]);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');
@@ -150,6 +189,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                         <FlashcardsView
                             notebookId={details?.id}
                             userData={userData}
+                            highlightedItemId={highlightedItemId}
                         />
                     )}
                     {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
@@ -171,6 +211,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                     onResizeStart={startResizing}
                     chatName = {details?.name}
                     isShared={isShared}
+                    onNavigateToResource={handleNavigateToResource}
                 />
             </div>
         </div>
