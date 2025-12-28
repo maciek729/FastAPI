@@ -363,6 +363,56 @@
       "settings": "Ustawienia",
       "notifications": "Powiadomienia",
       "help": "Pomoc"
+    },
+    "demo": {
+      "buttons": {
+        "back": "Wstecz",
+        "next": "Dalej",
+        "finish": "Zakończ"
+      },
+      "steps": {
+        "welcome": {
+          "title": "Witaj w zdAI to!",
+          "description": "Twój osobisty asystent edukacyjny.\nYour personal educational assistant.",
+          "subdescription": "Wybierz preferowany język, aby rozpocząć.\nChoose your preferred language to get started."
+        },
+        "createNotebooks": {
+          "title": "Twórz notatniki",
+          "description": "Organizuj swoją naukę tworząc notatniki w przestrzeni osobistej lub współdzielonej z przyjaciółmi. Kliknij przycisk \"+\" na pasku po lewej stronie obok \"Przestrzeni osobistej\" lub \"Przestrzeni współdzielonej\" aby rozpocząć."
+        },
+        "addNotes": {
+          "title": "Dodawaj notatki",
+          "description": "Twórz notatki z bogatym formatowaniem, obrazami i tabelami. Kliknij na notatnik, a następnie dodaj nową notatkę używając przycisku \"+ Dodaj notatkę\"."
+        },
+        "pinOrganize": {
+          "title": "Przypinaj i organizuj",
+          "description": "Przypinaj ważne notatki klikając ikonę pinezki, przeciągaj pliki między folderami lub przeciągając na boczny pasek dodaj od razu do innych przestrzeni. Twórz własną strukturę i uporządkuj materiały tak, jak Ci wygodnie."
+        },
+        "folderMaterials": {
+          "title": "Folderuj materiały",
+          "description": "Twórz foldery i podfoldery aby lepiej organizować swoje notatki. Grupuj materiały według przedmiotów, tematów lub projektów. Wszystko pod kontrolą!"
+        },
+        "generateFlashcards": {
+          "title": "Generuj fiszki i testy",
+          "description": "AI automatycznie utworzy fiszki i testy z Twoich notatek. Otwórz notatkę i znajdź opcję \"Generuj fiszki\" lub \"Generuj test\" w menu. Ucz się efektywnie!"
+        },
+        "listenPodcasts": {
+          "title": "Słuchaj podcastów",
+          "description": "Przekształć swoje notatki w podkasty audio i ucz się w drodze. Wybierz notatkę i kliknij opcję \"Generuj podcast\" lub opisz o czym chcesz posłuchać, aby utworzyć audio z treści."
+        },
+        "chatWithAI": {
+          "title": "Czatuj z AI",
+          "description": "Zadawaj pytania AI asystentowi, który pomoże Ci zrozumieć trudne koncepcje. Kliknij \"Czatuj z AI\" na pasku górnym aby rozpocząć rozmowę z asystentem."
+        },
+        "groupChat": {
+          "title": "Czat grupowy",
+          "description": "Rozmawiaj z przyjaciółmi w czasie rzeczywistym! Omawiaj materiały, zadawaj pytania i pomagajcie sobie nawzajem w nauce. Wspólna nauka jest skuteczniejsza!"
+        },
+        "ready": {
+          "title": "Gotowe!",
+          "description": "Teraz już znasz wszystkie funkcje! Kliknij \"Zakończ\" aby zamknąć ten poradnik i zacząć korzystać z aplikacji. Powodzenia w nauce!"
+        }
+      }
     }
   },
 
@@ -732,6 +782,56 @@
       "settings": "Settings",
       "notifications": "Notifications",
       "help": "Help"
+    },
+    "demo": {
+      "buttons": {
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish"
+      },
+      "steps": {
+        "welcome": {
+          "title": "Welcome to zdAI to!",
+          "description": "Your personal educational assistant.\nTwój osobisty asystent edukacyjny.",
+          "subdescription": "Choose your preferred language to get started.\nWybierz preferowany język, aby rozpocząć."
+        },
+        "createNotebooks": {
+          "title": "Create Notebooks",
+          "description": "Organize your learning by creating notebooks in personal or shared space with friends. Click the \"+\" button on the left sidebar next to \"Personal Space\" or \"Shared Space\" to get started."
+        },
+        "addNotes": {
+          "title": "Add Notes",
+          "description": "Create notes with rich formatting, images and tables. Click on a notebook, then add a new note using the \"+ Add note\" button."
+        },
+        "pinOrganize": {
+          "title": "Pin and Organize",
+          "description": "Pin important notes by clicking the pin icon, drag files between folders or by dragging to the sidebar add directly to other spaces. Create your own structure and organize materials the way you like."
+        },
+        "folderMaterials": {
+          "title": "Folder Your Materials",
+          "description": "Create folders and subfolders to better organize your notes. Group materials by subjects, topics or projects. Everything under control!"
+        },
+        "generateFlashcards": {
+          "title": "Generate Flashcards & Tests",
+          "description": "AI automatically creates flashcards and tests from your notes. Open a note and find the \"Generate flashcards\" or \"Generate test\" option in the menu. Learn efficiently!"
+        },
+        "listenPodcasts": {
+          "title": "Listen to Podcasts",
+          "description": "Transform your notes into audio podcasts and learn on the go. Select a note and click the \"Generate podcast\" option or describe what you want to listen to, to create audio from the content."
+        },
+        "chatWithAI": {
+          "title": "Chat with AI",
+          "description": "Ask questions to AI assistant who will help you understand difficult concepts. Click \"Chat with AI\" on the top bar to start a conversation with the assistant."
+        },
+        "groupChat": {
+          "title": "Group Chat",
+          "description": "Talk with friends in real-time! Discuss materials, ask questions and help each other learn. Learning together is more effective!"
+        },
+        "ready": {
+          "title": "Ready!",
+          "description": "Now you know all the features! Click \"Finish\" to close this guide and start using the app. Good luck with your studies!"
+        }
+      }
     }
   }
 }
