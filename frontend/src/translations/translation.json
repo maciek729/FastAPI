@@ -63,51 +63,56 @@
       "logo": "zdAI to!",
       "nav": {
         "features": "Funkcje",
-        "benefits": "Korzyści",
-        "testimonials": "Opinie"
+        "benefits": "Korzyści"
       },
       "auth": {
         "login": "Zaloguj się",
-        "start": "Rozpocznij",
-        "startFree": "Rozpocznij za darmo"
+        "start": "Utwórz konto",
+        "startFree": "Utwórz konto"
       },
       "hero": {
-        "badge": "Wspierane przez AI • Zaufane przez 10,000+ uczniów",
-        "title1": "Twoja osobista ",
-        "title2": "AI nauka",
-        "title3": " rewolucja",
-        "description": "zdAI to! łączy w sobie inteligentną konwersację AI, łatwe notatowanie i inteligentne narzędzia do generowania materiałów edukacyjnych - wszystko w jednym, pięknie zaprojektowanym miejscu.",
-        "startFree": "Zacznij za darmo",
-        "seeHow": "Zobacz jak działa",
-        "stats": {
-          "students": "Aktywnych uczniów",
-          "flashcards": "Utworzonych fiszek",
-          "rating": "Ocena użytkowników"
-        }
+        "title1": "Nauka",
+        "subtitle": "nie musi być",
+        "title2": "trudna",
+        "title3": "!",
+        "description": "zdAI to! to Twój osobisty asystent edukacyjny. Twórz notatki, generuj fiszki i testy, słuchaj podcastów audio - wszystko automatycznie dzięki sztucznej inteligencji.",
+        "startFree": "Wypróbuj zdAI to!"
       },
       "features": {
         "title1": "Wszystko czego potrzebujesz ",
-        "title2": "w jednym miejscu",
-        "description": "Kompleksowy ekosystem do nauki, zaprojektowany aby Ci pomóc osiągnąć więcej",
+        "title2": "do skutecznej nauki",
+        "description": "Kompleksowa platforma edukacyjna, która oszczędza Twój czas i pomaga osiągać lepsze wyniki",
         "aiChat": {
-          "title": "Porozmawiaj z AI Study Buddy",
-          "description": "Uzyskaj natychmiastowe odpowiedzi, wyjaśnienia i spersonalizowane wskazówki na dowolny temat. Twój prywatny korepetytor dostępny 24/7.",
-          "highlight": "Inteligentne odpowiedzi w sekundach"
+          "title": "Czat z AI asystentem",
+          "description": "Zadawaj pytania i otrzymuj natychmiastowe odpowiedzi. AI pomaga wyjaśnić trudne koncepcje prostym językiem."
         },
         "notes": {
-          "title": "Bezproblemowe robienie notatek",
-          "description": "Rób jasne, zwięzłe notatki bezpośrednio w zdAI. Organizuj je łatwo i uzyskuj dostęp w dowolnym miejscu i czasie.",
-          "highlight": "Synchronizacja w chmurze"
+          "title": "Smart notatki",
+          "description": "Twórz notatki z formatowaniem, obrazami i tabelami. Wszystko zapisywane w chmurze, dostępne z każdego urządzenia."
         },
-        "materials": {
-          "title": "Generuj skuteczne materiały",
-          "description": "Przekształć swoje notatki w niestandardowe fiszki i testy sprawdzające. Ucz się mądrzej, a nie ciężej.",
-          "highlight": "AI tworzy idealne fiszki"
+        "flashcards": {
+          "title": "Fiszki",
+          "description": "AI automatycznie generuje fiszki z Twoich notatek. Ucz się efektywnie metodą powtórek."
+        },
+        "tests": {
+          "title": "Testy",
+          "description": "Sprawdź swoją wiedzę z automatycznie generowanymi testami. Śledź postępy i poprawiaj wyniki."
+        },
+        "podcasts": {
+          "title": "Podkasty audio",
+          "description": "Przekształć notatki w podkasty audio. Ucz się w drodze, na spacerze czy w siłowni."
+        },
+        "collaboration": {
+          "title": "Wspólna nauka",
+          "description": "Udostępniaj notatniki i ucz się razem z przyjaciółmi. Współpracuj w czasie rzeczywistym."
+        },
+        "chatWithFriends": {
+          "title": "Czatuj z przyjaciółmi",
+          "description": "Omawiaj materiały, zadawaj pytania i pomagaj sobie nawzajem w nauce."
         },
         "organization": {
-          "title": "Scentralizowane centrum nauki",
-          "description": "Przechowuj wszystkie materiały do nauki - notatki, fiszki, quizy - starannie zorganizowane w jednym miejscu.",
-          "highlight": "Wszystko w jednym miejscu"
+          "title": "Wszystko w jednym miejscu",
+          "description": "Notebooki, foldery, etykiety, wyszukiwanie - wszystkie materiały zorganizowane tak, jak lubisz."
         }
       },
       "benefits": {
@@ -121,22 +126,41 @@
         "stayOrganized": "Zachowaj porządek",
         "stayOrganizedDesc": "Wszystkie materiały do nauki w jednym, zorganizowanym miejscu"
       },
-      "testimonials": {
-        "title1": "Co mówią ",
-        "title2": "nasi użytkownicy",
-        "testimonial1": "\"zdAI to! całkowicie zmieniło moje podejście do nauki. AI asystent jest niesamowity!\"",
-        "testimonial2": "\"Najlepsza aplikacja do nauki jakiej używałem. Automatyczne fiszki oszczędzają mi godziny!\"",
-        "testimonial3": "\"Wreszcie wszystkie moje notatki w jednym miejscu. Interfejs jest piękny i intuicyjny.\"",
-        "highSchoolStudent": "Uczennica liceum",
-        "universityStudent": "Student uniwersytetu",
-        "graduate": "Maturzystka"
+      "showcase": {
+        "title1": "Zobacz ",
+        "title2": "zdAI to! ",
+        "title3": "w akcji",
+        "subtitle": "Poznaj możliwości platformy",
+        "slides": [
+          {
+            "title": "Czat z AI asystentem",
+            "description": "Zadawaj pytania i otrzymuj natychmiastowe odpowiedzi. AI pomaga wyjaśnić trudne koncepcje prostym językiem."
+          },
+          {
+            "title": "Twórz smart notatki",
+            "description": "Edytor z bogatym formatowaniem, obrazami i tabelami. Wszystko synchronizowane w chmurze."
+          },
+          {
+            "title": "Generuj fiszki automatycznie",
+            "description": "AI tworzy fiszki z Twoich notatek w sekundy. Ucz się efektywnie z gotowymi materiałami."
+          },
+          {
+            "title": "Rozwiązuj testy",
+            "description": "Sprawdź swoją wiedzę z automatycznie generowanymi testami. Śledź postępy i poprawiaj wyniki."
+          },
+          {
+            "title": "Słuchaj podcastów",
+            "description": "Przekształć notatki w podcasty audio. Ucz się w drodze, na spacerze czy w siłowni."
+          }
+        ],
+        "prevButton": "Poprzedni",
+        "nextButton": "Następny"
       },
       "cta": {
-        "title": "Gotowy na rewolucję w nauce?",
-        "description": "Dołącz do tysięcy uczniów, którzy już odkryli moc AI w nauce. Rozpocznij swoją przygodę już dziś - całkowicie za darmo!",
-        "createAccount": "Stwórz konto teraz",
-        "freeStart": "Darmowy start • Bez zobowiązań",
-        "rating": "4.9/5 z 2,500+ opinii"
+        "title": "Przestań tracić czas na żmudne przygotowania",
+        "description": "Zacznij uczyć się sprytniej z AI. Darmowy start, bez karty kredytowej, bez zobowiązań.",
+        "createAccount": "Zacznij za darmo",
+        "freeStart": "100% darmowe • Bez zobowiązań • Pełny dostęp"
       },
       "footer": {
         "terms": "Warunki użytkowania",
@@ -407,51 +431,56 @@
       "logo": "zdAI to!",
       "nav": {
         "features": "Features",
-        "benefits": "Benefits",
-        "testimonials": "Testimonials"
+        "benefits": "Benefits"
       },
       "auth": {
         "login": "Log In",
-        "start": "Get Started",
-        "startFree": "Start for Free"
+        "start": "Create Account",
+        "startFree": "Create Account"
       },
       "hero": {
-        "badge": "AI-Powered • Trusted by 10,000+ Students",
-        "title1": "Your Personal ",
-        "title2": "AI Learning",
-        "title3": " Revolution",
-        "description": "zdAI to! combines smart AI conversation, easy note-taking, and intelligent educational material generation tools - all in one beautifully designed place.",
-        "startFree": "Start for Free",
-        "seeHow": "See How It Works",
-        "stats": {
-          "students": "Active Students",
-          "flashcards": "Flashcards Created",
-          "rating": "User Rating"
-        }
+        "title1": "Learning",
+        "subtitle": "doesn't have to be",
+        "title2": "hard",
+        "title3": "!",
+        "description": "zdAI to! is your personal educational assistant. Create notes, generate flashcards and tests, listen to audio podcasts - everything automatically powered by AI.",
+        "startFree": "Try zdAI to!"
       },
       "features": {
         "title1": "Everything You Need ",
-        "title2": "in One Place",
-        "description": "Comprehensive learning ecosystem designed to help you achieve more",
+        "title2": "for Effective Learning",
+        "description": "A comprehensive educational platform that saves your time and helps you achieve better results",
         "aiChat": {
-          "title": "Chat with AI Study Buddy",
-          "description": "Get instant answers, explanations, and personalized guidance on any topic. Your private tutor available 24/7.",
-          "highlight": "Intelligent responses in seconds"
+          "title": "Chat with AI assistant",
+          "description": "Ask questions and get instant answers. AI helps explain difficult concepts in simple language."
         },
         "notes": {
-          "title": "Seamless Note-Taking",
-          "description": "Take clear, concise notes directly in zdAI. Organize them easily and access them anywhere, anytime.",
-          "highlight": "Cloud synchronization"
+          "title": "Smart notes",
+          "description": "Create notes with formatting, images, and tables. Everything saved in the cloud, accessible from any device."
         },
-        "materials": {
-          "title": "Generate Effective Materials",
-          "description": "Transform your notes into custom flashcards and practice tests. Learn smarter, not harder.",
-          "highlight": "AI creates perfect flashcards"
+        "flashcards": {
+          "title": "Flashcards",
+          "description": "AI automatically generates flashcards from your notes. Learn efficiently with spaced repetition."
+        },
+        "tests": {
+          "title": "Tests",
+          "description": "Test your knowledge with automatically generated quizzes. Track progress and improve results."
+        },
+        "podcasts": {
+          "title": "Audio podcasts",
+          "description": "Transform notes into audio podcasts. Learn on the go, while walking, or at the gym."
+        },
+        "collaboration": {
+          "title": "Collaborative learning",
+          "description": "Share notebooks and learn together with friends. Collaborate in real-time."
+        },
+        "chatWithFriends": {
+          "title": "Chat with friends",
+          "description": "Discuss materials, ask questions, and help each other in learning."
         },
         "organization": {
-          "title": "Centralized Learning Hub",
-          "description": "Store all your learning materials - notes, flashcards, quizzes - neatly organized in one place.",
-          "highlight": "Everything in one place"
+          "title": "Everything in one place",
+          "description": "Notebooks, folders, labels, search - all materials organized just the way you like."
         }
       },
       "benefits": {
@@ -465,22 +494,41 @@
         "stayOrganized": "Stay Organized",
         "stayOrganizedDesc": "All your learning materials in one organized place"
       },
-      "testimonials": {
-        "title1": "What Our ",
-        "title2": "Users Say",
-        "testimonial1": "\"zdAI to! completely changed my approach to learning. The AI assistant is amazing!\"",
-        "testimonial2": "\"The best learning app I've ever used. Automatic flashcards save me hours!\"",
-        "testimonial3": "\"Finally all my notes in one place. The interface is beautiful and intuitive.\"",
-        "highSchoolStudent": "High School Student",
-        "universityStudent": "University Student",
-        "graduate": "Graduate"
+      "showcase": {
+        "title1": "See ",
+        "title2": "zdAI to! ",
+        "title3": "in action",
+        "subtitle": "Explore the platform's capabilities",
+        "slides": [
+          {
+            "title": "Chat with AI assistant",
+            "description": "Ask questions and get instant answers. AI helps explain difficult concepts in simple language."
+          },
+          {
+            "title": "Create smart notes",
+            "description": "Rich text editor with formatting, images, and tables. Everything synchronized in the cloud."
+          },
+          {
+            "title": "Generate flashcards automatically",
+            "description": "AI creates flashcards from your notes in seconds. Learn efficiently with ready-made materials."
+          },
+          {
+            "title": "Take tests",
+            "description": "Test your knowledge with automatically generated quizzes. Track progress and improve results."
+          },
+          {
+            "title": "Listen to podcasts",
+            "description": "Transform notes into audio podcasts. Learn on the go, while walking, or at the gym."
+          }
+        ],
+        "prevButton": "Previous",
+        "nextButton": "Next"
       },
       "cta": {
-        "title": "Ready for a Learning Revolution?",
-        "description": "Join thousands of students who have already discovered the power of AI in learning. Start your adventure today - completely free!",
-        "createAccount": "Create Account Now",
-        "freeStart": "Free Start • No Commitment",
-        "rating": "4.9/5 from 2,500+ reviews"
+        "title": "Stop wasting time on tedious preparations",
+        "description": "Start learning smarter with AI. Free start, no credit card, no commitments.",
+        "createAccount": "Start for Free",
+        "freeStart": "100% free • No commitments • Full access"
       },
       "footer": {
         "terms": "Terms of Service",

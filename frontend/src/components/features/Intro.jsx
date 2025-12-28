@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, FileText, Zap, FolderOpen, Menu, X, Star, Users, Sparkles, LogIn } from 'lucide-react';
+import { Menu, X, Users, Sparkles, LogIn } from 'lucide-react';
 import styles from '../../css/features/Intro.module.css';
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
@@ -54,28 +54,36 @@ const Intro = () => {
 
   const features = [
     {
-      icon: <MessageCircle className={styles.featureIcon} />,
-      title: t('intro.features.aiChat.title') || "Porozmawiaj z AI Study Buddy",
-      description: t('intro.features.aiChat.description') || "Uzyskaj natychmiastowe odpowiedzi, wyjaśnienia i spersonalizowane wskazówki na dowolny temat. Twój prywatny korepetytor dostępny 24/7.",
-      highlight: t('intro.features.aiChat.highlight') || "Inteligentne odpowiedzi w sekundach",
+      title: t('intro.features.aiChat.title') || "Czat z AI asystentem",
+      description: t('intro.features.aiChat.description') || "Zadawaj pytania i otrzymuj natychmiastowe odpowiedzi. AI pomaga wyjaśnić trudne koncepcje prostym językiem.",
     },
     {
-      icon: <FileText className={styles.featureIcon} />,
-      title: t('intro.features.notes.title') || "Bezproblemowe robienie notatek",
-      description: t('intro.features.notes.description') || "Rób jasne, zwięzłe notatki bezpośrednio w zdAI. Organizuj je łatwo i uzyskuj dostęp w dowolnym miejscu i czasie.",
-      highlight: t('intro.features.notes.highlight') || "Synchronizacja w chmurze",
+      title: t('intro.features.notes.title') || "Smart notatki",
+      description: t('intro.features.notes.description') || "Twórz notatki z formatowaniem, obrazami i tabelami. Wszystko zapisywane w chmurze, dostępne z każdego urządzenia.",
     },
     {
-      icon: <Zap className={styles.featureIcon} />,
-      title: t('intro.features.materials.title') || "Generuj skuteczne materiały",
-      description: t('intro.features.materials.description') || "Przekształć swoje notatki w niestandardowe fiszki i testy sprawdzające. Ucz się mądrzej, a nie ciężej.",
-      highlight: t('intro.features.materials.highlight') || "AI tworzy idealne fiszki",
+      title: t('intro.features.flashcards.title') || "Fiszki",
+      description: t('intro.features.flashcards.description') || "AI automatycznie generuje fiszki z Twoich notatek. Ucz się efektywnie metodą powtórek.",
     },
     {
-      icon: <FolderOpen className={styles.featureIcon} />,
-      title: t('intro.features.organization.title') || "Scentralizowane centrum nauki",
-      description: t('intro.features.organization.description') || "Przechowuj wszystkie materiały do nauki - notatki, fiszki, quizy - starannie zorganizowane w jednym miejscu.",
-      highlight: t('intro.features.organization.highlight') || "Wszystko w jednym miejscu",
+      title: t('intro.features.tests.title') || "Testy",
+      description: t('intro.features.tests.description') || "Sprawdź swoją wiedzę z automatycznie generowanymi testami. Śledź postępy i poprawiaj wyniki.",
+    },
+    {
+      title: t('intro.features.podcasts.title') || "Podkasty audio",
+      description: t('intro.features.podcasts.description') || "Przekształć notatki w podkasty audio. Ucz się w drodze, na spacerze czy w siłowni.",
+    },
+    {
+      title: t('intro.features.collaboration.title') || "Wspólna nauka",
+      description: t('intro.features.collaboration.description') || "Udostępniaj notatniki i ucz się razem z przyjaciółmi. Współpracuj w czasie rzeczywistym.",
+    },
+    {
+      title: t('intro.features.chatWithFriends.title') || "Czatuj z przyjaciółmi",
+      description: t('intro.features.chatWithFriends.description') || "Omawiaj materiały, zadawaj pytania i pomagaj sobie nawzajem w nauce.",
+    },
+    {
+      title: t('intro.features.organization.title') || "Wszystko w jednym miejscu",
+      description: t('intro.features.organization.description') || "Notebooki, foldery, etykiety, wyszukiwanie - wszystkie materiały zorganizowane tak, jak lubisz.",
     },
   ];
 
@@ -98,12 +106,14 @@ const Intro = () => {
     return () => observer.disconnect();
   }, []);
 
+  const slides = t('intro.showcase.slides') || [];
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % features.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [features.length]);
+  }, [slides.length]);
 
   const handleGetStarted = () => {
     navigate('/register');
@@ -111,6 +121,10 @@ const Intro = () => {
 
   const handleLogin = () => {
     navigate('/login');
+  };
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
   };
 
   return (
@@ -121,13 +135,7 @@ const Intro = () => {
             <Sparkles className={styles.introLogoIcon} />
             <span className={styles.introLogoText}>{t('intro.logo')}</span>
           </div>
-          
-          <nav className={styles.introNavLinks}>
-            <a href="#features" className={styles.introNavLink}>{t('intro.nav.features')}</a>
-            <a href="#benefits" className={styles.introNavLink}>{t('intro.nav.benefits')}</a>
-            <a href="#testimonials" className={styles.introNavLink}>{t('intro.nav.testimonials')}</a>
-          </nav>
-          
+
           <div className={styles.introAuthButtons}>
             <button 
               className={styles.introBtnLogin}
@@ -155,9 +163,6 @@ const Intro = () => {
 
         {isMenuOpen && (
           <div className={styles.introMobileMenu}>
-            <a href="#features" onClick={() => setIsMenuOpen(false)}>{t('intro.nav.features')}</a>
-            <a href="#benefits" onClick={() => setIsMenuOpen(false)}>{t('intro.nav.benefits')}</a>
-            <a href="#testimonials" onClick={() => setIsMenuOpen(false)}>{t('intro.nav.testimonials')}</a>
             <button className={styles.introMobileLogin} onClick={handleLogin}>
               {t('intro.auth.login')}
             </button>
@@ -169,49 +174,54 @@ const Intro = () => {
       </header>
 
       <section className={styles.introHero}>
-        <div className={styles.introHeroContent}>
-          <div className={styles.introHeroBadge}>
-            <Sparkles size={16} />
-            <span>{t('intro.hero.badge')}</span>
-          </div>
-          
-          <h1 className={styles.introHeroTitle}>
-            {t('intro.hero.title1')}<span className={styles.introGradientText}>{t('intro.hero.title2')}</span>{t('intro.hero.title3')}
-          </h1>
-          
-          <p className={styles.introHeroDescription}>
-            {t('intro.hero.description')}
-          </p>
-          
-          <div className={styles.introHeroButtons}>
-            <button 
-              className={styles.introBtnPrimary}
-              onClick={handleGetStarted}
-            >
-              <Users size={20} />
-              {t('intro.hero.startFree')}
-              <Sparkles className={styles.introBtnSparkle} size={16} />
-            </button>
-            <button className={styles.introBtnSecondary}>
-              <MessageCircle size={20} />
-              {t('intro.hero.seeHow')}
-            </button>
-          </div>
-          
-          <div className={styles.introHeroStats}>
-            <div className={styles.introStat}>
-              <div className={styles.introStatNumber}>10,000+</div>
-              <div className={styles.introStatLabel}>{t('intro.hero.stats.students')}</div>
+        <div className={styles.introHeroTop}>
+          <div className={styles.introHeroContent}>
+            <h1 className={styles.introHeroTitle}>
+              <span className={styles.introHeroTitleLarge}>{t('intro.hero.title1')}</span>
+              <br />
+              {t('intro.hero.subtitle')}
+              <br />
+              <span className={`${styles.introGradientText} ${styles.introHeroTitleLarge}`}>{t('intro.hero.title2')}</span>{t('intro.hero.title3')}
+            </h1>
+
+            <p className={styles.introHeroDescription}>
+              {t('intro.hero.description')}
+            </p>
+
+            <div className={styles.introHeroButtons}>
+              <button
+                className={styles.introBtnPrimary}
+                onClick={handleGetStarted}
+              >
+                {t('intro.hero.startFree')}
+              </button>
             </div>
-            <div className={styles.introStatDivider}></div>
-            <div className={styles.introStat}>
-              <div className={styles.introStatNumber}>50,000+</div>
-              <div className={styles.introStatLabel}>{t('intro.hero.stats.flashcards')}</div>
-            </div>
-            <div className={styles.introStatDivider}></div>
-            <div className={styles.introStat}>
-              <div className={styles.introStatNumber}>4.9/5</div>
-              <div className={styles.introStatLabel}>{t('intro.hero.stats.rating')}</div>
+          </div>
+
+          <div className={styles.introHeroCarouselSection}>
+            <div className={styles.introHeroCarousel}>
+              <div className={styles.introHeroCarouselContent}>
+                <div className={styles.introHeroCarouselSlide}>
+                  <div className={styles.introHeroImagePlaceholder}>
+                    <Sparkles size={40} className={styles.introHeroPlaceholderIcon} />
+                  </div>
+                  <div className={styles.introHeroSlideInfo}>
+                    <h3 className={styles.introHeroSlideTitle}>{slides[currentSlide]?.title}</h3>
+                    <p className={styles.introHeroSlideDesc}>{slides[currentSlide]?.description}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.introHeroCarouselDots}>
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.introHeroCarouselDot} ${index === currentSlide ? styles.active : ''}`}
+                    onClick={() => goToSlide(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -236,139 +246,10 @@ const Intro = () => {
                 isVisible[`feature-${index}`] ? styles.visible : ''
               }`}
             >
-              <div className={styles.introFeatureIconWrapper}>
-                {feature.icon}
-              </div>
               <h3 className={styles.introFeatureTitle}>{feature.title}</h3>
               <p className={styles.introFeatureDescription}>{feature.description}</p>
-              <div className={styles.introFeatureHighlight}>
-                <Sparkles size={14} />
-                <span>{feature.highlight}</span>
-              </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section id="benefits" className={styles.introBenefits}>
-        <div className={styles.introBenefitsContent}>
-          <div className={styles.introBenefitsText}>
-            <h2 className={styles.introBenefitsTitle}>
-              {t('intro.benefits.title1')}<span className={styles.introGradientText}>{t('intro.benefits.title2')}</span>{t('intro.benefits.title3')}
-            </h2>
-            <div className={styles.introBenefitsList}>
-              <div className={styles.introBenefitItem}>
-                <div className={styles.introBenefitIcon}>
-                  <Zap size={20} />
-                </div>
-                <div>
-                  <h3>{t('intro.benefits.saveTime')}</h3>
-                  <p>{t('intro.benefits.saveTimeDesc')}</p>
-                </div>
-              </div>
-              <div className={styles.introBenefitItem}>
-                <div className={styles.introBenefitIcon}>
-                  <MessageCircle size={20} />
-                </div>
-                <div>
-                  <h3>{t('intro.benefits.instantHelp')}</h3>
-                  <p>{t('intro.benefits.instantHelpDesc')}</p>
-                </div>
-              </div>
-              <div className={styles.introBenefitItem}>
-                <div className={styles.introBenefitIcon}>
-                  <FolderOpen size={20} />
-                </div>
-                <div>
-                  <h3>{t('intro.benefits.stayOrganized')}</h3>
-                  <p>{t('intro.benefits.stayOrganizedDesc')}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className={styles.introBenefitsVisual}>
-            <div className={styles.introMockupCard}>
-              <div className={styles.introMockupHeader}>
-                <div className={styles.introMockupDots}>
-                  <span></span><span></span><span></span>
-                </div>
-              </div>
-              <div className={styles.introMockupContent}>
-                <div className={`${styles.introMockupMessage} ${styles.user}`}>
-                  Wyjaśnij fotosyntezę prostymi słowami
-                </div>
-                <div className={`${styles.introMockupMessage} ${styles.ai}`}>
-                  Oczywiście! Fotosynteza to sposób, w jaki rośliny...
-                </div>
-                <div className={styles.introMockupTyping}>
-                  <span></span><span></span><span></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="testimonials" className={styles.introTestimonials}>
-        <h2 className={styles.introSectionTitle}>
-          {t('intro.testimonials.title1')}<span className={styles.introGradientText}>{t('intro.testimonials.title2')}</span>
-        </h2>
-        
-        <div className={styles.introTestimonialsGrid}>
-          <div className={styles.introTestimonialCard}>
-            <div className={styles.introTestimonialStars}>
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} fill="currentColor" className={styles.introStarIcon} />
-              ))}
-            </div>
-            <p className={styles.introTestimonialText}>
-              {t('intro.testimonials.testimonial1')}
-            </p>
-            <div className={styles.introTestimonialAuthor}>
-              <div className={styles.introAuthorAvatar}>A</div>
-              <div>
-                <div className={styles.introAuthorName}>Anna Kowalska</div>
-                <div className={styles.introAuthorRole}>{t('intro.testimonials.highSchoolStudent')}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.introTestimonialCard}>
-            <div className={styles.introTestimonialStars}>
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} fill="currentColor" className={styles.introStarIcon} />
-              ))}
-            </div>
-            <p className={styles.introTestimonialText}>
-              {t('intro.testimonials.testimonial2')}
-            </p>
-            <div className={styles.introTestimonialAuthor}>
-              <div className={styles.introAuthorAvatar}>P</div>
-              <div>
-                <div className={styles.introAuthorName}>Piotr Nowak</div>
-                <div className={styles.introAuthorRole}>{t('intro.testimonials.universityStudent')}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.introTestimonialCard}>
-            <div className={styles.introTestimonialStars}>
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} fill="currentColor" className={styles.introStarIcon} />
-              ))}
-            </div>
-            <p className={styles.introTestimonialText}>
-              {t('intro.testimonials.testimonial3')}
-            </p>
-            <div className={styles.introTestimonialAuthor}>
-              <div className={styles.introAuthorAvatar}>M</div>
-              <div>
-                <div className={styles.introAuthorName}>Maria Wiśniewska</div>
-                <div className={styles.introAuthorRole}>{t('intro.testimonials.graduate')}</div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -396,14 +277,6 @@ const Intro = () => {
               
               <div className={styles.introCtaSocialProof}>
                 <div className={styles.introCtaFreeText}>{t('intro.cta.freeStart')}</div>
-                <div className={styles.introCtaRating}>
-                  <div className={styles.introRatingStars}>
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={styles.introStarIcon} fill="currentColor" />
-                    ))}
-                  </div>
-                  <span className={styles.introRatingText}>{t('intro.cta.rating')}</span>
-                </div>
               </div>
             </div>
           </div>
