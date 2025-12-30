@@ -2,7 +2,7 @@ from click import group
 from fastapi import FastAPI, Request, status
 from models import Base
 from database import engine
-from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, flashcards, folders , chat_ws
+from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, flashcards, folders , chat_ws, notifications
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,3 +39,4 @@ app.include_router(flashcards.router)
 app.include_router(folders.router)
 app.include_router(podcasts.router)
 app.include_router(chat_ws.router)
+app.include_router(notifications.router)

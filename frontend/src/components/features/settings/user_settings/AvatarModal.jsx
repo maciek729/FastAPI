@@ -1,16 +1,41 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import Cropper from 'react-easy-crop';
 import styles from "../../../../css/features/settings/Modal.module.css";
 import { getCroppedImg } from './canvasUtils';
+import { LanguageContext } from "../../../../translations/LanguageContext";
+import translations from "../../../../translations/translation.json";
 
 export default function AvatarModal({ onClose, onSave, onDelete, userData }) {
     const [image, setImage] = useState(null);
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => params[key] || match);
+        }
+        return translation || key;
+    };
 
     const onSelectFile = (e) => {
         if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                alert(t('userSettings.photoFormat'));
+                e.target.value = null;
+                return;
+            }
+
             const reader = new FileReader();
             reader.readAsDataURL(e.target.files[0]);
             reader.onload = () => setImage(reader.result);
@@ -27,26 +52,26 @@ export default function AvatarModal({ onClose, onSave, onDelete, userData }) {
             const croppedFile = new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" });
             onSave(croppedFile);
         } catch (e) {
-            console.error("Błąd przycinania:", e);
+            console.error(t('userSettings.cropError'), e);
         }
     };
 
     return (
         <div className={styles.modalBackdrop} onClick={onClose}>
             <div className={`${styles.modalContent} ${styles.avatarModal}`} onClick={(e) => e.stopPropagation()}>
-                <h3 className={styles.modalTitle}>Dostosuj zdjęcie profilowe</h3>
+                <h3 className={styles.modalTitle}>{t('userSettings.adjustPhoto')}</h3>
                 
                 {!image ? (
                     <div className={styles.uploadContainer}>
                         <input 
                             type="file" 
-                            accept="image/*" 
-                            onChange={onSelectFile} 
-                            id="avatar-upload" 
+                            accept=".jpg,.jpeg,.png"
+                            onChange={onSelectFile}
+                            id="avatar-upload"
                             style={{ display: 'none' }} 
                         />
                         <label htmlFor="avatar-upload" className={styles.saveButton}>
-                            Wybierz nowe zdjęcie
+                            {t('userSettings.photoPick')}
                         </label>
                         
                         {userData?.avatar_url && (
@@ -64,7 +89,7 @@ export default function AvatarModal({ onClose, onSave, onDelete, userData }) {
                                     fontWeight: '500'
                                 }}
                             >
-                                Usuń obecne zdjęcie
+                                {t('userSettings.removePhoto')}
                             </button>
                         )}
                     </div>
@@ -97,10 +122,10 @@ export default function AvatarModal({ onClose, onSave, onDelete, userData }) {
                 )}
 
                 <div className={styles.buttonContainer}>
-                    <button className={styles.cancelButton} onClick={onClose}>Anuluj</button>
+                    <button className={styles.cancelButton} onClick={onClose}>{t('userSettings.cancelPhoto')}</button>
                     {image && (
                         <button className={styles.saveButton} onClick={handleConfirm}>
-                            Przytnij i wybierz
+                            {t('userSettings.cropAndPick')}
                         </button>
                     )}
                 </div>

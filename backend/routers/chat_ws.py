@@ -5,7 +5,8 @@ import json
 from datetime import datetime
 from database import SessionLocal
 from models import Notebooks, NotebookCollaborator, Users, NotebookMessages
-from models import Notes, Tests, FlashcardSets, Podcasts
+from models import Notes, Tests, FlashcardSets, Podcasts, Notifications
+import re
 
 router = APIRouter(
     prefix="/group-chat",
@@ -55,7 +56,7 @@ async def get_chat_history(notebook_id: int):
                 "senderId": m.user_id,
                 "senderName": m.user.username if m.user else "Użytkownik",
                 "text": m.content,
-                "timestamp": format_time(m.created_at),
+                "timestamp": m.created_at.isoformat(),
                 "type": m.type,
                 "is_edited": m.is_edited if m.is_edited is not None else False,
                 "is_deleted": False
@@ -66,8 +67,15 @@ async def get_chat_history(notebook_id: int):
 @router.websocket("/ws/{notebook_id}/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: int):
     with SessionLocal() as db:
-        is_owner = db.query(Notebooks).filter(Notebooks.id == notebook_id, Notebooks.created_by == user_id).first()
-        is_collaborator = db.query(NotebookCollaborator).filter(NotebookCollaborator.notebook_id == notebook_id, NotebookCollaborator.user_id == user_id).first()
+        is_owner = db.query(Notebooks).filter(
+            Notebooks.id == notebook_id, 
+            Notebooks.created_by == user_id
+        ).first()
+        
+        is_collaborator = db.query(NotebookCollaborator).filter(
+            NotebookCollaborator.notebook_id == notebook_id, 
+            NotebookCollaborator.user_id == user_id
+        ).first()
 
         if not is_owner and not is_collaborator:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
@@ -94,14 +102,55 @@ async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: in
                 db.commit()
                 db.refresh(new_msg)
 
-                user = db.query(Users).filter(Users.id == user_id).first()
+                user_sender = db.query(Users).filter(Users.id == user_id).first()
                 
+                content = new_msg.content
+                mentioned_user_ids = set()
+
+                if "@wszyscy" in content.lower():
+                    notebook = db.query(Notebooks).filter(Notebooks.id == notebook_id).first()
+                    if notebook:
+                        mentioned_user_ids.add(notebook.created_by)
+                    
+                    collabs = db.query(NotebookCollaborator).filter(
+                        NotebookCollaborator.notebook_id == notebook_id
+                    ).all()
+                    for c in collabs:
+                        mentioned_user_ids.add(c.user_id)
+                
+                else:
+                    mentions = re.findall(r"@(\w+)", content)
+                    if mentions:
+                        db_users = db.query(Users.id).filter(Users.username.in_(mentions)).all()
+                        for u in db_users:
+                            mentioned_user_ids.add(u.id)
+
+                if user_id in mentioned_user_ids:
+                    mentioned_user_ids.remove(user_id)
+
+                for target_id in mentioned_user_ids:
+                    new_notification = Notifications(
+                        user_id=target_id,
+                        sender_id=user_id,
+                        content=user_sender.username,
+                        type="mention",
+                        redirect_type="notebook",
+                        notebook_id=notebook_id,
+                        tab_target="chat",
+                        item_id=new_msg.id,
+                        is_read=False,
+                        created_at=datetime.utcnow()
+                    )
+                    db.add(new_notification)
+                
+                db.commit()
+
                 broadcast_data = {
                     "id": new_msg.id,
                     "senderId": user_id,
-                    "senderName": user.username if user else "Użytkownik",
+                    "senderName": user_sender.username if user_sender else "Użytkownik",
                     "text": new_msg.content,
-                    "timestamp": format_time(new_msg.created_at),
+                    "timestamp": datetime.utcnow().isoformat(),
                     "type": new_msg.type,
                     "is_edited": False,
                     "is_deleted": False
@@ -110,7 +159,8 @@ async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: in
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, notebook_id)
-    except Exception:
+    except Exception as e:
+        print(f"Błąd WebSocket: {e}")
         manager.disconnect(websocket, notebook_id)
 
 @router.delete("/message/{message_id}")
@@ -121,6 +171,7 @@ async def delete_message(message_id: int, user_id: int):
             raise HTTPException(status_code=403, detail="Brak uprawnień")
 
         notebook_id = msg.notebook_id
+        was_pinned = msg.is_pinned
         db.delete(msg)
         db.commit()
 
@@ -128,6 +179,11 @@ async def delete_message(message_id: int, user_id: int):
             "type": "message_delete",
             "messageId": message_id
         }, notebook_id)
+
+        if was_pinned:
+            await manager.broadcast({
+                "type": "message_unpin"
+            }, notebook_id)
         
         return {"status": "success"}
 
@@ -147,6 +203,66 @@ async def edit_message(message_id: int, user_id: int, new_content: str):
             "messageId": message_id,
             "newText": new_content
         }, msg.notebook_id)
+        
+        return {"status": "success"}
+    
+@router.get("/{notebook_id}/pinned")
+async def get_pinned_message(notebook_id: int):
+    with SessionLocal() as db:
+        msg = db.query(NotebookMessages).filter(
+            NotebookMessages.notebook_id == notebook_id,
+            NotebookMessages.is_pinned == True
+        ).first()
+        if not msg:
+            return None
+        return {
+            "id": msg.id,
+            "text": msg.content,
+            "senderName": msg.user.username if msg.user else "Użytkownik"
+        }
+
+@router.patch("/message/{message_id}/pin")
+async def pin_message(message_id: int, user_id: int):
+    with SessionLocal() as db:
+        msg = db.query(NotebookMessages).filter(NotebookMessages.id == message_id).first()
+        if not msg:
+            raise HTTPException(status_code=404, detail="Wiadomość nie istnieje")
+        
+        # 1. Odpnij wszystkie wiadomości w tym notatniku
+        db.query(NotebookMessages).filter(
+            NotebookMessages.notebook_id == msg.notebook_id
+        ).update({NotebookMessages.is_pinned: False})
+        
+        # 2. Przypnij nową
+        msg.is_pinned = True
+        db.commit()
+
+        # 3. Poinformuj wszystkich przez WebSocket
+        await manager.broadcast({
+            "type": "message_pin",
+            "pinnedMessage": {
+                "id": msg.id,
+                "text": msg.content,
+                "senderName": msg.user.username if msg.user else "Użytkownik"
+            }
+        }, msg.notebook_id)
+        
+        return {"status": "success"}
+    
+@router.patch("/{notebook_id}/unpin")
+async def unpin_message(notebook_id: int):
+    with SessionLocal() as db:
+        # Odpinamy wszystko w tym notatniku
+        db.query(NotebookMessages).filter(
+            NotebookMessages.notebook_id == notebook_id
+        ).update({NotebookMessages.is_pinned: False})
+        
+        db.commit()
+
+        # Informujemy wszystkich przez WebSocket, że pinezka zniknęła
+        await manager.broadcast({
+            "type": "message_unpin"
+        }, notebook_id)
         
         return {"status": "success"}
 
@@ -173,3 +289,34 @@ async def get_notebook_podcasts(notebook_id: int):
     with SessionLocal() as db:
         podcasts = db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).all()
         return [{"id": p.id, "title": p.title} for p in podcasts]
+    
+@router.get("/{notebook_id}/members")
+async def get_notebook_members(notebook_id: int):
+    with SessionLocal() as db:
+        notebook = db.query(Notebooks).filter(Notebooks.id == notebook_id).first()
+        if not notebook:
+            raise HTTPException(status_code=404, detail="Notebook not found")
+
+        members = []
+
+        owner = db.query(Users).filter(Users.id == notebook.created_by).first()
+        if owner:
+            members.append({
+                "id": owner.id, 
+                "username": owner.username,
+                "role": "owner"
+            })
+
+        collaborators = db.query(NotebookCollaborator).filter(
+            NotebookCollaborator.notebook_id == notebook_id
+        ).all()
+
+        for collab in collaborators:
+            if collab.user and collab.user.id != notebook.created_by:
+                members.append({
+                    "id": collab.user.id, 
+                    "username": collab.user.username,
+                    "role": "collaborator"
+                })
+
+        return members

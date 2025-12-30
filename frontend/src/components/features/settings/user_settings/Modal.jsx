@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import styles from "../../../../css/features/settings/Modal.module.css"; 
 import { checkUsernameAvailability as checkAvailabilityService } from '../../../../services/userService';
+import { LanguageContext } from "../../../../translations/LanguageContext";
+import translations from "../../../../translations/translation.json";
 
 const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -23,8 +25,22 @@ export default function Modal({
     isDelete,
     oldValue
 }) {
+    const { language } = useContext(LanguageContext);
     const [newInputValue, setNewInputValue] = useState('');
     const [validationError, setValidationError] = useState('');
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => params[key] || match);
+        }
+        return translation || key;
+    };
 
     const isInputValid = () => {
         const value = newInputValue;
@@ -44,15 +60,15 @@ export default function Modal({
         if (!hideCurrent && saveType === 'username') {
             if (value.length > 0) {
                 if (value.length < 3) {
-                    setValidationError('Nazwa użytkownika musi mieć co najmniej 3 znaki.');
+                    setValidationError(t('userSettings.usernameShorterThan'));
                     return false;
                 }
                 if (value.length > 15) {
-                    setValidationError('Nazwa użytkownika może mieć maksymalnie 15 znaków.');
+                    setValidationError(t('userSettings.usernameLongerThan'));
                     return false;
                 }
                 if (value == oldValue) {
-                    setValidationError('Nowa nazwa użytkownika jest taka sama jak obecna.');
+                    setValidationError(t('userSettings.usernameTaken'));
                     return false;
                 }
             }
@@ -63,7 +79,7 @@ export default function Modal({
 
     const checkUsernameAvailability = async (username) => {
         try {
-            const token = getCookie('access_token'); // Pobieramy token
+            const token = getCookie('access_token');
             
             const data = await checkAvailabilityService(username, token);
             
@@ -85,7 +101,7 @@ export default function Modal({
             const isAvailable = await checkUsernameAvailability(newInputValue);
             
             if (!isAvailable) {
-                setValidationError('Ta nazwa użytkownika jest już zajęta.');
+                setValidationError('userSettings.usernameTaken');
                 return;
             }
         }
@@ -124,7 +140,7 @@ export default function Modal({
                 )}
                 
                 <div className={styles.inputRow}>
-                    <label htmlFor="new-input" className={styles.newLabel}>{newInputLabel}:</label>
+                    <label htmlFor="new-input" className={styles.newLabel}>{newInputLabel}</label>
                     
                     {!hideCurrent && (
                     <input
