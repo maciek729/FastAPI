@@ -75,11 +75,6 @@ export default function Help({userData}) {
             </div>
 
             <HelpQuestion
-                question="Jeżeli byście chcieli to mogę dodać nową sekcję kontakt"
-                answer="i tam wówczas umieszczę formularz. Bo nie wiedziałem, gdzie go umieścić, więc na razie jest tutaj"
-            />
-
-            <HelpQuestion
                 question={t('help.question1')}
                 answer={t('help.answer1')}
             />

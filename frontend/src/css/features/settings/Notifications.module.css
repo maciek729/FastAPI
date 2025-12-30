@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
+/* Główny kontener - identyczny jak w Settings */
+.notificationsMainContainer {
+    max-width: 1400px;
+    width: 80%;
+    flex-direction: column;
+    display: flex;
+    min-height: 0;
+    margin: 2.5rem auto 2rem auto;
+}
+
+/* Nagłówek */
+.titleContainer {
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Przycisk "Wyczyść wszystko" po prawej */
+}
+
+.titleWithIcon {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.headerIcon {
+    color: var(--purple_brighter);
+}
+
+.title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--title);
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+/* Przycisk czyszczenia wszystkiego */
+.clearAllBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--white_btn_bg, #fff);
+    color: var(--red_btn_text, #ef4444);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.clearAllBtn:hover {
+    transform: scale(1.05);
+    background-color: rgba(239, 68, 68, 0.05);
+    border-color: #ef4444;
+}
+
+/* Kontener listy - wzorowany na sekcjach ustawień */
+.sectionContainer {
+    background: var(--inner_section_bg);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* --- Karta pojedynczego powiadomienia (NotificationModal) --- */
+.notificationCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--inner_inner_section_bg, #f8fafc);
+    border: 1px solid var(--border_gray, #e2e8f0);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.notificationCard:hover {
+    transform: scale(1.01);
+    border-color: var(--purple_brighter);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Styl dla nieprzeczytanych */
+.unread {
+    border-left: 4px solid var(--purple_brighter);
+    background: linear-gradient(to right, rgba(139, 92, 246, 0.05), var(--inner_inner_section_bg));
+}
+
+/* Wrapper ikony */
+.iconWrapper {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2);
+}
+
+/* Treść powiadomienia */
+.contentWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.notificationHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.senderName {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--title);
+}
+
+.timeWrapper {
+    font-size: 0.75rem;
+    color: var(--subtitle);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notificationText {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--subtitle);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Przycisk usuwania */
+.deleteBtn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    opacity: 0; /* Ukryty domyślnie, pojawia się po hover */
+}
+
+.notificationCard:hover .deleteBtn {
+    opacity: 1;
+}
+
+.deleteBtn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Stany puste i ładowanie */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: var(--subtitle);
+    gap: 1rem;
+}
+
+.emptyState p {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--purple_brighter);
+    font-weight: 600;
+}

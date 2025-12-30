@@ -21,6 +21,8 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [notebookSection, setNotebookSection] = useState('overview');
 
+  const [highlightMessageId, setHighlightMessageId] = useState(null);
+
   const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -75,6 +77,32 @@ export default function MainLayout() {
     fetchUserData();
   }, [fetchUserData]);
 
+  const handleNavigateToResource = (navData) => {
+    if (navData.type === 'notebook') {
+      setHighlightMessageId(navData.targetId);
+      
+      const token = getCookie('access_token');
+      fetch(`${API_BASE_URL}/notebooks/${navData.notebookId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setSelectedNotebook(data);
+          setNotebookDetails(data);
+          setActiveSection('notebook');
+          setNotebookSection(navData.tab || 'files');
+        })
+        .catch(err => console.error('Error deep linking to notebook:', err));
+
+        setTimeout(() => {
+            setHighlightMessageId(null);
+        }, 5000);
+
+    } else if (navData.type === 'settings') {
+      setActiveSection('user_settings');
+    }
+  };
+
   useEffect(() => {
     window.addEventListener("refreshUserData", fetchUserData);
     
@@ -87,6 +115,7 @@ export default function MainLayout() {
     setActiveSection(sectionId);
     if (sectionId !== 'notebook') {
         setSelectedNotebook(null);
+        setHighlightMessageId(null);
     }
   };
 
@@ -95,6 +124,7 @@ export default function MainLayout() {
   };
 
   const handleSelectNotebook = (notebook) => {
+    setHighlightMessageId(null);
     setSelectedNotebook(notebook);
     setActiveSection('notebook');
     setNotebookSection('files');
@@ -142,7 +172,7 @@ export default function MainLayout() {
         return <Help userData={userData}/>;
 
       case 'notifications':
-        return <NotificationView userData={userData}/>;
+        return <NotificationView userData={userData} onNavigateToResource={handleNavigateToResource}/>;
       
       case 'notebook':
         return selectedNotebook ? (
@@ -153,6 +183,7 @@ export default function MainLayout() {
             refreshNotebook={refreshNotebook}
             defaultSection={notebookSection}
             isSidebarOpen={isSidebarOpen}
+            highlightMessageId={highlightMessageId}
           />
         ) : (
           <div style={{ padding: '2rem', color: '#94a3b8' }}>

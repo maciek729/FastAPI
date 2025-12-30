@@ -10,7 +10,7 @@ import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import GroupChatSidebar from "../group_chat/GroupChatSidebar";
 
-export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen }) {
+export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen, highlightMessageId, setHighlightMessageId}) {
     const notebookId = details?.id;
     const [highlightedItemId, setHighlightedItemId] = useState(null);
     
@@ -25,10 +25,24 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         return false;
     });
 
-    const handleNavigateToResource = (resourceData) => {
+    // const handleNavigateToResource = (resourceData) => {
+    //     const type = resourceData.itemType;
+    //     const id = resourceData.itemId;
+
+    //     setHighlightedItemId(id);
+        
+    //     if (type === 'note') setActiveTab('files');
+    //     else if (type === 'test') setActiveTab('tests');
+    //     else if (type === 'flashcards') setActiveTab('flashcards');
+    //     else if (type === 'podcast') setActiveTab('podcasts');
+        
+    //     // Opcjonalnie: tutaj możesz dodać logikę, która przekaże resourceData.itemId 
+    //     // do konkretnego widoku, aby go podświetlić, jeśli Twoje widoki to obsługują.
+    //     setTimeout(() => setHighlightedItemId(null), 10000);
+    // };
+    const handleInternalResourceOpen = (resourceData) => {
         const type = resourceData.itemType;
         const id = resourceData.itemId;
-
         setHighlightedItemId(id);
         
         if (type === 'note') setActiveTab('files');
@@ -36,8 +50,6 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         else if (type === 'flashcards') setActiveTab('flashcards');
         else if (type === 'podcast') setActiveTab('podcasts');
         
-        // Opcjonalnie: tutaj możesz dodać logikę, która przekaże resourceData.itemId 
-        // do konkretnego widoku, aby go podświetlić, jeśli Twoje widoki to obsługują.
         setTimeout(() => setHighlightedItemId(null), 10000);
     };
     
@@ -72,6 +84,12 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
             }
         }
     }, [isResizing]);
+
+    useEffect(() => {
+        if (highlightMessageId) {
+            setIsGroupChatOpen(true);
+        }
+    }, [highlightMessageId]);
 
     useEffect(() => {
         if (!notebookId) return;
@@ -168,7 +186,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                             onClick={() => setIsGroupChatOpen(!isGroupChatOpen)}
                         >
                             <Users size={18} />
-                            <span>{t('Czat grupowy')}</span>
+                            <span>{t('notebook.tabs.group_chat')}</span>
                         </button>
                     </>
                 )}
@@ -211,7 +229,9 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                     onResizeStart={startResizing}
                     chatName = {details?.name}
                     isShared={isShared}
-                    onNavigateToResource={handleNavigateToResource}
+                    onNavigateToResource={handleInternalResourceOpen}
+                    highlightMessageId={highlightMessageId}
+                    setHighlightMessageId={setHighlightMessageId}
                 />
             </div>
         </div>

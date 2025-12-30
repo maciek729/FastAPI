@@ -278,3 +278,29 @@ class NotebookMessages(Base):
     notebook = relationship("Notebooks")
     is_edited = Column(Boolean, default=False, nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=True)
+    is_pinned = Column(Boolean, default=False, nullable=True)
+
+class Notifications(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    content = Column(Text, nullable=False)
+    type = Column(String(50))
+    
+    redirect_type = Column(String(50)) 
+    
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"), nullable=True)
+    tab_target = Column(String(50), nullable=True)
+    
+    item_id = Column(Integer, nullable=True) 
+
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("Users", foreign_keys=[user_id])
+    sender = relationship("Users", foreign_keys=[sender_id])
+    notebook = relationship("Notebooks")

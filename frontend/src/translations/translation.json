@@ -167,7 +167,8 @@
         "files": "Moje Pliki",
         "flashcards": "Fiszki",
         "tests": "Sprawdziany",
-        "podcasts": "Podcasty"
+        "podcasts": "Podcasty",
+        "group_chat": "Chat grupowy"
       }
     },
     "noteEditor": {
@@ -329,16 +330,53 @@
       "email": "Adres e-mail",
       "password": "Hasło",
       "passwordDescription": "Zmień swoje hasło.",
-      "deleteAccount": "Deaktywuj / Usuń konto ?",
+      "changePasswordTitle": "Zmień hasło.",
+      "changePasswordDescription": "Wyślemy Ci wiadomość e-mail umożliwiającą zmianę hasła.",
+      "deleteAccount": "Deaktywuj konto",
+      "deleteAccountDescription": "Uwaga: Ta akcja jest nieodwracalna.",
       "edit": "Edytuj",
       "change": "Zmień",
-      "deleteAccountButton": "Usuń konto"
+      "deleteAccountButton": "Usuń konto",
+      "usernameShorterThan": "Nazwa użytkownika musi mieć co najmniej 3 znaki.",
+      "usernameTaken": "Nazwa użytkownika jest już zajęta.",
+      "usernameLongerThan": "Nazwa użytkownika nie może przekraczać 15 znaków.",
+      "photoFormat": "Zdjęcie profilowe musi być w formacie JPG, JPEG lub PNG.",
+      "cropError": "Błąd przycinania obrazu.",
+      "photoTitle": "Zmień zdjęcie profilowe",
+      "photoPick": "Wybierz nowe zdjęcie",
+      "removePhoto": "Usuń zdjęcie profilowe",
+      "cropAndPick": "Przytnij i wybierz",
+      "adjustPhoto": "Dostosuj zdjęcie profilowe",
+      "cancelPhoto": "Anuluj"
     },
     "userMenu": {
       "profile": "Profil",
       "settings": "Ustawienia",
       "notifications": "Powiadomienia",
       "help": "Pomoc"
+    },
+    "notifications": {
+      "title": "Powiadomienia",
+      "noNotifications": "Brak nowych powiadomień",
+      "loading": "Ładowanie powiadomień...",
+      "fetchError": "Błąd pobierania powiadomień",
+      "markAllRead": "Oznacz wszystkie jako przeczytane",
+      "clearAll": "Wyczyść wszystkie",
+      "confirmClear": "Czy na pewno chcesz wyczyścić wszystkie powiadomienia?",
+      "clickError": "Błąd podczas klikania powiadomienia",
+      "deleteError": "Błąd podczas usuwania powiadomienia",
+      "clearError": "Błąd podczas czyszczenia powiadomień",
+      "downloadError": "Błąd podczas pobierania powiadomień",
+      "mention": "Użytkownik {username} wspomniał o Tobie w notatniku"
+    },
+    "group_chat": {
+      "emptyTitle": "Cisza przed naukową burzą? 🧠",
+      "emptySubtitle": "Napisz coś do reszty grupy lub udostępnij pierwsze materiały, aby wspólnie rozkręcić ten notatnik!",
+      "pin": "Przypnij wiadomość",
+      "edit": "Edytuj treść",
+      "delete": "Usuń na zawsze",
+      "autoScrollOn": "Włącz autoscroll",
+      "autoScrollOff": "Wyłącz autoscroll"
     }
   },
 
@@ -511,7 +549,8 @@
         "files": "My Files",
         "flashcards": "Flashcards",
         "tests": "Tests",
-        "podcasts": "Podcasts"
+        "podcasts": "Podcasts",
+        "group_chat": "Group Chat"
       }
     },
     "noteEditor": {
@@ -674,16 +713,53 @@
       "email": "Email Address",
       "password": "Password",
       "passwordDescription": "Change your password.",
-      "deleteAccount": "Deactivate / Delete Account?",
+      "changePasswordTitle": "Change Password",
+      "changePasswordDescription": "We will send you an email to change your password.",
+      "deleteAccount": "Deactivate Account",
+      "deleteAccountDescription": "Warning: This action is irreversible.",
       "edit": "Edit",
       "change": "Change",
-      "deleteAccountButton": "Delete Account"
+      "deleteAccountButton": "Delete Account",
+      "usernameShorterThan": "Username must be at least 3 characters long.",
+      "usernameTaken": "Username is already taken.",
+      "usernameLongerThan": "Username cannot exceed 15 characters.",
+      "photoFormat": "Profile picture must be in JPG, JPEG or PNG format.",
+      "cropError": "Error cropping the image.",
+      "photoTitle": "Change Profile Picture",
+      "photoPick": "Pick New Image",
+      "removePhoto": "Remove Profile Picture",
+      "cropAndPick": "Crop & Pick",
+      "adjustPhoto": "Adjust Profile Photo",
+      "cancelPhoto": "Cancel"
     },
     "userMenu": {
       "profile": "Profile",
       "settings": "Settings",
       "notifications": "Notifications",
       "help": "Help"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "noNotifications": "No new notifications",
+      "loading": "Loading notifications...",
+      "fetchError": "Error loading notifications",
+      "markAllRead": "Mark all as read",
+      "clearAll": "Clear all",
+      "confirmClear": "Are you sure you want to clear all notifications?",
+      "clickError": "Error clicking notification",
+      "deleteError": "Error deleting notification",
+      "clearError": "Error clearing notifications",
+      "downloadError": "Error downloading notifications",
+      "mention": "User {username} mentioned you in a notebook"
+    },
+    "group_chat": {
+      "emptyTitle": "Calm before the study storm? 🧠",
+      "emptySubtitle": "Send a message to the group or share your first resources to get this notebook rolling together!",
+      "pin": "Pin message",
+      "edit": "Edit content",
+      "delete": "Delete forever",
+      "autoScrollOn": "Enable auto-scroll",
+      "autoScrollOff": "Disable auto-scroll"
     }
   }
 }

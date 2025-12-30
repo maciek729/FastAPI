@@ -172,30 +172,30 @@ export default function UserSettings({ userData }) {
         let content = {};
         if (type === 'username') {
             content = {
-                title: t('Zmień nazwę użytkownika'),
-                currentValueLabel: t('Obecna nazwa'),
+                title: t('userSettings.username'),
+                currentValueLabel: t('userSettings.username'),
                 currentValue: userData?.username || '',
-                newInputLabel: t('Nowa nazwa'),
+                newInputLabel: t('userSettings.edit'),
                 inputType: 'text',
-                buttonText: t('Zmień nazwę'),
+                buttonText: t('userSettings.edit'),
                 saveType: 'username',
                 oldValue: userData?.username
             };
         } else if (type === 'password') {
             content = {
-                title: t('Zmień hasło'),
-                newInputLabel: t('Wyślemy ci maila, aby zmienić hasło'),
+                title: t('userSettings.changePasswordTitle'),
+                newInputLabel: t('userSettings.changePasswordDescription'),
                 inputType: 'password',
-                buttonText: t('Zmień hasło'),
+                buttonText: t('userSettings.change'),
                 saveType: 'password',
                 hideCurrent: true
             };
         } else if (type === 'deleteAccount') {
             content = {
-                title: t('Usuń konto'),
-                newInputLabel: t('Czy jesteś pewny?'),
+                title: t('userSettings.deleteAccountButton'),
+                newInputLabel: t('userSettings.deleteAccountDescription'),
                 inputType: 'password',
-                buttonText: t('Usuń konto'),
+                buttonText: t('userSettings.deleteAccountButton'),
                 saveType: 'deleteAccount',
                 hideCurrent: true,
                 isDelete: true
@@ -260,7 +260,7 @@ export default function UserSettings({ userData }) {
                     <div className={styles.sectionOption}>
                         <div className={styles.textWrapper}>
                             <label className={styles.sectionTitle}>{t('userSettings.deleteAccount')}</label>
-                            <label className={styles.optionLabel}>{t('Ta akcja jest nieodwracalna.')}</label>
+                            <label className={styles.optionLabel}>{t('userSettings.deleteAccountDescription')}</label>
                         </div>
                         <button className={styles.deleteAccountButton} onClick={() => openModal('deleteAccount')}>{t('userSettings.deleteAccountButton')}</button>
                     </div>

@@ -11,6 +11,11 @@
     transition: background 0.3s ease;
     animation: fadeIn 0.3s ease-out;
 }
+.fixedTopSection {
+    flex-shrink: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border_gray);
+}
 
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -73,7 +78,8 @@
 }
 
 .toggleScrollBtn {
-    opacity: 0.5;
+    /* opacity: 0.5; */
+    position: relative;
 }
 
 .scrollActive {
@@ -91,6 +97,7 @@
     flex-direction: column;
     gap: 1rem;
     word-break: break-word;
+    position: relative;
 }
 
 .sideChatContent::-webkit-scrollbar {
@@ -312,4 +319,163 @@
 
 .deleteBtn {
     color: #ff4d4d !important;
+}
+.pinnedMessageBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: var(--inner_inner_section_bg); /* Nieco inny odcień niż tło */
+    cursor: pointer;
+    transition: background 0.2s;
+    border-top: 1px solid var(--border_gray); /* Oddzielenie od tytułu czatu */
+}
+
+.pinnedMessageBar:hover {
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.pinIcon {
+    color: var(--purple_brighter);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+}
+
+.pinnedContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.pinnedLabel {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--purple_brighter);
+    text-transform: uppercase;
+}
+
+.pinnedText {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unpinAction {
+    color: var(--subtitle);
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.unpinAction:hover {
+    opacity: 1;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+.emptyChatContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    animation: fadeInScale 0.4s ease-out;
+}
+
+.emptyChatIcon {
+    font-size: 3.5rem;
+    margin-bottom: 1.25rem;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
+    user-select: none;
+}
+
+.emptyChatTitle {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--title);
+    line-height: 1.2;
+    margin-bottom: 0.85rem;
+    max-width: 90%;
+}
+
+.emptyChatSubtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--subtitle);
+    max-width: 280px;
+    margin: 0 auto;
+    opacity: 0.85;
+}
+
+@keyframes fadeInScale {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+.toggleScrollBtn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 130%;
+    right: 0;
+    
+    background: #1f2937;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    pointer-events: none;
+}
+
+.toggleScrollBtn::before {
+    content: "";
+    position: absolute;
+    top: 115%;
+    right: 10px;
+    
+    border: 6px solid transparent;
+    border-bottom-color: #1f2937;
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.toggleScrollBtn:hover::after,
+.toggleScrollBtn:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.toggleScrollBtn svg {
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.scrollActive svg {
+    opacity: 1;
+}
+.toggleScrollBtn:hover svg {
+    opacity: 1;
 }
