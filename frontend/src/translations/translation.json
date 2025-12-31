@@ -401,6 +401,7 @@
       "delete": "Usuń na zawsze",
       "autoScrollOn": "Włącz autoscroll",
       "autoScrollOff": "Wyłącz autoscroll"
+    },
     "demo": {
       "buttons": {
         "back": "Wstecz",
@@ -857,6 +858,7 @@
       "delete": "Delete forever",
       "autoScrollOn": "Enable auto-scroll",
       "autoScrollOff": "Disable auto-scroll"
+    },
     "demo": {
       "buttons": {
         "back": "Back",
