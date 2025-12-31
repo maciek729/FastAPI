@@ -4,7 +4,7 @@ import NotificationModal from "./NotificationModal";
 import { Bell, BellOff, Trash2 } from "lucide-react";
 import { useLanguage } from "../../../../translations/LanguageContext";
 import translations from "../../../../translations/translation.json";
-import axios from "axios";
+import * as notifService from "../../../../services/notificationService";
 
 export default function NotificationView({ userData, onNavigateToResource }) {
     const { language } = useLanguage();
@@ -38,8 +38,8 @@ export default function NotificationView({ userData, onNavigateToResource }) {
     const fetchNotifications = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8000/notifications/${userData.id}`);
-            setNotifications(response.data);
+            const data = await notifService.getUserNotifications(userData.id);
+            setNotifications(data);
         } catch (error) {
             console.error(t("notifications.downloadError"), error);
         } finally {
@@ -50,7 +50,7 @@ export default function NotificationView({ userData, onNavigateToResource }) {
     const handleNotificationClick = async (notification) => {
         try {
             if (!notification.is_read) {
-                await axios.patch(`http://localhost:8000/notifications/${notification.id}/read`);
+                await notifService.markNotificationAsRead(notification.id);
                 
                 setNotifications(prev => prev.map(n => 
                     n.id === notification.id ? { ...n, is_read: true } : n
@@ -78,7 +78,7 @@ export default function NotificationView({ userData, onNavigateToResource }) {
 
     const handleDeleteNotification = async (id) => {
         try {
-            await axios.delete(`http://localhost:8000/notifications/${id}`);
+            await notifService.deleteNotification(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
         } catch (error) {
             console.error(t("notifications.deleteError"), error);
@@ -88,7 +88,7 @@ export default function NotificationView({ userData, onNavigateToResource }) {
     const handleClearAll = async () => {
         if (!window.confirm(t('notifications.confirmClear'))) return;
         try {
-            await axios.delete(`http://localhost:8000/notifications/user/${userData.id}/all`);
+            await notifService.clearAllNotifications(userData.id);
             setNotifications([]);
         } catch (error) {
             console.error(t("notifications.clearError"), error);
@@ -126,7 +126,7 @@ export default function NotificationView({ userData, onNavigateToResource }) {
                 ) : (
                     <div className={styles.emptyState}>
                         <BellOff size={48} />
-                        <p>{t('notifications.empty')}</p>
+                        <p>{t('notifications.noNotifications')}</p>
                     </div>
                 )}
             </div>

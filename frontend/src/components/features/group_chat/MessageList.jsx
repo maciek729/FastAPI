@@ -50,23 +50,30 @@ const MessageList = ({
     useEffect(() => {
         if (!highlightMessageId) return;
 
-        const timer = setTimeout(() => {
+        let attempts = 0;
+        const checkExist = setInterval(() => {
             const element = document.getElementById(`msg-${highlightMessageId}`);
+            attempts++;
+
             if (element) {
+                clearInterval(checkExist);
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
                 element.classList.add(styles.jumpHighlight);
                 
                 setTimeout(() => {
                     element.classList.remove(styles.jumpHighlight);
                     setHighlightMessageId(null);
-                }, 2000);
-            } else {
+                }, 3000);
+            }
+
+            if (attempts > 20) {
+                clearInterval(checkExist);
                 setHighlightMessageId(null);
             }
         }, 100);
 
-        return () => clearTimeout(timer);
-    }, [highlightMessageId, messages, setHighlightMessageId]);
+        return () => clearInterval(checkExist);
+    }, [highlightMessageId, messages]);
 
     const formatDisplayTime = (dateStr) => {
         if (!dateStr) return "";
