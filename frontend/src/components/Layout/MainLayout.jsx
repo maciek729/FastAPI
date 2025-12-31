@@ -10,6 +10,7 @@ import UserSettings from "../features/settings/user_settings/UserSettings";
 import Help from '../features/settings/help/Help';
 import NotificationView from "../features/settings/notifications/NotificationView";
 import API_BASE_URL from "../../api/config";
+import Demo from "../demo/Demo";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -234,12 +235,14 @@ export default function MainLayout() {
         onGoToDashboard={handleBackToDashboard}
         onGoToSection={handleGoToSection}
       />
-      
-      <div 
+
+      <div
         className={`${styles.contentArea} ${!isSidebarOpen ? styles.contentAreaCollapsed : ''}`}
       >
         {renderContent()}
       </div>
+
+      <Demo />
     </div>
   );
 }
