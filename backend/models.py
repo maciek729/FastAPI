@@ -20,6 +20,10 @@ class Users(Base):
     reset_password_token = Column(String, nullable=True)
     reset_password_token_expires = Column(DateTime, nullable=True)
 
+    avatar_url = Column(String, nullable=True)
+
+    is_archived = Column(Boolean, default=False, nullable=True)
+
 class Groups(Base):
     __tablename__ = 'groups'
 
@@ -76,17 +80,16 @@ class Notes(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
-    folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)  # parent folder
+    folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)
     title = Column(String)
     content = Column(String)
     type = Column(String(50), default="Notatka")
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     is_shared = Column(Boolean, default=False)
-    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
-    is_pinned = Column(Boolean, default=False)  # whether note is pinned to top
+    grid_position = Column(Integer, nullable=True)
+    is_pinned = Column(Boolean, default=False)
 
-    # 🔼 RELACJA DO NOTEBOOKA
     notebook = relationship("Notebooks", back_populates="notes")
 
 class NoteFolders(Base):
@@ -96,7 +99,7 @@ class NoteFolders(Base):
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String)
-    parent_folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)  # for nested folders
+    parent_folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)
     grid_position = Column(Integer, nullable=True)
     created_at = Column(DateTime)
 
@@ -107,7 +110,7 @@ class TestFolders(Base):
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String)
-    parent_folder_id = Column(Integer, ForeignKey("test_folders.id"), nullable=True)  # for nested folders
+    parent_folder_id = Column(Integer, ForeignKey("test_folders.id"), nullable=True)
     grid_position = Column(Integer, nullable=True)
     created_at = Column(DateTime)
 
@@ -117,13 +120,13 @@ class Tests(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
-    folder_id = Column(Integer, ForeignKey("test_folders.id"), nullable=True)  # parent folder
+    folder_id = Column(Integer, ForeignKey("test_folders.id"), nullable=True)
     title = Column(String)
-    topic = Column(String, nullable=True)  # Description/topic of the test
+    topic = Column(String, nullable=True)
     note_id = Column(Integer, ForeignKey("notes.id"))
-    source_type = Column(String, default="manual")  # manual, file, note
-    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
-    is_pinned = Column(Boolean, default=False)  # whether test is pinned to top
+    source_type = Column(String, default="manual")
+    grid_position = Column(Integer, nullable=True)
+    is_pinned = Column(Boolean, default=False)
     created_at = Column(DateTime)
 
 class TestQuestions(Base):
@@ -132,7 +135,7 @@ class TestQuestions(Base):
     id = Column(Integer, primary_key=True, index=True)
     test_id = Column(Integer, ForeignKey("tests.id"))
     question = Column(String)
-    question_type = Column(String, default="multiple_choice")  # multiple_choice, multiple_answers, true_false
+    question_type = Column(String, default="multiple_choice")
     correct_answer = Column(String)
     other_options = Column(String)
 
@@ -153,7 +156,7 @@ class FlashcardSetFolders(Base):
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String)
-    parent_folder_id = Column(Integer, ForeignKey("flashcard_set_folders.id"), nullable=True)  # for nested folders
+    parent_folder_id = Column(Integer, ForeignKey("flashcard_set_folders.id"), nullable=True) 
     grid_position = Column(Integer, nullable=True)
     created_at = Column(DateTime)
 
@@ -165,7 +168,7 @@ class FlashcardSets(Base):
     note_id = Column(Integer, ForeignKey("notes.id"), unique=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     notebook_id = Column(Integer, ForeignKey("notebooks.id"), index=True)
-    folder_id = Column(Integer, ForeignKey("flashcard_set_folders.id"), nullable=True)  # parent folder
+    folder_id = Column(Integer, ForeignKey("flashcard_set_folders.id"), nullable=True)
 
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
@@ -175,8 +178,8 @@ class FlashcardSets(Base):
     source_notes = Column(Text, nullable=True)
     source_files = Column(Text, nullable=True)
 
-    grid_position = Column(Integer, nullable=True)  # for drag-and-drop ordering
-    is_pinned = Column(Boolean, default=False)  # whether flashcard set is pinned to top
+    grid_position = Column(Integer, nullable=True)
+    is_pinned = Column(Boolean, default=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -231,3 +234,73 @@ class PDFUploads(Base):
     file_path = Column(String)
     upload_date = Column(DateTime)
     ai_extracted_text = Column(String)
+
+class PodcastFolders(Base):
+    __tablename__ = "podcast_folders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    name = Column(String)
+    parent_folder_id = Column(Integer, ForeignKey("podcast_folders.id"), nullable=True)
+    grid_position = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Podcasts(Base):
+    __tablename__ = "podcasts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    folder_id = Column(Integer, ForeignKey("podcast_folders.id"), nullable=True)
+
+    title = Column(String)
+    script_content = Column(Text)
+    file_path = Column(String)
+    file_url = Column(String)
+    
+    grid_position = Column(Integer, nullable=True)
+    is_pinned = Column(Boolean, default=False)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class NotebookMessages(Base):
+    __tablename__ = 'notebook_messages'
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    content = Column(Text)
+    type = Column(String, default="text") # 'text', 'resource_share', 'image'
+    created_at = Column(DateTime, default=datetime.utcnow)
+    user = relationship("Users")
+    notebook = relationship("Notebooks")
+    is_edited = Column(Boolean, default=False, nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=True)
+    is_pinned = Column(Boolean, default=False, nullable=True)
+
+class Notifications(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    content = Column(Text, nullable=False)
+    type = Column(String(50))
+    
+    redirect_type = Column(String(50)) 
+    
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"), nullable=True)
+    tab_target = Column(String(50), nullable=True)
+    
+    item_id = Column(Integer, nullable=True) 
+
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("Users", foreign_keys=[user_id])
+    sender = relationship("Users", foreign_keys=[sender_id])
+    notebook = relationship("Notebooks")

@@ -9,6 +9,8 @@ import Settings from "../features/settings/app_settings/Settings";
 import UserSettings from "../features/settings/user_settings/UserSettings";
 import Help from '../features/settings/help/Help';
 import NotificationView from "../features/settings/notifications/NotificationView";
+import API_BASE_URL from "../../api/config";
+import Demo from "../demo/Demo";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -20,12 +22,7 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [notebookSection, setNotebookSection] = useState('overview');
 
-  const handleGoToSection = (sectionId) => {
-    setActiveSection(sectionId);
-    if (sectionId !== 'notebook') {
-        setSelectedNotebook(null);
-    }
-  };
+  const [highlightMessageId, setHighlightMessageId] = useState(null);
 
   const getCookie = (name) => {
     let cookieValue = null;
@@ -53,43 +50,94 @@ export default function MainLayout() {
     navigate('/login');
   }, [navigate]);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  useEffect(() => {
+  const fetchUserData = useCallback(() => {
     const token = getCookie('access_token');
     if (!token) {
       navigate('/login');
       return;
     }
 
-    fetch('http://localhost:8000/user/', {
+    fetch(`${API_BASE_URL}/user/`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => {
         if (!res.ok) throw new Error('Unauthorized');
         return res.json();
       })
-      .then(data => setUserData(data))
-      .catch(() => {
+      .then(data => {
+        console.log("Dane użytkownika pobrane/zaktualizowane:", data);
+        setUserData(data);
+      })
+      .catch((err) => {
+        console.error("Błąd pobierania danych użytkownika:", err);
         handleLogout();
       });
   }, [navigate, handleLogout]);
 
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  const handleNavigateToResource = (navData) => {
+    if (navData.type === 'notebook') {
+      setHighlightMessageId(navData.targetId);
+      
+      const token = getCookie('access_token');
+      fetch(`${API_BASE_URL}/notebooks/${navData.notebookId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setSelectedNotebook(data);
+          setNotebookDetails(data);
+          setActiveSection('notebook');
+          setNotebookSection(navData.tab || 'files');
+        })
+        .catch(err => console.error('Error deep linking to notebook:', err));
+
+        setTimeout(() => {
+            setHighlightMessageId(null);
+        }, 5000);
+
+    } else if (navData.type === 'settings') {
+      setActiveSection('user_settings');
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("refreshUserData", fetchUserData);
+    
+    return () => {
+      window.removeEventListener("refreshUserData", fetchUserData);
+    };
+  }, [fetchUserData]);
+
+  const handleGoToSection = (sectionId) => {
+    setActiveSection(sectionId);
+    if (sectionId !== 'notebook') {
+        setSelectedNotebook(null);
+        setHighlightMessageId(null);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const handleSelectNotebook = (notebook) => {
+    setHighlightMessageId(null);
     setSelectedNotebook(notebook);
     setActiveSection('notebook');
     setNotebookSection('files');
-    
+    setNotebookDetails(notebook);
+
     const token = getCookie('access_token');
-    fetch(`http://localhost:8000/notebooks/${notebook.id}`, {
+    fetch(`${API_BASE_URL}/notebooks/${notebook.id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => {
-        console.log("Pobrane szczegóły notatnika:", data);
-        setNotebookDetails(data);
+        setNotebookDetails(prev => ({...prev, ...data}));
       })
       .catch(err => console.error('Error fetching notebook:', err));
   };
@@ -125,7 +173,7 @@ export default function MainLayout() {
         return <Help userData={userData}/>;
 
       case 'notifications':
-        return <NotificationView userData={userData}/>;
+        return <NotificationView userData={userData} onNavigateToResource={handleNavigateToResource}/>;
       
       case 'notebook':
         return selectedNotebook ? (
@@ -136,6 +184,7 @@ export default function MainLayout() {
             refreshNotebook={refreshNotebook}
             defaultSection={notebookSection}
             isSidebarOpen={isSidebarOpen}
+            highlightMessageId={highlightMessageId}
           />
         ) : (
           <div style={{ padding: '2rem', color: '#94a3b8' }}>
@@ -153,6 +202,28 @@ export default function MainLayout() {
     }
   };
 
+  useEffect(() => {
+    const applyTheme = () => {
+        const savedTheme = localStorage.getItem('appTheme') || 'light';
+        if (savedTheme === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+        } else if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (savedTheme === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+    };
+
+    applyTheme();
+    window.addEventListener('storage', applyTheme);
+    return () => window.removeEventListener('storage', applyTheme);
+  }, []);
+
   return (
     <div className={styles.mainLayout}>
       <Sidebar
@@ -164,12 +235,14 @@ export default function MainLayout() {
         onGoToDashboard={handleBackToDashboard}
         onGoToSection={handleGoToSection}
       />
-      
-      <div 
+
+      <div
         className={`${styles.contentArea} ${!isSidebarOpen ? styles.contentAreaCollapsed : ''}`}
       >
         {renderContent()}
       </div>
+
+      <Demo />
     </div>
   );
 }

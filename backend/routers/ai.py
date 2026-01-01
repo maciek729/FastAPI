@@ -3,7 +3,11 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import os
 import base64
-import google.generativeai as genai
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+
+load_dotenv()
 
 router = APIRouter(
     prefix="/ai",
@@ -11,17 +15,16 @@ router = APIRouter(
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+client = None
 if not GEMINI_API_KEY:
     print("[WARNING] Brak GEMINI_API_KEY. Dodaj go do pliku .env")
-    model = None
 else:
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        print("[SUCCESS] Gemini client initialized successfully")
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        print("[SUCCESS] Gemini client initialized successfully (google-genai v1)")
     except Exception as e:
         print(f"[ERROR] Błąd inicjalizacji klienta Gemini: {e}")
-        model = None
 
 class ChatMessage(BaseModel):
     message: str
@@ -29,7 +32,7 @@ class ChatMessage(BaseModel):
 
 def get_gemini_response(messages: list, files: list = None) -> str:    
     try:
-        if not model:
+        if not client:
             return "Gemini nie jest skonfigurowany"
         
         conversation_text = ""
@@ -52,17 +55,21 @@ def get_gemini_response(messages: list, files: list = None) -> str:
         
         if files:
             for file_info in files:
-                file_content = file_info["content"]
+                file_content_base64 = file_info["content"] 
                 mime_type = file_info["mime_type"]
                 
-                file_data = base64.b64decode(file_content)
-                file_part = {
-                    'mime_type': mime_type,
-                    'data': file_data
-                }
+                file_bytes = base64.b64decode(file_content_base64)
+                
+                file_part = types.Part.from_bytes(
+                    data=file_bytes,
+                    mime_type=mime_type
+                )
                 contents.append(file_part)
         
-        response = model.generate_content(contents)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=contents
+        )
         return response.text
         
     except Exception as e:
@@ -135,7 +142,7 @@ async def chat_endpoint(chat_data: ChatMessage):
         messages = chat_data.conversation.copy()
         messages.append({"role": "user", "content": chat_data.message})
 
-        if model:
+        if client:
             response_text = get_gemini_response(messages, current_session_files)
         else:
             response_text = get_fallback_response(chat_data.message)
@@ -169,7 +176,7 @@ async def api_status():
     """Endpoint sprawdzający status API"""
     return {
         "status": "active",
-        "gemini_configured": bool(GEMINI_API_KEY and model),
+        "gemini_configured": bool(GEMINI_API_KEY and client),
         "has_files": bool(current_session_files),
         "files_count": len(current_session_files),
         "model": "gemini-2.5-flash"
@@ -188,4 +195,3 @@ async def get_files():
             for file in current_session_files
         ]
     }
-

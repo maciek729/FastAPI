@@ -1,29 +1,59 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import styles from "../../../../css/features/settings/Settings.module.css"
 import SettingsSelectElement from './SettingsSelectElement';
-
-const ThemeOptions = [
-    { value: 'light', label: 'Jasny' },
-    { value: 'dark', label: 'Ciemny' },
-    { value: 'system', label: 'Systemowy' }
-];
-
-const LanguageOptions = [
-    { value: 'pl', label: 'Polski (Polish)' },
-    { value: 'en', label: 'English (Angielski)' }
-];
+import { useLanguage } from "../../../../translations/LanguageContext";
+import translations from "../../../../translations/translation.json";
 
 export default function Settings({userData, onGoToSection}) {
+    const { language, changeLanguage } = useLanguage();
+    
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
+
+    // Theme options z tłumaczeniami
+    const ThemeOptions = [
+        { value: 'light', label: t('settings.themeOptions.light') },
+        { value: 'dark', label: t('settings.themeOptions.dark') },
+        { value: 'system', label: t('settings.themeOptions.system') }
+    ];
+
+    // Language options z tłumaczeniami
+    const LanguageOptions = [
+        { value: 'pl', label: t('settings.languageOptions.polish') },
+        { value: 'en', label: t('settings.languageOptions.english') }
+    ];
+
+    // Local Storage
+    const getInitialTheme = () => {
+        const savedTheme = localStorage.getItem('appTheme');
+        return savedTheme ? savedTheme : 'light';
+    }
+
     // Obsluga zmiany ustawien
-    const [theme, setTheme] = useState("light"); 
-    const [language, setLanguage] = useState("pl");
+    const [theme, setTheme] = useState(getInitialTheme());
+    const [selectedLanguage, setSelectedLanguage] = useState(language);
 
     // Wartosci z bazy danych (które ma już zapisane)
     // Potrzebne do porównania czy są jakieś zmiany
     // i do przywrócenia ustawień przy anulowaniu
     // i do wyswietlenia komunikatu "Masz niezapisane zmiany"
-    const [savedTheme, setSavedTheme] = useState("light"); // muszę zmienić na userData.theme
-    const [savedLanguage, setSavedLanguage] = useState("pl"); // userData.language
+    const [savedTheme, setSavedTheme] = useState(getInitialTheme()); // muszę zmienić na userData.theme
+    const [savedLanguage, setSavedLanguage] = useState(language); // userData.language
 
     const [saved, setSaved] = useState(false);
 
@@ -54,19 +84,21 @@ export default function Settings({userData, onGoToSection}) {
         }
     }, [savedTheme]);
 
-    const hasUnsavedChanges = (theme !== savedTheme) || (language !== savedLanguage);
+    const hasUnsavedChanges = (theme !== savedTheme) || (selectedLanguage !== savedLanguage);
 
     const handleThemeChange = (event) => {
         setTheme(event.target.value);
     };
 
     const handleLanguageChange = (event) => {
-        setLanguage(event.target.value);
+        setSelectedLanguage(event.target.value);
     };
 
     const handleSave = () => {
+        localStorage.setItem('appTheme', theme);
         setSavedTheme(theme);
-        setSavedLanguage(language);
+        setSavedLanguage(selectedLanguage);
+        changeLanguage(selectedLanguage);
         setSaved(true);
         setTimeout(() => {
             setSaved(false);
@@ -75,14 +107,14 @@ export default function Settings({userData, onGoToSection}) {
 
     const handleCancel = () => {
         setTheme(savedTheme);
-        setLanguage(savedLanguage);
+        setSelectedLanguage(savedLanguage);
     }
 
     return (
         <div className={styles.settingsMainContainer}>
             
             <div className={styles.titleContainer}>
-                <h2 className={styles.title}>Ustawienia</h2>
+                <h2 className={styles.title}>{t('settings.title')}</h2>
                 {/*<p className={styles.subtitle}>Dostosuj aplikację według swoich preferencji.</p>*/}
             </div>
 
@@ -92,10 +124,10 @@ export default function Settings({userData, onGoToSection}) {
                 <div className={styles.section}>
                     <div className={styles.sectionOption}>
                         <div className={styles.textWrapper}>
-                            <label className={styles.sectionTitle}>Konto</label>
-                            <label className={styles.optionLabel}>Zmień swoje dane, edytuj hasło lub e-mail i zarządzaj bezpieczeństwem konta.</label>
+                            <label className={styles.sectionTitle}>{t('settings.account')}</label>
+                            <label className={styles.optionLabel}>{t('settings.accountDescription')}</label>
                         </div>    
-                        <button className={styles.optionButton} onClick={()=>onGoToSection('user_settings')}>Zarządzaj</button>
+                        <button className={styles.optionButton} onClick={()=>onGoToSection('user_settings')}>{t('settings.manage')}</button>
                     </div>
                 </div>
         
@@ -103,8 +135,8 @@ export default function Settings({userData, onGoToSection}) {
                 <div className={styles.section}>
                     <div className={styles.sectionOption}>
                         <div className={styles.textWrapper}>
-                            <label className={styles.sectionTitle}>Motyw</label>
-                            <label className={styles.optionLabel}>Dostosuj wygląd aplikacji.</label>
+                            <label className={styles.sectionTitle}>{t('settings.theme')}</label>
+                            <label className={styles.optionLabel}>{t('settings.themeDescription')}</label>
                         </div>    
                         <div className={styles.selectWrapper}>
                             <select
@@ -127,13 +159,13 @@ export default function Settings({userData, onGoToSection}) {
                 <div className={styles.section}>
                     <div className={styles.sectionOption}>
                         <div className={styles.textWrapper}>
-                            <label className={styles.sectionTitle}>Język</label>
-                            <label className={styles.optionLabel}>Wybierz preferowany język aplikacji.</label>
+                            <label className={styles.sectionTitle}>{t('settings.language')}</label>
+                            <label className={styles.optionLabel}>{t('settings.languageDescription')}</label>
                         </div>    
                         <div className={styles.selectWrapper}>
                             <select 
                                 className={styles.optionSelect}
-                                value={language}
+                                value={selectedLanguage}
                                 onChange={handleLanguageChange}
                             >
                                 {LanguageOptions.map((option) => (
@@ -151,26 +183,26 @@ export default function Settings({userData, onGoToSection}) {
                 <div className={styles.section}>
                     <div className={styles.sectionOption}>
                         <div className={styles.textWrapper}>
-                            <label className={styles.sectionTitle}>Powiadomienia</label>
-                            <label className={styles.optionLabel}>Skonfiguruj swoje preferencje dotyczące powiadomień powiadomień.</label>
+                            <label className={styles.sectionTitle}>{t('settings.notifications')}</label>
+                            <label className={styles.optionLabel}>{t('settings.notificationsDescription')}</label>
                         </div>
-                        <button className={styles.optionButton} onClick={()=>onGoToSection('notifications')}>Zarządzaj</button>
+                        <button className={styles.optionButton} onClick={()=>onGoToSection('notifications')}>{t('settings.manage')}</button>
                     </div>
                 </div>
             </div>
 
             {/* Komunikaty */}
             <div className={`${styles.savedMessage} ${saved ? styles.show : ''}`}>
-                <p>Pomyślnie zapisano.</p>
+                <p>{t('settings.savedMessage')}</p>
             </div>
             <div className={`${styles.unsavedMessage} ${hasUnsavedChanges ? styles.show : ''}`}>
-                <p>Masz niezapisane zmiany.</p>
+                <p>{t('settings.unsavedMessage')}</p>
             </div>
 
             {/* Przyciski */}
             <div className={styles.buttonsContainer}>
-                <button className={styles.saveButton} onClick={handleSave} disabled={!hasUnsavedChanges}>Zapisz zmiany</button>
-                <button className={styles.cancelButton} onClick={handleCancel} disabled={!hasUnsavedChanges}>Anuluj</button>
+                <button className={styles.saveButton} onClick={handleSave} disabled={!hasUnsavedChanges}>{t('settings.saveChanges')}</button>
+                <button className={styles.cancelButton} onClick={handleCancel} disabled={!hasUnsavedChanges}>{t('settings.cancel')}</button>
             </div>
         </div>
     );

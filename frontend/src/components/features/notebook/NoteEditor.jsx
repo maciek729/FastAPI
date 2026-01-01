@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import styles from '../../../css/features/NoteEditor.module.css';
 import { lockNoteFunction, unlockNoteFunction, checkLockStatusFunction, updateNote, deleteNote } from '../../../services/noteService';
+import { useLanguage } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 export default function NoteEditor({ note, onClose, onSave, onDelete, userData }) {
     const [title, setTitle] = useState(note.title);
@@ -16,6 +18,25 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
     const editorRef = useRef(null);
     const fileInputRef = useRef(null);
     const lockCheckIntervalRef = useRef(null)
+    const { language, changeLanguage } = useLanguage();
+    
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        
+        return translation || key;
+    };
 
     useEffect(() => {
         if (editorRef.current && note.content) {
@@ -203,7 +224,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                 {isReadOnly && (
                     <div className={styles.readOnlyBanner}>
                         <Lock size={16} />
-                        <span>Tryb tylko do odczytu - {lockedByUsername} edytuje tę notatkę</span>
+                        <span>{t('noteEditor.readOnlyMessage', { username: lockedByUsername })}</span>
                     </div>
                 )}
                 {/* Header */}
@@ -214,7 +235,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             value={title}
                             onChange={(e) => !isReadOnly && setTitle(e.target.value)}
                             className={styles.titleInput}
-                            placeholder="Tytuł notatki"
+                            placeholder={t('noteEditor.titlePlaceholder')}
                             disabled={isReadOnly}
                         />
                     </div>
@@ -224,7 +245,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                                 <button 
                                     className={styles.deleteBtn}
                                     onClick={handleDelete}
-                                    title="Usuń notatkę"
+                                    title={t('noteEditor.deleteTitle')}
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -232,23 +253,23 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                                     className={styles.saveBtn}
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    title="Zapisz zmiany"
+                                    title={t('noteEditor.saveTitle')}
                                 >
                                     <Save size={18} />
-                                    {isSaving ? 'Zapisywanie...' : 'Zapisz'}
+                                    {isSaving ? t('noteEditor.saving') : t('noteEditor.saveButton')}
                                 </button>
                             </>
                         )}
                         {isReadOnly && (
                             <div className={styles.readOnlyIndicator}>
                                 <Eye size={18} />
-                                <span>Podgląd</span>
+                                <span>{t('noteEditor.preview')}</span>
                             </div>
                         )}
                         <button 
                             className={styles.closeBtn}
                             onClick={onClose}
-                            title="Zamknij"
+                            title={t('noteEditor.closeTitle')}
                         >
                             <X size={20} />
                         </button>
@@ -262,21 +283,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('bold')}
-                                title="Pogrubienie (Ctrl+B)"
+                                title={`${t('noteEditor.bold')} (Ctrl+B)`}
                             >
                                 <Bold size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('italic')}
-                                title="Kursywa (Ctrl+I)"
+                                title={`${t('noteEditor.italic')} (Ctrl+I)`}
                             >
                                 <Italic size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('underline')}
-                                title="Podkreślenie (Ctrl+U)"
+                                title={`${t('noteEditor.underline')} (Ctrl+U)`}
                             >
                                 <Underline size={18} />
                             </button>
@@ -288,21 +309,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyLeft')}
-                                title="Wyrównaj do lewej"
+                                title={t('noteEditor.alignLeft')}
                             >
                                 <AlignLeft size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyCenter')}
-                                title="Wyśrodkuj"
+                                title={t('noteEditor.alignCenter')}
                             >
                                 <AlignCenter size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyRight')}
-                                title="Wyrównaj do prawej"
+                                title={t('noteEditor.alignRight')}
                             >
                                 <AlignRight size={18} />
                             </button>
@@ -314,14 +335,14 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertUnorderedList')}
-                                title="Lista wypunktowana"
+                                title={t('noteEditor.bulletList')}
                             >
                                 <List size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertOrderedList')}
-                                title="Lista numerowana"
+                                title={t('noteEditor.numberedList')}
                             >
                                 <ListOrdered size={18} />
                             </button>
@@ -340,7 +361,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => fileInputRef.current?.click()}
-                                title="Wstaw zdjęcie"
+                                title={t('noteEditor.insertImage')}
                             >
                                 <Image size={18} />
                             </button>
@@ -354,10 +375,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                                 onChange={(e) => execCommand('fontSize', e.target.value)}
                                 defaultValue="3"
                             >
-                                <option value="1">Mały</option>
-                                <option value="3">Normalny</option>
-                                <option value="5">Duży</option>
-                                <option value="7">Bardzo duży</option>
+                                <option value="1">{t('noteEditor.fontSize.small')}</option>
+                                <option value="3">{t('noteEditor.fontSize.normal')}</option>
+                                <option value="5">{t('noteEditor.fontSize.large')}</option>
+                                <option value="7">{t('noteEditor.fontSize.veryLarge')}</option>
                             </select>
                         </div>
                     </div>
@@ -379,13 +400,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                     <div className={styles.footerInfo}>
                         <span className={styles.noteType} style={{
                             backgroundColor: note.type === 'Notatka' ? '#6c63ff' : 
-                                           note.type === 'Test' ? '#4cafef' : '#ff6f61'
+                                        note.type === 'Test' ? '#4cafef' : '#ff6f61'
                         }}>
                             {note.type}
                         </span>
                         <span className={styles.footerDate}>
                             <Calendar size={14} />
-                            Utworzono: {formatDate(note.created_at)}
+                            {t('noteEditor.createdAt')}: {formatDate(note.created_at)}
                         </span>
                     </div>
                 </div>

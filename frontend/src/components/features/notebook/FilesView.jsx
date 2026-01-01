@@ -6,7 +6,7 @@ import styles from "../../../css/features/NotebookView.module.css";
 import { getCollaborators, addCollaborator, removeCollaborator } from '../../../services/notebookService';
 import { createNote} from '../../../services/noteService';
 
-export default function FilesView({ details, userData, refreshNotebook }) {
+export default function FilesView({ details, userData, refreshNotebook, highlightedItemId }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
     const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
     const [showNoteEditor, setShowNoteEditor] = useState(false);
@@ -66,9 +66,44 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         }
     }, [details?.id, userData?.id]);
 
+    useEffect(() => {
+        if (highlightedItemId) {
+            // Krótkie opóźnienie, aby komponent zdążył się wyrenderować
+            const timer = setTimeout(() => {
+                const element = document.getElementById(`note-card-${highlightedItemId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 150);
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId]);
+
+    useEffect(() => {
+        if (highlightedItemId && notes.length > 0 && folders.length > 0) {
+            // 1. Znajdź notatkę, która ma być podświetlona
+            const targetNote = notes.find(n => n.id === highlightedItemId);
+            
+            if (targetNote) {
+                // 2. Jeśli notatka jest w folderze, a my nie jesteśmy w tym folderze...
+                if (targetNote.folder_id && (!currentFolder || currentFolder.id !== targetNote.folder_id)) {
+                    const folderToOpen = folders.find(f => f.id === targetNote.folder_id);
+                    if (folderToOpen) {
+                        console.log("Automatyczne otwieranie folderu dla notatki:", folderToOpen.name);
+                        setCurrentFolder(folderToOpen); // Teraz to zadziała, bo jesteśmy w FilesView
+                    }
+                } 
+                // 3. Jeśli notatka jest w widoku głównym, a my jesteśmy w jakimś folderze...
+                else if (!targetNote.folder_id && currentFolder !== null) {
+                    setCurrentFolder(null);
+                }
+            }
+        }
+    }, [highlightedItemId, notes, folders]);
+
     const fetchFolders = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/note-folders/list', {
+            const response = await axios.get('http://localhost:8000/folders/notes/list', {
                 params: {
                     notebook_id: details.id,
                     user_id: userData.id
@@ -259,7 +294,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!newFolderName.trim()) return;
 
         try {
-            await axios.post('http://localhost:8000/note-folders/create', {
+            await axios.post('http://localhost:8000/folders/notes/create', {
                 notebook_id: details.id,
                 user_id: userData.id,
                 name: newFolderName,
@@ -291,7 +326,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Notatki zostaną przeniesione do głównego widoku.')) return;
 
         try {
-            await axios.delete(`http://localhost:8000/note-folders/${folderId}`);
+            await axios.delete(`http://localhost:8000/folders/notes/${folderId}`);
             if (currentFolder?.id === folderId) {
                 setCurrentFolder(null);
             }
@@ -308,7 +343,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         if (!editingFolder || !editingFolder.name.trim()) return;
 
         try {
-            await axios.patch(`http://localhost:8000/note-folders/${editingFolder.id}/rename`, {
+            await axios.patch(`http://localhost:8000/folders/notes/${editingFolder.id}/rename`, {
                 name: editingFolder.name
             });
             setEditingFolder(null);
@@ -322,7 +357,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
     const handleMoveNoteToFolder = async (noteId, folderId) => {
         try {
             console.log('Moving note:', noteId, 'to folder:', folderId);
-            const response = await axios.post('http://localhost:8000/note-folders/move-note', {
+            const response = await axios.post('http://localhost:8000/folders/notes/move-item', {
                 note_id: noteId,
                 folder_id: folderId
             });
@@ -509,7 +544,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         try {
             await Promise.all(
                 updatedFolders.map(folder =>
-                    axios.patch(`http://localhost:8000/note-folders/${folder.id}/position`, {
+                    axios.patch(`http://localhost:8000/folders/notes/${folder.id}/position`, {
                         grid_position: folder.grid_position
                     })
                 )
@@ -539,12 +574,28 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         e.stopPropagation();
         setDragOverFolder(null);
 
+        // Handle note drop
         if (draggedNote) {
             try {
                 await handleMoveNoteToFolder(draggedNote.note.id, folderId);
                 setDraggedNote(null);
             } catch (err) {
                 console.error('Error dropping note into folder:', err);
+            }
+        }
+
+        // Handle folder drop
+        if (draggedFolder) {
+            try {
+                await axios.patch(`http://localhost:8000/folders/notes/${draggedFolder.folder.id}/move`, {
+                    parent_folder_id: folderId
+                });
+                setDraggedFolder(null);
+                await fetchFolders();
+                refreshNotebook();
+            } catch (err) {
+                console.error('Error moving folder into folder:', err);
+                alert("Błąd przenoszenia folderu");
             }
         }
     };
@@ -581,7 +632,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
         // Handle folder drop
         if (draggedFolder) {
             try {
-                await axios.patch(`http://localhost:8000/note-folders/${draggedFolder.folder.id}/move`, {
+                await axios.patch(`http://localhost:8000/folders/notes/${draggedFolder.folder.id}/move`, {
                     parent_folder_id: parentFolderId
                 });
                 setDraggedFolder(null);
@@ -707,7 +758,7 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                                 }}
                                 onDrop={(e) => {
                                     if (draggedFolder) {
-                                        handleFolderCardDrop(e, index);
+                                        handleFolderDrop(e, folder.id);
                                     } else if (draggedNote) {
                                         handleFolderDrop(e, folder.id);
                                     }
@@ -760,11 +811,19 @@ export default function FilesView({ details, userData, refreshNotebook }) {
                             const isBeingDragged = draggedNote?.note.id === note.id;
                             const isDragOver = dragOverIndex === index;
                             const isDragNotAllowed = dragNotAllowedIndex === index;
+                            const isHighlighted = highlightedItemId === note.id;
 
                             return (
                                 <div
                                     key={note.id}
-                                    className={`${styles.noteCard} ${note.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''} ${isDragNotAllowed ? styles.dragNotAllowed : ''}`}
+                                    id={`note-card-${note.id}`}
+                                    className={`
+                                        ${styles.noteCard} 
+                                        ${note.is_pinned ? styles.pinnedCard : ''} 
+                                        ${isDragOver ? styles.dragOver : ''} 
+                                        ${isDragNotAllowed ? styles.dragNotAllowed : ''}
+                                        ${isHighlighted ? styles.highlighted : ''}
+                                    `}
                                     draggable
                                     onDragStart={(e) => handleDragStart(e, note, index)}
                                     onDragEnd={handleDragEnd}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../css/shared/Auth.module.css";
+import { ForgotPassword as ForgotPasswordService } from "../../services/authService";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -15,19 +16,7 @@ function ForgotPassword() {
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("email", email);
-
-      const res = await fetch("http://localhost:8000/auth/forgot-password", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "Nie udało się wysłać linku resetującego");
-      }
-
+      await ForgotPasswordService(email);
       setMessage("Link do resetowania hasła został wysłany! Sprawdź swoją skrzynkę email.");
       setEmail("");
     } catch (err) {

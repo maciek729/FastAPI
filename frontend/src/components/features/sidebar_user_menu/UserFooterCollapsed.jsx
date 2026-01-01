@@ -3,7 +3,7 @@ import { LogOut } from "lucide-react";
 import UserMenu from "./UserMenu";
 import styles from "../../../css/layout/SidebarFooter.module.css";
 
-const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
+const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSection }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -16,8 +16,24 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
+
+    const renderAvatarContent = () => {
+        if (userData?.avatar_url) {
+            return (
+                <img 
+                    src={userData.avatar_url} 
+                    alt="User" 
+                    className={styles.userAvatarImg} 
+                />
+            );
+        }
+        return userData?.username?.charAt(0).toUpperCase() || "U";
+    };
 
     return (
         <>
@@ -25,21 +41,28 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick }) => {
                 <div
                     className={styles.userAvatarCollapsed}
                     onClick={toggleMenu}
+                    role="button"
+                    tabIndex="0"
                     title={userData?.username || "User"}
                 >
-                    {userData?.name?.charAt(0) || userData?.username?.charAt(0) || "U"}
+                    {renderAvatarContent()}
                 </div>
 
                 {isMenuOpen && (
                     <UserMenu
                         isCollapsed
+                        onGoToSection={onGoToSection}
                         onSettingsClick={onSettingsClick}
                         onClose={() => setIsMenuOpen(false)}
                     />
                 )}
             </div>
 
-            <button className={styles.logoutBtnCollapsed} onClick={handleLogout} title="Wyloguj">
+            <button 
+                className={styles.logoutBtnCollapsed} 
+                onClick={handleLogout} 
+                title="Wyloguj"
+            >
                 <LogOut size={18} />
             </button>
         </>

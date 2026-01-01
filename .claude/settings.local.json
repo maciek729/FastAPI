@@ -11,7 +11,8 @@
       "Bash(npm run dev:*)",
       "Bash(timeout 5 bash:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(if exist \"c:\\StudyBuddy\\FastAPI\\frontend\\src\\components\\features\\notebook\\TestsView.jsx\" del \"c:\\StudyBuddy\\FastAPI\\frontend\\src\\components\\features\\notebook\\TestsView.jsx\")"
     ],
     "deny": [],
     "ask": []

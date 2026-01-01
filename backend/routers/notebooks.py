@@ -114,7 +114,6 @@ def list_notebooks(created_by: int, space_type: str, db: db_dependency):
 @router.get("/{notebook_id}", response_model=NotebookOut)
 def get_notebook(notebook_id: int, db: db_dependency):
     print("=" * 50)
-    print(f"GET NOTEBOOK WYWOŁANY! notebook_id = {notebook_id}")
     print("=" * 50)
     
     notebook = db.query(Notebooks).filter(Notebooks.id == notebook_id).first()
@@ -123,9 +122,7 @@ def get_notebook(notebook_id: int, db: db_dependency):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Notebook not found"
         )
-    
-    print(f"Znaleziony notebook: id={notebook.id}, name={notebook.name}")
-    
+        
     return NotebookOut(
         id=notebook.id,
         name=notebook.name,

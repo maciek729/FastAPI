@@ -1,25 +1,22 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { BookOpen, Trash2, Play, Brain, Settings, Pin, Folder, MoreVertical } from "lucide-react";
 import styles from "../../../css/features/FlashcardsView.module.css";
+import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
 
-export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, onStartLearning, onManageSet, onDelete, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
+export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, highlightedItemId, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
     const [progress, setProgress] = useState({});
     const [loadingProgress, setLoadingProgress] = useState({});
 
-    // Drag and drop state
     const [draggedSet, setDraggedSet] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [dragNotAllowedIndex, setDragNotAllowedIndex] = useState(null);
     const [localSets, setLocalSets] = useState([]);
 
-    // Folder drag state
     const [draggedFolder, setDraggedFolder] = useState(null);
     const [dragOverFolder, setDragOverFolder] = useState(null);
     const [dragOverFolderIndex, setDragOverFolderIndex] = useState(null);
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
 
-    // Notify parent component of drag state changes
     useEffect(() => {
         if (onDragStateChange) {
             onDragStateChange({ draggedSet, draggedFolder });
@@ -27,7 +24,20 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
     }, [draggedSet, draggedFolder, onDragStateChange]);
 
     useEffect(() => {
-        setLocalSets(sets);
+        // Only update localSets if the sets prop has meaningfully changed
+        // Don't compare with localSets to avoid resetting optimistic updates
+        setLocalSets(prevLocalSets => {
+            // Sort by ID before comparing to avoid order differences
+            const sortById = (a, b) => a.id - b.id;
+            const setsString = JSON.stringify(sets.map(s => ({ id: s.id, grid_position: s.grid_position, is_pinned: s.is_pinned, folder_id: s.folder_id })).sort(sortById));
+            const localSetsString = JSON.stringify(prevLocalSets.map(s => ({ id: s.id, grid_position: s.grid_position, is_pinned: s.is_pinned, folder_id: s.folder_id })).sort(sortById));
+
+            // Only update if the data has actually changed
+            if (setsString !== localSetsString) {
+                return sets;
+            }
+            return prevLocalSets;
+        });
     }, [sets]);
 
     useEffect(() => {
@@ -38,13 +48,28 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         }
     }, [localSets, userId]);
 
+    useEffect(() => {
+        // Zmieniono z highlightedId na highlightedItemId
+        if (highlightedItemId) { 
+            // Małe opóźnienie, aby upewnić się, że folder zdążył się otworzyć
+            const timer = setTimeout(() => {
+                // Zmieniono z highlightedId na highlightedItemId
+                const element = document.getElementById(`set-card-${highlightedItemId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId]);
+
     const fetchProgress = async (setId) => {
         if (progress[setId] !== undefined) return;
 
         try {
             setLoadingProgress(prev => ({...prev, [setId]: true}));
-            const response = await axios.get(`http://localhost:8000/flashcards/progress/${userId}/${setId}`);
-            setProgress(prev => ({...prev, [setId]: response.data}));
+            const data = await getFlashcardProgress(userId, setId);
+            setProgress(prev => ({...prev, [setId]: data}));
         } catch (error) {
             setProgress(prev => ({...prev, [setId]: { progress_percentage: 0 }}));
         } finally {
@@ -52,48 +77,37 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         }
     };
 
-    // Get filtered and sorted flashcard sets
     const getSortedSets = () => {
-        // Filter by current folder context
         let filtered = currentFolder
             ? localSets.filter(set => set.folder_id === currentFolder.id)
             : localSets.filter(set => !set.folder_id);
 
-        // Sort sets: pinned first, then by grid_position, then by date
         const sorted = [...filtered].sort((a, b) => {
-            // First, pinned sets always come first
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
 
-            // For pinned sets, sort by grid_position
             if (a.is_pinned && b.is_pinned) {
                 if (a.grid_position !== null && b.grid_position !== null) {
                     return a.grid_position - b.grid_position;
                 }
             }
 
-            // For non-pinned sets, sort by grid_position
             if (!a.is_pinned && !b.is_pinned) {
                 if (a.grid_position !== null && b.grid_position !== null) {
                     return a.grid_position - b.grid_position;
                 }
             }
 
-            // Default to date
             return new Date(b.created_at) - new Date(a.created_at);
         });
 
         return sorted;
     };
 
-    // Pin toggle handler
     const handleTogglePin = async (setId, isPinned, e) => {
         e.stopPropagation();
         try {
-            await axios.patch(`http://localhost:8000/flashcards/set/${setId}/pin`, {
-                is_pinned: isPinned
-            });
-            // Update local state
+            await pinFlashcardSet(setId, isPinned);
             setLocalSets(prevSets =>
                 prevSets.map(set =>
                     set.id === setId ? { ...set, is_pinned: isPinned } : set
@@ -105,13 +119,10 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         }
     };
 
-    // Drag handlers
     const handleDragStart = (e, set, index) => {
         setDraggedSet({ set, index });
         e.dataTransfer.effectAllowed = 'move';
         e.currentTarget.style.opacity = '0.5';
-
-        // Add flashcard set data to dataTransfer for drag-to-copy to sidebar
         e.dataTransfer.setData('application/json', JSON.stringify({
             type: 'flashcard-set',
             setId: set.id,
@@ -134,7 +145,6 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         const targetSet = sortedSets[index];
         const draggedSetData = draggedSet?.set;
 
-        // Allow drag over only if both sets have same pinned status
         if (draggedSetData && targetSet) {
             if (draggedSetData.is_pinned === targetSet.is_pinned) {
                 e.dataTransfer.dropEffect = 'move';
@@ -166,44 +176,51 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         const draggedSetData = draggedSet.set;
         const targetSet = sortedSets[dropIndex];
 
-        // Prevent dropping pinned set on unpinned set and vice versa
         if (draggedSetData.is_pinned !== targetSet.is_pinned) {
             setDragOverIndex(null);
             return;
         }
-
-        // Reorder sets locally
         const newSets = [...sortedSets];
         const [removed] = newSets.splice(draggedSet.index, 1);
         newSets.splice(dropIndex, 0, removed);
-
-        // Update grid positions
         const updatedSets = newSets.map((set, idx) => ({
             ...set,
             grid_position: idx
         }));
 
-        // Update local state immediately
-        setLocalSets(updatedSets);
+        // Find only the sets whose position actually changed
+        const setsToUpdate = updatedSets.filter(set => {
+            const originalSet = sortedSets.find(s => s.id === set.id);
+            return originalSet && originalSet.grid_position !== set.grid_position;
+        });
 
-        // Update backend
+        // Update local state immediately
+        setLocalSets(prevSets => {
+            const allSets = [...prevSets];
+            updatedSets.forEach(updated => {
+                const idx = allSets.findIndex(s => s.id === updated.id);
+                if (idx !== -1) {
+                    allSets[idx] = updated;
+                }
+            });
+            return allSets;
+        });
+
         try {
+            // Only update sets whose position actually changed
             await Promise.all(
-                updatedSets.map(set =>
-                    axios.patch(`http://localhost:8000/flashcards/set/${set.id}/position`, {
-                        grid_position: set.grid_position
-                    })
+                setsToUpdate.map(set =>
+                    updateFlashcardSetPosition(set.id, set.grid_position)
                 )
             );
         } catch (err) {
             console.error('Error updating flashcard set positions:', err);
-            setLocalSets(sets); // Revert on error
+            setLocalSets(sets);
         }
 
         setDragOverIndex(null);
     };
 
-    // Folder drag handlers for reordering
     const handleFolderCardDragStart = (e, folder, index) => {
         setDraggedFolder({ folder, index });
         e.dataTransfer.effectAllowed = 'move';
@@ -257,9 +274,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         try {
             await Promise.all(
                 updatedFolders.map(folder =>
-                    axios.patch(`http://localhost:8000/flashcard-set-folders/${folder.id}/position`, {
-                        grid_position: folder.grid_position
-                    })
+                    updateFlashcardFolderPosition(folder.id, folder.grid_position)
                 )
             );
         } catch (err) {
@@ -269,7 +284,6 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         setDragOverFolderIndex(null);
     };
 
-    // Drag set to folder handlers
     const handleFolderDragOver = (e, folderId) => {
         e.preventDefault();
         e.stopPropagation();
@@ -287,6 +301,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         e.stopPropagation();
         setDragOverFolder(null);
 
+        // Handle set drop
         if (draggedSet) {
             try {
                 await onMoveSetToFolder(draggedSet.set.id, folderId);
@@ -295,13 +310,26 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 console.error('Error dropping set into folder:', err);
             }
         }
+
+        // Handle folder drop
+        if (draggedFolder) {
+            try {
+                await moveFlashcardFolder(draggedFolder.folder.id, folderId);
+                setDraggedFolder(null);
+                await onRefreshFolders(); // Refresh folders
+                onDelete(); // Refresh flashcard sets
+            } catch (err) {
+                console.error('Error moving folder into folder:', err);
+                alert("Błąd przenoszenia folderu");
+            }
+        }
     };
 
     const handleDelete = async (setId) => {
         if (!window.confirm("Czy na pewno chcesz usunąć ten zestaw fiszek?")) return;
 
         try {
-            await axios.delete(`http://localhost:8000/flashcards/set/${setId}`);
+            await deleteFlashcardSet(setId);
             alert("Zestaw usunięty!");
             onDelete();
         } catch (error) {
@@ -327,13 +355,11 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         );
     }
 
-    // Get filtered folders and sets for current view
     const currentFolders = folders.filter(f =>
         currentFolder ? f.parent_folder_id === currentFolder.id : !f.parent_folder_id
     );
     const currentSets = getSortedSets();
 
-    // Show empty state only if there are no folders AND no sets in current view
     if (currentFolders.length === 0 && currentSets.length === 0) {
         return (
             <div className={styles.emptyState}>
@@ -380,7 +406,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                             }}
                             onDrop={(e) => {
                                 if (draggedFolder) {
-                                    handleFolderCardDrop(e, index);
+                                    handleFolderDrop(e, folder.id);
                                 } else if (draggedSet) {
                                     handleFolderDrop(e, folder.id);
                                 }
@@ -447,11 +473,19 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 const isBeingDragged = draggedSet?.set.id === set.id;
                 const isDragOver = dragOverIndex === index;
                 const isDragNotAllowed = dragNotAllowedIndex === index;
+                const isHighlighted = highlightedItemId === set.id;
 
                 return (
                     <div
+                        id={`set-card-${set.id}`}
                         key={set.id}
-                        className={`${styles.setCard} ${set.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''} ${isDragNotAllowed ? styles.dragNotAllowed : ''}`}
+                        className={`
+                            ${styles.setCard} 
+                            ${set.is_pinned ? styles.pinnedCard : ''} 
+                            ${isDragOver ? styles.dragOver : ''} 
+                            ${isDragNotAllowed ? styles.dragNotAllowed : ''}
+                            ${isHighlighted ? styles.highlighted : ''}
+                        `}
                         draggable
                         onDragStart={(e) => handleDragStart(e, set, index)}
                         onDragEnd={handleDragEnd}
