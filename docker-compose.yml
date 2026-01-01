@@ -8,13 +8,13 @@ services:
     ports:
       - "8001:8000"
     env_file:
-      - ./backend/.env  # Pamiętaj, aby stworzyć ten plik na VPS!
+      - ./backend/.env 
 
   frontend:
     build: ./frontend
     container_name: myapp-frontend
     restart: always
     ports:
-      - "3001:80" # Mapujemy port 80 kontenera na 3000 VPSa
+      - "3001:80" 
     depends_on:
       - backend
