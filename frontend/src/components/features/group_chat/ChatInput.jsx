@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { SendHorizontal, Smile, Image as ImageIcon, Plus, FileText } from "lucide-react";
+import { SendHorizontal, Smile, Plus, FileText, X } from "lucide-react";
 import styles from "../../../css/features/groupchat/ChatInput.module.css";
 import EmojiPicker, { Theme } from 'emoji-picker-react';
+import ENDPOINTS from '../../../api/endpoints'; // Importujemy Twoje endpointy
 
 const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
     const [text, setText] = useState("");
@@ -52,7 +53,8 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
 
         setTimeout(() => {
             textarea.focus();
-            textarea.setSelectionRange(start + emojiData.emoji.length, start + emojiData.emoji.length);
+            const newPos = start + emojiData.emoji.length;
+            textarea.setSelectionRange(newPos, newPos);
             adjustHeight();
         }, 0);
         
@@ -86,6 +88,7 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
             setText("");
             setIsMenuOpen(false);
             setShowMentions(false);
+            setShowEmojiPicker(false);
             if (inputRef.current) {
                 inputRef.current.style.height = 'auto';
             }
@@ -94,6 +97,7 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
+            if (showMentions) return;
             e.preventDefault();
             handleSubmit();
         }
@@ -124,9 +128,25 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                                 onClick={() => insertMention(member.username)}
                             >
                                 <div className={styles.mentionAvatar}>
-                                    {member.username === 'wszyscy' ? '📢' : member.username[0].toUpperCase()}
+                                    {member.username === 'wszyscy' ? (
+                                        '📢'
+                                    ) : member.avatar_url ? (
+                                        <img 
+                                            src={ENDPOINTS.USERS.GET_AVATAR(member.avatar_url)} 
+                                            alt={member.username}
+                                            className={styles.avatarImage}
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.innerText = member.username[0].toUpperCase();
+                                            }}
+                                        />
+                                    ) : (
+                                        member.username[0].toUpperCase()
+                                    )}
                                 </div>
-                                <span>{member.username}</span>
+                                <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>
+                                    {member.username}
+                                </span>
                             </div>
                         ))
                     }
@@ -139,7 +159,6 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                         onEmojiClick={onEmojiClick}
                         autoFocusSearch={false}
                         theme={Theme.DARK}
-                        searchPlaceholder={t('Szukaj emoji...')}
                         width="100%"
                         height={350}
                     />
@@ -175,23 +194,23 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                     type="button" 
                     className={`${styles.plusButton} ${isMenuOpen ? styles.plusActive : ""}`}
                     onClick={() => {
-                        setIsMenuOpen(!isMenuOpen)
+                        setIsMenuOpen(!isMenuOpen);
                         setShowEmojiPicker(false);
                     }}
                 >
-                    <Plus size={22} />
+                    {isMenuOpen ? <X size={22} /> : <Plus size={22} />}
                 </button>
 
                 <textarea
                     ref={inputRef}
                     rows="1"
-                    placeholder={t('Wpisz wiadomość...')}
+                    placeholder="Wpisz wiadomość..."
                     value={text}
                     onChange={handleTextChange}
                     onKeyDown={handleKeyDown}
                     className={styles.messageInput}
                     onFocus={() => {
-                        setIsMenuOpen(false)
+                        setIsMenuOpen(false);
                         setShowEmojiPicker(false);
                     }}
                 />

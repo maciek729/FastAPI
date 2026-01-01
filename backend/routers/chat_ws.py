@@ -55,6 +55,7 @@ async def get_chat_history(notebook_id: int):
                 "id": m.id,
                 "senderId": m.user_id,
                 "senderName": m.user.username if m.user else "Użytkownik",
+                "senderAvatar": m.user.avatar_url if m.user else None,
                 "text": m.content,
                 "timestamp": m.created_at.isoformat(),
                 "type": m.type,
@@ -149,6 +150,7 @@ async def websocket_endpoint(websocket: WebSocket, notebook_id: int, user_id: in
                     "id": new_msg.id,
                     "senderId": user_id,
                     "senderName": user_sender.username if user_sender else "Użytkownik",
+                    "senderAvatar": user_sender.avatar_url if user_sender else None,
                     "text": new_msg.content,
                     "timestamp": datetime.utcnow().isoformat(),
                     "type": new_msg.type,
@@ -228,16 +230,13 @@ async def pin_message(message_id: int, user_id: int):
         if not msg:
             raise HTTPException(status_code=404, detail="Wiadomość nie istnieje")
         
-        # 1. Odpnij wszystkie wiadomości w tym notatniku
         db.query(NotebookMessages).filter(
             NotebookMessages.notebook_id == msg.notebook_id
         ).update({NotebookMessages.is_pinned: False})
         
-        # 2. Przypnij nową
         msg.is_pinned = True
         db.commit()
 
-        # 3. Poinformuj wszystkich przez WebSocket
         await manager.broadcast({
             "type": "message_pin",
             "pinnedMessage": {
@@ -304,7 +303,7 @@ async def get_notebook_members(notebook_id: int):
             members.append({
                 "id": owner.id, 
                 "username": owner.username,
-                "role": "owner"
+                "avatar_url": owner.avatar_url
             })
 
         collaborators = db.query(NotebookCollaborator).filter(
@@ -316,7 +315,7 @@ async def get_notebook_members(notebook_id: int):
                 members.append({
                     "id": collab.user.id, 
                     "username": collab.user.username,
-                    "role": "collaborator"
+                    "avatar_url": collab.user.avatar_url
                 })
 
         return members

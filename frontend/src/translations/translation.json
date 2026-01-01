@@ -400,7 +400,8 @@
       "edit": "Edytuj treść",
       "delete": "Usuń na zawsze",
       "autoScrollOn": "Włącz autoscroll",
-      "autoScrollOff": "Wyłącz autoscroll"
+      "autoScrollOff": "Wyłącz autoscroll",
+      "edited": "edytowano"
     },
     "demo": {
       "buttons": {
@@ -857,7 +858,8 @@
       "edit": "Edit content",
       "delete": "Delete forever",
       "autoScrollOn": "Enable auto-scroll",
-      "autoScrollOff": "Disable auto-scroll"
+      "autoScrollOff": "Disable auto-scroll",
+      "edited": "Edited"
     },
     "demo": {
       "buttons": {

@@ -121,6 +121,7 @@ const ENDPOINTS = {
     UPLOAD_AVATAR: `${API_BASE_URL}/user/avatar`,
     DELETE_AVATAR: `${API_BASE_URL}/user/avatar`,
     DELETE_ACCOUNT: `${API_BASE_URL}/user/delete-account`,
+    GET_AVATAR: (avatarPath) => avatarPath ? `${API_BASE_URL}${avatarPath}` : null,
   },
   AUTH: {
     REGISTER: `${API_BASE_URL}/auth/`,
@@ -132,16 +133,19 @@ const ENDPOINTS = {
     HISTORY: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/history`,
     MEMBERS: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/members`,
     PINNED: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/pinned`,
-    UNPIN: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/unpin`,
-    DELETE: (messageId, userId) => `${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userId}`,
-    EDIT: (messageId, userId, content) => `${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userId}&new_content=${encodeURIComponent(content)}`,
-    PIN: (messageId, userId) => `${API_BASE_URL}/group-chat/message/${messageId}/pin?user_id=${userId}`,
-    RES_NOTES: (notebookId) => `${API_BASE_URL}/group-chat/notes/notebook/${notebookId}`,
-    RES_TESTS: (notebookId) => `${API_BASE_URL}/group-chat/tests/notebook/${notebookId}`,
-    RES_FLASHCARDS: (notebookId) => `${API_BASE_URL}/group-chat/flashcards/notebook/${notebookId}`,
-    RES_PODCASTS: (notebookId) => `${API_BASE_URL}/group-chat/podcasts/notebook/${notebookId}`,
-    INITIATE_CLEAR: (notebookId, userId) => `${API_BASE_URL}/group-chat/${notebookId}/initiate-clear?user_id=${userId}`,
-    VOTE_CLEAR: (requestId, userId) => `${API_BASE_URL}/group-chat/vote/${requestId}?user_id=${userId}`,
+    UNPIN_ALL: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/unpin`,
+    
+    DELETE_MESSAGE: (messageId, userId) => `${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userId}`,
+    EDIT_MESSAGE: (messageId, userId, content) => 
+        `${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userId}&new_content=${encodeURIComponent(content)}`,
+    PIN_MESSAGE: (messageId, userId) => `${API_BASE_URL}/group-chat/message/${messageId}/pin?user_id=${userId}`,
+
+    RESOURCES: {
+      NOTES: (notebookId) => `${API_BASE_URL}/group-chat/notes/notebook/${notebookId}`,
+      TESTS: (notebookId) => `${API_BASE_URL}/group-chat/tests/notebook/${notebookId}`,
+      FLASHCARDS: (notebookId) => `${API_BASE_URL}/group-chat/flashcards/notebook/${notebookId}`,
+      PODCASTS: (notebookId) => `${API_BASE_URL}/group-chat/podcasts/notebook/${notebookId}`,
+    }
   },
   NOTIFICATIONS: {
     LIST: (userId) => `${API_BASE_URL}/notifications/${userId}`,

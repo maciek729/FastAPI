@@ -10,17 +10,14 @@ const MessageList = ({
     onPin, 
     onOpenResource, 
     userData, 
-    highlightMessageId,
-    setHighlightMessageId,
-    t,
-    notebookId
+    highlightMessageId, 
+    setHighlightMessageId, 
+    t, 
+    notebookId 
 }) => {
     const [editingId, setEditingId] = useState(null);
     const [editText, setEditText] = useState("");
     const editRef = useRef(null);
-
-    const scrollContainerRef = useRef(null);
-    const lastNotebookId = useRef(notebookId);
 
     const adjustEditHeight = () => {
         const textarea = editRef.current;
@@ -30,6 +27,12 @@ const MessageList = ({
         }
     };
 
+    // Funkcja aktywująca tryb edycji - TEGO BRAKOWAŁO
+    const handleStartEdit = (msg) => {
+        setEditingId(msg.id);
+        setEditText(msg.text);
+    };
+
     useEffect(() => {
         if (editingId) {
             adjustEditHeight();
@@ -37,12 +40,10 @@ const MessageList = ({
                 const textarea = editRef.current;
                 if (textarea) {
                     textarea.focus({ preventScroll: true });
-                    
                     const length = textarea.value.length;
                     textarea.setSelectionRange(length, length);
                 }
             }, 0);
-
             return () => clearTimeout(timer);
         }
     }, [editingId]);
@@ -73,17 +74,19 @@ const MessageList = ({
         }, 100);
 
         return () => clearInterval(checkExist);
-    }, [highlightMessageId, messages]);
+    }, [highlightMessageId, messages, setHighlightMessageId]);
 
     const formatDisplayTime = (dateStr) => {
         if (!dateStr) return "";
         const date = new Date(dateStr);
+        date.setHours(date.getHours() + 1);
         return date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
     };
 
     const formatSeparatorDate = (dateStr) => {
         if (!dateStr) return "";
         const date = new Date(dateStr);
+        date.setHours(date.getHours() + 1);
         return date.toLocaleDateString('pl-PL', { 
             weekday: 'long', 
             day: 'numeric', 
@@ -109,11 +112,6 @@ const MessageList = ({
             }
             return part;
         });
-    };
-
-    const handleStartEdit = (msg) => {
-        setEditingId(msg.id);
-        setEditText(msg.text);
     };
 
     const handleSaveEdit = (id) => {
@@ -166,7 +164,7 @@ const MessageList = ({
         return (
             <div className={styles.messageText}>
                 {formatText(msg.text)}
-                {msg.is_edited && <span className={styles.editedTag}> (edytowano)</span>}
+                {msg.is_edited && <span className={styles.editedTag}> ({t('group_chat.edited') || 'edytowano'})</span>}
             </div>
         );
     };
@@ -193,7 +191,7 @@ const MessageList = ({
                             {!isMe && <span className={styles.senderName}>{msg.senderName}</span>}
                             <div className={`${styles.bubble} ${styles.deletedBubble}`}>
                                 <span className={styles.deletedText}>
-                                    {isMe ? "Usunąłeś tę wiadomość" : "Wiadomość została usunięta"}
+                                    {isMe ? t('group_chat.youDeleted') : t('group_chat.messageDeleted')}
                                 </span>
                                 <span className={styles.messageTime}>{formatDisplayTime(msg.timestamp)}</span>
                             </div>
@@ -209,7 +207,7 @@ const MessageList = ({
                             </div>
                         )}
                         <div 
-                            key={msg.id} 
+                            key={msg.id}
                             id={`msg-${msg.id}`}
                             className={`
                                 ${styles.messageWrapper} 
@@ -234,8 +232,8 @@ const MessageList = ({
                                                 rows="1"
                                             />
                                             <div className={styles.editActions}>
-                                                <Check size={22} className={styles.saveIcon} onClick={() => handleSaveEdit(msg.id)}/>
-                                                <X size={22} className={styles.cancelIcon} onClick={() => setEditingId(null)}/>
+                                                <Check size={20} className={styles.saveIcon} onClick={() => handleSaveEdit(msg.id)}/>
+                                                <X size={20} className={styles.cancelIcon} onClick={() => setEditingId(null)}/>
                                             </div>
                                         </div>
                                     ) : (
@@ -246,7 +244,11 @@ const MessageList = ({
                                         {!isEditing && (
                                             <div className={styles.bubbleActions}>
                                                 {msg.type === 'text' && (
-                                                    <button onClick={() => onPin(msg.id)} className={`${styles.smallActionBtn} ${styles.pinBtn}`} title="Przypnij" data-tooltip={t('group_chat.pin')}>
+                                                    <button 
+                                                        onClick={() => onPin(msg.id)} 
+                                                        className={`${styles.smallActionBtn} ${styles.pinBtn}`} 
+                                                        data-tooltip="Przypnij wiadomość"
+                                                    >
                                                         <Pin size={10} style={{ transform: 'rotate(45deg)' }} />
                                                     </button>
                                                 )}
@@ -254,11 +256,19 @@ const MessageList = ({
                                                 {isMe && (
                                                     <>
                                                         {msg.type === 'text' && (
-                                                            <button onClick={() => handleStartEdit(msg)} className={`${styles.smallActionBtn} ${styles.editBtn}`} data-tooltip={t('group_chat.edit')}>
+                                                            <button 
+                                                                onClick={() => handleStartEdit(msg)} 
+                                                                className={`${styles.smallActionBtn} ${styles.editBtn}`}
+                                                                data-tooltip="Edytuj"
+                                                            >
                                                                 <Pencil size={10} />
                                                             </button>
                                                         )}
-                                                        <button onClick={() => onDelete(msg.id)} className={`${styles.smallActionBtn} ${styles.deleteBtn}`} data-tooltip={t('group_chat.delete')}>
+                                                        <button 
+                                                            onClick={() => onDelete(msg.id)} 
+                                                            className={`${styles.smallActionBtn} ${styles.deleteBtn}`}
+                                                            data-tooltip="Usuń"
+                                                        >
                                                             <Trash2 size={10} />
                                                         </button>
                                                     </>

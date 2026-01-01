@@ -169,6 +169,14 @@
     transition: all 0.15s ease;
     color: var(--title);
 }
+.mentionItem span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .mentionItem:hover {
     background-color: rgba(139, 92, 246, 0.08);
@@ -187,4 +195,12 @@
     font-size: 12px;
     font-weight: 700;
     flex-shrink: 0;
+    overflow: hidden; 
+    position: relative;
+}
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
