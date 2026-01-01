@@ -3,6 +3,7 @@ import { X, ArrowDownCircle, FileText, ClipboardCheck, Layers, Mic, Pin } from "
 import styles from "../../../css/features/groupchat/GroupChat.module.css";
 import MessageList from "./MessageList";
 import ChatInput from './ChatInput';
+import * as chatService from '../../../services/groupChatService';
 
 const GroupChatSidebar = ({ 
     isOpen, 
@@ -48,8 +49,7 @@ const GroupChatSidebar = ({
     const fetchPinnedMessage = async () => {
         if (!notebookId) return;
         try {
-            const response = await fetch(`${API_BASE_URL}/group-chat/${notebookId}/pinned`);
-            const data = await response.json();
+            const data = await chatService.getPinnedMessage(notebookId);
             setPinnedMessage(data);
         } catch (error) { console.error(error); }
     };
@@ -57,8 +57,7 @@ const GroupChatSidebar = ({
     const fetchMembers = async () => {
         if (!notebookId) return;
         try {
-            const response = await fetch(`${API_BASE_URL}/group-chat/${notebookId}/members`);
-            const data = await response.json();
+            const data = await chatService.getChatMembers(notebookId);
             setMembers([{ id: 'everyone', username: 'wszyscy' }, ...data]);
         } catch (error) {
             console.error("Błąd pobierania członków:", error);
@@ -68,19 +67,8 @@ const GroupChatSidebar = ({
     const fetchResources = async () => {
         if (!notebookId) return;
         try {
-            const [notesRes, testsRes, flashcardsRes, podcastsRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/group-chat/notes/notebook/${notebookId}`),
-                fetch(`${API_BASE_URL}/group-chat/tests/notebook/${notebookId}`),
-                fetch(`${API_BASE_URL}/group-chat/flashcards/notebook/${notebookId}`),
-                fetch(`${API_BASE_URL}/group-chat/podcasts/notebook/${notebookId}`)
-            ]);
-            
-            setAvailableResources({
-                notes: await notesRes.json(),
-                tests: await testsRes.json(),
-                flashcards: await flashcardsRes.json(),
-                podcasts: await podcastsRes.json()
-            });
+            const data = await chatService.getAvailableResources(notebookId);
+            setAvailableResources(data);
         } catch (error) {
             console.error("Błąd ładowania zasobów:", error);
         }
@@ -110,9 +98,8 @@ const GroupChatSidebar = ({
         const fetchHistory = async () => {
             if (isOpen && notebookId) {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/group-chat/${notebookId}/history`);
-                    const data = await response.json();
-                    setMessages(Array.isArray(data) ? data : data.messages || []);
+                    const data = await chatService.getChatHistory(notebookId);
+                    setMessages(data);
                 } catch (error) {
                     console.error("Błąd pobierania historii:", error);
                 }
@@ -174,25 +161,25 @@ const GroupChatSidebar = ({
 
     const handlePinMessage = async (messageId) => {
         try {
-            await fetch(`${API_BASE_URL}/group-chat/message/${messageId}/pin?user_id=${userData.id}`, { method: 'PATCH' });
+            await chatService.pinMessage(messageId, userData.id);
         } catch (error) { console.error(error); }
     };
 
     const handleUnpinMessage = async () => {
         try {
-            await fetch(`${API_BASE_URL}/group-chat/${notebookId}/unpin`, { method: 'PATCH' });
+            await chatService.unpinAllMessages(notebookId);
         } catch (error) { console.error(error); }
     };
 
     const handleDeleteMessage = async (messageId) => {
         try {
-            await fetch(`${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userData.id}`, { method: 'DELETE' });
+            await chatService.deleteMessage(messageId, userData.id);
         } catch (error) { console.error(error); }
     };
 
     const handleEditMessage = async (messageId, newText) => {
         try {
-            await fetch(`${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userData.id}&new_content=${encodeURIComponent(newText)}`, { method: 'PATCH' });
+            await chatService.editMessage(messageId, userData.id, newText);
         } catch (error) { console.error(error); }
     };
 
@@ -297,7 +284,7 @@ const GroupChatSidebar = ({
                         onEdit={handleEditMessage}
                         onOpenResource={onNavigateToResource}
                         userData={userData}
-                        highlightMessageId={localScrollId}
+                        highlightMessageId={highlightMessageId || localScrollId}
                         setHighlightMessageId={setLocalScrollId}
                         onPin={handlePinMessage}
                         t={t}

@@ -128,6 +128,27 @@ const ENDPOINTS = {
     FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
     RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
   },
+  GROUP_CHAT: {
+    HISTORY: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/history`,
+    MEMBERS: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/members`,
+    PINNED: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/pinned`,
+    UNPIN: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/unpin`,
+    DELETE: (messageId, userId) => `${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userId}`,
+    EDIT: (messageId, userId, content) => `${API_BASE_URL}/group-chat/message/${messageId}?user_id=${userId}&new_content=${encodeURIComponent(content)}`,
+    PIN: (messageId, userId) => `${API_BASE_URL}/group-chat/message/${messageId}/pin?user_id=${userId}`,
+    RES_NOTES: (notebookId) => `${API_BASE_URL}/group-chat/notes/notebook/${notebookId}`,
+    RES_TESTS: (notebookId) => `${API_BASE_URL}/group-chat/tests/notebook/${notebookId}`,
+    RES_FLASHCARDS: (notebookId) => `${API_BASE_URL}/group-chat/flashcards/notebook/${notebookId}`,
+    RES_PODCASTS: (notebookId) => `${API_BASE_URL}/group-chat/podcasts/notebook/${notebookId}`,
+    INITIATE_CLEAR: (notebookId, userId) => `${API_BASE_URL}/group-chat/${notebookId}/initiate-clear?user_id=${userId}`,
+    VOTE_CLEAR: (requestId, userId) => `${API_BASE_URL}/group-chat/vote/${requestId}?user_id=${userId}`,
+  },
+  NOTIFICATIONS: {
+    LIST: (userId) => `${API_BASE_URL}/notifications/${userId}`,
+    MARK_READ: (notifId) => `${API_BASE_URL}/notifications/${notifId}/read`,
+    DELETE: (notifId) => `${API_BASE_URL}/notifications/${notifId}`,
+    CLEAR_ALL: (userId) => `${API_BASE_URL}/notifications/user/${userId}/all`,
+  }
 };
 
 export default ENDPOINTS;
