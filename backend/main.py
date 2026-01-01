@@ -3,7 +3,6 @@ from fastapi import FastAPI, Request, status
 from models import Base
 from database import engine
 from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, flashcards, folders , chat_ws, notifications
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from routers import podcasts
@@ -20,7 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/healthy")
 def health_check():

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: myapp-backend
+    restart: always
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./backend/.env 
+
+  frontend:
+    build: ./frontend
+    container_name: myapp-frontend
+    restart: always
+    ports:
+      - "3001:80" 
+    depends_on:
+      - backend
