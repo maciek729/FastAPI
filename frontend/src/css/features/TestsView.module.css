@@ -208,8 +208,8 @@
 }
 
 .searchInput {
-  border: none;
-  outline: none;
+  border: none !important;
+  outline: none !important;
   background: transparent;
   flex: 1;
   font-size: 0.875rem;

@@ -25,21 +25,6 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         return false;
     });
 
-    // const handleNavigateToResource = (resourceData) => {
-    //     const type = resourceData.itemType;
-    //     const id = resourceData.itemId;
-
-    //     setHighlightedItemId(id);
-        
-    //     if (type === 'note') setActiveTab('files');
-    //     else if (type === 'test') setActiveTab('tests');
-    //     else if (type === 'flashcards') setActiveTab('flashcards');
-    //     else if (type === 'podcast') setActiveTab('podcasts');
-        
-    //     // Opcjonalnie: tutaj możesz dodać logikę, która przekaże resourceData.itemId 
-    //     // do konkretnego widoku, aby go podświetlić, jeśli Twoje widoki to obsługują.
-    //     setTimeout(() => setHighlightedItemId(null), 10000);
-    // };
     const handleInternalResourceOpen = (resourceData) => {
         const type = resourceData.itemType;
         const id = resourceData.itemId;

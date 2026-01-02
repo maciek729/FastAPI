@@ -28,6 +28,9 @@
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border_gray);
   flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
 
 /* Tab Button */
@@ -46,6 +49,7 @@
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab:hover {
@@ -63,7 +67,6 @@
   flex-shrink: 0;
 }
 
-/* Tab Container - Scrollable content area */
 .tabContainer {
   flex: 1;
   min-width: 0;
@@ -75,21 +78,26 @@
   color: var(--title);
 }
 
-.tabContainer::-webkit-scrollbar {
-  width: 6px;
-}
-
-.tabContainer::-webkit-scrollbar-track {
+.tabsBar::-webkit-scrollbar-track {
   background: transparent;
+  margin: 0 2rem;
 }
 
-.tabContainer::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.2);
-  border-radius: 3px;
-}
-
-.tabContainer::-webkit-scrollbar-thumb:hover {
+.tabsBar:hover::-webkit-scrollbar-thumb {
   background: rgba(139, 92, 246, 0.3);
+}
+
+.tabsBar::-webkit-scrollbar-thumb:hover {
+  background: var(--purple_brighter_brighter_brighter);
+}
+
+.tabsBar::-webkit-scrollbar-thumb:active {
+  background: var(--purple_brighter_brighter_brighter); /* Kolor docelowy podczas przewijania */
+}
+
+.tabsBar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple_brighter_brighter_brighter) transparent;
 }
 
 /* Files View */

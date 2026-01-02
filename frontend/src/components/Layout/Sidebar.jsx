@@ -7,10 +7,16 @@ import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
 import { getNotebooks, createNotebook } from "../../services/notebookService";
 import ENDPOINTS from "../../api/endpoints";
+import logoDark from "./logodark.png";
+import logoLight from "./logolight.png";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
     const { language } = useContext(LanguageContext);
     
+    const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
+
+    const logoToShow = theme === 'dark' ? logoDark : logoDark;
+
     const t = useCallback((key, params = {}) => {
         const keys = key.split('.');
         let translation = translations[language];
@@ -243,7 +249,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                         title={t('sidebar.dashboard')}
                     >
                         <div className={styles.brandIcon}>
-                            <Sparkles size={20} />
+                            {/* <Sparkles size={20} /> */}
+                            <img src={theme === 'light' ? logoLight : logoDark} alt="zdAI to logo" className={styles.logoImg} />
                         </div>
                         {isSidebarOpen && (
                             <div className={styles.brandText}>

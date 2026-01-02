@@ -38,7 +38,7 @@
 
 /* Header */
 .sidebarHeader {
-  padding: 1rem;
+  padding: 0.2rem 1rem 0.2rem 1rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
   flex-shrink: 0;
   display: flex;
@@ -63,13 +63,7 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar.collapsed .brandContainer {
-  flex: 0;
-  width: 100%;
-  justify-content: center;
-}
-
-.brandIcon {
+/* .brandIcon {
   width: 32px;
   height: 32px;
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
@@ -80,6 +74,40 @@
   color: white;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+} */
+
+.brandIcon {
+  margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    background: transparent;
+}
+
+.logoImg {
+    width: 100%;
+    height: 100%; 
+    object-fit: contain;
+    display: block;
+}
+
+/* .brandContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 1;
+    min-width: 0;
+    padding: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+} */
+
+.sidebar.collapsed .brandContainer {
+  flex: 0;
+  width: 100%;
+  justify-content: center;
 }
 
 .brandText {

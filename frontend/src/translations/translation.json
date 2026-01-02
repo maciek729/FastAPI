@@ -400,7 +400,14 @@
       "edit": "Edytuj treść",
       "delete": "Usuń na zawsze",
       "autoScrollOn": "Włącz autoscroll",
-      "autoScrollOff": "Wyłącz autoscroll"
+      "autoScrollOff": "Wyłącz autoscroll",
+      "edited": "edytowano",
+      "loading": "Ładowanie...",
+      "shareResources": "Udostępnij zasoby",
+      "notes": "Notatki",
+      "tests": "Testy",
+      "flashcards": "Fiszki",
+      "Podcasts": "Podkasty"
     },
     "demo": {
       "buttons": {
@@ -857,7 +864,14 @@
       "edit": "Edit content",
       "delete": "Delete forever",
       "autoScrollOn": "Enable auto-scroll",
-      "autoScrollOff": "Disable auto-scroll"
+      "autoScrollOff": "Disable auto-scroll",
+      "edited": "Edited",
+      "loading": "Loading...",
+      "shareResources": "Share resources",
+      "notes": "Notes",
+      "tests": "Tests",
+      "flashcards": "Flashcards",
+      "Podcasts": "Podcasts"
     },
     "demo": {
       "buttons": {
