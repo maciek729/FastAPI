@@ -238,8 +238,6 @@ Pozdro*/
   padding: 0.75rem 2rem;
 }
 .saveButton:hover, .optionButton:hover, .cancelButton:hover {
-  /*Maciej miał tu transform, ale mi się bardziej to podoba*/
-  /*Jeżeli ktoś będzie chciał zmiany to nie ma problemu*/
   transform: scale(1.05);
   box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
@@ -250,14 +248,14 @@ Pozdro*/
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--white_btn_bg);
-  color: var(--white_btn_text);
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  color: #6d28d9;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px var(--white_btn_box_shadow);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   padding: 0.75rem 2rem;

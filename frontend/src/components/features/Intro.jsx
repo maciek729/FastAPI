@@ -4,6 +4,7 @@ import { Menu, X, Users, Sparkles, LogIn } from 'lucide-react';
 import styles from '../../css/features/Intro.module.css';
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
+import logoLight from "../Layout/logolight.png";
 
 const Intro = () => {
   const navigate = useNavigate();
@@ -132,7 +133,8 @@ const Intro = () => {
       <header className={styles.introHeader}>
         <div className={styles.introNav}>
           <div className={styles.introLogo}>
-            <Sparkles className={styles.introLogoIcon} />
+            {/* <Sparkles className={styles.introLogoIcon} /> */}
+            <img src={logoLight} alt="zdAI to logo" className={styles.logoImg} />
             <span className={styles.introLogoText}>{t('intro.logo')}</span>
           </div>
 

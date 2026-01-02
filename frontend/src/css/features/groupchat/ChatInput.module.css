@@ -73,6 +73,10 @@
     transform: rotate(45deg);
     color: var(--purple_brighter);
 }
+textarea {
+    border: none !important;
+    outline: none !important
+}
 
 .attachmentMenu {
     position: absolute;

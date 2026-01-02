@@ -309,7 +309,7 @@
 .ownMessage .resourceHeader { color: rgba(255, 255, 255, 0.9); }
 .otherMessage .resourceHeader { color: var(--purple_brighter); }
 
-.noteIcon { color: #3b82f6; }
+.noteIcon { color: #96b6e8; }
 .testIcon { color: #10b981; }
 .flashIcon { color: #f59e0b; }
 
@@ -332,6 +332,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .otherMessage .openResourceBtn {

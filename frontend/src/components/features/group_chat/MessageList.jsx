@@ -144,7 +144,8 @@ const MessageList = ({
                             <span className={styles.resourceLabel}>
                                 {resource.itemType === 'note' ? 'Notatka' : 
                                  resource.itemType === 'test' ? 'Test' : 
-                                 resource.itemType === 'flashcards' ? 'Fiszki' : 'Podcast'}
+                                 resource.itemType === 'flashcards' ? 'Fiszki' :
+                                 resource.itemType === 'podcast' ? 'Podcasty': 'Zasób'}
                             </span>
                         </div>
                         <p className={styles.resourceTitle}>{resource.itemTitle}</p>

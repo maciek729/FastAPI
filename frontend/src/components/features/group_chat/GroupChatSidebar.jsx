@@ -4,7 +4,7 @@ import styles from "../../../css/features/groupchat/GroupChat.module.css";
 import MessageList from "./MessageList";
 import ChatInput from './ChatInput';
 import * as chatService from '../../../services/groupChatService';
-import API_BASE_URL from '../../../api/config'; // IMPORTUJEMY TWÓJ BASE URL
+import API_BASE_URL from '../../../api/config';
 
 const GroupChatSidebar = ({ 
     isOpen, 
@@ -108,16 +108,26 @@ const GroupChatSidebar = ({
         if (isOpen) fetchInitialData();
     }, [isOpen, notebookId]);
 
-    // --- FIX DLA SERWERA: DYNAMICZNY URL WEBSOCKETU ---
+    useEffect(() => {
+        if (!notebookId) return;
+        try {
+            const saved = localStorage.getItem(autoScrollObjKey);
+            let states = saved ? JSON.parse(saved) : {};
+            
+            states[notebookId] = autoScroll;
+            
+            localStorage.setItem(autoScrollObjKey, JSON.stringify(states));
+        } catch (e) {
+            console.error("Błąd zapisu do localStorage:", e);
+        }
+    }, [autoScroll, notebookId]);
+
     useEffect(() => {
         if (isOpen && notebookId && userData?.id) {
-            // 1. Wyciągamy sam host z Twojego API_BASE_URL (usuwamy http:// lub https://)
             const host = API_BASE_URL.replace(/^https?:\/\//, '');
             
-            // 2. Automatycznie dobieramy protokół (wss dla zabezpieczonych stron, ws dla zwykłych)
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
             
-            // 3. Budujemy URL dynamicznie
             const wsUrl = `${protocol}://${host}/group-chat/ws/${notebookId}/${userData.id}`;
             
             console.log("Łączenie z WebSocketem pod adresem:", wsUrl);
@@ -200,7 +210,33 @@ const GroupChatSidebar = ({
                                 <FileText size={16} /> <span>{note.title}</span>
                             </div>
                         ))}
-                        {/* Pozostałe zasoby analogicznie... */}
+
+                        {availableResources.tests.length > 0 && <h4>{t('group_chat.tests')}</h4>}
+                        {availableResources.tests.map(test => (
+                            <div key={test.id} className={styles.resourceItem} onClick={() => handleShareResource(test, 'test')}>
+                                <ClipboardCheck size={16} /> <span>{test.title}</span>
+                            </div>
+                        ))}
+
+                        {availableResources.flashcards.length > 0 && <h4>{t('group_chat.flashcards')}</h4>}
+                        {availableResources.flashcards.map(set => (
+                            <div key={set.id} className={styles.resourceItem} onClick={() => handleShareResource(set, 'flashcards')}>
+                                <Layers size={16} /> <span>{set.title}</span>
+                            </div>
+                        ))}
+
+                        {availableResources.podcasts.length > 0 && <h4>{t('group_chat.podcasts')}</h4>}
+                        {availableResources.podcasts.map(podcast => (
+                            <div key={podcast.id} className={styles.resourceItem} onClick={() => handleShareResource(podcast, 'podcast')}>
+                                <Mic size={16} /> <span>{podcast.title}</span>
+                            </div>
+                        ))}
+
+                        {Object.values(availableResources).every(arr => arr.length === 0) && (
+                            <div className={styles.noResources}>
+                                {t('group_chat.noResources') || 'Brak materiałów w tym notatniku.'}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
