@@ -270,6 +270,7 @@ WYMAGANIA:
 - Każda fiszka to PROSTE tłumaczenie (np. "dog" → "pies", "unprecedented" → "bezprecedensowy")
 - NIE twórz pytań opisowych ani zdań
 - Tylko słówka lub krótkie frazy (max 3-4 słowa)
+- LIMIT ZNAKÓW: pytanie MAX 100 znaków, odpowiedź MAX 150 znaków
 - KONIECZNIE dostosuj ZAAWANSOWANIE SŁÓWEK do poziomu {request.difficulty}!
 - Dla poziomu "łatwy": tylko podstawowe słówka A1-A2
 - Dla poziomu "średni": słówka B1-B2
@@ -298,6 +299,7 @@ MATERIAŁ DO NAUKI:
 
 WYMAGANIA:
 - Każda fiszka: pytanie (krótkie, konkretne) + odpowiedź (zwięzła, kompletna)
+- LIMIT ZNAKÓW: pytanie MAX 150 znaków, odpowiedź MAX 300 znaków
 - Poziom {request.difficulty}: {difficulty_hints.get(request.difficulty, 'standardowy')}
 - Dla słówek językowych dostosuj poziom zgodnie z CEFR (A1-A2 dla łatwego, B1-B2 dla średniego, C1 dla trudnego)
 - Format JSON: [{{"question": "...", "answer": "..."}}, ...]
@@ -409,6 +411,7 @@ WYMAGANIA:
 - Każda fiszka to PROSTE tłumaczenie (np. "dog" → "pies", "kot" → "cat")
 - NIE twórz pytań opisowych ani zdań
 - Tylko słówka lub krótkie frazy (max 3-4 słowa)
+- LIMIT ZNAKÓW: pytanie MAX 100 znaków, odpowiedź MAX 150 znaków
 - Format JSON: [{{"question": "słowo1", "answer": "tłumaczenie1"}}, ...]
 - Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
 - Dokładnie {count} fiszek
@@ -435,6 +438,7 @@ MATERIAŁ DO NAUKI:
 
 WYMAGANIA:
 - Każda fiszka: pytanie (krótkie, konkretne) + odpowiedź (zwięzła, kompletna)
+- LIMIT ZNAKÓW: pytanie MAX 150 znaków, odpowiedź MAX 300 znaków
 - Poziom {difficulty}: {difficulty_hints.get(difficulty, 'standardowy')}
 - Dla słówek językowych dostosuj poziom zgodnie z CEFR (A1-A2 dla łatwego, B1-B2 dla średniego, C1 dla trudnego)
 - Format JSON: [{{"question": "...", "answer": "..."}}, ...]

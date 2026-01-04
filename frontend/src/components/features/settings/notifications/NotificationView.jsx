@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { confirmModal } from '../../../../utils/confirmModal';
 import styles from "../../../../css/features/settings/Notifications.module.css";
 import NotificationModal from "./NotificationModal";
 import { Bell, BellOff, Trash2 } from "lucide-react";
@@ -86,7 +87,8 @@ export default function NotificationView({ userData, onNavigateToResource }) {
     };
 
     const handleClearAll = async () => {
-        if (!window.confirm(t('notifications.confirmClear'))) return;
+        const confirmed = await confirmModal(t('notifications.confirmClear'));
+        if (!confirmed) return;
         try {
             await notifService.clearAllNotifications(userData.id);
             setNotifications([]);

@@ -25,6 +25,8 @@ const ENDPOINTS = {
     LOCK: (noteId) => `${API_BASE_URL}/notes/${noteId}/lock`,
     UNLOCK: (noteId) => `${API_BASE_URL}/notes/${noteId}/unlock`,
     LOCK_STATUS: (noteId) => `${API_BASE_URL}/notes/${noteId}/lock-status`,
+    UPDATE_POSITION: (noteId) => `${API_BASE_URL}/notes/${noteId}/position`,
+    TOGGLE_PIN: (noteId) => `${API_BASE_URL}/notes/${noteId}/pin`,
   },
   TESTS: {
     LIST: (notebookId, userId) => `${API_BASE_URL}/tests/list?user_id=${userId}&notebook_id=${notebookId}`,
@@ -105,10 +107,11 @@ const ENDPOINTS = {
   PODCASTS: {
     LIST: (notebookId) => `${API_BASE_URL}/podcasts/list?notebook_id=${notebookId}`,
     GENERATE: `${API_BASE_URL}/podcasts/generate`,
-    DELETE: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}`, 
+    DELETE: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}`,
     RENAME: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}/rename`,
     TOGGLE_PIN: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}/pin`,
     UPDATE_POSITION: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}/position`,
+    COPY: (podcastId) => `${API_BASE_URL}/podcasts/${podcastId}/copy`,
   },
   USERS: {
     LOGIN: `${API_BASE_URL}/auth/login`,

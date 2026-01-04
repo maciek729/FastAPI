@@ -11,19 +11,29 @@ export default function FlashcardCard({ question, answer, onReview }) {
     const t = (key, params = {}) => {
         const keys = key.split('.');
         let translation = translations[language];
-        
+
         for (const k of keys) {
             translation = translation?.[k];
             if (!translation) return key;
         }
-        
+
         if (typeof translation === 'string' && Object.keys(params).length > 0) {
             return translation.replace(/\{(\w+)\}/g, (match, key) => {
                 return params[key] || match;
             });
         }
-        
+
         return translation || key;
+    };
+
+    const getFontSize = (text) => {
+        const length = text.length;
+        if (length < 50) return '1.5rem';
+        if (length < 100) return '1.3rem';
+        if (length < 150) return '1.1rem';
+        if (length < 250) return '1rem';
+        if (length < 350) return '0.9rem';
+        return '0.85rem';
     };
 
     const handleFlipCard = () => {
@@ -44,7 +54,7 @@ export default function FlashcardCard({ question, answer, onReview }) {
                     <div className={`${styles.cardFace} ${styles.cardFront}`}>
                         <div className={styles.cardLabel}>{t('flashcard.question')}</div>
                         <div className={styles.cardContent}>
-                            <p>{question}</p>
+                            <p style={{ fontSize: getFontSize(question) }}>{question}</p>
                         </div>
                         <button className={styles.flipBtn} onClick={handleFlipCard}>
                             {t('flashcard.showAnswer')}
@@ -54,7 +64,7 @@ export default function FlashcardCard({ question, answer, onReview }) {
                     <div className={`${styles.cardFace} ${styles.cardBack}`}>
                         <div className={styles.cardLabel}>{t('flashcard.answer')}</div>
                         <div className={styles.cardContent}>
-                            <p>{answer}</p>
+                            <p style={{ fontSize: getFontSize(answer) }}>{answer}</p>
                         </div>
                     </div>
                 </div>

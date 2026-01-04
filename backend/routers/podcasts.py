@@ -68,6 +68,10 @@ class MoveItemRequest(BaseModel):
 class MoveFolderRequest(BaseModel):
     parent_folder_id: Optional[int] = None
 
+class CopyPodcastRequest(BaseModel):
+    target_notebook_id: int
+    user_id: int
+
 class PodcastResponse(BaseModel):
     id: int
     title: str
@@ -276,8 +280,10 @@ async def pin_podcast(podcast_id: int, request: PinUpdate, db: db_dependency):
 async def update_podcast_position(podcast_id: int, request: PositionUpdate, db: db_dependency):
     podcast = db.query(Podcasts).filter(Podcasts.id == podcast_id).first()
     if not podcast: raise HTTPException(status_code=404, detail="Podcast not found")
-    podcast.grid_position = request.grid_position; db.commit()
-    return {"message": "Updated"}
+    podcast.grid_position = request.grid_position
+    db.commit()
+    db.refresh(podcast)
+    return {"message": "Position updated successfully", "grid_position": podcast.grid_position}
 
 @router.post("/folders/move-item")
 async def move_podcast_to_folder(request: MoveItemRequest, db: db_dependency):
@@ -297,8 +303,10 @@ async def rename_folder(folder_id: int, request: RenameRequest, db: db_dependenc
 async def update_folder_position(folder_id: int, request: PositionUpdate, db: db_dependency):
     folder = db.query(PodcastFolders).filter(PodcastFolders.id == folder_id).first()
     if not folder: raise HTTPException(status_code=404, detail="Folder not found")
-    folder.grid_position = request.grid_position; db.commit()
-    return {"message": "Updated"}
+    folder.grid_position = request.grid_position
+    db.commit()
+    db.refresh(folder)
+    return {"message": "Position updated successfully", "grid_position": folder.grid_position}
 
 @router.patch("/folders/{folder_id}/move")
 async def move_folder(folder_id: int, request: MoveFolderRequest, db: db_dependency):
@@ -306,3 +314,25 @@ async def move_folder(folder_id: int, request: MoveFolderRequest, db: db_depende
     if not folder: raise HTTPException(status_code=404, detail="Folder not found")
     folder.parent_folder_id = request.parent_folder_id; db.commit()
     return {"message": "Updated"}
+
+@router.post("/{podcast_id}/copy", response_model=PodcastResponse, status_code=status.HTTP_201_CREATED)
+async def copy_podcast_to_notebook(podcast_id: int, request: CopyPodcastRequest, db: db_dependency):
+    original_podcast = db.query(Podcasts).filter(Podcasts.id == podcast_id).first()
+    if not original_podcast: raise HTTPException(status_code=404, detail="Podcast not found")
+
+    new_podcast = Podcasts(
+        user_id=request.user_id,
+        notebook_id=request.target_notebook_id,
+        title=original_podcast.title,
+        script_content=original_podcast.script_content,
+        file_path=original_podcast.file_path,
+        file_url=original_podcast.file_url,
+        folder_id=None,
+        grid_position=None,
+        is_pinned=False,
+        created_at=datetime.now()
+    )
+    db.add(new_podcast)
+    db.commit()
+    db.refresh(new_podcast)
+    return new_podcast

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { ForgotPassword as ForgotPasswordService } from "../../services/authService";
 
@@ -28,8 +29,13 @@ function ForgotPassword() {
 
   return (
     <div className={styles.authContainer}>
+      <Link to="/" className={styles.backButton}>
+        <ArrowLeft />
+        <span>Powrót do strony głównej</span>
+      </Link>
+
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Zapomniałeś hasła?</h2>
+        <h2 className={styles.title}>Przypomnienie hasła</h2>
         <p className={styles.subtitle}>
           Podaj swój email, a wyślemy Ci link do resetowania
         </p>

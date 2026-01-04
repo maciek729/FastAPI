@@ -158,14 +158,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-  color: #6d28d9;
-  border: none;
+  background: var(--cancel_btn_bg);
+  color: var(--cancel_btn_text);
+  border: 2px solid rgba(139, 92, 246, 0.2);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   padding: 0.75rem 2rem;
@@ -178,4 +177,71 @@
 }
 .saveButton:active, .optionButton:active, .cancelButton:active, .deleteAccountButton:active {
   transform: scale(1.03);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .modalContent {
+    width: 95%;
+    max-width: 95vw;
+    padding: 20px;
+  }
+
+  .closeButton {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    top: 5px;
+    right: 5px;
+  }
+
+  .modalTitle {
+    font-size: 18px;
+    padding-right: 40px;
+  }
+
+  .inputField {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .saveButton,
+  .cancelButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .avatarModal {
+    max-width: 95% !important;
+  }
+
+  .uploadContainer {
+    padding: 20px;
+  }
+
+  .cropperWrapper {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 16px;
+  }
+
+  .modalTitle {
+    font-size: 16px;
+  }
+
+  .uploadContainer {
+    padding: 15px;
+  }
+
+  .cropperWrapper {
+    height: 200px;
+  }
 }

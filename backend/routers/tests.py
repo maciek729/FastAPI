@@ -85,11 +85,16 @@ class TestWithQuestions(BaseModel):
     id: int
     user_id: int
     notebook_id: int
+    folder_id: Optional[int] = None
     title: str
     topic: Optional[str] = None
     note_id: Optional[int]
+    source_type: str = "manual"
+    grid_position: Optional[int] = None
+    is_pinned: bool = False
     created_at: datetime
     questions: List[QuestionOut]
+    last_result: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -473,13 +478,62 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
         )
 
 
-@router.get("/list", response_model=List[TestOut])
+@router.get("/list", response_model=List[TestWithQuestions])
 async def list_tests(user_id: int, notebook_id: int, db: db_dependency):
     tests = db.query(Tests).filter(
         Tests.user_id == user_id,
         Tests.notebook_id == notebook_id
     ).order_by(Tests.created_at.desc()).all()
-    return tests
+
+    result = []
+    for test in tests:
+        questions = db.query(TestQuestions).filter(TestQuestions.test_id == test.id).all()
+
+        last_result = None
+        if questions:
+            question_ids = [q.id for q in questions]
+            user_answers = db.query(UserAnswers).filter(
+                UserAnswers.test_question_id.in_(question_ids),
+                UserAnswers.user_id == user_id
+            ).all()
+
+            if user_answers:
+                correct_count = 0
+                for question in questions:
+                    user_answer = next((ans for ans in user_answers if ans.test_question_id == question.id), None)
+                    if user_answer:
+                        try:
+                            correct_answers_array = json.loads(question.correct_answer)
+                        except:
+                            correct_answers_array = [question.correct_answer]
+
+                        try:
+                            user_answer_array = json.loads(user_answer.selected_answer) if isinstance(user_answer.selected_answer, str) else [user_answer.selected_answer]
+                        except:
+                            user_answer_array = [user_answer.selected_answer]
+
+                        if set(user_answer_array) == set(correct_answers_array):
+                            correct_count += 1
+
+                last_result = f"{correct_count}/{len(questions)}"
+
+        result.append(TestWithQuestions(
+            id=test.id,
+            user_id=test.user_id,
+            notebook_id=test.notebook_id,
+            folder_id=test.folder_id,
+            title=test.title,
+            topic=test.topic,
+            note_id=test.note_id,
+            source_type=test.source_type,
+            grid_position=test.grid_position,
+            is_pinned=test.is_pinned,
+            created_at=test.created_at,
+            questions=[QuestionOut.model_validate(q) for q in questions],
+            last_result=last_result
+        ))
+
+    return result
 
 @router.get("/{test_id}", response_model=TestWithQuestions)
 async def get_test(test_id: int, db: db_dependency):

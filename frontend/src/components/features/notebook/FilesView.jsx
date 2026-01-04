@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
+import { promptModal } from '../../../utils/promptModal';
 import axios from "axios";
-import { UserPlus, X, Pin, Folder, ArrowLeft, MoreVertical } from 'lucide-react';
+import { UserPlus, X, Pin, Folder, ArrowLeft, MoreVertical, Search, Trash2, Plus, Filter } from 'lucide-react';
 import NoteEditor from './NoteEditor';
 import styles from "../../../css/features/NotebookView.module.css";
+import generatorStyles from "../../../css/features/FlashcardGenerator.module.css";
 import { getCollaborators, addCollaborator, removeCollaborator } from '../../../services/notebookService';
-import { createNote} from '../../../services/noteService';
+import { createNote, updateNotePosition } from '../../../services/noteService';
+import ENDPOINTS from '../../../api/endpoints';
 
 export default function FilesView({ details, userData, refreshNotebook, highlightedItemId }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
@@ -37,6 +42,21 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     const [dragOverFolder, setDragOverFolder] = useState(null);
     const [dragOverFolderIndex, setDragOverFolderIndex] = useState(null);
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
+
+    // Search and sort state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('date_desc');
+    const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setShowFilters(true);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         setIsLoadingDetails(true);
@@ -103,12 +123,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
     const fetchFolders = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/folders/notes/list', {
-                params: {
-                    notebook_id: details.id,
-                    user_id: userData.id
-                }
-            });
+            const response = await axios.get(ENDPOINTS.FOLDERS.NOTES.LIST(details.id, userData.id));
             setFolders(response.data);
         } catch (err) {
             console.error('Error fetching folders:', err);
@@ -139,7 +154,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         e.preventDefault();
 
         if (!newNote.title.trim() || !newNote.content.trim()) {
-            alert("Wypełnij wszystkie pola!");
+            toast.error("Wypełnij wszystkie pola!");
             return;
         }
 
@@ -159,43 +174,63 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 await handleMoveNoteToFolder(responseData.id, currentFolder.id);
             }
 
-            alert("Notatka dodana!");
+            toast.success("Notatka dodana!");
             setNewNote({ title: '', content: '', type: 'Notatka' });
             setShowAddNoteModal(false);
             refreshNotebook();
         } catch (err) {
             console.error(err);
-            alert("Błąd dodawania notatki");
+            toast.error("Błąd dodawania notatki");
+        }
+    };
+
+    const handleDeleteNote = async (noteId) => {
+        const confirmed = await confirmModal("Czy na pewno chcesz usunąć tę notatkę?");
+        if (!confirmed) return;
+
+        try{
+            await axios.delete(ENDPOINTS.NOTES.DELETE(noteId), {
+                params: { user_id: userData.id }
+            });
+            toast.success("Notatka usunięta!");
+            refreshNotebook();
+        } catch (err) {
+            console.error('Error deleting note:', err);
+            toast.error("Błąd usuwania notatki");
         }
     };
 
     const handleAddCollaborator = async (e) => {
         e.preventDefault();
-        if (!collaboratorUsername.trim()) return alert("Podaj nazwę użytkownika");
+        if (!collaboratorUsername.trim()) {
+            toast.error("Podaj nazwę użytkownika");
+            return;
+        }
 
         try {
             await addCollaborator(details.id, collaboratorUsername);
-            alert(`Dodano użytkownika ${collaboratorUsername}`);
+            toast.success(`Dodano użytkownika ${collaboratorUsername}`);
             setCollaboratorUsername('');
             setShowCollaboratorModal(false);
             fetchCollaborators();
         } catch (err) {
             console.error('Błąd dodawania:', err);
-            alert(err.message || "Błąd dodawania współtwórcy");
+            toast.error(err.message || "Błąd dodawania współtwórcy");
         }
     };
 
     const handleRemoveCollaborator = async (userId) => {
-        if (!window.confirm('Czy na pewno chcesz usunąć tego współtwórcę?')) return;
+        const confirmed = await confirmModal('Czy na pewno chcesz usunąć tego współtwórcę?');
+        if (!confirmed) return;
 
         try {
             await removeCollaborator(details.id, userId);
 
-            alert('Współtwórca usunięty');
+            toast.success('Współtwórca usunięty');
             fetchCollaborators();
         } catch (err) {
             console.error('Błąd usuwania:', err);
-            alert(err.message || "Błąd usuwania współtwórcy");
+            toast.error(err.message || "Błąd usuwania współtwórcy");
         }
     };
 
@@ -250,6 +285,12 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             filtered = filtered.filter(note => !note.folder_id);
         }
 
+        if (searchQuery) {
+            filtered = filtered.filter(note =>
+                note.title.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
         filtered = [...filtered].sort((a, b) => {
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
@@ -261,12 +302,22 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             }
 
             if (!a.is_pinned && !b.is_pinned) {
-                if (a.grid_position !== null && b.grid_position !== null) {
-                    return a.grid_position - b.grid_position;
+                if (sortBy === 'custom') {
+                    if (a.grid_position !== null && b.grid_position !== null) {
+                        return a.grid_position - b.grid_position;
+                    }
+                } else if (sortBy === 'date_desc') {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                } else if (sortBy === 'date_asc') {
+                    return new Date(a.created_at) - new Date(b.created_at);
+                } else if (sortBy === 'name_asc') {
+                    return a.title.localeCompare(b.title);
+                } else if (sortBy === 'name_desc') {
+                    return b.title.localeCompare(a.title);
                 }
             }
 
-            return new Date(b.created_at) - new Date(a.created_at);
+            return 0;
         });
 
         return filtered;
@@ -275,7 +326,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     const handleTogglePin = async (noteId, isPinned, e) => {
         e.stopPropagation();
         try {
-            await axios.patch(`http://localhost:8000/notes/${noteId}/pin`, {
+            await axios.patch(ENDPOINTS.NOTES.TOGGLE_PIN(noteId), {
                 is_pinned: isPinned
             });
             setNotes(prevNotes =>
@@ -285,7 +336,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             );
         } catch (err) {
             console.error('Error toggling pin:', err);
-            alert("Błąd przypinania notatki");
+            toast.error("Błąd przypinania notatki");
         }
     };
 
@@ -294,7 +345,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         if (!newFolderName.trim()) return;
 
         try {
-            await axios.post('http://localhost:8000/folders/notes/create', {
+            await axios.post(ENDPOINTS.FOLDERS.NOTES.CREATE, {
                 notebook_id: details.id,
                 user_id: userData.id,
                 name: newFolderName,
@@ -305,7 +356,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             fetchFolders();
         } catch (err) {
             console.error('Error creating folder:', err);
-            alert("Błąd tworzenia folderu");
+            toast.error("Błąd tworzenia folderu");
         }
     };
 
@@ -323,10 +374,11 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     };
 
     const handleDeleteFolder = async (folderId) => {
-        if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Notatki zostaną przeniesione do głównego widoku.')) return;
+        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten folder? Notatki zostaną przeniesione do głównego widoku.');
+        if (!confirmed) return;
 
         try {
-            await axios.delete(`http://localhost:8000/folders/notes/${folderId}`);
+            await axios.delete(ENDPOINTS.FOLDERS.NOTES.DELETE(folderId));
             if (currentFolder?.id === folderId) {
                 setCurrentFolder(null);
             }
@@ -334,7 +386,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             refreshNotebook();
         } catch (err) {
             console.error('Error deleting folder:', err);
-            alert("Błąd usuwania folderu");
+            toast.error("Błąd usuwania folderu");
         }
     };
 
@@ -343,21 +395,21 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         if (!editingFolder || !editingFolder.name.trim()) return;
 
         try {
-            await axios.patch(`http://localhost:8000/folders/notes/${editingFolder.id}/rename`, {
+            await axios.patch(ENDPOINTS.FOLDERS.NOTES.RENAME(editingFolder.id), {
                 name: editingFolder.name
             });
             setEditingFolder(null);
             fetchFolders();
         } catch (err) {
             console.error('Error renaming folder:', err);
-            alert("Błąd zmiany nazwy folderu");
+            toast.error("Błąd zmiany nazwy folderu");
         }
     };
 
     const handleMoveNoteToFolder = async (noteId, folderId) => {
         try {
             console.log('Moving note:', noteId, 'to folder:', folderId);
-            const response = await axios.post('http://localhost:8000/folders/notes/move-item', {
+            const response = await axios.post(ENDPOINTS.FOLDERS.NOTES.MOVE_ITEM, {
                 note_id: noteId,
                 folder_id: folderId
             });
@@ -377,7 +429,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
         } catch (err) {
             console.error('Error moving note:', err);
-            alert("Błąd przenoszenia notatki");
+            toast.error("Błąd przenoszenia notatki");
         }
     };
 
@@ -467,13 +519,12 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         try {
             await Promise.all(
                 updatedNotes.map(note =>
-                    axios.patch(`http://localhost:8000/notes/${note.id}/position`, {
-                        grid_position: note.grid_position
-                    })
+                    updateNotePosition(note.id, note.grid_position)
                 )
             );
         } catch (err) {
             console.error('Error updating note positions:', err);
+            toast.error("Błąd aktualizacji pozycji notatek");
             refreshNotebook();
         }
 
@@ -544,7 +595,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         try {
             await Promise.all(
                 updatedFolders.map(folder =>
-                    axios.patch(`http://localhost:8000/folders/notes/${folder.id}/position`, {
+                    axios.patch(ENDPOINTS.FOLDERS.NOTES.UPDATE_POSITION(folder.id), {
                         grid_position: folder.grid_position
                     })
                 )
@@ -587,7 +638,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         // Handle folder drop
         if (draggedFolder) {
             try {
-                await axios.patch(`http://localhost:8000/folders/notes/${draggedFolder.folder.id}/move`, {
+                await axios.patch(ENDPOINTS.FOLDERS.NOTES.MOVE(draggedFolder.folder.id), {
                     parent_folder_id: folderId
                 });
                 setDraggedFolder(null);
@@ -595,7 +646,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 refreshNotebook();
             } catch (err) {
                 console.error('Error moving folder into folder:', err);
-                alert("Błąd przenoszenia folderu");
+                toast.error("Błąd przenoszenia folderu");
             }
         }
     };
@@ -632,7 +683,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         // Handle folder drop
         if (draggedFolder) {
             try {
-                await axios.patch(`http://localhost:8000/folders/notes/${draggedFolder.folder.id}/move`, {
+                await axios.patch(ENDPOINTS.FOLDERS.NOTES.MOVE(draggedFolder.folder.id), {
                     parent_folder_id: parentFolderId
                 });
                 setDraggedFolder(null);
@@ -640,7 +691,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 refreshNotebook();
             } catch (err) {
                 console.error('Error moving folder to parent:', err);
-                alert("Błąd przenoszenia folderu");
+                toast.error("Błąd przenoszenia folderu");
             }
         }
     };
@@ -649,77 +700,128 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         <>
             <div className={styles.filesView}>
                 <div className={styles.headerSection}>
-                    <div className={styles.headerMain}>
-                        {currentFolder ? (
-                            <>
-                                <button
-                                    onClick={closeFolder}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.5rem',
-                                        background: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        color: '#f59e0b',
-                                        fontWeight: 600,
-                                        fontSize: '1rem',
-                                        transition: 'all 0.2s ease'
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-3px)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
-                                >
-                                    <ArrowLeft size={20} />
-                                    Powrót
-                                </button>
-                                <h1
-                                    className={styles.notebookTitle}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.5rem',
-                                        borderRadius: '8px',
-                                        transition: 'all 0.2s ease',
-                                        backgroundColor: dragOverBreadcrumb ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
-                                        border: dragOverBreadcrumb ? '2px dashed #f59e0b' : '2px solid transparent'
-                                    }}
-                                    onDragOver={handleBreadcrumbDragOver}
-                                    onDragLeave={handleBreadcrumbDragLeave}
-                                    onDrop={handleBreadcrumbDrop}
-                                >
-                                    <Folder size={24} style={{ color: '#f59e0b' }} />
-                                    {currentFolder.name}
-                                </h1>
-                            </>
-                        ) : (
-                            <h1 className={styles.notebookTitle}>{details.name}</h1>
+                    <div className={styles.leftSection}>
+                        {currentFolder && (
+                            <button
+                                onClick={closeFolder}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.5rem',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#f59e0b',
+                                    fontWeight: 600,
+                                    fontSize: '1rem',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-3px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+                            >
+                                <ArrowLeft size={20} />
+                                Powrót
+                            </button>
                         )}
-                        <div className={styles.headerActions}>
-                            <button
-                                className={styles.addFolderBtn}
-                                onClick={() => setShowCreateFolderModal(true)}
-                            >
-                                <Folder size={18} />
-                                Nowy folder
-                            </button>
-                            {details.is_shared && (
-                                <button
-                                    className={styles.collaboratorBtn}
-                                    onClick={() => setShowCollaboratorModal(true)}
-                                >
-                                    <UserPlus size={18} />
-                                    <span>Współtwórcy</span>
-                                </button>
+                        <h1
+                            className={styles.notebookTitle}
+                            style={{
+                                padding: currentFolder ? '0.5rem' : '0',
+                                borderRadius: '8px',
+                                transition: 'all 0.2s ease',
+                                backgroundColor: dragOverBreadcrumb ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
+                                border: dragOverBreadcrumb ? '2px dashed #f59e0b' : '2px solid transparent'
+                            }}
+                            onDragOver={currentFolder ? handleBreadcrumbDragOver : undefined}
+                            onDragLeave={currentFolder ? handleBreadcrumbDragLeave : undefined}
+                            onDrop={currentFolder ? handleBreadcrumbDrop : undefined}
+                        >
+                            {currentFolder ? (
+                                <span style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                                    <Folder size={24} style={{color: '#f59e0b'}} />
+                                    {currentFolder.name}
+                                </span>
+                            ) : (
+                                'Moje Pliki'
                             )}
-                            <button
-                                className={styles.addNoteBtn}
-                                onClick={() => setShowAddNoteModal(true)}
-                            >
-                                + Dodaj notatkę
-                            </button>
+                        </h1>
+                        <div className={styles.searchBox}>
+                            <Search size={16} />
+                            <input
+                                type="text"
+                                placeholder="Szukaj notatek..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.searchInput}
+                            />
                         </div>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="date_desc">Najnowsze</option>
+                            <option value="date_asc">Najstarsze</option>
+                            <option value="name_asc">Nazwa A-Z</option>
+                            <option value="name_desc">Nazwa Z-A</option>
+                        </select>
+                    </div>
+                    {showFilters && (
+                        <div className={styles.filtersRow}>
+                            <div className={styles.searchBox}>
+                                <Search size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Szukaj notatek..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className={styles.searchInput}
+                                />
+                            </div>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className={styles.filterSelect}
+                            >
+                                <option value="date_desc">Najnowsze</option>
+                                <option value="date_asc">Najstarsze</option>
+                                <option value="name_asc">Nazwa A-Z</option>
+                                <option value="name_desc">Nazwa Z-A</option>
+                            </select>
+                        </div>
+                    )}
+                    <div className={styles.headerActions}>
+                        <button
+                            className={styles.filterToggleBtn}
+                            onClick={() => setShowFilters(!showFilters)}
+                            title="Filtry"
+                        >
+                            <Filter size={18} />
+                        </button>
+                        <button
+                            className={styles.addFolderBtn}
+                            onClick={() => setShowCreateFolderModal(true)}
+                        >
+                            <Folder size={18} />
+                            Nowy folder
+                        </button>
+                        {details.is_shared && (
+                            <button
+                                className={styles.collaboratorBtn}
+                                onClick={() => setShowCollaboratorModal(true)}
+                            >
+                                <UserPlus size={18} />
+                                <span>Współtwórcy</span>
+                            </button>
+                        )}
+                        <button
+                            className={styles.addNoteBtn}
+                            onClick={() => setShowAddNoteModal(true)}
+                        >
+                            <Plus size={18} />
+                            Dodaj notatkę
+                        </button>
                     </div>
                 </div>
 
@@ -818,9 +920,9 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                     key={note.id}
                                     id={`note-card-${note.id}`}
                                     className={`
-                                        ${styles.noteCard} 
-                                        ${note.is_pinned ? styles.pinnedCard : ''} 
-                                        ${isDragOver ? styles.dragOver : ''} 
+                                        ${styles.noteCard}
+                                        ${note.is_pinned ? styles.pinnedCard : ''}
+                                        ${isDragOver ? styles.dragOver : ''}
                                         ${isDragNotAllowed ? styles.dragNotAllowed : ''}
                                         ${isHighlighted ? styles.highlighted : ''}
                                     `}
@@ -842,12 +944,16 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                             >
                                                 <Pin size={16} />
                                             </button>
-                                            <span
-                                                className={styles.noteType}
-                                                style={{ backgroundColor: getTypeColor(note.type) }}
+                                            <button
+                                                className={styles.deleteNoteBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteNote(note.id);
+                                                }}
+                                                title="Usuń notatkę"
                                             >
-                                                {note.type}
-                                            </span>
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                     <p className={styles.noteContent}>
@@ -857,6 +963,12 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                     <div className={styles.noteFooter}>
                                         <span className={styles.noteDate}>
                                             {formatDate(note.created_at)}
+                                        </span>
+                                        <span
+                                            className={styles.noteType}
+                                            style={{ backgroundColor: getTypeColor(note.type) }}
+                                        >
+                                            {note.type}
                                         </span>
                                     </div>
                                 </div>
@@ -872,47 +984,60 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 </div>
 
                 {showAddNoteModal && (
-                    <div className={styles.modalOverlay} onClick={() => setShowAddNoteModal(false)}>
-                        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                            <h2 className={styles.modalTitle}>Dodaj nową notatkę</h2>
-                            <form onSubmit={handleAddNote}>
-                                <div className={styles.formGroup}>
-                                    <label>Tytuł</label>
-                                    <input
-                                        type="text"
-                                        value={newNote.title}
-                                        onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                                        placeholder="Tytuł notatki"
-                                    />
+                    <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowAddNoteModal(false)}>
+                        <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                            <div className={generatorStyles.header}>
+                                <h2 className={generatorStyles.title}>Dodaj nową notatkę</h2>
+                                <button className={generatorStyles.closeBtn} onClick={() => setShowAddNoteModal(false)} title="Zamknij">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddNote} className={generatorStyles.form}>
+                                <div className={generatorStyles.formSection}>
+                                    <h3 className={generatorStyles.sectionTitle}>Podstawowe informacje</h3>
+
+                                    <div className={generatorStyles.formGroup}>
+                                        <label>Tytuł</label>
+                                        <input
+                                            type="text"
+                                            value={newNote.title}
+                                            onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                                            placeholder="Tytuł notatki"
+                                        />
+                                    </div>
+
+                                    <div className={generatorStyles.formGroup}>
+                                        <label>Treść</label>
+                                        <textarea
+                                            value={newNote.content}
+                                            onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+                                            placeholder="Treść notatki..."
+                                        />
+                                    </div>
+
+                                    <div className={generatorStyles.formGroup}>
+                                        <label>Typ</label>
+                                        <select
+                                            value={newNote.type}
+                                            onChange={(e) => setNewNote({ ...newNote, type: e.target.value })}
+                                        >
+                                            <option value="Notatka">Notatka</option>
+                                            <option value="Test">Test</option>
+                                            <option value="Fiszki">Fiszki</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div className={styles.formGroup}>
-                                    <label>Treść</label>
-                                    <textarea
-                                        value={newNote.content}
-                                        onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                                        placeholder="Treść notatki..."
-                                    />
-                                </div>
-                                <div className={styles.formGroup}>
-                                    <label>Typ</label>
-                                    <select
-                                        value={newNote.type}
-                                        onChange={(e) => setNewNote({ ...newNote, type: e.target.value })}
-                                    >
-                                        <option value="Notatka">Notatka</option>
-                                        <option value="Test">Test</option>
-                                        <option value="Fiszki">Fiszki</option>
-                                    </select>
-                                </div>
-                                <div className={styles.modalActions}>
+
+                                <div className={generatorStyles.formActions}>
                                     <button
                                         type="button"
-                                        className={styles.btnCancel}
+                                        className={generatorStyles.btnCancel}
                                         onClick={() => setShowAddNoteModal(false)}
                                     >
                                         Anuluj
                                     </button>
-                                    <button type="submit" className={styles.btnSubmit}>
+                                    <button type="submit" className={generatorStyles.btnSubmit}>
                                         Dodaj
                                     </button>
                                 </div>
@@ -922,65 +1047,78 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 )}
 
                 {showCollaboratorModal && (
-                    <div className={styles.modalOverlay} onClick={() => setShowCollaboratorModal(false)}>
-                        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                            <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>Zarządzaj współtwórcami</h2>
+                    <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCollaboratorModal(false)}>
+                        <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                            <div className={generatorStyles.header}>
+                                <h2 className={generatorStyles.title}>Zarządzaj współtwórcami</h2>
                                 <button
-                                    className={styles.closeBtn}
+                                    className={generatorStyles.closeBtn}
                                     onClick={() => setShowCollaboratorModal(false)}
+                                    title="Zamknij"
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <form onSubmit={handleAddCollaborator} className={styles.addCollaboratorForm}>
-                                <div className={styles.formGroup}>
-                                    <label>Dodaj nowego współtwórcę</label>
-                                    <div className={styles.inputWithButton}>
-                                        <input
-                                            type="text"
-                                            value={collaboratorUsername}
-                                            onChange={(e) => setCollaboratorUsername(e.target.value)}
-                                            placeholder="Nazwa użytkownika"
-                                        />
-                                        <button type="submit" className={styles.btnAdd}>
-                                            <UserPlus size={18} />
-                                            Dodaj
-                                        </button>
-                                    </div>
+                            <div style={{ padding: '0 2rem 2rem 2rem', display: 'flex', flexDirection: 'column', gap: '2rem', flex: 1, overflowY: 'auto' }}>
+                                <div className={generatorStyles.formSection}>
+                                    <h3 className={generatorStyles.sectionTitle}>Dodaj nowego współtwórcę</h3>
+                                    <form onSubmit={handleAddCollaborator}>
+                                        <div className={styles.inputWithButton}>
+                                            <input
+                                                type="text"
+                                                value={collaboratorUsername}
+                                                onChange={(e) => setCollaboratorUsername(e.target.value)}
+                                                placeholder="Nazwa użytkownika"
+                                                style={{
+                                                    background: 'var(--inner_inner_section_bg)',
+                                                    color: 'var(--title)',
+                                                    padding: '0.75rem 1rem',
+                                                    border: '2px solid var(--white_btn_box_shadow)',
+                                                    borderRadius: '10px',
+                                                    fontSize: '1rem',
+                                                    flex: 1,
+                                                    fontFamily: 'inherit'
+                                                }}
+                                            />
+                                            <button type="submit" className={styles.btnAdd}>
+                                                <UserPlus size={18} />
+                                                Dodaj
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </form>
 
-                            <div className={styles.collaboratorsList}>
-                                <h3 className={styles.collaboratorsTitle}>
-                                    Współtwórcy ({collaborators.length})
-                                </h3>
-                                {collaborators.length > 0 ? (
-                                    <div className={styles.collaboratorsItems}>
-                                        {collaborators.map((collab) => (
-                                            <div key={collab.id} className={styles.collaboratorItem}>
-                                                <div className={styles.collaboratorAvatar}>
-                                                    {collab.username.charAt(0).toUpperCase()}
+                                <div className={generatorStyles.formSection}>
+                                    <h3 className={generatorStyles.sectionTitle}>
+                                        Współtwórcy ({collaborators.length})
+                                    </h3>
+                                    {collaborators.length > 0 ? (
+                                        <div className={styles.collaboratorsItems}>
+                                            {collaborators.map((collab) => (
+                                                <div key={collab.id} className={styles.collaboratorItem}>
+                                                    <div className={styles.collaboratorAvatar}>
+                                                        {collab.username.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <span className={styles.collaboratorName}>
+                                                        {collab.username}
+                                                    </span>
+                                                    <button
+                                                        className={styles.btnRemove}
+                                                        onClick={() => handleRemoveCollaborator(collab.id)}
+                                                        title="Usuń współtwórcę"
+                                                    >
+                                                        <X size={16} />
+                                                    </button>
                                                 </div>
-                                                <span className={styles.collaboratorName}>
-                                                    {collab.username}
-                                                </span>
-                                                <button
-                                                    className={styles.btnRemove}
-                                                    onClick={() => handleRemoveCollaborator(collab.id)}
-                                                    title="Usuń współtwórcę"
-                                                >
-                                                    <X size={16} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className={styles.emptyCollaborators}>
-                                        <p>Brak współtwórców. Dodaj pierwszego!</p>
-                                    </div>
-                                )}
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className={styles.emptyCollaborators}>
+                                            <p>Brak współtwórców. Dodaj pierwszego!</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -988,38 +1126,41 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
                 {/* Create Folder Modal */}
                 {showCreateFolderModal && (
-                    <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                        <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
-                            <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>Utwórz nowy folder</h2>
+                    <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCreateFolderModal(false)}>
+                        <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                            <div className={generatorStyles.header}>
+                                <h2 className={generatorStyles.title}>Utwórz nowy folder</h2>
                                 <button
-                                    className={styles.closeBtn}
+                                    className={generatorStyles.closeBtn}
                                     onClick={() => setShowCreateFolderModal(false)}
+                                    title="Zamknij"
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
-                            <form onSubmit={handleCreateFolder} style={{ padding: '2rem' }}>
-                                <div className={styles.formGroup}>
-                                    <label>Nazwa folderu</label>
-                                    <input
-                                        type="text"
-                                        value={newFolderName}
-                                        onChange={(e) => setNewFolderName(e.target.value)}
-                                        placeholder="Wpisz nazwę folderu..."
-                                        autoFocus
-                                        required
-                                    />
+                            <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
+                                <div className={generatorStyles.formSection}>
+                                    <div className={generatorStyles.formGroup}>
+                                        <label>Nazwa folderu</label>
+                                        <input
+                                            type="text"
+                                            value={newFolderName}
+                                            onChange={(e) => setNewFolderName(e.target.value)}
+                                            placeholder="Wpisz nazwę folderu..."
+                                            autoFocus
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <div className={styles.modalActions}>
+                                <div className={generatorStyles.formActions}>
                                     <button
                                         type="button"
-                                        className={styles.btnCancel}
+                                        className={generatorStyles.btnCancel}
                                         onClick={() => setShowCreateFolderModal(false)}
                                     >
                                         Anuluj
                                     </button>
-                                    <button type="submit" className={styles.btnSubmit}>
+                                    <button type="submit" className={generatorStyles.btnSubmit}>
                                         Utwórz folder
                                     </button>
                                 </div>
@@ -1030,38 +1171,41 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
                 {/* Rename Folder Modal */}
                 {editingFolder && (
-                    <div className={styles.modalOverlay} onClick={() => setEditingFolder(null)}>
-                        <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
-                            <div className={styles.modalHeader}>
-                                <h2 className={styles.modalTitle}>Zmień nazwę folderu</h2>
+                    <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setEditingFolder(null)}>
+                        <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                            <div className={generatorStyles.header}>
+                                <h2 className={generatorStyles.title}>Zmień nazwę folderu</h2>
                                 <button
-                                    className={styles.closeBtn}
+                                    className={generatorStyles.closeBtn}
                                     onClick={() => setEditingFolder(null)}
+                                    title="Zamknij"
                                 >
                                     <X size={20} />
                                 </button>
                             </div>
-                            <form onSubmit={handleRenameFolder} style={{ padding: '2rem' }}>
-                                <div className={styles.formGroup}>
-                                    <label>Nowa nazwa</label>
-                                    <input
-                                        type="text"
-                                        value={editingFolder.name}
-                                        onChange={(e) => setEditingFolder({ ...editingFolder, name: e.target.value })}
-                                        placeholder="Wpisz nową nazwę folderu..."
-                                        autoFocus
-                                        required
-                                    />
+                            <form onSubmit={handleRenameFolder} className={generatorStyles.form}>
+                                <div className={generatorStyles.formSection}>
+                                    <div className={generatorStyles.formGroup}>
+                                        <label>Nowa nazwa</label>
+                                        <input
+                                            type="text"
+                                            value={editingFolder.name}
+                                            onChange={(e) => setEditingFolder({ ...editingFolder, name: e.target.value })}
+                                            placeholder="Wpisz nową nazwę folderu..."
+                                            autoFocus
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <div className={styles.modalActions}>
+                                <div className={generatorStyles.formActions}>
                                     <button
                                         type="button"
-                                        className={styles.btnCancel}
+                                        className={generatorStyles.btnCancel}
                                         onClick={() => setEditingFolder(null)}
                                     >
                                         Anuluj
                                     </button>
-                                    <button type="submit" className={styles.btnSubmit}>
+                                    <button type="submit" className={generatorStyles.btnSubmit}>
                                         Zmień nazwę
                                     </button>
                                 </div>

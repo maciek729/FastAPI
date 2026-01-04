@@ -53,6 +53,8 @@
     --red_white_btn_border_hover: #fc8181;
     --flashcards_green_border: #68d391;
     --flashcards_green_bg: #f0fff4;
+    --cancel_btn_bg: white;
+    --cancel_btn_text: #8b5cf6;
 }
 
 /* Motyw Ciemny */ 
@@ -111,4 +113,6 @@
     --flashcards_green_border: #3a5740;
     --flashcards_green_bg: rgba(58, 87, 64, 0.5);
     --flashcards_green_border_hover: rgb(85, 148, 98);
+    --cancel_btn_bg: linear-gradient(135deg, #383845 0%, #454554 100%);
+    --cancel_btn_text: #c4b5fd;
 }

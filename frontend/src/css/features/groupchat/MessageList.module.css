@@ -461,3 +461,121 @@
     border: 1px solid var(--border_gray);
     text-transform: capitalize;
 }
+
+@media (max-width: 768px) {
+    .messagesContainer {
+        gap: 0.875rem;
+        padding: 0.375rem;
+    }
+
+    .messageWrapper {
+        max-width: 90%;
+    }
+
+    .senderName {
+        font-size: 0.6875rem;
+    }
+
+    .bubble {
+        padding: 0.625rem 0.875rem;
+        padding-bottom: 0.3rem;
+        min-width: 85px;
+    }
+
+    .messageText {
+        font-size: 0.8125rem;
+    }
+
+    .messageTime {
+        font-size: 0.5625rem;
+    }
+
+    .bubbleActions {
+        opacity: 1; /* Always visible on mobile for easier interaction */
+        gap: 0.5rem;
+    }
+
+    .smallActionBtn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .editInput {
+        font-size: 16px; /* Prevents iOS zoom */
+        padding: 0.75rem;
+    }
+
+    .saveIcon, .cancelIcon {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .resourceCard {
+        min-width: 180px;
+    }
+
+    .resourceHeader {
+        font-size: 0.6875rem;
+    }
+
+    .resourceTitle {
+        font-size: 0.875rem;
+    }
+
+    .openResourceBtn {
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        min-height: 44px;
+    }
+
+    .dateSeparator {
+        margin: 20px 0 12px;
+    }
+
+    .dateSeparator::before {
+        left: 10px;
+        right: 10px;
+    }
+
+    .dateSeparator span {
+        font-size: 0.6875rem;
+        padding: 3px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .messagesContainer {
+        gap: 0.75rem;
+        padding: 0.25rem;
+    }
+
+    .messageWrapper {
+        max-width: 95%;
+    }
+
+    .bubble {
+        padding: 0.5rem 0.75rem;
+        padding-bottom: 0.25rem;
+        min-width: 75px;
+    }
+
+    .messageText {
+        font-size: 0.8125rem;
+        line-height: 1.35;
+    }
+
+    .resourceCard {
+        min-width: 160px;
+    }
+
+    .resourceTitle {
+        font-size: 0.8125rem;
+    }
+
+    .openResourceBtn {
+        padding: 0.625rem 0.875rem;
+    }
+}
+
