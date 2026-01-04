@@ -1,4 +1,4 @@
-import { X, Play, BarChart } from 'lucide-react';
+import { X, Play } from 'lucide-react';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 
@@ -95,7 +95,6 @@ export default function TestDetails({ show, onClose, test, onStartTest, onViewRe
                             className={styles.btnResultsLarge}
                             onClick={() => onViewResults(test)}
                         >
-                            <BarChart size={18} />
                             Zobacz wyniki
                         </button>
                     </div>

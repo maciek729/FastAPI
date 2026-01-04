@@ -201,3 +201,111 @@
     color: var(--purple_brighter);
     font-weight: 600;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .notificationsMainContainer {
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .notificationsMainContainer {
+    width: 95%;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .titleContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .titleWithIcon {
+    gap: 0.625rem;
+  }
+
+  .headerIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .clearAllBtn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.8125rem;
+  }
+
+  .sectionContainer {
+    padding: 0.75rem;
+  }
+
+  .notificationCard {
+    gap: 0.75rem;
+    padding: 0.875rem;
+  }
+
+  .iconWrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .senderName {
+    font-size: 0.85rem;
+  }
+
+  .notificationText {
+    font-size: 0.8125rem;
+  }
+
+  .timeWrapper {
+    font-size: 0.6875rem;
+  }
+
+  .deleteBtn {
+    opacity: 1; /* Always visible on mobile for easier interaction */
+    padding: 8px; /* Larger touch target */
+  }
+}
+
+@media (max-width: 480px) {
+  .notificationsMainContainer {
+    width: 100%;
+    margin: 1rem auto;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .sectionContainer {
+    padding: 0.5rem;
+  }
+
+  .notificationCard {
+    flex-direction: row;
+    gap: 0.625rem;
+    padding: 0.75rem;
+  }
+
+  .iconWrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .emptyState {
+    padding: 3rem 1rem;
+  }
+
+  .emptyState p {
+    font-size: 1rem;
+  }
+}

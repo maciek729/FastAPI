@@ -1,13 +1,14 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import styles from "../../../../css/features/settings/UserSettings.module.css";
 import { LanguageContext } from "../../../../translations/LanguageContext";
 import translations from "../../../../translations/translation.json";
 import Modal from "./Modal.jsx";
 import AvatarModal from "./AvatarModal.jsx";
-import { 
-    changeUsername, 
-    requestPasswordReset, 
-    uploadAvatar, 
+import {
+    changeUsername,
+    requestPasswordReset,
+    uploadAvatar,
     deleteAvatar,
     archiveUserAccount
 } from '../../../../services/userService';
@@ -101,7 +102,7 @@ export default function UserSettings({ userData }) {
                 setIsPendingDelete(false);
             } catch (error) {
                 success = false;
-                alert("Błąd podczas usuwania zdjęcia.");
+                toast.error("Błąd podczas usuwania zdjęcia.");
             }
         }
 
@@ -110,7 +111,7 @@ export default function UserSettings({ userData }) {
                 await uploadAvatar(selectedAvatarFile, token);
             } catch (error) {
                 success = false;
-                alert("Błąd podczas wgrywania nowego zdjęcia.");
+                toast.error("Błąd podczas wgrywania nowego zdjęcia.");
             }
         }
 
@@ -119,7 +120,7 @@ export default function UserSettings({ userData }) {
                 await changeUsername(pendingChanges.username, token);
             } catch (error) {
                 success = false;
-                alert(`Błąd nazwy: ${error.message}`);
+                toast.error(`Błąd nazwy: ${error.message}`);
             }
         }
 
@@ -139,9 +140,9 @@ export default function UserSettings({ userData }) {
             if (!userData?.email) return closeModal();
             try {
                 await requestPasswordReset(userData.email);
-                alert(t('Wysłano wiadomość email z linkiem do resetowania hasła!'));
+                toast.success(t('Wysłano wiadomość email z linkiem do resetowania hasła!'));
             } catch (error) {
-                alert(`Błąd: ${error.message}`);
+                toast.error(`Błąd: ${error.message}`);
             }
             closeModal();
             return;
@@ -151,13 +152,14 @@ export default function UserSettings({ userData }) {
             try {
                 await archiveUserAccount(token);
 
-                alert(t('Twoje konto zostało pomyślnie zarchiwizowane. Nastąpi wylogowanie.'));
+                toast.success(t('Twoje konto zostało pomyślnie zarchiwizowane. Nastąpi wylogowanie.'));
 
-                document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                
-                window.location.href = '/login';
+                setTimeout(() => {
+                    document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    window.location.href = '/login';
+                }, 1500);
             } catch (error) {
-                alert(`${t('Błąd podczas usuwania konta')}: ${error.message}`);
+                toast.error(`${t('Błąd podczas usuwania konta')}: ${error.message}`);
             }
             closeModal();
             return;

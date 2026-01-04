@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
 import { X } from 'lucide-react';
 import MathText from './MathText';
 import styles from "../../../css/features/TestsView.module.css";
@@ -49,7 +51,8 @@ export default function TestTaking({
         });
 
         if (unanswered.length > 0) {
-            if (!window.confirm(`Nie odpowiedziałeś na ${unanswered.length} pytań. Czy chcesz kontynuować?`)) {
+            const confirmed = await confirmModal(`Nie odpowiedziałeś na ${unanswered.length} pytań. Czy chcesz kontynuować?`);
+            if (!confirmed) {
                 return;
             }
         }
@@ -75,7 +78,7 @@ export default function TestTaking({
             onSubmitComplete(results);
         } catch (err) {
             console.error('Error submitting test:', err);
-            alert("Błąd podczas przesyłania odpowiedzi");
+            toast.error("Błąd podczas przesyłania odpowiedzi");
         } finally {
             setLoading(false);
         }

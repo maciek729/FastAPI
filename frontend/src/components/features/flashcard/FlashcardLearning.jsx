@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import toast from 'react-hot-toast';
 import { ArrowLeft, RotateCw, Award, Loader } from "lucide-react";
 import FlashcardCard from "./FlashcardCard";
 import styles from "../../../css/features/FlashcardLearning.module.css";
@@ -83,7 +84,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
                 setShowCompletion(true);
             }
         } catch (error) {
-            alert(t('flashcardLearning.saveError'));
+            toast.error(t('flashcardLearning.saveError'));
         }
     };
 
@@ -129,7 +130,6 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
 
         return (
             <div className={styles.completion}>
-                <Award className={styles.completionIcon} size={64} />
                 <h2>{t('flashcardLearning.sessionCompleted')}</h2>
                 <p>{t('flashcardLearning.set')}: "{flashcardSet.title}"</p>
 

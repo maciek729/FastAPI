@@ -1,6 +1,7 @@
 {
   "pl": {
     "sidebar": {
+      "spaces": "Przestrzenie",
       "personalSpace": "Osobista",
       "sharedSpace": "Wspólna",
       "dashboard": "Pulpit",
@@ -17,7 +18,8 @@
         "note": "Notatka skopiowana do notatnika \"{notebookName}\"",
         "noteFolder": "Folder skopiowany do notatnika \"{notebookName}\"",
         "flashcardSet": "Zestaw fiszek skopiowany do notatnika \"{notebookName}\"",
-        "flashcardSetFolder": "Folder fiszek skopiowany do notatnika \"{notebookName}\""
+        "flashcardSetFolder": "Folder fiszek skopiowany do notatnika \"{notebookName}\"",
+        "podcast": "Podcast skopiowany do notatnika \"{notebookName}\""
       },
       "errors": {
         "fetchNotebooks": "Błąd pobierania notatników",
@@ -239,7 +241,7 @@
       "know": "Umiem"
     },
     "flashcardGenerator": {
-      "title": "Generuj nowe fiszki",
+      "title": "Wygeneruj nowe fiszki",
       "close": "Zamknij",
       "sourceTitle": "Źródło materiału",
       "manual": "Ręczny opis",
@@ -305,7 +307,7 @@
       "setDescriptionPlaceholder": "Opis zestawu (opcjonalnie)",
       "save": "Zapisz",
       "cancel": "Anuluj",
-      "editSet": "Edytuj zestaw",
+      "editSet": "Edytuj",
       "addNewCard": "Dodaj nową fiszkę",
       "questionPlaceholder": "Pytanie",
       "answerPlaceholder": "Odpowiedź",
@@ -325,12 +327,27 @@
       "noNotebooks": "Brak notatników. Utwórz swój pierwszy!",
       "fetchError": "Błąd pobierania notatników",
       "createError": "Błąd tworzenia notatnika",
-      "notebookNamePrompt": "Podaj nazwę notatnika:"
+      "notebookNamePrompt": "Podaj nazwę notatnika:",
+      "greetings": {
+        "morning": "Dzień dobry",
+        "afternoon": "Dzień dobry",
+        "evening": "Dobry wieczór"
+      },
+      "readyToStudy": "Gotowy na nową sesję nauki?",
+      "startLearning": "Rozpocznij swoją przygodę z wiedzą już dziś! Wybierz notatnik z przestrzeni osobistej lub współdzielonej, aby kontynuować naukę.",
+      "recentNotifications": "Ostatnie powiadomienia",
+      "noNotifications": "Brak nowych powiadomień",
+      "timeFormats": {
+        "now": "Teraz",
+        "minutesAgo": "{count} min temu",
+        "hoursAgo": "{count} godz. temu",
+        "daysAgo": "{count} dni temu"
+      }
     },
     "chat": {
       "title": "Chat z AI",
       "clear": "Wyczyść",
-      "saveSelected": "Zapisz zaznaczone jako notatkę",
+      "saveSelected": "Naciśnij aby zapisać zaznaczone elementy jako notatkę",
       "saveSingle": "Zapisz pojedynczy dymek",
       "selectForNote": "Zaznacz do notatki",
       "startConversation": "Zacznij konwersację",
@@ -464,6 +481,7 @@
 
   "en": {
     "sidebar": {
+      "spaces": "Spaces",
       "personalSpace": "Personal",
       "sharedSpace": "Shared",
       "dashboard": "Dashboard",
@@ -480,7 +498,8 @@
         "note": "Note copied to notebook \"{notebookName}\"",
         "noteFolder": "Folder copied to notebook \"{notebookName}\"",
         "flashcardSet": "Flashcard set copied to notebook \"{notebookName}\"",
-        "flashcardSetFolder": "Flashcard folder copied to notebook \"{notebookName}\""
+        "flashcardSetFolder": "Flashcard folder copied to notebook \"{notebookName}\"",
+        "podcast": "Podcast copied to notebook \"{notebookName}\""
       },
       "errors": {
         "fetchNotebooks": "Error loading notebooks",
@@ -769,7 +788,7 @@
       "setDescriptionPlaceholder": "Set description (optional)",
       "save": "Save",
       "cancel": "Cancel",
-      "editSet": "Edit set",
+      "editSet": "Edit",
       "addNewCard": "Add new flashcard",
       "questionPlaceholder": "Question",
       "answerPlaceholder": "Answer",
@@ -789,12 +808,27 @@
       "noNotebooks": "No notebooks. Create your first one!",
       "fetchError": "Error loading notebooks",
       "createError": "Error creating notebook",
-      "notebookNamePrompt": "Enter notebook name:"
+      "notebookNamePrompt": "Enter notebook name:",
+      "greetings": {
+        "morning": "Good morning",
+        "afternoon": "Good afternoon",
+        "evening": "Good evening"
+      },
+      "readyToStudy": "Ready for a new study session?",
+      "startLearning": "Start your knowledge adventure today! Choose a notebook from your personal or shared space to continue learning.",
+      "recentNotifications": "Recent notifications",
+      "noNotifications": "No new notifications",
+      "timeFormats": {
+        "now": "Now",
+        "minutesAgo": "{count} min ago",
+        "hoursAgo": "{count} hrs ago",
+        "daysAgo": "{count} days ago"
+      }
     },
     "chat": {
       "title": "AI Chat",
       "clear": "Clear",
-      "saveSelected": "Save selected as note",
+      "saveSelected": "Click to save selected elements as note",
       "saveSingle": "Save single bubble",
       "selectForNote": "Select for note",
       "startConversation": "Start conversation",

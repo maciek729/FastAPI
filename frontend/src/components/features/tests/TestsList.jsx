@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
 import { Trash2, Pin, Folder, MoreVertical, X } from 'lucide-react';
 import styles from "../../../css/features/TestsView.module.css";
 import * as testsService from '../../../services/testsService';
@@ -66,20 +68,21 @@ export default function TestsList({
             );
         } catch (err) {
             console.error('Error toggling pin:', err);
-            alert("Błąd przypinania testu");
+            toast.error("Błąd przypinania testu");
         }
     };
 
     const handleDeleteTest = async (testId) => {
-        if (!window.confirm('Czy na pewno chcesz usunąć ten test?')) return;
+        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten test?');
+        if (!confirmed) return;
 
         try {
             await testsService.deleteTest(testId, userData.id);
-            alert('Test usunięty');
+            toast.success('Test usunięty');
             setTests(prevTests => prevTests.filter(t => t.id !== testId));
         } catch (err) {
             console.error('Error deleting test:', err);
-            alert("Błąd usuwania testu");
+            toast.error("Błąd usuwania testu");
         }
     };
 
@@ -249,7 +252,7 @@ export default function TestsList({
             );
         } catch (err) {
             console.error('Error moving test:', err);
-            alert("Błąd przenoszenia testu");
+            toast.error("Błąd przenoszenia testu");
         }
     };
 
@@ -282,7 +285,7 @@ export default function TestsList({
                 await onRefreshFolders();
             } catch (err) {
                 console.error('Error moving folder into folder:', err);
-                alert("Błąd przenoszenia folderu");
+                toast.error("Błąd przenoszenia folderu");
             }
         }
     };
@@ -445,7 +448,7 @@ export default function TestsList({
                     >
                         <div className={styles.testCardHeader}>
                             <h3 className={styles.testTitle}>{test.title}</h3>
-                            <div className={styles.cardActions}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <button
                                     className={`${styles.pinTestBtn} ${test.is_pinned ? styles.pinned : ''}`}
                                     onClick={(e) => {
@@ -468,16 +471,31 @@ export default function TestsList({
                                 </button>
                             </div>
                         </div>
-                        <span
-                            className={styles.sourceLabel}
-                            style={{
-                                backgroundColor: getSourceLabel(test.source_type).bg,
-                                color: getSourceLabel(test.source_type).color,
-                                border: `1px solid ${getSourceLabel(test.source_type).border}`
-                            }}
-                        >
-                            {getSourceLabel(test.source_type).text}
-                        </span>
+                        <div className={styles.testStats}>
+                            <div className={styles.stat}>
+                                <span className={styles.statLabel}>Pytań</span>
+                                <span className={styles.statValue}>{test.questions?.length || 0}</span>
+                            </div>
+                            <div className={styles.stat}>
+                                <span className={styles.statLabel}>Źródło</span>
+                                <span className={styles.statValue}>
+                                    <span
+                                        className={styles.sourceChip}
+                                        style={{
+                                            backgroundColor: getSourceLabel(test.source_type).bg,
+                                            color: getSourceLabel(test.source_type).color,
+                                            border: `1px solid ${getSourceLabel(test.source_type).border}`
+                                        }}
+                                    >
+                                        {getSourceLabel(test.source_type).text}
+                                    </span>
+                                </span>
+                            </div>
+                            <div className={styles.stat}>
+                                <span className={styles.statLabel}>Wyniki</span>
+                                <span className={styles.statValue}>{test.last_result || '-'}</span>
+                            </div>
+                        </div>
                         <button
                             className={styles.btnDetails}
                             onClick={() => onShowDetails(test)}

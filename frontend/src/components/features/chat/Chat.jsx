@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Sparkles, Trash2, Upload, Send, User, Bot, Save } from "lucide-react";
+import toast from "react-hot-toast";
+import { MessageCircle, Trash2, Upload, Send, User, Bot, Save } from "lucide-react";
 import styles from "../../../css/features/Chat.module.css";
 import { 
   UploadFile,
@@ -111,11 +112,11 @@ export default function Chat({ userId, notebookId }) {
         type: "Chat AI",
         is_shared: false
       });
-      alert(t('chat.saveSuccess'));
+      toast.success(t('chat.saveSuccess'));
       setSelectedMessages([]);
     } catch (error) {
       console.error(error);
-      alert(t('chat.saveError'));
+      toast.error(t('chat.saveError'));
     }
   };
 
@@ -129,10 +130,10 @@ export default function Chat({ userId, notebookId }) {
         type: "Chat AI",
         is_shared: false
       });
-      alert(t('chat.saveSuccess'));
+      toast.success(t('chat.saveSuccess'));
     } catch (error) {
       console.error(error);
-      alert(t('chat.saveError'));
+      toast.error(t('chat.saveError'));
     }
   };
 
@@ -178,7 +179,7 @@ export default function Chat({ userId, notebookId }) {
     <div className={styles.chatContainer}>
       <div className={styles.chatHeader}>
         <div className={styles.chatHeaderLeft}>
-          <Sparkles size={20} className={styles.headerIcon} />
+          <MessageCircle size={20} className={styles.headerIcon} />
           <h2 className={styles.chatTitle}>{t('chat.title')}</h2>
         </div>
         <button className={styles.clearBtn} onClick={clearChat} disabled={messages.length === 0}>
@@ -195,7 +196,7 @@ export default function Chat({ userId, notebookId }) {
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (
           <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}><Sparkles size={48} /></div>
+            <div className={styles.emptyIcon}><MessageCircle size={48} /></div>
             <h3>{t('chat.startConversation')}</h3>
             <p>{t('chat.startDescription')}</p>
           </div>

@@ -12,7 +12,9 @@
       "Bash(timeout 5 bash:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(if exist \"c:\\StudyBuddy\\FastAPI\\frontend\\src\\components\\features\\notebook\\TestsView.jsx\" del \"c:\\StudyBuddy\\FastAPI\\frontend\\src\\components\\features\\notebook\\TestsView.jsx\")"
+      "Bash(if exist \"c:\\StudyBuddy\\FastAPI\\frontend\\src\\components\\features\\notebook\\TestsView.jsx\" del \"c:\\StudyBuddy\\FastAPI\\frontend\\src\\components\\features\\notebook\\TestsView.jsx\")",
+      "Bash(git checkout:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

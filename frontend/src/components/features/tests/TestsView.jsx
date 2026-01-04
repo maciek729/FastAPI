@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
 import { Plus, Search, Filter, X, Folder, ArrowLeft } from 'lucide-react';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
+import generatorStyles from "../../../css/features/FlashcardGenerator.module.css";
 import * as testsService from '../../../services/testsService';
 import TestsList from './TestsList';
 import TestGenerator from './TestGenerator';
@@ -26,6 +29,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterSource, setFilterSource] = useState('all');
     const [sortBy, setSortBy] = useState('date_desc');
+    const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
     const [draggedTest, setDraggedTest] = useState(null);
     const [draggedFolder, setDraggedFolder] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -33,6 +37,16 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
     const [editingFolder, setEditingFolder] = useState(null);
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setShowFilters(true);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (userData?.id && notebookId) {
@@ -89,7 +103,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setShowTakeTestModal(true);
         } catch (err) {
             console.error('Error loading test:', err);
-            alert("Błąd ładowania testu");
+            toast.error("Błąd ładowania testu");
         }
     };
 
@@ -101,7 +115,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setShowResultsModal(true);
         } catch (err) {
             console.error('Error loading results:', err);
-            alert("Błąd ładowania wyników");
+            toast.error("Błąd ładowania wyników");
         }
     };
 
@@ -109,6 +123,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         setTestResults(results);
         setShowTakeTestModal(false);
         setShowResultsModal(true);
+        fetchTests(); // Odśwież listę testów aby pokazać nowy wynik
     };
 
     const hasActiveFilters = () => {
@@ -137,7 +152,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             fetchFolders();
         } catch (err) {
             console.error('Error creating folder:', err);
-            alert("Błąd tworzenia folderu");
+            toast.error("Błąd tworzenia folderu");
         }
     };
 
@@ -155,15 +170,17 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     };
 
     const handleDeleteFolder = async (folderId) => {
-        if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.')) return;
+        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.');
+        if (!confirmed) return;
 
         try {
             await testsService.deleteTestFolder(folderId);
+            toast.success("Folder usunięty");
             fetchFolders();
             fetchTests();
         } catch (err) {
             console.error('Error deleting folder:', err);
-            alert("Błąd usuwania folderu");
+            toast.error("Błąd usuwania folderu");
         }
     };
 
@@ -174,10 +191,11 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         try {
             await testsService.renameTestFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
+            toast.success("Nazwa folderu zmieniona");
             fetchFolders();
         } catch (err) {
             console.error('Error renaming folder:', err);
-            alert("Błąd zmiany nazwy folderu");
+            toast.error("Błąd zmiany nazwy folderu");
         }
     };
 
@@ -218,7 +236,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 fetchTests();
             } catch (err) {
                 console.error('Error moving folder to parent:', err);
-                alert("Błąd przenoszenia folderu");
+                toast.error("Błąd przenoszenia folderu");
             }
         }
     };
@@ -303,18 +321,59 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         <option value="name_asc">Nazwa A-Z</option>
                         <option value="name_desc">Nazwa Z-A</option>
                     </select>
-                    {hasActiveFilters() && (
-                        <button
-                            className={styles.clearFiltersBtn}
-                            onClick={clearFilters}
-                            title="Wyczyść wszystkie filtry"
-                        >
-                            <X size={16} />
-                            Wyczyść filtry
-                        </button>
-                    )}
                 </div>
-                <div style={{display: 'flex', gap: '0.75rem'}}>
+                {showFilters && (
+                    <div className={styles.filtersRow}>
+                        <div className={styles.searchBox}>
+                            <Search size={16} />
+                            <input
+                                type="text"
+                                placeholder="Szukaj testów..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.searchInput}
+                            />
+                        </div>
+                        <select
+                            value={filterSource}
+                            onChange={(e) => setFilterSource(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="all">Wszystkie źródła</option>
+                            <option value="manual">Ręczny opis</option>
+                            <option value="file">Z pliku</option>
+                            <option value="note">Z notatki</option>
+                        </select>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="date_desc">Najnowsze</option>
+                            <option value="date_asc">Najstarsze</option>
+                            <option value="name_asc">Nazwa A-Z</option>
+                            <option value="name_desc">Nazwa Z-A</option>
+                        </select>
+                        {hasActiveFilters() && (
+                            <button
+                                className={styles.clearFiltersBtn}
+                                onClick={clearFilters}
+                                title="Wyczyść wszystkie filtry"
+                            >
+                                <X size={16} />
+                                Wyczyść filtry
+                            </button>
+                        )}
+                    </div>
+                )}
+                <div className={styles.headerActions}>
+                    <button
+                        className={styles.filterToggleBtn}
+                        onClick={() => setShowFilters(!showFilters)}
+                        title="Filtry"
+                    >
+                        <Filter size={18} />
+                    </button>
                     <button
                         className={styles.addFolderBtn}
                         onClick={() => setShowCreateFolderModal(true)}
@@ -327,7 +386,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         onClick={() => setShowGenerateModal(true)}
                     >
                         <Plus size={18} />
-                        Wygeneruj nowy test
+                        Generuj test
                     </button>
                 </div>
             </div>
@@ -359,39 +418,41 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
             {/* Create Folder Modal */}
             {showCreateFolderModal && (
-                <div className={sharedStyles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
-                        <div className={sharedStyles.modalHeader}>
-                            <h2 className={sharedStyles.modalTitle}>Utwórz nowy folder</h2>
+                <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCreateFolderModal(false)}>
+                    <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={generatorStyles.header}>
+                            <h2 className={generatorStyles.title}>Utwórz nowy folder</h2>
                             <button
-                                className={sharedStyles.closeBtn}
+                                className={generatorStyles.closeBtn}
                                 onClick={() => setShowCreateFolderModal(false)}
+                                title="Zamknij"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
-                            <div className={sharedStyles.formGroup}>
-                                <label>Nazwa folderu</label>
-                                <input
-                                    type="text"
-                                    value={newFolderName}
-                                    onChange={(e) => setNewFolderName(e.target.value)}
-                                    placeholder="Wpisz nazwę folderu..."
-                                    className={sharedStyles.formInput}
-                                    autoFocus
-                                    required
-                                />
+                        <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
+                            <div className={generatorStyles.formSection}>
+                                <div className={generatorStyles.formGroup}>
+                                    <label>Nazwa folderu</label>
+                                    <input
+                                        type="text"
+                                        value={newFolderName}
+                                        onChange={(e) => setNewFolderName(e.target.value)}
+                                        placeholder="Wpisz nazwę folderu..."
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className={sharedStyles.modalActions}>
+                            <div className={generatorStyles.formActions}>
                                 <button
                                     type="button"
-                                    className={sharedStyles.btnCancel}
+                                    className={generatorStyles.btnCancel}
                                     onClick={() => setShowCreateFolderModal(false)}
                                 >
                                     Anuluj
                                 </button>
-                                <button type="submit" className={sharedStyles.btnSubmit}>
+                                <button type="submit" className={generatorStyles.btnSubmit}>
                                     Utwórz folder
                                 </button>
                             </div>
@@ -402,39 +463,41 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
             {/* Rename Folder Modal */}
             {editingFolder && (
-                <div className={sharedStyles.modalOverlay} onClick={() => setEditingFolder(null)}>
-                    <div className={sharedStyles.modal} onClick={(e) => e.stopPropagation()}>
-                        <div className={sharedStyles.modalHeader}>
-                            <h2 className={sharedStyles.modalTitle}>Zmień nazwę folderu</h2>
+                <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setEditingFolder(null)}>
+                    <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={generatorStyles.header}>
+                            <h2 className={generatorStyles.title}>Zmień nazwę folderu</h2>
                             <button
-                                className={sharedStyles.closeBtn}
+                                className={generatorStyles.closeBtn}
                                 onClick={() => setEditingFolder(null)}
+                                title="Zamknij"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleRenameFolder} style={{padding: '2rem'}}>
-                            <div className={sharedStyles.formGroup}>
-                                <label>Nowa nazwa</label>
-                                <input
-                                    type="text"
-                                    value={editingFolder.name}
-                                    onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
-                                    placeholder="Wpisz nową nazwę folderu..."
-                                    className={sharedStyles.formInput}
-                                    autoFocus
-                                    required
-                                />
+                        <form onSubmit={handleRenameFolder} className={generatorStyles.form}>
+                            <div className={generatorStyles.formSection}>
+                                <div className={generatorStyles.formGroup}>
+                                    <label>Nowa nazwa</label>
+                                    <input
+                                        type="text"
+                                        value={editingFolder.name}
+                                        onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
+                                        placeholder="Wpisz nową nazwę folderu..."
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className={sharedStyles.modalActions}>
+                            <div className={generatorStyles.formActions}>
                                 <button
                                     type="button"
-                                    className={sharedStyles.btnCancel}
+                                    className={generatorStyles.btnCancel}
                                     onClick={() => setEditingFolder(null)}
                                 >
                                     Anuluj
                                 </button>
-                                <button type="submit" className={sharedStyles.btnSubmit}>
+                                <button type="submit" className={generatorStyles.btnSubmit}>
                                     Zmień nazwę
                                 </button>
                             </div>

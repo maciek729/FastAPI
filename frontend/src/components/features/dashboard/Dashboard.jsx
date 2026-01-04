@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Bell, Clock } from 'lucide-react';
 import styles from "../../../css/features/Dashboard.module.css";
-import { getNotebooks, createNotebook } from '../../../services/notebookService';
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import ENDPOINTS from '../../../api/endpoints';
 
-export default function Dashboard({ userData, onSelectNotebook }) {
-  const [notebooks, setNotebooks] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+export default function Dashboard({ userData }) {
+  const [notifications, setNotifications] = useState([]);
   const { language } = useContext(LanguageContext);
 
   const t = (key, params = {}) => {
@@ -29,91 +29,97 @@ export default function Dashboard({ userData, onSelectNotebook }) {
 
   useEffect(() => {
     if (userData) {
-      fetchNotebooks();
+      fetchNotifications();
     }
   }, [userData]);
 
-  const fetchNotebooks = async () => {
-    setIsLoading(true);
+  const fetchNotifications = async () => {
     try {
-      const [personalData, sharedData] = await Promise.all([
-        getNotebooks(userData.id, 'personal'),
-        getNotebooks(userData.id, 'shared')
-      ]);
-      setNotebooks([...personalData, ...sharedData]);
-    }
-    catch (error) {
-      console.error(t('dashboard.fetchError'), error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCreateNotebook = async () => {
-    const name = prompt(t('dashboard.notebookNamePrompt'));
-    if (!name) return;
-    try {
-      await createNotebook({
-        name: name,
-        created_by: userData.id,
-        space_type: 'personal',
-        is_shared: false
+      const response = await fetch(ENDPOINTS.NOTIFICATIONS.LIST(userData.id), {
+        credentials: 'include'
       });
-      fetchNotebooks();
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.slice(0, 5)); // Get last 5 notifications
+      }
     } catch (error) {
-      console.error(t('dashboard.createError'), error);
+      console.error('Error fetching notifications:', error);
     }
   };
 
-  const getFileCountText = (count) => {
-    if (language === 'pl') {
-      return `${count} ${count === 1 ? 'plik' : count >= 2 && count <= 4 ? 'pliki' : 'plików'}`;
-    } else {
-      return `${count} ${count === 1 ? 'file' : 'files'}`;
-    }
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('dashboard.greetings.morning');
+    if (hour < 18) return t('dashboard.greetings.afternoon');
+    return t('dashboard.greetings.evening');
+  };
+
+  const formatNotificationTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return t('dashboard.timeFormats.now');
+    if (diffMins < 60) return t('dashboard.timeFormats.minutesAgo', { count: diffMins });
+    if (diffHours < 24) return t('dashboard.timeFormats.hoursAgo', { count: diffHours });
+    if (diffDays < 7) return t('dashboard.timeFormats.daysAgo', { count: diffDays });
+    return date.toLocaleDateString(language === 'pl' ? 'pl-PL' : 'en-US');
   };
 
   return (
     <div className={styles.dashboardContainer}>
-      <div className={styles.notebookSelection}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>
-            {t('dashboard.welcome', { username: userData?.username })}
+      {/* Main Content */}
+      <div className={styles.contentWrapper}>
+        {/* Left Side - Welcome Section */}
+        <div className={styles.welcomeSection}>
+          <h1 className={styles.greeting}>
+            {getGreeting()}, <span className={styles.gradientText}>{userData?.username}</span>! 👋
           </h1>
-          <p className={styles.subtitle}>{t('dashboard.subtitle')}</p>
+          <p className={styles.subtitle}>
+            {t('dashboard.readyToStudy')}
+          </p>
+          <p className={styles.description}>
+            {t('dashboard.startLearning')}
+          </p>
         </div>
 
-        <div className={styles.actions}>
-          <button className={styles.createButton} onClick={handleCreateNotebook}>
-            + {t('dashboard.createNotebook')}
-          </button>
-        </div>
+        {/* Right Side - Notifications Section */}
+        <div className={styles.notificationsSection}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionTitleWrapper}>
+              <Bell className={styles.sectionIcon} size={24} />
+              <h2 className={styles.sectionTitle}>{t('dashboard.recentNotifications')}</h2>
+            </div>
+          </div>
 
-        {isLoading ? (
-          <div className={styles.loading}>{t('dashboard.loading')}</div>
-        ) : (
-          <div className={styles.notebooksGrid}>
-            {notebooks.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>{t('dashboard.noNotebooks')}</p>
+          <div className={styles.notificationsList}>
+            {notifications.length === 0 ? (
+              <div className={styles.emptyNotifications}>
+                <Bell size={32} className={styles.emptyIcon} />
+                <p>{t('dashboard.noNotifications')}</p>
               </div>
             ) : (
-              notebooks.map((notebook) => (
-                <div
-                  key={notebook.id}
-                  className={styles.notebookCard}
-                  onClick={() => onSelectNotebook(notebook)}
-                >
-                  <div className={styles.notebookIcon}>📚</div>
-                  <h3 className={styles.notebookName}>{notebook.name}</h3>
-                  <p className={styles.notebookInfo}>
-                    {getFileCountText(notebook.files_count || 0)}
-                  </p>
+              notifications.map((notif) => (
+                <div key={notif.id} className={styles.notificationItem}>
+                  <div className={styles.notifIcon}>
+                    <Bell size={18} />
+                  </div>
+                  <div className={styles.notifContent}>
+                    <p className={styles.notifMessage}>{notif.message}</p>
+                    <div className={styles.notifMeta}>
+                      <Clock size={14} />
+                      <span>{formatNotificationTime(notif.created_at)}</span>
+                    </div>
+                  </div>
+                  {!notif.is_read && <div className={styles.unreadDot}></div>}
                 </div>
               ))
             )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

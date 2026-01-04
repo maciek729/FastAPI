@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useContext } from 'react';
+import toast from 'react-hot-toast';
 import Cropper from 'react-easy-crop';
 import styles from "../../../../css/features/settings/Modal.module.css";
 import { getCroppedImg } from './canvasUtils';
@@ -31,7 +32,7 @@ export default function AvatarModal({ onClose, onSave, onDelete, userData }) {
 
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
             if (!allowedTypes.includes(file.type)) {
-                alert(t('userSettings.photoFormat'));
+                toast.error(t('userSettings.photoFormat'));
                 e.target.value = null;
                 return;
             }

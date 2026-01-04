@@ -1,5 +1,5 @@
 /* Auth.module.css - Light Minimalistic Authentication Pages */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@700;800;900&display=swap');
 
 /* MAIN CONTAINER - FIXED POSITIONING */
 .authContainer {
@@ -14,7 +14,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #fdfeff 0%, #f8f9fd 50%, #f3f4f9 100%);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, #fdfeff 0%, #f8f9fd 50%, #f3f4f9 100%);
   overflow: hidden;
   box-sizing: border-box;
   margin: 0;
@@ -56,18 +59,20 @@
 
 /* AUTH CARD - Clean & Modern */
 .authCard {
-  background: white;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 1.5rem;
-  padding: 2rem 2rem;
+  padding: 1.5rem 2rem 2rem 2rem;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   max-height: 85vh;
   overflow: hidden;
   position: relative;
-  box-shadow: 
-    0 20px 60px rgba(15, 23, 42, 0.08),
-    0 0 1px rgba(15, 23, 42, 0.1);
+  box-shadow:
+    0 20px 60px rgba(15, 23, 42, 0.06),
+    0 8px 16px rgba(139, 92, 246, 0.04),
+    0 0 1px rgba(15, 23, 42, 0.08);
   opacity: 0;
   transform: translateY(20px);
   animation: cardFadeIn 0.5s ease-out 0.1s forwards;
@@ -83,37 +88,52 @@
   }
 }
 
-/* TITLE */
-.title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 0.375rem;
-  color: #0f172a;
-  text-align: center;
+/* LOGO */
+.logo {
+  width: 56px;
+  height: auto;
+  margin: 0 auto 0;
+  display: block;
   opacity: 0;
-  animation: titleFadeIn 0.5s ease-out 0.3s forwards;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  flex-shrink: 0;
+  animation: logoFadeIn 0.5s ease-out 0.2s forwards;
+  filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.15));
 }
 
-.title::before {
-  content: '';
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  border-radius: 0.625rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+@keyframes logoFadeIn {
+  to { opacity: 1; }
+}
+
+/* BRAND NAME */
+.brandName {
+  font-size: 2rem;
+  font-weight: 800;
+  font-family: 'Poppins', 'Inter', sans-serif;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  margin: 0 0 0.25rem 0;
+  opacity: 0;
+  animation: brandFadeIn 0.5s ease-out 0.3s forwards;
+  letter-spacing: -0.02em;
+}
+
+@keyframes brandFadeIn {
+  to { opacity: 1; }
+}
+
+/* TITLE */
+.title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1e293b;
+  text-align: center;
+  opacity: 0;
+  animation: titleFadeIn 0.5s ease-out 0.4s forwards;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/%3E%3C/svg%3E") no-repeat center;
-  mask-size: 20px 20px;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/%3E%3C/svg%3E") no-repeat center;
-  -webkit-mask-size: 20px 20px;
 }
 
 @keyframes titleFadeIn {
@@ -124,10 +144,15 @@
   font-size: 0.875rem;
   color: #64748b;
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   opacity: 0;
   animation: subtitleFadeIn 0.5s ease-out 0.4s forwards;
   flex-shrink: 0;
+}
+
+/* Special spacing for forgot password page */
+.title + .subtitle {
+  margin-bottom: 2.25rem;
 }
 
 @keyframes subtitleFadeIn {
@@ -136,9 +161,9 @@
 
 /* FORM GROUP */
 .formGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   opacity: 0;
-  animation: formFadeIn 0.5s ease-out 0.5s forwards;
+  animation: formFadeIn 0.5s ease-out 0.6s forwards;
   flex-shrink: 0;
 }
 
@@ -148,7 +173,7 @@
 
 .formGroup label {
   display: block;
-  margin-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
   color: #334155;
   font-weight: 500;
   font-size: 0.875rem;
@@ -156,13 +181,13 @@
 
 .formGroup input {
   width: 100%;
-  padding: 0.75rem 0.875rem;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 0.625rem;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid rgba(148, 163, 184, 0.15);
+  border-radius: 0.75rem;
   font-size: 0.9375rem;
   color: #1e293b;
-  background: #fafbfc;
-  transition: all 0.2s ease;
+  background: rgba(248, 250, 252, 0.5);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
@@ -171,7 +196,10 @@
   outline: none;
   border-color: #8b5cf6;
   background: white;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(139, 92, 246, 0.08),
+    0 2px 8px rgba(139, 92, 246, 0.1);
+  transform: translateY(-1px);
 }
 
 .formGroup input::placeholder {
@@ -186,20 +214,40 @@
 /* SUBMIT BUTTON */
 .submitButton {
   width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  padding: 1rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
   color: white;
   border: none;
-  border-radius: 0.625rem;
-  font-size: 0.9375rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.375rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0.5rem;
   opacity: 0;
-  animation: buttonFadeIn 0.5s ease-out 0.7s forwards;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+  animation: buttonFadeIn 0.5s ease-out 0.8s forwards;
+  box-shadow:
+    0 4px 12px rgba(139, 92, 246, 0.3),
+    0 0 0 1px rgba(139, 92, 246, 0.1) inset;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.submitButton:hover::before {
+  opacity: 1;
 }
 
 @keyframes buttonFadeIn {
@@ -207,9 +255,10 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+  box-shadow:
+    0 8px 24px rgba(139, 92, 246, 0.4),
+    0 0 0 1px rgba(139, 92, 246, 0.15) inset;
 }
 
 .submitButton:disabled {
@@ -278,12 +327,12 @@
 /* AUTH LINKS */
 .authLinks {
   text-align: center;
-  margin-top: 1.25rem;
+  margin-top: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
   opacity: 0;
-  animation: linksFadeIn 0.5s ease-out 0.9s forwards;
+  animation: linksFadeIn 0.5s ease-out 1s forwards;
   flex-shrink: 0;
 }
 
