@@ -71,12 +71,38 @@
   }
 }
 
+/* Sidebar Overlay */
+.sidebarOverlay {
+  display: none;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .contentArea {
-    margin-left: 60px;
+  .sidebarOverlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 59;
+    animation: fadeIn 0.2s ease-out;
   }
-  
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .contentArea {
+    margin-left: 0;
+  }
+
   .contentAreaCollapsed {
     margin-left: 0 !important;
   }

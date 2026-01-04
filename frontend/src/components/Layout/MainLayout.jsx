@@ -19,10 +19,13 @@ export default function MainLayout() {
   const [userData, setUserData] = useState(null);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   const [notebookDetails, setNotebookDetails] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [notebookSection, setNotebookSection] = useState('overview');
 
   const [highlightMessageId, setHighlightMessageId] = useState(null);
+
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   const getCookie = (name) => {
     let cookieValue = null;
@@ -124,6 +127,33 @@ export default function MainLayout() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isRightSwipe && touchStart < 50 && !isSidebarOpen) {
+      setIsSidebarOpen(true);
+    }
+
+    if (isLeftSwipe && isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   const handleSelectNotebook = (notebook) => {
     setHighlightMessageId(null);
     setSelectedNotebook(notebook);
@@ -161,7 +191,11 @@ export default function MainLayout() {
   const renderContent = () => {
     switch (activeSection) {
       case 'chat':
-        return <Chat key={getChatKey()} />;
+        return (
+          <Chat
+            key={getChatKey()}
+          />
+        );
 
       case 'settings':
         return <Settings userData={userData} onGoToSection={handleGoToSection}/>
@@ -174,7 +208,7 @@ export default function MainLayout() {
 
       case 'notifications':
         return <NotificationView userData={userData} onNavigateToResource={handleNavigateToResource}/>;
-      
+
       case 'notebook':
         return selectedNotebook ? (
           <NotebookView
@@ -191,7 +225,7 @@ export default function MainLayout() {
             Please select a notebook from the sidebar
           </div>
         );
-      
+
       default:
         return (
           <Dashboard
@@ -225,7 +259,19 @@ export default function MainLayout() {
   }, []);
 
   return (
-    <div className={styles.mainLayout}>
+    <div
+      className={styles.mainLayout}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {isSidebarOpen && (
+        <div
+          className={styles.sidebarOverlay}
+          onClick={toggleSidebar}
+        />
+      )}
+
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
@@ -242,7 +288,10 @@ export default function MainLayout() {
         {renderContent()}
       </div>
 
-      <Demo />
+      <Demo
+        onSelectNotebook={handleSelectNotebook}
+        userData={userData}
+      />
     </div>
   );
 }

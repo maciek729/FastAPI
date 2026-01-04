@@ -1,5 +1,5 @@
 import { useState, useContext, useCallback, useEffect } from "react";
-import { Users, MessageCircle, FileText, Zap, ClipboardCheck, Headphones } from "lucide-react";
+import { Users, MessageCircle, FileText, Layers, ClipboardCheck, Headphones } from "lucide-react";
 import Chat from "../chat/Chat";
 import FilesView from "../notebook/FilesView";
 import FlashcardsView from "../flashcard/FlashcardsView";
@@ -25,21 +25,6 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         return false;
     });
 
-    // const handleNavigateToResource = (resourceData) => {
-    //     const type = resourceData.itemType;
-    //     const id = resourceData.itemId;
-
-    //     setHighlightedItemId(id);
-        
-    //     if (type === 'note') setActiveTab('files');
-    //     else if (type === 'test') setActiveTab('tests');
-    //     else if (type === 'flashcards') setActiveTab('flashcards');
-    //     else if (type === 'podcast') setActiveTab('podcasts');
-        
-    //     // Opcjonalnie: tutaj możesz dodać logikę, która przekaże resourceData.itemId 
-    //     // do konkretnego widoku, aby go podświetlić, jeśli Twoje widoki to obsługują.
-    //     setTimeout(() => setHighlightedItemId(null), 10000);
-    // };
     const handleInternalResourceOpen = (resourceData) => {
         const type = resourceData.itemType;
         const id = resourceData.itemId;
@@ -90,6 +75,21 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
             setIsGroupChatOpen(true);
         }
     }, [highlightMessageId]);
+
+    useEffect(() => {
+        const handleTabSelection = (event) => {
+            const tab = event.detail;
+            if (tab) {
+                setActiveTab(tab);
+                setIsGroupChatOpen(false);
+            }
+        };
+
+        window.addEventListener('selectNotebookTab', handleTabSelection);
+        return () => {
+            window.removeEventListener('selectNotebookTab', handleTabSelection);
+        };
+    }, []);
 
     useEffect(() => {
         if (!notebookId) return;
@@ -156,7 +156,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
     const tabs = [
         { id: "chat", label: t('notebook.tabs.chat'), icon: MessageCircle },
         { id: "files", label: t('notebook.tabs.files'), icon: FileText },
-        { id: "flashcards", label: t('notebook.tabs.flashcards'), icon: Zap },
+        { id: "flashcards", label: t('notebook.tabs.flashcards'), icon: Layers },
         { id: "tests", label: t('notebook.tabs.tests'), icon: ClipboardCheck },
         { id: "podcasts", label: t('notebook.tabs.podcasts'), icon: Headphones }
     ];
@@ -185,7 +185,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                             className={`${styles.tab} ${isGroupChatOpen ? styles.active : ""}`}
                             onClick={() => setIsGroupChatOpen(!isGroupChatOpen)}
                         >
-                            <Users size={18} />
+                            <MessageCircle size={18} />
                             <span>{t('notebook.tabs.group_chat')}</span>
                         </button>
                     </>
@@ -212,9 +212,10 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                     )}
                     {activeTab === "tests" && <TestsView userData={userData} notebookId={details?.id} isSidebarOpen={isSidebarOpen} />}
                     {activeTab === "podcasts" && (
-                        <PodcastView 
-                            notebookId={details?.id} 
-                            userData={userData} 
+                        <PodcastView
+                            notebookId={details?.id}
+                            userData={userData}
+                            highlightedItemId={highlightedItemId}
                         />
                     )}
                 </div>

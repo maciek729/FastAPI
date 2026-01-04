@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { BookOpen, Trash2, Play, Brain, Settings, Pin, Folder, MoreVertical } from "lucide-react";
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
+import { Layers, Trash2, Play, Brain, Settings, Pin, Folder, MoreVertical } from "lucide-react";
 import styles from "../../../css/features/FlashcardsView.module.css";
 import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
 
-export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, highlightedItemId, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
+export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, highlightedItemId, sortBy, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
     const [progress, setProgress] = useState({});
     const [loadingProgress, setLoadingProgress] = useState({});
 
@@ -83,22 +85,37 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             : localSets.filter(set => !set.folder_id);
 
         const sorted = [...filtered].sort((a, b) => {
+            // First, pinned sets always come first
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
 
-            if (a.is_pinned && b.is_pinned) {
-                if (a.grid_position !== null && b.grid_position !== null) {
-                    return a.grid_position - b.grid_position;
+            if (sortBy === 'date_desc') {
+                // For date_desc, use grid_position if available
+                if (a.is_pinned && b.is_pinned) {
+                    if (a.grid_position !== null && b.grid_position !== null) {
+                        return a.grid_position - b.grid_position;
+                    }
                 }
+
+                if (!a.is_pinned && !b.is_pinned) {
+                    if (a.grid_position !== null && b.grid_position !== null) {
+                        return a.grid_position - b.grid_position;
+                    }
+                }
+
+                return new Date(b.created_at) - new Date(a.created_at);
             }
 
-            if (!a.is_pinned && !b.is_pinned) {
-                if (a.grid_position !== null && b.grid_position !== null) {
-                    return a.grid_position - b.grid_position;
-                }
+            // For other sort types, ignore grid_position and use the selected sort
+            if (sortBy === 'date_asc') {
+                return new Date(a.created_at) - new Date(b.created_at);
+            } else if (sortBy === 'name_asc') {
+                return a.title.localeCompare(b.title);
+            } else if (sortBy === 'name_desc') {
+                return b.title.localeCompare(a.title);
             }
 
-            return new Date(b.created_at) - new Date(a.created_at);
+            return 0;
         });
 
         return sorted;
@@ -115,7 +132,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             );
         } catch (err) {
             console.error('Error toggling pin:', err);
-            alert("Błąd przypinania zestawu fiszek");
+            toast.error("Błąd przypinania zestawu fiszek");
         }
     };
 
@@ -320,30 +337,36 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 onDelete(); // Refresh flashcard sets
             } catch (err) {
                 console.error('Error moving folder into folder:', err);
-                alert("Błąd przenoszenia folderu");
+                toast.error("Błąd przenoszenia folderu");
             }
         }
     };
 
     const handleDelete = async (setId) => {
-        if (!window.confirm("Czy na pewno chcesz usunąć ten zestaw fiszek?")) return;
+        const confirmed = await confirmModal("Czy na pewno chcesz usunąć ten zestaw fiszek?");
+        if (!confirmed) return;
 
         try {
             await deleteFlashcardSet(setId);
-            alert("Zestaw usunięty!");
+            toast.success("Zestaw usunięty!");
             onDelete();
         } catch (error) {
-            alert("Błąd podczas usuwania zestawu");
+            toast.error("Błąd podczas usuwania zestawu");
         }
     };
 
-    const getDifficultyColor = (difficulty) => {
-        switch(difficulty) {
-            case "łatwy": return "#4CAF50";
-            case "średni": return "#FF9800";
-            case "trudny": return "#F44336";
-            default: return "#6c63ff";
-        }
+    const getDifficultyText = (difficulty) => {
+        const difficultyMap = {
+            "łatwy": { color: "#4CAF50", label: "Łatwy" },
+            "średni": { color: "#FF9800", label: "Średni" },
+            "trudny": { color: "#F44336", label: "Trudny" }
+        };
+        const config = difficultyMap[difficulty] || difficultyMap["średni"];
+        return (
+            <span style={{ color: config.color, fontWeight: 700, fontSize: '0.875rem' }}>
+                {config.label}
+            </span>
+        );
     };
 
     if (loading) {
@@ -419,8 +442,11 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                         >
                             <div className={styles.folderHeader}>
                                 <div className={styles.folderTitle}>
-                                    <Folder size={24} style={{color: '#f59e0b'}} />
+                                    <Folder size={72} style={{color: '#f59e0b', filter: 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.15))'}} />
                                     <h3>{folder.name}</h3>
+                                    <span className={styles.folderCount}>
+                                        {setsInFolder} {setsInFolder === 1 ? 'zestaw' : setsInFolder > 1 && setsInFolder < 5 ? 'zestawy' : 'zestawów'}
+                                    </span>
                                 </div>
                                 <button
                                     className={styles.folderMenuBtn}
@@ -431,11 +457,6 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                 >
                                     <MoreVertical size={18} />
                                 </button>
-                            </div>
-                            <div className={styles.folderStats}>
-                                <span className={styles.folderCount}>
-                                    {setsInFolder} {setsInFolder === 1 ? 'zestaw' : setsInFolder > 1 && setsInFolder < 5 ? 'zestawy' : 'zestawów'}
-                                </span>
                             </div>
 
                             {folderMenuOpen === folder.id && (
@@ -495,7 +516,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                     >
                         <div className={styles.setHeader}>
                             <div className={styles.setTitle}>
-                                <BookOpen size={20} />
+                                <Layers size={20} />
                                 <h3>{set.title}</h3>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -506,12 +527,13 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                 >
                                     <Pin size={16} />
                                 </button>
-                                <span
-                                    className={styles.difficultyBadge}
-                                    style={{ '--difficulty-color': getDifficultyColor(set.difficulty) }}
+                                <button
+                                    className={styles.deleteSetBtn}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(set.id); }}
+                                    title="Usuń zestaw"
                                 >
-                                    {set.difficulty}
-                                </span>
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
                         </div>
 
@@ -523,6 +545,12 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                             <div className={styles.stat}>
                                 <span className={styles.statLabel}>Fiszek</span>
                                 <span className={styles.statValue}>{set.total_cards}</span>
+                            </div>
+                            <div className={styles.stat}>
+                                <span className={styles.statLabel}>Poziom</span>
+                                <span className={styles.statValue}>
+                                    {getDifficultyText(set.difficulty)}
+                                </span>
                             </div>
                             <div className={styles.stat}>
                                 <span className={styles.statLabel}>Postęp</span>
@@ -550,12 +578,6 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                 title="Zarządzaj fiszkami"
                             >
                                 <Settings size={18} />
-                            </button>
-                            <button
-                                className={styles.btnDelete}
-                                onClick={() => handleDelete(set.id)}
-                            >
-                                <Trash2 size={18} />
                             </button>
                         </div>
                     </div>

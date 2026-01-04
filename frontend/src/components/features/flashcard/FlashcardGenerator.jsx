@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
-import { X, Loader, Sparkles, CheckSquare } from "lucide-react";
+import toast from 'react-hot-toast';
+import { X, Loader, CheckSquare } from "lucide-react";
 import styles from "../../../css/features/FlashcardGenerator.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
@@ -73,22 +74,22 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
         e.preventDefault();
 
         if (!formData.title.trim()) {
-            alert(t('flashcardGenerator.titleError'));
+            toast.error(t('flashcardGenerator.titleError'));
             return;
         }
 
         if (formData.source_type === "manual" && !formData.description.trim()) {
-            alert(t('flashcardGenerator.descriptionError'));
+            toast.error(t('flashcardGenerator.descriptionError'));
             return;
         }
 
         if (formData.source_type === "file" && !uploadFile) {
-            alert(t('flashcardGenerator.fileError'));
+            toast.error(t('flashcardGenerator.fileError'));
             return;
         }
 
         if (formData.source_type === "note" && formData.source_note_ids.length === 0) {
-            alert(t('flashcardGenerator.noteError'));
+            toast.error(t('flashcardGenerator.noteError'));
             return;
         }
 
@@ -119,23 +120,21 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 });
             }
 
-            alert(t('flashcardGenerator.success'));
+            toast.success(t('flashcardGenerator.success'));
             onSuccess();
         } catch (error) {
             const errorMessage = error.response?.data?.detail || error.message || t('flashcardGenerator.unknownError');
-            alert(t('flashcardGenerator.generationError') + ": " + errorMessage);
+            toast.error(t('flashcardGenerator.generationError') + ": " + errorMessage);
         } finally {
             setGenerating(false);
         }
     };
 
     return (
-        <div className={styles.generatorContainer}>
-            <div className={styles.header}>
-                <div className={styles.headerLeft}>
-                    <Sparkles className={styles.headerIcon} size={24} />
-                    <h2 className={styles.title}>{t('flashcardGenerator.title')}</h2>
-                </div>
+        <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && !generating && onCancel()}>
+            <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.header}>
+                <h2 className={styles.title}>{t('flashcardGenerator.title')}</h2>
                 <button className={styles.closeBtn} onClick={onCancel} title={t('flashcardGenerator.close')}>
                     <X size={20} />
                 </button>
@@ -352,14 +351,12 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                                 {t('flashcardGenerator.generating')}
                             </>
                         ) : (
-                            <>
-                                <Sparkles size={18} />
-                                {t('flashcardGenerator.generateCards')}
-                            </>
+                            t('flashcardGenerator.generateCards')
                         )}
                     </button>
                 </div>
             </form>
+            </div>
         </div>
     );
 }

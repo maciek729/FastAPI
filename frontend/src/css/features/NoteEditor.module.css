@@ -14,6 +14,8 @@
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
+  padding-left: calc(1rem + 12%);
+  padding-right: calc(1rem - 12%);
   overflow-y: auto;
 }
 
@@ -114,15 +116,22 @@
 }
 
 .deleteBtn {
-  background: var(--red_btn_bg);
-  color: var(--red_btn_text);
-  border: 1px solid var(--red_btn_bg);
+  background: var(--white_btn_bg);
+  color: #94a3b8;
+  border: 2px solid rgba(148, 163, 184, 0.2);
 }
 
 .deleteBtn:hover {
-  background: var(--red_btn_hover);
+  background: rgba(239, 68, 68, 0.05);
+  color: #ef4444;
+  border-color: #ef4444;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.deleteBtn:active {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
 }
 
 .saveBtn {

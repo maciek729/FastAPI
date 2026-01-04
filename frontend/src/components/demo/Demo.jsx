@@ -3,8 +3,9 @@ import { X, ChevronRight, ChevronLeft, Globe } from 'lucide-react';
 import styles from '../../css/demo/Demo.module.css';
 import { LanguageContext } from '../../translations/LanguageContext';
 import translations from '../../translations/translation.json';
+import { getNotebooks } from '../../services/notebookService';
 
-const Demo = () => {
+const Demo = ({ onSelectNotebook, userData }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const { language, changeLanguage } = useContext(LanguageContext);
@@ -14,6 +15,16 @@ const Demo = () => {
     if (!hasSeenDemo) {
       setTimeout(() => setIsOpen(true), 1000);
     }
+
+    const handleReopenDemo = () => {
+      setIsOpen(true);
+      setCurrentStep(0);
+    };
+
+    window.addEventListener('reopenDemo', handleReopenDemo);
+    return () => {
+      window.removeEventListener('reopenDemo', handleReopenDemo);
+    };
   }, []);
 
   const t = (key) => {
@@ -25,58 +36,118 @@ const Demo = () => {
     return value || key;
   };
 
+  // Get first personal notebook for demo purposes
+  const [firstNotebook, setFirstNotebook] = useState(null);
+
+  useEffect(() => {
+    const fetchFirstNotebook = async () => {
+      if (!userData?.id) return;
+
+      try {
+        const personalNotebooks = await getNotebooks(userData.id, 'personal');
+        if (personalNotebooks && personalNotebooks.length > 0) {
+          setFirstNotebook(personalNotebooks[0]);
+        }
+      } catch (err) {
+        console.log('No notebooks available for demo');
+      }
+    };
+    fetchFirstNotebook();
+  }, [userData]);
+
   const steps = [
     {
       title: t('demo.steps.welcome.title'),
       description: t('demo.steps.welcome.description'),
       subdescription: t('demo.steps.welcome.subdescription'),
       showLanguageSelector: true,
-      icon: "🎓"
+      icon: "🎓",
+      action: null
     },
     {
       title: t('demo.steps.createNotebooks.title'),
       description: t('demo.steps.createNotebooks.description'),
-      icon: "📚"
+      icon: "📚",
+      action: null // Just shows dashboard/sidebar
     },
     {
       title: t('demo.steps.addNotes.title'),
       description: t('demo.steps.addNotes.description'),
-      icon: "📝"
+      icon: "📝",
+      action: firstNotebook ? () => {
+        onSelectNotebook?.(firstNotebook);
+        setTimeout(() => {
+          // Ensure we're on files tab after selecting notebook
+          window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'files' }));
+        }, 100);
+      } : null
     },
     {
       title: t('demo.steps.pinOrganize.title'),
       description: t('demo.steps.pinOrganize.description'),
-      icon: "📌"
+      icon: "📌",
+      action: firstNotebook ? () => {
+        onSelectNotebook?.(firstNotebook);
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'files' }));
+        }, 100);
+      } : null
     },
     {
       title: t('demo.steps.folderMaterials.title'),
       description: t('demo.steps.folderMaterials.description'),
-      icon: "📁"
+      icon: "📁",
+      action: firstNotebook ? () => {
+        onSelectNotebook?.(firstNotebook);
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'files' }));
+        }, 100);
+      } : null
     },
     {
       title: t('demo.steps.generateFlashcards.title'),
       description: t('demo.steps.generateFlashcards.description'),
-      icon: "🎯"
+      icon: "🎯",
+      action: firstNotebook ? () => {
+        onSelectNotebook?.(firstNotebook);
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'flashcards' }));
+        }, 100);
+      } : null
     },
     {
       title: t('demo.steps.listenPodcasts.title'),
       description: t('demo.steps.listenPodcasts.description'),
-      icon: "🎧"
+      icon: "🎧",
+      action: firstNotebook ? () => {
+        onSelectNotebook?.(firstNotebook);
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'podcasts' }));
+        }, 100);
+      } : null
     },
     {
       title: t('demo.steps.chatWithAI.title'),
       description: t('demo.steps.chatWithAI.description'),
-      icon: "💬"
+      icon: "💬",
+      action: firstNotebook ? () => {
+        onSelectNotebook?.(firstNotebook);
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'chat' }));
+        }, 100);
+      } : null
     },
     {
       title: t('demo.steps.groupChat.title'),
       description: t('demo.steps.groupChat.description'),
-      icon: "👥"
+      icon: "👥",
+      action: null 
     },
     {
       title: t('demo.steps.ready.title'),
       description: t('demo.steps.ready.description'),
-      icon: "🚀"
+      icon: "🚀",
+      action: null
     }
   ];
 
@@ -87,7 +158,12 @@ const Demo = () => {
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+
+      if (steps[nextStep].action && typeof steps[nextStep].action === 'function') {
+        steps[nextStep].action();
+      }
     } else {
       setIsOpen(false);
       localStorage.setItem('hasSeenDemo', 'true');

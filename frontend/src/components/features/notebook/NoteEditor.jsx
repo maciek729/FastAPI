@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { 
-    Save, X, Trash2, Bold, Italic, Underline, 
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
+import {
+    Save, X, Trash2, Bold, Italic, Underline,
     AlignLeft, AlignCenter, AlignRight, List, ListOrdered,
     Type, Calendar, Image, Lock, Eye
 } from 'lucide-react';
@@ -108,12 +110,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            alert('Proszę wybrać plik obrazu!');
+            toast.error('Proszę wybrać plik obrazu!');
             return;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-            alert('Plik jest za duży! Maksymalny rozmiar to 5MB.');
+            toast.error('Plik jest za duży! Maksymalny rozmiar to 5MB.');
             return;
         }
 
@@ -149,18 +151,18 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const handleSave = async () => {
         if (isReadOnly) {
-            alert('Notatka jest edytowana przez innego użytkownika!');
+            toast.error('Notatka jest edytowana przez innego użytkownika!');
             return;
         }
         if (!title.trim()) {
-            alert('Tytuł nie może być pusty!');
+            toast.error('Tytuł nie może być pusty!');
             return;
         }
 
         setIsSaving(true);
         try {
             const updatedContent = editorRef.current.innerHTML;
-            
+
             await updateNote(note.id, {
                 title: title,
                 content: updatedContent,
@@ -169,12 +171,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
                 notebook_id: note.notebook_id,
                 is_shared: note.is_shared
             });
-            
+
             onSave({ ...note, title, content: updatedContent });
-            alert('Notatka zapisana!');
+            toast.success('Notatka zapisana!');
         } catch (err) {
             console.error(err);
-            alert(err.message || 'Błąd zapisywania notatki');
+            toast.error(err.message || 'Błąd zapisywania notatki');
         } finally {
             setIsSaving(false);
         }
@@ -182,20 +184,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData }
 
     const handleDelete = async () => {
         if (isReadOnly) {
-            alert('Nie możesz usunąć notatki, która jest edytowana przez innego użytkownika!');
+            toast.error('Nie możesz usunąć notatki, która jest edytowana przez innego użytkownika!');
             return;
         }
-        if (!window.confirm('Czy na pewno chcesz usunąć tę notatkę?')) return;
+        const confirmed = await confirmModal('Czy na pewno chcesz usunąć tę notatkę?');
+        if (!confirmed) return;
 
         try {
             await deleteNote(note.id);
-            
+
             onDelete(note.id);
-            alert('Notatka usunięta!');
+            toast.success('Notatka usunięta!');
             onClose();
         } catch (err) {
             console.error(err);
-            alert(err.message || 'Błąd usuwania notatki');
+            toast.error(err.message || 'Błąd usuwania notatki');
         }
     };
 

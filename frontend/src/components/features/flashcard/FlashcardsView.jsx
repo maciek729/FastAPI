@@ -1,10 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Search, X, Folder } from "lucide-react";
+import toast from "react-hot-toast";
+import { confirmModal } from '../../../utils/confirmModal';
+import { Plus, Search, X, Folder, ArrowLeft, Filter } from "lucide-react";
 import FlashcardGenerator from "./FlashcardGenerator";
 import FlashcardSetsList from "./FlashcardSetsList";
 import FlashcardLearning from "./FlashcardLearning";
 import FlashcardSetManager from "./FlashcardSetManager";
 import styles from "../../../css/features/FlashcardsView.module.css";
+import generatorStyles from "../../../css/features/FlashcardGenerator.module.css";
 import { getFlashcardSets, getFlashcardFolders, createFlashcardFolder, deleteFlashcardFolder, renameFlashcardFolder, moveFlashcardFolder, moveFlashcardSetToFolder } from '../../../services/flashcardService';
 import ENDPOINTS from '../../../api/endpoints';
 
@@ -15,8 +18,9 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
     const [selectedSet, setSelectedSet] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterDifficulty, setFilterDifficulty] = useState('all');
+    const [filterSource, setFilterSource] = useState('all');
     const [sortBy, setSortBy] = useState('date_desc');
+    const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
 
     const [folders, setFolders] = useState([]);
     const [currentFolder, setCurrentFolder] = useState(null);
@@ -27,6 +31,16 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
     const [draggedSet, setDraggedSet] = useState(null);
     const [draggedFolder, setDraggedFolder] = useState(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setShowFilters(true);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (notebookId) {
@@ -91,12 +105,12 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
     };
 
     const hasActiveFilters = () => {
-        return searchQuery !== '' || filterDifficulty !== 'all' || sortBy !== 'date_desc';
+        return searchQuery !== '' || filterSource !== 'all' || sortBy !== 'date_desc';
     };
 
     const clearFilters = () => {
         setSearchQuery('');
-        setFilterDifficulty('all');
+        setFilterSource('all');
         setSortBy('date_desc');
     };
 
@@ -116,7 +130,7 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
             fetchFolders();
         } catch (err) {
             console.error('Error creating folder:', err);
-            alert("Błąd tworzenia folderu");
+            toast.error("Błąd tworzenia folderu");
         }
     };
 
@@ -134,18 +148,20 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
     };
 
     const handleDeleteFolder = async (folderId) => {
-        if (!window.confirm('Czy na pewno chcesz usunąć ten folder? Zestawy fiszek zostaną przeniesione do głównego widoku.')) return;
+        const confirmed = await confirmModal('Czy na pewno chcesz usunąć folder? Zestawy fiszek zostaną przeniesione do głównego widoku.');
+        if (!confirmed) return;
 
         try {
             await deleteFlashcardFolder(folderId);
             if (currentFolder?.id === folderId) {
                 setCurrentFolder(null);
             }
+            toast.success("Folder usunięty");
             fetchFolders();
             fetchFlashcardSets();
         } catch (err) {
             console.error('Error deleting folder:', err);
-            alert("Błąd usuwania folderu");
+            toast.error("Błąd usuwania folderu");
         }
     };
 
@@ -156,14 +172,15 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
         try {
             await renameFlashcardFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
+            toast.success("Nazwa folderu zmieniona");
             fetchFolders();
         } catch (err) {
             console.error('Error renaming folder:', err);
-            alert("Błąd zmiany nazwy folderu");
+            toast.error("Błąd zmiany nazwy folderu");
         }
     };
 
-    const filteredAndSortedSets = useMemo(() => {
+    const filteredSets = useMemo(() => {
         let filtered = flashcardSets;
 
         if (searchQuery) {
@@ -172,25 +189,21 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
             );
         }
 
-        if (filterDifficulty !== 'all') {
-            filtered = filtered.filter(set => set.difficulty === filterDifficulty);
+        if (filterSource !== 'all') {
+            filtered = filtered.filter(set => {
+                if (filterSource === 'manual') {
+                    return !set.source_notes && !set.source_files;
+                } else if (filterSource === 'note') {
+                    return set.source_notes && set.source_notes !== '[]';
+                } else if (filterSource === 'file') {
+                    return set.source_files && set.source_files !== '[]';
+                }
+                return true;
+            });
         }
 
-        filtered = [...filtered].sort((a, b) => {
-            if (sortBy === 'date_desc') {
-                return new Date(b.created_at) - new Date(a.created_at);
-            } else if (sortBy === 'date_asc') {
-                return new Date(a.created_at) - new Date(b.created_at);
-            } else if (sortBy === 'name_asc') {
-                return a.title.localeCompare(b.title);
-            } else if (sortBy === 'name_desc') {
-                return b.title.localeCompare(a.title);
-            }
-            return 0;
-        });
-
         return filtered;
-    }, [flashcardSets, searchQuery, filterDifficulty, sortBy]);
+    }, [flashcardSets, searchQuery, filterSource]);
 
     const handleBreadcrumbDragOver = (e) => {
         e.preventDefault();
@@ -225,7 +238,7 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                 setDraggedSet(null);
             } catch (err) {
                 console.error('Error moving set to parent folder:', err);
-                alert("Błąd przenoszenia zestawu fiszek");
+                toast.error("Błąd przenoszenia zestawu fiszek");
             }
         }
 
@@ -237,7 +250,7 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                 fetchFlashcardSets();
             } catch (err) {
                 console.error('Error moving folder to parent:', err);
-                alert("Błąd przenoszenia folderu");
+                toast.error("Błąd przenoszenia folderu");
             }
         }
     };
@@ -266,6 +279,29 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
         <div className={styles.flashcardsView}>
             <div className={styles.headerSection}>
                 <div className={styles.leftSection}>
+                    {currentFolder && (
+                        <button
+                            onClick={closeFolder}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem',
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#f59e0b',
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-3px)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+                        >
+                            <ArrowLeft size={20} />
+                            Powrót
+                        </button>
+                    )}
                     <h1
                         className={styles.notebookTitle}
                         style={{
@@ -288,27 +324,6 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                             'Fiszki'
                         )}
                     </h1>
-                    {currentFolder && (
-                        <button
-                            onClick={closeFolder}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 0.75rem',
-                                background: 'transparent',
-                                border: '2px solid rgba(245, 158, 11, 0.3)',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                color: '#f59e0b',
-                                fontWeight: 600,
-                                fontSize: '0.875rem',
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            ← Powrót
-                        </button>
-                    )}
                     <div className={styles.searchBox}>
                         <Search size={16} />
                         <input
@@ -320,14 +335,14 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                         />
                     </div>
                     <select
-                        value={filterDifficulty}
-                        onChange={(e) => setFilterDifficulty(e.target.value)}
+                        value={filterSource}
+                        onChange={(e) => setFilterSource(e.target.value)}
                         className={styles.filterSelect}
                     >
-                        <option value="all">Wszystkie poziomy</option>
-                        <option value="łatwy">Łatwy</option>
-                        <option value="średni">Średni</option>
-                        <option value="trudny">Trudny</option>
+                        <option value="all">Wszystkie źródła</option>
+                        <option value="manual">Ręczny opis</option>
+                        <option value="file">Z pliku</option>
+                        <option value="note">Z notatki</option>
                     </select>
                     <select
                         value={sortBy}
@@ -339,18 +354,59 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                         <option value="name_asc">Nazwa A-Z</option>
                         <option value="name_desc">Nazwa Z-A</option>
                     </select>
-                    {hasActiveFilters() && (
-                        <button
-                            className={styles.clearFiltersBtn}
-                            onClick={clearFilters}
-                            title="Wyczyść wszystkie filtry"
-                        >
-                            <X size={16} />
-                            Wyczyść filtry
-                        </button>
-                    )}
                 </div>
-                <div style={{display: 'flex', gap: '0.5rem'}}>
+                {showFilters && (
+                    <div className={styles.filtersRow}>
+                        <div className={styles.searchBox}>
+                            <Search size={16} />
+                            <input
+                                type="text"
+                                placeholder="Szukaj fiszek..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.searchInput}
+                            />
+                        </div>
+                        <select
+                            value={filterSource}
+                            onChange={(e) => setFilterSource(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="all">Wszystkie źródła</option>
+                            <option value="manual">Ręczny opis</option>
+                            <option value="file">Z pliku</option>
+                            <option value="note">Z notatki</option>
+                        </select>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="date_desc">Najnowsze</option>
+                            <option value="date_asc">Najstarsze</option>
+                            <option value="name_asc">Nazwa A-Z</option>
+                            <option value="name_desc">Nazwa Z-A</option>
+                        </select>
+                        {hasActiveFilters() && (
+                            <button
+                                className={styles.clearFiltersBtn}
+                                onClick={clearFilters}
+                                title="Wyczyść wszystkie filtry"
+                            >
+                                <X size={16} />
+                                Wyczyść filtry
+                            </button>
+                        )}
+                    </div>
+                )}
+                <div className={styles.headerActions}>
+                    <button
+                        className={styles.filterToggleBtn}
+                        onClick={() => setShowFilters(!showFilters)}
+                        title="Filtry"
+                    >
+                        <Filter size={18} />
+                    </button>
                     <button
                         className={styles.addFolderBtn}
                         onClick={() => setShowCreateFolderModal(true)}
@@ -369,13 +425,14 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
             </div>
 
             <FlashcardSetsList
-                sets={filteredAndSortedSets}
+                sets={filteredSets}
                 loading={loading}
                 userId={userData.id}
                 notebookId={notebookId}
                 folders={folders}
                 currentFolder={currentFolder}
                 highlightedItemId={highlightedItemId}
+                sortBy={sortBy}
                 onStartLearning={handleStartLearning}
                 onManageSet={handleManageSet}
                 onDelete={fetchFlashcardSets}
@@ -396,7 +453,7 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                         await fetchFolders();
                     } catch (err) {
                         console.error('Error moving set:', err);
-                        alert("Błąd przenoszenia zestawu fiszek");
+                        toast.error("Błąd przenoszenia zestawu fiszek");
                     }
                 }}
                 onDragStateChange={({ draggedSet, draggedFolder }) => {
@@ -406,51 +463,50 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
             />
 
             {showGenerateModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowGenerateModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <FlashcardGenerator
-                            notebookId={notebookId}
-                            userId={userData.id}
-                            onSuccess={handleGenerateSuccess}
-                            onCancel={() => setShowGenerateModal(false)}
-                        />
-                    </div>
-                </div>
+                <FlashcardGenerator
+                    notebookId={notebookId}
+                    userId={userData.id}
+                    onSuccess={handleGenerateSuccess}
+                    onCancel={() => setShowGenerateModal(false)}
+                />
             )}
 
             {showCreateFolderModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
-                        <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Utwórz nowy folder</h2>
+                <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCreateFolderModal(false)}>
+                    <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={generatorStyles.header}>
+                            <h2 className={generatorStyles.title}>Utwórz nowy folder</h2>
                             <button
-                                className={styles.closeBtn}
+                                className={generatorStyles.closeBtn}
                                 onClick={() => setShowCreateFolderModal(false)}
+                                title="Zamknij"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
-                            <div className={styles.formGroup}>
-                                <label>Nazwa folderu</label>
-                                <input
-                                    type="text"
-                                    value={newFolderName}
-                                    onChange={(e) => setNewFolderName(e.target.value)}
-                                    placeholder="Wpisz nazwę folderu..."
-                                    autoFocus
-                                    required
-                                />
+                        <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
+                            <div className={generatorStyles.formSection}>
+                                <div className={generatorStyles.formGroup}>
+                                    <label>Nazwa folderu</label>
+                                    <input
+                                        type="text"
+                                        value={newFolderName}
+                                        onChange={(e) => setNewFolderName(e.target.value)}
+                                        placeholder="Wpisz nazwę folderu..."
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className={styles.modalActions}>
+                            <div className={generatorStyles.formActions}>
                                 <button
                                     type="button"
-                                    className={styles.btnCancel}
+                                    className={generatorStyles.btnCancel}
                                     onClick={() => setShowCreateFolderModal(false)}
                                 >
                                     Anuluj
                                 </button>
-                                <button type="submit" className={styles.btnSubmit}>
+                                <button type="submit" className={generatorStyles.btnSubmit}>
                                     Utwórz folder
                                 </button>
                             </div>
@@ -460,38 +516,41 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
             )}
 
             {editingFolder && (
-                <div className={styles.modalOverlay} onClick={() => setEditingFolder(null)}>
-                    <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
-                        <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Zmień nazwę folderu</h2>
+                <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setEditingFolder(null)}>
+                    <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+                        <div className={generatorStyles.header}>
+                            <h2 className={generatorStyles.title}>Zmień nazwę folderu</h2>
                             <button
-                                className={styles.closeBtn}
+                                className={generatorStyles.closeBtn}
                                 onClick={() => setEditingFolder(null)}
+                                title="Zamknij"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleRenameFolder} style={{padding: '2rem'}}>
-                            <div className={styles.formGroup}>
-                                <label>Nowa nazwa</label>
-                                <input
-                                    type="text"
-                                    value={editingFolder.name}
-                                    onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
-                                    placeholder="Wpisz nową nazwę folderu..."
-                                    autoFocus
-                                    required
-                                />
+                        <form onSubmit={handleRenameFolder} className={generatorStyles.form}>
+                            <div className={generatorStyles.formSection}>
+                                <div className={generatorStyles.formGroup}>
+                                    <label>Nowa nazwa</label>
+                                    <input
+                                        type="text"
+                                        value={editingFolder.name}
+                                        onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
+                                        placeholder="Wpisz nową nazwę folderu..."
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
                             </div>
-                            <div className={styles.modalActions}>
+                            <div className={generatorStyles.formActions}>
                                 <button
                                     type="button"
-                                    className={styles.btnCancel}
+                                    className={generatorStyles.btnCancel}
                                     onClick={() => setEditingFolder(null)}
                                 >
                                     Anuluj
                                 </button>
-                                <button type="submit" className={styles.btnSubmit}>
+                                <button type="submit" className={generatorStyles.btnSubmit}>
                                     Zmień nazwę
                                 </button>
                             </div>

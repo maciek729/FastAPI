@@ -81,3 +81,18 @@ export const getNotes = async (notebookId) => {
     }
     return await response.json();
 };
+
+export const updateNotePosition = async (noteId, gridPosition) => {
+    const response = await fetch(ENDPOINTS.NOTES.UPDATE_POSITION(noteId), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ grid_position: gridPosition }),
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({ detail: 'Nieznany błąd serwera' }));
+        throw new Error(errorBody.detail || 'Failed to update note position');
+    }
+    return await response.json();
+};

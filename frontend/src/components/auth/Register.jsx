@@ -1,8 +1,10 @@
 import { useState } from "react";
+import toast from 'react-hot-toast';
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { RegisterUser } from "../../services/authService";
+import logo from "../Layout/logodark.png";
 
 function Register() {
   const navigate = useNavigate();
@@ -29,8 +31,8 @@ function Register() {
     setIsLoading(true);
     try {
       await RegisterUser(form);
-      alert("Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.");
-      navigate("/login");
+      toast.success("Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.");
+      setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,7 +48,8 @@ function Register() {
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Utwórz konto</h2>
+        <img src={logo} alt="zdAI to!" className={styles.logo} />
+        <h1 className={styles.brandName}>zdAI to!</h1>
         <p className={styles.subtitle}>Zarejestruj się, aby rozpocząć</p>
         
         <div className={styles.formGroup}>

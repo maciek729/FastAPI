@@ -479,3 +479,175 @@
 .toggleScrollBtn:hover svg {
     opacity: 1;
 }
+.loaderContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    background: var(--inner_section_bg);
+    animation: fadeInScale 0.4s ease-out;
+}
+
+.loaderText {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--title);
+    margin-top: 1.25rem;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+    animation: pulseText 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseText {
+    0%, 100% { opacity: 0.5; transform: scale(0.98); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .sideGroupChat {
+        min-width: 100%;
+        width: 100%;
+    }
+
+    .resizer {
+        display: none; /* Disable resizing on mobile */
+    }
+
+    .sideChatHeader {
+        padding: 0.875rem 1rem;
+    }
+
+    .sideChatTitle {
+        font-size: 0.9375rem;
+    }
+
+    .sideChatCloseBtn, .toggleScrollBtn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .sideChatContent {
+        padding: 0.75rem;
+        gap: 0.875rem;
+    }
+
+    .inputArea {
+        padding: 0.75rem;
+    }
+
+    .inputWrapper {
+        padding: 0.5rem;
+    }
+
+    .messageInput {
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    .iconButton {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .sendButton {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .resourcePickerHeader {
+        padding: 0.875rem 1rem;
+    }
+
+    .closePicker {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .resourcePickerList {
+        padding: 0.75rem;
+    }
+
+    .resourceItem {
+        padding: 0.875rem 0.75rem;
+        gap: 0.875rem;
+    }
+
+    .resourceItem span {
+        font-size: 0.9375rem;
+    }
+
+    .pinnedMessageBar {
+        padding: 0.75rem 1rem;
+        gap: 0.875rem;
+    }
+
+    .unpinAction {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .emptyChatContainer {
+        padding: 2rem 1rem;
+    }
+
+    .emptyChatIcon {
+        font-size: 3rem;
+    }
+
+    .emptyChatTitle {
+        font-size: 1.25rem;
+    }
+
+    .emptyChatSubtitle {
+        font-size: 0.875rem;
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    .sideChatHeader {
+        padding: 0.75rem;
+    }
+
+    .sideChatTitle {
+        font-size: 0.875rem;
+    }
+
+    .sideChatContent {
+        padding: 0.5rem;
+    }
+
+    .inputArea {
+        padding: 0.5rem;
+    }
+
+    .resourcePickerHeader {
+        padding: 0.75rem;
+    }
+
+    .resourcePickerList {
+        padding: 0.5rem;
+    }
+
+    .emptyChatContainer {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .emptyChatIcon {
+        font-size: 2.5rem;
+    }
+
+    .emptyChatTitle {
+        font-size: 1.125rem;
+    }
+}

@@ -1,5 +1,7 @@
 import { useEffect, useState, useContext, useCallback } from "react";
-import { Lock, Users, Plus, ChevronRight, Sparkles, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
+import toast from 'react-hot-toast';
+import { promptModal } from '../../utils/promptModal';
+import { User, Users, Plus, ChevronRight, PanelLeft } from "lucide-react";
 import styles from "../../css/layout/Sidebar.module.css";
 import UserFooter from "../features/sidebar_user_menu/UserFooter";
 import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
@@ -7,10 +9,16 @@ import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
 import { getNotebooks, createNotebook } from "../../services/notebookService";
 import ENDPOINTS from "../../api/endpoints";
+import logoDark from "./logodark.png";
+import logoLight from "./logolight.png";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
     const { language } = useContext(LanguageContext);
     
+    const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
+
+    const logoToShow = theme === 'dark' ? logoDark : logoDark;
+
     const t = useCallback((key, params = {}) => {
         const keys = key.split('.');
         let translation = translations[language];
@@ -37,7 +45,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
 
     useEffect(() => {
         setSpaces([
-            { id: 'personal', name: t('sidebar.personalSpace'), icon: Lock },
+            { id: 'personal', name: t('sidebar.personalSpace'), icon: User },
             { id: 'shared', name: t('sidebar.sharedSpace'), icon: Users }
         ]);
     }, [t]);
@@ -59,7 +67,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const handleAddNotebook = async (spaceType) => {
-        const name = prompt(t('sidebar.notebookNamePrompt'));
+        const name = await promptModal(t('sidebar.notebookNamePrompt'));
         if (!name) return;
         try {
             await createNotebook({
@@ -68,9 +76,10 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 space_type: spaceType,
                 is_shared: spaceType === 'shared'
             });
+            toast.success('Notatnik został utworzony');
             fetchNotebooks(spaceType);
         } catch (error) {
-            alert(t('sidebar.errors.addNotebook') + ': ' + error.message);
+            toast.error(t('sidebar.errors.addNotebook') + ': ' + error.message);
         }
     };
 
@@ -138,7 +147,24 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })
                 });
 
-                alert(t('sidebar.copySuccess.test', { notebookName: targetNotebook.name }));
+                toast.success(t('sidebar.copySuccess.test', { notebookName: targetNotebook.name }));
+            }
+            else if (dragData.type === 'podcast') {
+                if (dragData.sourceNotebookId === targetNotebook.id) {
+                    return;
+                }
+
+                await fetch(ENDPOINTS.PODCASTS.COPY(dragData.podcastId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        target_notebook_id: targetNotebook.id,
+                        user_id: dragData.userId
+                    })
+                });
+
+                toast.success(t('sidebar.copySuccess.podcast', { notebookName: targetNotebook.name }));
             }
             else if (dragData.type === 'folder') {
                 if (dragData.sourceNotebookId === targetNotebook.id) {
@@ -155,7 +181,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })
                 });
 
-                alert(t('sidebar.copySuccess.folder', { notebookName: targetNotebook.name }));
+                toast.success(t('sidebar.copySuccess.folder', { notebookName: targetNotebook.name }));
             }
             else if (dragData.type === 'note') {
                 if (dragData.sourceNotebookId === targetNotebook.id) {
@@ -172,7 +198,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })
                 });
 
-                alert(t('sidebar.copySuccess.note', { notebookName: targetNotebook.name }));
+                toast.success(t('sidebar.copySuccess.note', { notebookName: targetNotebook.name }));
             }
             else if (dragData.type === 'note-folder') {
                 if (dragData.sourceNotebookId === targetNotebook.id) {
@@ -189,7 +215,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })
                 });
 
-                alert(t('sidebar.copySuccess.noteFolder', { notebookName: targetNotebook.name }));
+                toast.success(t('sidebar.copySuccess.noteFolder', { notebookName: targetNotebook.name }));
             }
             else if (dragData.type === 'flashcard-set') {
                 if (dragData.sourceNotebookId === targetNotebook.id) {
@@ -206,7 +232,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })
                 });
 
-                alert(t('sidebar.copySuccess.flashcardSet', { notebookName: targetNotebook.name }));
+                toast.success(t('sidebar.copySuccess.flashcardSet', { notebookName: targetNotebook.name }));
             }
             else if (dragData.type === 'flashcard-set-folder') {
                 if (dragData.sourceNotebookId === targetNotebook.id) {
@@ -223,11 +249,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                     })
                 });
 
-                alert(t('sidebar.copySuccess.flashcardSetFolder', { notebookName: targetNotebook.name }));
+                toast.success(t('sidebar.copySuccess.flashcardSetFolder', { notebookName: targetNotebook.name }));
             }
         } catch (error) {
             console.error(t('sidebar.errors.copy'), error);
-            alert(t('sidebar.errors.copy'));
+            toast.error(t('sidebar.errors.copy'));
         }
     };
 
@@ -236,14 +262,20 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
             <div className={styles.sidebarInner}>
 
                 <div className={styles.sidebarHeader}>
-                    <div 
+                    <div
                         className={styles.brandContainer}
-                        onClick={handleBrandClick}
+                        onClick={isSidebarOpen ? handleBrandClick : toggleSidebar}
                         style={{ cursor: 'pointer' }}
-                        title={t('sidebar.dashboard')}
+                        title={isSidebarOpen ? t('sidebar.dashboard') : t('sidebar.expandSidebar')}
                     >
                         <div className={styles.brandIcon}>
-                            <Sparkles size={20} />
+                            {/* <Sparkles size={20} /> */}
+                            <img src={theme === 'light' ? logoLight : logoDark} alt="zdAI to logo" className={styles.logoImg} />
+                            {!isSidebarOpen && (
+                                <div className={styles.expandIconOverlay}>
+                                    <PanelLeft size={20} />
+                                </div>
+                            )}
                         </div>
                         {isSidebarOpen && (
                             <div className={styles.brandText}>
@@ -251,16 +283,21 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             </div>
                         )}
                     </div>
-                    <button 
-                        className={styles.toggleBtn}
-                        onClick={toggleSidebar}
-                        title={isSidebarOpen ? t('sidebar.collapseSidebar') : t('sidebar.expandSidebar')}
-                    >
-                        {isSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
-                    </button>
+                    {isSidebarOpen && (
+                        <button
+                            className={styles.toggleBtn}
+                            onClick={toggleSidebar}
+                            title={t('sidebar.collapseSidebar')}
+                        >
+                            <PanelLeft size={18} />
+                        </button>
+                    )}
                 </div>
 
                 <div className={styles.sidebarContent}>
+                    {isSidebarOpen && (
+                        <div className={styles.spacesLabel}>{t('sidebar.spaces')}</div>
+                    )}
                     {spaces.map((space) => {
                         const SpaceIcon = space.icon;
                         const isExpanded = expandedSpaces.includes(space.id);

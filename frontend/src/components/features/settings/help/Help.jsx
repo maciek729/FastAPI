@@ -1,6 +1,5 @@
 import React, {useState, useContext} from "react";
 import styles from "../../../../css/features/settings/Help.module.css"
-import { Sparkles} from "lucide-react";
 import HelpQuestion from "./HelpQuestion.jsx";
 import { LanguageContext } from "../../../../translations/LanguageContext";
 import translations from "../../../../translations/translation.json";
@@ -10,6 +9,7 @@ export default function Help({userData}) {
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [openQuestion, setOpenQuestion] = useState(null);
     const { language } = useContext(LanguageContext);
 
     const t = (key, params = {}) => {
@@ -67,8 +67,12 @@ export default function Help({userData}) {
         }
     };
 
+    const handleQuestionToggle = (questionId) => {
+        setOpenQuestion(openQuestion === questionId ? null : questionId);
+    };
+
     return (
-        <div className={styles.formWrapper}>
+        <div className={styles.settingsMainContainer}>
             <div className={styles.titleContainer}>
                 <h2 className={styles.title}>{t('help.title')}</h2>
                 <p className={styles.subtitle}>{t('help.subtitle')}</p>
@@ -77,44 +81,51 @@ export default function Help({userData}) {
             <HelpQuestion
                 question={t('help.question1')}
                 answer={t('help.answer1')}
+                isOpen={openQuestion === 'question1'}
+                onToggle={() => handleQuestionToggle('question1')}
             />
             <HelpQuestion
                 question={t('help.question2')}
                 answer={t('help.answer2')}
+                isOpen={openQuestion === 'question2'}
+                onToggle={() => handleQuestionToggle('question2')}
             />
 
-            <form className={styles.helpContainer} onSubmit={handleSubmit}>
-                <div className={styles.formContainer}>
-                    <Sparkles size={20} className={styles.brandIcon}/>
-                    <h2 className={styles.helpTitle}>{t('help.contactTitle')}</h2>
-                </div>
+            <div className={styles.sectionContainer}>
+                <form className={styles.helpContainer} onSubmit={handleSubmit}>
+                    <div className={styles.formContainer}>
+                        <h2 className={styles.helpTitle}>{t('help.contactTitle')}</h2>
+                    </div>
 
-                <input
-                    type="text"
-                    placeholder={t('help.titlePlaceholder')}
-                    value={title}
-                    onChange={(t) => setTitle(t.target.value)}
-                    className={styles.inputTitle}
-                    required
-                    disabled={isLoading}
-                />
+                    <input
+                        type="text"
+                        placeholder={t('help.titlePlaceholder')}
+                        value={title}
+                        onChange={(t) => setTitle(t.target.value)}
+                        className={styles.inputTitle}
+                        required
+                        disabled={isLoading}
+                    />
 
-                <textarea
-                    placeholder={t('help.messagePlaceholder')}
-                    value={message}
-                    onChange={(m) => setMessage(m.target.value)}
-                    className={styles.textArea}
-                    required
-                    disabled={isLoading}
-                />
+                    <textarea
+                        placeholder={t('help.messagePlaceholder')}
+                        value={message}
+                        onChange={(m) => setMessage(m.target.value)}
+                        className={styles.textArea}
+                        required
+                        disabled={isLoading}
+                    />
 
-                <button type="submit" className={styles.sendButton} disabled={isLoading}>
-                    {isLoading ? t('help.sending') : t('help.sendButton')}
-                </button>
+                    <div className={styles.buttonsContainer}>
+                        <button type="submit" className={styles.sendButton} disabled={isLoading}>
+                            {isLoading ? t('help.sending') : t('help.sendButton')}
+                        </button>
+                    </div>
 
-                {status && <p className={styles.statusMessage}>{status}</p>}
-            </form>
-        </div>  
+                    {status && <p className={styles.statusMessage}>{status}</p>}
+                </form>
+            </div>
+        </div>
     );
 }
 

@@ -1,4 +1,6 @@
 import { useState, useEffect, useContext } from "react";
+import toast from "react-hot-toast";
+import { confirmModal } from '../../../utils/confirmModal';
 import { ArrowLeft, Edit2, Trash2, GripVertical, Plus, X, Check } from "lucide-react";
 import styles from "../../../css/features/FlashcardSetManager.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
@@ -61,17 +63,17 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                 description: setDescription
             });
 
-            alert(t('flashcardSetManager.updateSuccess'));
+            toast.success(t('flashcardSetManager.updateSuccess'));
             setEditingSet(false);
             onBack();
         } catch (error) {
-            alert(`${t('flashcardSetManager.updateError')}: ${error.message}`);
+            toast.error(`${t('flashcardSetManager.updateError')}: ${error.message}`);
         }
     };
 
     const handleUpdateCard = async () => {
         if (!editQuestion.trim() || !editAnswer.trim()) {
-            alert(t('flashcardSetManager.emptyFields'));
+            toast.error(t('flashcardSetManager.emptyFields'));
             return;
         }
 
@@ -84,9 +86,9 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             setEditingCard(null);
             setEditQuestion("");
             setEditAnswer("");
-            alert(t('flashcardSetManager.cardUpdateSuccess'));
+            toast.success(t('flashcardSetManager.cardUpdateSuccess'));
         } catch (error) {
-            alert(t('flashcardSetManager.cardUpdateError'));
+            toast.error(t('flashcardSetManager.cardUpdateError'));
         }
     };
 
@@ -97,20 +99,21 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
     };
 
     const handleDeleteCard = async (cardId) => {
-        if (!window.confirm(t('flashcardSetManager.deleteConfirm'))) return;
+        const confirmed = await confirmModal(t('flashcardSetManager.deleteConfirm'));
+        if (!confirmed) return;
 
         try {
             await deleteFlashcard(cardId);
             fetchFlashcards();
-            alert(t('flashcardSetManager.cardDeleteSuccess'));
+            toast.success(t('flashcardSetManager.cardDeleteSuccess'));
         } catch (error) {
-            alert(t('flashcardSetManager.cardDeleteError'));
+            toast.error(t('flashcardSetManager.cardDeleteError'));
         }
     };
 
     const handleAddCard = async () => {
         if (!newQuestion.trim() || !newAnswer.trim()) {
-            alert(t('flashcardSetManager.emptyFields'));
+            toast.error(t('flashcardSetManager.emptyFields'));
             return;
         }
 
@@ -125,9 +128,9 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             setNewAnswer("");
             setShowAddCard(false);
             fetchFlashcards();
-            alert(t('flashcardSetManager.cardAddSuccess'));
+            toast.success(t('flashcardSetManager.cardAddSuccess'));
         } catch (error) {
-            alert(t('flashcardSetManager.cardAddError'));
+            toast.error(t('flashcardSetManager.cardAddError'));
         }
     };
 
@@ -228,12 +231,13 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                         </div>
                     ) : (
                         <div className={styles.setDisplay}>
-                            <h1>{flashcardSet.title}</h1>
+                            <div className={styles.setTitleRow}>
+                                <h1>{flashcardSet.title}</h1>
+                                <button className={styles.btnEditIcon} onClick={() => setEditingSet(true)} title={t('flashcardSetManager.editSet')}>
+                                    <Edit2 size={18} />
+                                </button>
+                            </div>
                             {flashcardSet.description && <p>{flashcardSet.description}</p>}
-                            <button className={styles.btnEdit} onClick={() => setEditingSet(true)}>
-                                <Edit2 size={16} />
-                                {t('flashcardSetManager.editSet')}
-                            </button>
                         </div>
                     )}
                 </div>

@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mic, Play, Pause, Trash2, CheckSquare, Square, RefreshCw, Headphones, Folder, ArrowLeft, MoreVertical, Pin, Edit2, X } from 'lucide-react';
-import styles from '../../../css/features/PodcastView.module.css'; 
+import toast from 'react-hot-toast';
+import { confirmModal } from '../../../utils/confirmModal';
+import { Play, Pause, Trash2, Headphones, Folder, ArrowLeft, MoreVertical, Pin, Edit2, X, Search, Plus, Filter } from 'lucide-react';
+import styles from '../../../css/features/PodcastView.module.css';
 
-import { 
+import {
     fetchPodcasts, generatePodcast, deletePodcast, renamePodcast, pinPodcast, updatePodcastPosition,
-    fetchPodcastFolders, createPodcastFolder, deletePodcastFolder, renamePodcastFolder, 
+    fetchPodcastFolders, createPodcastFolder, deletePodcastFolder, renamePodcastFolder,
     movePodcastToFolder, updatePodcastFolderPosition, movePodcastFolder
 } from '../../../services/podcastService';
 import { getNotes } from '../../../services/noteService';
+import PodcastGenerator from './PodcastGenerator';
 
-export default function PodcastView({ notebookId, userData }) {
+export default function PodcastView({ notebookId, userData, highlightedItemId }) {
     const [podcasts, setPodcasts] = useState([]);
     const [folders, setFolders] = useState([]);
     const [notes, setNotes] = useState([]);
@@ -17,11 +20,8 @@ export default function PodcastView({ notebookId, userData }) {
     const [currentFolder, setCurrentFolder] = useState(null);
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
     const [podcastMenuOpen, setPodcastMenuOpen] = useState(null);
-    
-    const [selectedNoteIds, setSelectedNoteIds] = useState([]);
-    const [topic, setTopic] = useState('');
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [showCreator, setShowCreator] = useState(false);
+
+    const [showGenerateModal, setShowGenerateModal] = useState(false);
     
     const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
@@ -43,12 +43,49 @@ export default function PodcastView({ notebookId, userData }) {
     const [dragOverFolderIndex, setDragOverFolderIndex] = useState(null);
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('date_desc');
+    const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768) {
+                setShowFilters(true);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     useEffect(() => {
         if (notebookId) {
             refreshData();
             loadNotes();
         }
     }, [notebookId]);
+
+    useEffect(() => {
+        if (highlightedItemId && podcasts.length > 0) {
+            const targetPodcast = podcasts.find(p => p.id === highlightedItemId);
+            if (targetPodcast && targetPodcast.folder_id) {
+                const folderToOpen = folders.find(f => f.id === targetPodcast.folder_id);
+                if (folderToOpen) {
+                    setCurrentFolder(folderToOpen);
+                }
+            } else if (targetPodcast && !targetPodcast.folder_id) {
+                setCurrentFolder(null);
+            }
+
+            // Scroll do elementu
+            const timer = setTimeout(() => {
+                const element = document.getElementById(`podcast-card-${highlightedItemId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [highlightedItemId, podcasts, folders]);
 
     const refreshData = async () => {
         try {
@@ -80,6 +117,11 @@ export default function PodcastView({ notebookId, userData }) {
         } else {
             filtered = filtered.filter(p => !p.folder_id);
         }
+        if (searchQuery) {
+            filtered = filtered.filter(p =>
+                p.title.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
 
         filtered = [...filtered].sort((a, b) => {
             if (a.is_pinned && !b.is_pinned) return -1;
@@ -88,9 +130,23 @@ export default function PodcastView({ notebookId, userData }) {
             if (a.is_pinned && b.is_pinned) {
                 if (a.grid_position !== null && b.grid_position !== null) return a.grid_position - b.grid_position;
             }
+
             if (!a.is_pinned && !b.is_pinned) {
-                if (a.grid_position !== null && b.grid_position !== null) return a.grid_position - b.grid_position;
+                if (sortBy === 'custom') {
+                    if (a.grid_position !== null && b.grid_position !== null) {
+                        return a.grid_position - b.grid_position;
+                    }
+                } else if (sortBy === 'date_desc') {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                } else if (sortBy === 'date_asc') {
+                    return new Date(a.created_at) - new Date(b.created_at);
+                } else if (sortBy === 'name_asc') {
+                    return a.title.localeCompare(b.title);
+                } else if (sortBy === 'name_desc') {
+                    return b.title.localeCompare(a.title);
+                }
             }
+
             return new Date(b.created_at) - new Date(a.created_at);
         });
 
@@ -138,27 +194,10 @@ export default function PodcastView({ notebookId, userData }) {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
-    const handleGenerate = async () => {
-        if (!topic) {
-            alert("Wpisz temat podcastu.");
-            return;
-        }
-        setIsGenerating(true);
-        try {
-            await generatePodcast(notebookId, userData.id, topic, selectedNoteIds, currentFolder?.id);
-            setTopic('');
-            setSelectedNoteIds([]);
-            setShowCreator(false);
-            refreshData();
-        } catch (err) {
-            alert("Błąd generowania: " + err.message);
-        } finally {
-            setIsGenerating(false);
-        }
-    };
 
     const handleDelete = async (id) => {
-        if(!window.confirm("Usunąć podcast?")) return;
+        const confirmed = await confirmModal("Czy na pewno chcesz usunąć ten podcast?");
+        if(!confirmed) return;
         try {
             await deletePodcast(id);
             const p = podcasts.find(x => x.id === id);
@@ -167,9 +206,10 @@ export default function PodcastView({ notebookId, userData }) {
                 setCurrentAudio(null);
                 setIsPlaying(false);
             }
+            toast.success("Podcast usunięty");
             refreshData();
         } catch(err) {
-            alert("Błąd usuwania.");
+            toast.error("Błąd usuwania.");
         }
     };
 
@@ -187,8 +227,9 @@ export default function PodcastView({ notebookId, userData }) {
         try {
             await renamePodcast(editingPodcast.id, editingPodcast.title);
             setEditingPodcast(null);
+            toast.success("Nazwa zmieniona");
             refreshData();
-        } catch(err) { alert("Błąd zmiany nazwy"); }
+        } catch(err) { toast.error("Błąd zmiany nazwy"); }
     };
 
     const handleCreateFolder = async (e) => {
@@ -198,16 +239,19 @@ export default function PodcastView({ notebookId, userData }) {
             await createPodcastFolder(notebookId, userData.id, newFolderName, currentFolder?.id);
             setNewFolderName('');
             setShowCreateFolderModal(false);
+            toast.success("Folder utworzony");
             refreshData();
-        } catch(err) { alert("Błąd tworzenia folderu"); }
+        } catch(err) { toast.error("Błąd tworzenia folderu"); }
     };
 
     const handleDeleteFolder = async (id) => {
-        if(!window.confirm("Usunąć folder? Podcasty wrócą do widoku głównego.")) return;
+        const confirmed = await confirmModal("Czy na pewno chcesz usunąć folder? Podcasty wrócą do widoku głównego.");
+        if(!confirmed) return;
         try {
             await deletePodcastFolder(id);
+            toast.success("Folder usunięty");
             refreshData();
-        } catch(err) { alert("Błąd usuwania folderu"); }
+        } catch(err) { toast.error("Błąd usuwania folderu"); }
     };
 
     const handleRenameFolderSubmit = async (e) => {
@@ -215,8 +259,9 @@ export default function PodcastView({ notebookId, userData }) {
         try {
             await renamePodcastFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
+            toast.success("Nazwa folderu zmieniona");
             refreshData();
-        } catch(err) { alert("Błąd zmiany nazwy"); }
+        } catch(err) { toast.error("Błąd zmiany nazwy"); }
     };
 
     const openFolder = (folder) => setCurrentFolder(folder);
@@ -233,6 +278,13 @@ export default function PodcastView({ notebookId, userData }) {
         setDraggedPodcast({ podcast, index });
         e.dataTransfer.effectAllowed = 'move';
         e.currentTarget.style.opacity = '0.5';
+
+        e.dataTransfer.setData('application/json', JSON.stringify({
+            type: 'podcast',
+            podcastId: podcast.id,
+            userId: userData.id,
+            sourceNotebookId: notebookId
+        }));
     };
 
     const handleDragEnd = (e) => {
@@ -283,7 +335,11 @@ export default function PodcastView({ notebookId, userData }) {
 
         try {
             await Promise.all(updated.map(p => updatePodcastPosition(p.id, p.grid_position)));
-        } catch(err) { refreshData(); }
+        } catch(err) {
+            console.error('Error updating podcast positions:', err);
+            toast.error("Błąd aktualizacji pozycji");
+            refreshData();
+        }
         setDragOverIndex(null);
     };
 
@@ -315,14 +371,14 @@ export default function PodcastView({ notebookId, userData }) {
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
-                <div className={styles.headerMain}>
+            <div className={styles.headerSection}>
+                <div className={styles.leftSection}>
                     {currentFolder ? (
                         <>
                             <button onClick={closeFolder} className={styles.backBtn}>
                                 <ArrowLeft size={20} /> Powrót
                             </button>
-                            <h2 
+                            <h2
                                 className={`${styles.title} ${dragOverBreadcrumb ? styles.dragOverBreadcrumb : ''}`}
                                 onDragOver={(e) => { e.preventDefault(); setDragOverBreadcrumb(true); }}
                                 onDragLeave={() => setDragOverBreadcrumb(false)}
@@ -334,50 +390,80 @@ export default function PodcastView({ notebookId, userData }) {
                                     refreshData();
                                 }}
                             >
-                                <Folder size={24} style={{color: '#6c63ff'}}/> {currentFolder.name}
+                                <Folder size={24} color="#f59e0b" stroke="#f59e0b"/> {currentFolder.name}
                             </h2>
                         </>
                     ) : (
-                        <h2 className={styles.title}>Biblioteka Podcastów</h2>
+                        <h2 className={styles.title}>Podkasty</h2>
                     )}
-                    
-                    <div className={styles.actions}>
-                        <button className={styles.secondaryBtn} onClick={() => setShowCreateFolderModal(true)}>
-                            <Folder size={18}/> Nowy folder
-                        </button>
-                        <button className={styles.createBtn} onClick={() => setShowCreator(!showCreator)}>
-                            {showCreator ? "Anuluj" : "+ Generuj Podcast"}
-                        </button>
+                    <div className={styles.searchBox}>
+                        <Search size={16} />
+                        <input
+                            type="text"
+                            placeholder="Szukaj podcastów..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={styles.searchInput}
+                        />
                     </div>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className={styles.filterSelect}
+                    >
+                        <option value="date_desc">Najnowsze</option>
+                        <option value="date_asc">Najstarsze</option>
+                        <option value="name_asc">Nazwa A-Z</option>
+                        <option value="name_desc">Nazwa Z-A</option>
+                    </select>
                 </div>
-            </div>
-
-            {showCreator && (
-                <div className={styles.creatorCard}>
-                    <h3>Nowy Podcast</h3>
-                    <input 
-                        type="text" placeholder="O czym ma być podcast? Jeżeli wybierasz z notatki, to podaj tylko tytuł podcastu." 
-                        value={topic} onChange={(e) => setTopic(e.target.value)}
-                        className={styles.input}
-                    />
-                    <div className={styles.notesList}>
-                        {notes.length === 0 ? <p className={styles.emptyNote}>Brak notatek.</p> : notes.map(note => (
-                            <div key={note.id} className={`${styles.noteItem} ${selectedNoteIds.includes(note.id) ? styles.selected : ''}`} onClick={() => setSelectedNoteIds(prev => prev.includes(note.id) ? prev.filter(n => n !== note.id) : [...prev, note.id])}>
-                                {selectedNoteIds.includes(note.id) ? <CheckSquare size={16}/> : <Square size={16}/>} <span>{note.title}</span>
-                            </div>
-                        ))}
+                {showFilters && (
+                    <div className={styles.filtersRow}>
+                        <div className={styles.searchBox}>
+                            <Search size={16} />
+                            <input
+                                type="text"
+                                placeholder="Szukaj podcastów..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.searchInput}
+                            />
+                        </div>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="date_desc">Najnowsze</option>
+                            <option value="date_asc">Najstarsze</option>
+                            <option value="name_asc">Nazwa A-Z</option>
+                            <option value="name_desc">Nazwa Z-A</option>
+                        </select>
                     </div>
-                    <button className={styles.generateBtn} onClick={handleGenerate} disabled={isGenerating}>
-                        {isGenerating ? <><RefreshCw className={styles.spin} size={18}/> Generowanie...</> : <><Mic size={18}/> Generuj Audio</>}
+                )}
+                <div className={styles.headerActions}>
+                    <button
+                        className={styles.filterToggleBtn}
+                        onClick={() => setShowFilters(!showFilters)}
+                        title="Filtry"
+                    >
+                        <Filter size={18} />
+                    </button>
+                    <button className={styles.secondaryBtn} onClick={() => setShowCreateFolderModal(true)}>
+                        <Folder size={18} color="#f59e0b"/> Nowy folder
+                    </button>
+                    <button className={styles.createBtn} onClick={() => setShowGenerateModal(true)}>
+                        <Plus size={18} />
+                        Generuj podcast
                     </button>
                 </div>
-            )}
+            </div>
 
             <div className={styles.podcastList}>
                 
                 {folders.filter(f => currentFolder ? f.parent_folder_id === currentFolder.id : !f.parent_folder_id).map((folder, index) => (
-                    <div 
-                        key={folder.id} 
+                    <div
+                        key={folder.id}
                         className={`${styles.folderCard} ${dragOverFolder === folder.id ? styles.folderDragOver : ''}`}
                         draggable
                         onDragStart={(e) => { setDraggedFolder({folder, index}); e.dataTransfer.effectAllowed = 'move'; }}
@@ -391,11 +477,11 @@ export default function PodcastView({ notebookId, userData }) {
                             <Folder size={64} className={styles.folderIcon}/>
                             <span className={styles.folderName}>{folder.name}</span>
                         </div>
-                        <button className={styles.optionsBtn} onClick={(e) => { e.stopPropagation(); setFolderMenuOpen(folderMenuOpen === folder.id ? null : folder.id); }}>
+                        <button className={styles.btnFolderOptions} onClick={(e) => { e.stopPropagation(); setFolderMenuOpen(folderMenuOpen === folder.id ? null : folder.id); }}>
                             <MoreVertical size={18}/>
                         </button>
                         {folderMenuOpen === folder.id && (
-                            <div className={styles.contextMenu}>
+                            <div className={styles.folderMenu}>
                                 <button onClick={(e) => { e.stopPropagation(); setEditingFolder(folder); setFolderMenuOpen(null); }}>Zmień nazwę</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.id); setFolderMenuOpen(null); }} className={styles.deleteOption}>Usuń</button>
                             </div>
@@ -406,11 +492,13 @@ export default function PodcastView({ notebookId, userData }) {
                 {getFilteredAndSortedPodcasts().map((podcast, index) => {
                     const isActive = currentAudio === podcast.file_url;
                     const isDragOver = dragOverIndex === index;
+                    const isHighlighted = highlightedItemId === podcast.id;
 
                     return (
-                        <div 
-                            key={podcast.id} 
-                            className={`${styles.podcastCard} ${isActive ? styles.activeCard : ''} ${podcast.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''}`}
+                        <div
+                            key={podcast.id}
+                            id={`podcast-card-${podcast.id}`}
+                            className={`${styles.podcastCard} ${isActive ? styles.activeCard : ''} ${podcast.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''} ${isHighlighted ? styles.highlighted : ''}`}
                             draggable
                             onDragStart={(e) => handleDragStart(e, podcast, index)}
                             onDragEnd={handleDragEnd}
@@ -454,7 +542,7 @@ export default function PodcastView({ notebookId, userData }) {
                     );
                 })}
 
-                {getFilteredAndSortedPodcasts().length === 0 && folders.length === 0 && !isGenerating && (
+                {getFilteredAndSortedPodcasts().length === 0 && folders.length === 0 && (
                     <div className={styles.emptyState}>
                          <Headphones size={48} opacity={0.3}/>
                          <p>Brak podcastów w tym folderze.</p>
@@ -467,12 +555,32 @@ export default function PodcastView({ notebookId, userData }) {
             {showCreateFolderModal && (
                 <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <h3>Nowy folder</h3>
-                        <input autoFocus type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Nazwa folderu" className={styles.input}/>
-                        <div className={styles.modalActions}>
-                            <button onClick={() => setShowCreateFolderModal(false)}>Anuluj</button>
-                            <button onClick={handleCreateFolder} className={styles.primaryBtn}>Utwórz</button>
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modalTitle}>Utwórz nowy folder</h2>
+                            <button
+                                className={styles.closeBtn}
+                                onClick={() => setShowCreateFolderModal(false)}
+                            >
+                                <X size={20} />
+                            </button>
                         </div>
+                        <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
+                            <div className={styles.formGroup}>
+                                <label>Nazwa folderu</label>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={newFolderName}
+                                    onChange={e => setNewFolderName(e.target.value)}
+                                    placeholder="Wpisz nazwę folderu..."
+                                    required
+                                />
+                            </div>
+                            <div className={styles.modalActions}>
+                                <button type="button" className={styles.btnCancel} onClick={() => setShowCreateFolderModal(false)}>Anuluj</button>
+                                <button type="submit" className={styles.btnSubmit}>Utwórz folder</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
@@ -480,23 +588,46 @@ export default function PodcastView({ notebookId, userData }) {
             {(editingFolder || editingPodcast) && (
                 <div className={styles.modalOverlay} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <h3>Zmień nazwę</h3>
-                        <form onSubmit={editingFolder ? handleRenameFolderSubmit : handleRenamePodcastSubmit}>
-                            <input 
-                                autoFocus 
-                                type="text" 
-                                value={editingFolder ? editingFolder.name : editingPodcast.title} 
-                                onChange={e => editingFolder ? setEditingFolder({...editingFolder, name: e.target.value}) : setEditingPodcast({...editingPodcast, title: e.target.value})} 
-                                className={styles.input}
-                            />
+                        <div className={styles.modalHeader}>
+                            <h2 className={styles.modalTitle}>Zmień nazwę</h2>
+                            <button
+                                className={styles.closeBtn}
+                                onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={editingFolder ? handleRenameFolderSubmit : handleRenamePodcastSubmit} style={{padding: '2rem'}}>
+                            <div className={styles.formGroup}>
+                                <label>{editingFolder ? 'Nazwa folderu' : 'Nazwa podcastu'}</label>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={editingFolder ? editingFolder.name : editingPodcast.title}
+                                    onChange={e => editingFolder ? setEditingFolder({...editingFolder, name: e.target.value}) : setEditingPodcast({...editingPodcast, title: e.target.value})}
+                                    required
+                                />
+                            </div>
                             <div className={styles.modalActions}>
-                                <button type="button" onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>Anuluj</button>
-                                <button type="submit" className={styles.primaryBtn}>Zapisz</button>
+                                <button type="button" className={styles.btnCancel} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>Anuluj</button>
+                                <button type="submit" className={styles.btnSubmit}>Zapisz</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
+            <PodcastGenerator
+                show={showGenerateModal}
+                onClose={() => setShowGenerateModal(false)}
+                onSuccess={() => {
+                    setShowGenerateModal(false);
+                    refreshData();
+                }}
+                notebookId={notebookId}
+                userData={userData}
+                notes={notes}
+            />
         </div>
     );
 }

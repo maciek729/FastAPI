@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { LoginUser } from "../../services/authService";
+import logo from "../Layout/logodark.png";
 
 function Login() {
   const navigate = useNavigate();
@@ -36,7 +37,8 @@ function Login() {
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Witaj ponownie</h2>
+        <img src={logo} alt="zdAI to!" className={styles.logo} />
+        <h1 className={styles.brandName}>zdAI to!</h1>
         <p className={styles.subtitle}>Zaloguj się do swojego konta</p>
         
         <div className={styles.formGroup}>

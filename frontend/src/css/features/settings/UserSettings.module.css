@@ -378,3 +378,105 @@ Pozdro*/
 .clickableAvatar:hover {
     opacity: 0.85;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .settingsMainContainer {
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .settingsMainContainer {
+    width: 95%;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .sectionContainer {
+    padding: 0.5rem 1rem;
+    padding-bottom: 0.875rem;
+    gap: 1.5rem;
+  }
+
+  .sectionOption {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .textWrapper {
+    width: 100%;
+  }
+
+  .selectWrapper {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .optionSelect {
+    width: 100%;
+    text-align: left;
+  }
+
+  .buttonsContainer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .saveButton,
+  .cancelButton,
+  .deleteAccountButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .userAvatar {
+    width: 50px;
+    height: 50px;
+    font-size: 0.875rem;
+  }
+
+  .optionButton {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .settingsMainContainer {
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .sectionContainer {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.9375rem;
+  }
+
+  .optionLabel {
+    font-size: 0.8125rem;
+  }
+
+  .userAvatar {
+    width: 45px;
+    height: 45px;
+  }
+}

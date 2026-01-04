@@ -1,93 +1,120 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-.wrapper {
+.settingsMainContainer {
+  max-width: 1400px;
   width: 80%;
-  max-width: 800px;;
+  flex-direction: column;
+  display: flex;
+  min-height: 0;
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wrapper {
+  width: 100%;
   justify-content: center;
-  margin: 0.75rem auto;
-    margin-bottom: 0.75rem; 
-    border-radius: 0.625rem;
-    overflow: hidden;
-    border: 1px solid rgba(148, 163, 184, 0.25);
+  margin: 0.75rem 0;
+  margin-bottom: 0.75rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: var(--inner_section_bg);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
 }
 
 .collapsibleHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.5rem;
     cursor: pointer;
-    background-color: var(--inner_section_bg);
-    color: var(--info_msg_text);
+    background-color: transparent;
+    color: var(--title);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9375rem;
     transition: all 0.2s ease;
 }
 
 .collapsibleHeader:hover {
-    opacity: 0.9;
+    color: #8b5cf6;
+}
+
+.collapsibleHeader label {
+    cursor: pointer;
 }
 
 .toggleIcon {
     margin-left: 10px;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, color 0.2s ease;
+    color: #8b5cf6;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .content {
-    max-height: 0;
+    display: grid;
+    grid-template-rows: 0fr;
     overflow: hidden;
-    background: var(--inner_inner_section_bg);
+    background: transparent;
     color: var(--subtitle);
-    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out; 
-    padding: 0 1rem;
-    font-size: 13px;
+    transition: grid-template-rows 0.3s ease-in-out, padding 0.3s ease-in-out;
+    padding: 0 1.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.content > * {
+    min-height: 0;
 }
 
 .open {
-    max-height: 500px; 
-    padding: 1rem;
+    grid-template-rows: 1fr;
+    padding: 0 1.5rem 1rem 1.5rem;
 }
 
 .content p {
     margin: 0;
+    color: var(--subtitle);
 }
+.sectionContainer {
+  background: var(--inner_section_bg);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  padding-bottom: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 .helpContainer {
   display: flex;
   flex-direction: column;
-  width: 80%;
-  max-width: 800px;
-  margin: 2rem auto;
-  background: var(--inner_section_bg);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  border-radius: 0.875rem;
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   font-family: 'Inter', sans-serif;
-  animation: fadeInUp 0.5s ease-out forwards;
   height: auto;
   box-sizing: border-box;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .helpTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 600;
   color: var(--title);
-  text-align: center;
-  margin-top:0;
-  margin-bottom:0;
-  margin-right:10px;
-  margin-left:15px;
+  text-align: left;
+  margin: 0;
 }
 
 .inputTitle {
@@ -118,27 +145,37 @@
 
 .textArea {
   resize: vertical;
-  min-height: 220px;
+  min-height: 120px;
+}
+
+.buttonsContainer {
+  display: flex;
+  margin-top: 24px;
+  gap: 1.2rem;
+  justify-content: flex-end;
 }
 
 .sendButton {
-  margin-top: 1.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
+  border: none;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .sendButton:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
 
 .sendButton:active {
@@ -152,53 +189,122 @@
   font-size: 0.9375rem;
 }
 
-.brandIcon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7px;;
-  color: white;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
-}
-
 .formContainer {
   display: flex;
-  flex-direction: row; /* Poprawiłem z 'flex' na 'row' */
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   margin-bottom: 1.5rem;
 }
 .titleContainer {
-    text-align: center;
-    margin-bottom: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
 }
 
 .title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--title);
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
-    margin-top: 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--title);
+  margin-bottom: 0.1rem;
+  letter-spacing: -0.02em;
+  margin-top: 0;
 }
 
 .subtitle {
-    font-size: 0.9375rem;
-    color: var(--subtitle);
-    font-weight: 400;
-    margin-top: 0;
+  font-size: 0.9375rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-top: 0;
 }
-.formWrapper {
-  margin-top: 25px;
-  margin-bottom: 25px;
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+  .settingsMainContainer {
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .settingsMainContainer {
+    width: 95%;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .sectionContainer {
+    padding: 0.5rem 1rem;
+    padding-bottom: 0.875rem;
+  }
+
+  .collapsibleHeader {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .content {
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
+
+  .content.open {
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  .inputTitle,
+  .textArea {
+    font-size: 16px; /* Prevents iOS zoom */
+    padding: 0.625rem 0.875rem;
+  }
+
+  .textArea {
+    min-height: 100px;
+  }
+
+  .buttonsContainer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sendButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .settingsMainContainer {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .sectionContainer {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .collapsibleHeader {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .content {
+    padding: 0 0.75rem;
+  }
+
+  .content.open {
+    padding: 0 0.75rem 0.875rem 0.75rem;
+  }
 }
