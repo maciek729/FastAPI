@@ -123,8 +123,9 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Could not validate user.')
 
-async def send_verification_email(email: EmailStr, token: str):
-    verify_link = f"http://localhost:8000/auth/verify?token={token}"
+async def send_verification_email(email: EmailStr, token: str, base_url:str):
+    # verify_link = f"http://localhost:8000/auth/verify?token={token}"
+    verify_link = f"{base_url}auth/verify?token={token}"
     message = MessageSchema(
         subject="Email Verification",
         recipients=[email],
@@ -137,8 +138,9 @@ async def send_verification_email(email: EmailStr, token: str):
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
-                      create_user_request: CreateUserRequest):
+                      create_user_request: CreateUserRequest, request: Request):
     token = secrets.token_urlsafe(32)
+    base_url = str(request.base_url)
     thisEmail = create_user_request.email
     create_user_model = Users(
         email=thisEmail,
@@ -153,7 +155,7 @@ async def create_user(db: db_dependency,
     db.add(create_user_model)
     db.commit()
 
-    await send_verification_email(thisEmail, token)
+    await send_verification_email(thisEmail, token, base_url)
 
 
 @router.post("/token", response_model=Token)
@@ -169,7 +171,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
 
 @router.get("/verify")
-async def verify_email(token: str, db: Session = Depends(get_db)):
+async def verify_email(request: Request, token: str, db: Session = Depends(get_db)):
     user = db.query(Users).filter(Users.verification_token == token).first()
 
     if not user:
@@ -182,16 +184,87 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
     user.verification_token = None
     db.commit()
 
+    current_url = str(request.base_url)
+    if "localhost" in current_url:
+        frontend_url = "http://localhost:5173"
+    else:
+        frontend_url = "https://zdaito.pl"
 
-    html_content = """
-    <html>
-        <head>
-            <title>Email Verified</title>
-        </head>
-        <body>
-            <h1>Email successfully verified!</h1>
-            <p>You can now <a href="/auth/login-page">log in</a>.</p>
-        </body>
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="pl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Zweryfikowany - zdAI to!</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                color: #2d3436;
+            }}
+            .card {{
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+            }}
+            .icon {{
+                font-size: 60px;
+                color: #00b894;
+                margin-bottom: 20px;
+            }}
+            h1 {{
+                margin: 0 0 10px 0;
+                font-size: 24px;
+                color: #2d3436;
+            }}
+            p {{
+                color: #636e72;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }}
+            .btn {{
+                display: inline-block;
+                background: #0984e3;
+                color: white;
+                text-decoration: none;
+                padding: 12px 30px;
+                border-radius: 10px;
+                font-weight: bold;
+                transition: transform 0.2s, background 0.2s;
+            }}
+            .btn:hover {{
+                background: #9771F8;
+                transform: translateY(-2px);
+            }}
+            .logo {{
+                font-weight: bold;
+                color: #9771F8;
+                font-weight:800;
+                font-size: 2rem;
+                margin-bottom: 10px;
+                display: block;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <span class="logo">zdAI to!</span>
+            <div class="icon">✓</div>
+            <h1>Email zweryfikowany!</h1>
+            <p>Twoje konto zostało pomyślnie aktywowane. Możesz teraz wrócić do aplikacji i zacząć naukę.</p>
+            <a href="{frontend_url}/login" class="btn">Przejdź do logowania</a>
+        </div>
+    </body>
     </html>
     """
     return HTMLResponse(content=html_content, status_code=200)
@@ -203,6 +276,7 @@ class ResetPasswordRequest(BaseModel):
 
 @router.post("/forgot-password")
 async def forgot_password(
+    request: Request,
     email: str = Form(...),
     db: Session = Depends(get_db)
 ):
@@ -220,7 +294,11 @@ async def forgot_password(
     user.reset_password_token_expires = expires
     db.commit()
 
-    reset_link = f"http://localhost:5173/reset-password/{token}"
+    origin = request.headers.get('origin') 
+    if not origin:
+        origin = "https://zdaito.pl"
+
+    reset_link = f"{origin}/reset-password/{token}"
 
     message = MessageSchema(
         subject="Password Reset Request",

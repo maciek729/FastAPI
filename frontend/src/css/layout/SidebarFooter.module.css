@@ -47,6 +47,7 @@
   overflow: hidden;
   flex-shrink: 0;
   object-fit: cover;
+  position: relative;
 }
 .userInfo {
   flex: 1;
@@ -216,4 +217,41 @@
     opacity: 1;
     transform: translateY(0) translateX(-50%);
   }
+}
+.iconContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notificationBadge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff4d4d;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.userMenuCollapsed .notificationBadge {
+    top: -4px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+}
+
+.avatarBadge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff4d4d;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 10;
 }
