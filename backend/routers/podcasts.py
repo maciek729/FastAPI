@@ -42,8 +42,9 @@ db_dependency = Annotated[Session, Depends(get_db)]
 class PodcastCreateRequest(BaseModel):
     notebook_id: int
     user_id: int
+    title: str
     topic: str
-    note_ids: Optional[List[int]] = [] 
+    note_ids: Optional[List[int]] = []
     parent_folder_id: Optional[int] = None
 
 class FolderCreateRequest(BaseModel):
@@ -213,7 +214,7 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     new_podcast = Podcasts(
         notebook_id=request.notebook_id,
         user_id=request.user_id,
-        title=request.topic,
+        title=request.title,
         script_content=script,
         file_path=storage_path,
         file_url=file_url,

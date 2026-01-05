@@ -13,6 +13,7 @@ export default function PodcastGenerator({
     notes
 }) {
     const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+    const [title, setTitle] = useState('');
     const [topic, setTopic] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -27,15 +28,21 @@ export default function PodcastGenerator({
     const handleGenerate = async (e) => {
         e.preventDefault();
 
+        if (!title.trim()) {
+            toast.error("Podaj tytuł podcastu!");
+            return;
+        }
+
         if (!topic.trim()) {
-            toast.error("Podaj temat podcastu!");
+            toast.error("Podaj opis/temat podcastu!");
             return;
         }
 
         setIsGenerating(true);
         try {
-            await generatePodcast(notebookId, userData.id, topic, selectedNoteIds, null);
+            await generatePodcast(notebookId, userData.id, title, selectedNoteIds, null, topic);
             toast.success("Podcast został wygenerowany!");
+            setTitle('');
             setTopic('');
             setSelectedNoteIds([]);
             if (onSuccess) onSuccess();
@@ -72,12 +79,28 @@ export default function PodcastGenerator({
                             <label>Tytuł podcastu *</label>
                             <input
                                 type="text"
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                                 placeholder="np. Historia Polski - Średniowiecze"
                                 disabled={isGenerating}
                                 required
                             />
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label>Opis/Temat podcastu *</label>
+                            <textarea
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                placeholder="np. Opowiedz o najważniejszych wydarzeniach w średniowiecznej Polsce, skupiając się na bitwach i władcach"
+                                disabled={isGenerating}
+                                required
+                                rows={4}
+                                style={{ resize: 'vertical', minHeight: '80px' }}
+                            />
+                            <small style={{ color: 'var(--subtitle)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                                Opisz co dokładnie ma zostać omówione w podcastie - AI wygeneruje treść na podstawie tego opisu
+                            </small>
                         </div>
 
                         <div className={styles.formGroup}>
