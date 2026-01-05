@@ -71,6 +71,35 @@
   }
 }
 
+
+.mobileExpandBtn {
+  position: fixed;
+  top: 2px;
+  left: 2px;
+  z-index: 70;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.mobileExpandBtn:hover {
+  background: rgba(139, 92, 246, 0.05);
+  color: #8b5cf6;
+}
+
+.mobileExpandBtn:active {
+  transform: scale(0.95);
+}
+
 /* Sidebar Overlay */
 .sidebarOverlay {
   display: none;
@@ -78,6 +107,10 @@
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+  .mobileExpandBtn {
+    display: flex;
+  }
+
   .sidebarOverlay {
     display: block;
     position: fixed;

@@ -1,11 +1,13 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Settings, User, Palette, HelpCircle, Bell } from "lucide-react";
 import styles from "../../../css/layout/SidebarFooter.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import * as notifService from "../../../services/notificationService";
 
-const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
+const UserMenu = ({ isCollapsed = false, onGoToSection, onClose, userData }) => {
     const { language } = useContext(LanguageContext);
+    const [hasUnread, setHasUnread] = useState(false);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');
@@ -55,6 +57,22 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
         }
     ];
 
+    useEffect(() => {
+        const checkNotifications = async () => {
+            if (userData?.id) {
+                try {
+                    const data = await notifService.getUserNotifications(userData.id);
+                    const unreadExists = data.some(n => !n.is_read);
+                    setHasUnread(unreadExists);
+                } catch (error) {
+                    console.error("Błąd sprawdzania powiadomień:", error);
+                }
+            }
+        };
+
+        checkNotifications();
+    }, [userData?.id]);
+
     return (
         <div className={isCollapsed ? styles.userMenuCollapsed : styles.userMenu}>
             {menuItems.map((item) => {
@@ -65,7 +83,12 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose }) => {
                         className={styles.menuItem}
                         onClick={() => handleMenuClick(item.id)}
                     >
-                        <Icon size={16} />
+                        <div className={styles.iconContainer}>
+                            <Icon size={16} />
+                            {item.id === 'notifications' && hasUnread && (
+                                <span className={styles.notificationBadge} />
+                            )}
+                        </div>
                         <span>{item.label}</span>
                     </button>
                 );

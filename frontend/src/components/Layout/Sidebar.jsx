@@ -260,7 +260,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     return (
         <aside className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''}`}>
             <div className={styles.sidebarInner}>
-
                 <div className={styles.sidebarHeader}>
                     <div
                         className={styles.brandContainer}
@@ -289,7 +288,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             onClick={toggleSidebar}
                             title={t('sidebar.collapseSidebar')}
                         >
-                            <PanelLeft size={18} />
+                            <PanelLeft size={20} />
                         </button>
                     )}
                 </div>

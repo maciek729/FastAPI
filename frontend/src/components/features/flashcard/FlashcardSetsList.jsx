@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
-import { Layers, Trash2, Play, Brain, Settings, Pin, Folder, MoreVertical } from "lucide-react";
+import { Layers, Trash2, Play, Brain, Pin, Folder, MoreVertical } from "lucide-react";
 import styles from "../../../css/features/FlashcardsView.module.css";
 import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
 
@@ -501,9 +501,9 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                         id={`set-card-${set.id}`}
                         key={set.id}
                         className={`
-                            ${styles.setCard} 
-                            ${set.is_pinned ? styles.pinnedCard : ''} 
-                            ${isDragOver ? styles.dragOver : ''} 
+                            ${styles.setCard}
+                            ${set.is_pinned ? styles.pinnedCard : ''}
+                            ${isDragOver ? styles.dragOver : ''}
                             ${isDragNotAllowed ? styles.dragNotAllowed : ''}
                             ${isHighlighted ? styles.highlighted : ''}
                         `}
@@ -513,6 +513,8 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, index)}
+                        onClick={() => onManageSet(set)}
+                        style={{ cursor: 'pointer' }}
                     >
                         <div className={styles.setHeader}>
                             <div className={styles.setTitle}>
@@ -567,17 +569,13 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                         <div className={styles.setActions}>
                             <button
                                 className={styles.btnLearn}
-                                onClick={() => onStartLearning(set)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onStartLearning(set);
+                                }}
                             >
                                 <Play size={18} />
                                 Ucz się
-                            </button>
-                            <button
-                                className={styles.btnManage}
-                                onClick={() => onManageSet(set)}
-                                title="Zarządzaj fiszkami"
-                            >
-                                <Settings size={18} />
                             </button>
                         </div>
                     </div>
