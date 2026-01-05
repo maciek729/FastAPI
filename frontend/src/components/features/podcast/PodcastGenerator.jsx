@@ -8,6 +8,8 @@ export default function PodcastGenerator({
     show,
     onClose,
     onSuccess,
+    onStartGenerating,
+    onError,
     notebookId,
     userData,
     notes
@@ -33,15 +35,23 @@ export default function PodcastGenerator({
         }
 
         setIsGenerating(true);
+
+        // Close modal and show loading state immediately
+        if (onStartGenerating) {
+            onStartGenerating();
+        }
+
         try {
             await generatePodcast(notebookId, userData.id, topic, selectedNoteIds, null);
             toast.success("Podcast został wygenerowany!");
             setTopic('');
             setSelectedNoteIds([]);
             if (onSuccess) onSuccess();
-            onClose();
         } catch (err) {
             toast.error(err.message || "Nie udało się wygenerować podcastu");
+            if (onError) {
+                onError();
+            }
         } finally {
             setIsGenerating(false);
         }

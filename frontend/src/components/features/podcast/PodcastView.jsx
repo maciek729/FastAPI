@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { Play, Pause, Trash2, Headphones, Folder, ArrowLeft, MoreVertical, Pin, Edit2, X, Search, Plus, Filter } from 'lucide-react';
@@ -11,11 +11,24 @@ import {
 } from '../../../services/podcastService';
 import { getNotes } from '../../../services/noteService';
 import PodcastGenerator from './PodcastGenerator';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function PodcastView({ notebookId, userData, highlightedItemId }) {
+    const { language } = useContext(LanguageContext);
     const [podcasts, setPodcasts] = useState([]);
     const [folders, setFolders] = useState([]);
     const [notes, setNotes] = useState([]);
+
+    const t = (key) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        return translation || key;
+    };
     
     const [currentFolder, setCurrentFolder] = useState(null);
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
@@ -46,6 +59,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('date_desc');
     const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -489,6 +503,27 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                     </div>
                 ))}
 
+                {/* Skeleton card while generating */}
+                {isGenerating && (
+                    <div className={`${styles.podcastCard} ${styles.skeletonCard}`}>
+                        <div className={styles.podcastCardHeader}>
+                            <div className={`${styles.skeleton} ${styles.skeletonTitle}`}></div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <div className={`${styles.skeleton} ${styles.skeletonButton}`}></div>
+                                <div className={`${styles.skeleton} ${styles.skeletonButton}`}></div>
+                            </div>
+                        </div>
+                        <div className={styles.podcastStats}>
+                            <div className={`${styles.skeleton} ${styles.skeletonStat}`}></div>
+                            <div className={`${styles.skeleton} ${styles.skeletonStat}`}></div>
+                        </div>
+                        <div className={styles.generatingText}>
+                            <div className={styles.spinner}></div>
+                            <span>{t('podcastGenerator.generatingPodcast')}</span>
+                        </div>
+                    </div>
+                )}
+
                 {getFilteredAndSortedPodcasts().map((podcast, index) => {
                     const isActive = currentAudio === podcast.file_url;
                     const isDragOver = dragOverIndex === index;
@@ -621,8 +656,15 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                 show={showGenerateModal}
                 onClose={() => setShowGenerateModal(false)}
                 onSuccess={() => {
-                    setShowGenerateModal(false);
+                    setIsGenerating(false);
                     refreshData();
+                }}
+                onStartGenerating={() => {
+                    setShowGenerateModal(false);
+                    setIsGenerating(true);
+                }}
+                onError={() => {
+                    setIsGenerating(false);
                 }}
                 notebookId={notebookId}
                 userData={userData}

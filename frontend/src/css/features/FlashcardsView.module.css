@@ -455,6 +455,90 @@
   to { transform: rotate(360deg); }
 }
 
+/* Skeleton Loading Card */
+.skeletonCard {
+  cursor: default !important;
+  pointer-events: none;
+}
+
+.skeletonCard:hover {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  border-color: var(--border_gray);
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--purple_brighter_bg) 25%,
+    var(--purple_brighter_border) 50%,
+    var(--purple_brighter_bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeletonTitle {
+  height: 20px;
+  width: 60%;
+}
+
+.skeletonButton {
+  height: 32px;
+  width: 32px;
+  border-radius: 8px;
+}
+
+.skeletonStat {
+  height: 16px;
+  width: 80px;
+}
+
+.setCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.setStats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.generatingText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--purple_brighter_bg);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--purple_brighter);
+  margin-top: auto;
+}
+
+.generatingText .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--purple_brighter_bg);
+  border-top-color: var(--purple_brighter);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .emptyState {
   grid-column: 1 / -1;
   display: flex;
