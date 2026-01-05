@@ -54,6 +54,7 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSe
                         onGoToSection={onGoToSection}
                         onSettingsClick={onSettingsClick}
                         onClose={() => setIsMenuOpen(false)}
+                        userData={userData}
                     />
                 )}
             </div>

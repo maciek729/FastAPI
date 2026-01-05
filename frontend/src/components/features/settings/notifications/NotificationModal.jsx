@@ -17,6 +17,7 @@ export default function NotificationModal({ notification, onDelete, onClick, t }
 
     const formatTimestamp = (dateString) => {
         const date = new Date(dateString);
+        date.setHours(date.getHours() + 1);
         return date.toLocaleString(undefined, {
             day: '2-digit',
             month: '2-digit',

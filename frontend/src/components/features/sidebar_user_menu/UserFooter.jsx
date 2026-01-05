@@ -71,6 +71,7 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) 
                     <UserMenu
                         onGoToSection={onGoToSection}
                         onClose={() => setIsMenuOpen(false)}
+                        userData={userData}
                     />
                 )}
             </div>
