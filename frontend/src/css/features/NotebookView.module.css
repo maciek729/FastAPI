@@ -182,10 +182,17 @@
 .searchInput {
   flex: 1;
   background: transparent;
-  border: none;
-  outline: none;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: var(--title);
   font-size: 0.875rem;
+}
+
+.searchInput:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .searchInput::placeholder {

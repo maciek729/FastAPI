@@ -172,7 +172,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid rgba(148, 163, 184, 0.15);
+  border: none;
   border-radius: 6px;
   color: #64748b;
   cursor: pointer;
@@ -187,7 +187,6 @@
 
 .toggleBtn:hover {
   background: rgba(139, 92, 246, 0.05);
-  border-color: rgba(139, 92, 246, 0.3);
   color: #8b5cf6;
 }
 
@@ -678,3 +677,4 @@
 .sidebar.collapsed .userMenu {
   width: 60px; /* szerokość collapsed sidebara */
 }
+
