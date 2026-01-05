@@ -1,40 +1,56 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { X, ChevronDown } from 'lucide-react';
+import { X, CheckSquare } from 'lucide-react';
 import styles from "../../../css/features/FlashcardGenerator.module.css";
 import * as testsService from '../../../services/testsService';
 
 export default function TestGenerator({
     show,
     onClose,
+    onStartGenerating,
     onSuccess,
+    onError,
     userData,
     notebookId,
     currentFolder,
     notes
 }) {
-    const [loading, setLoading] = useState(false);
     const [uploadFile, setUploadFile] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
     const [newTest, setNewTest] = useState({
         title: '',
         topic: '',
         num_questions: 5,
         question_type: 'multiple_choice',
         source_type: 'manual',
-        note_id: null
+        note_ids: []
     });
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setDropdownOpen(false);
+    const handleNoteToggle = (noteId) => {
+        setNewTest(prev => {
+            const isRemoving = prev.note_ids.includes(noteId);
+            const newNoteIds = isRemoving
+                ? prev.note_ids.filter(id => id !== noteId)
+                : [...prev.note_ids, noteId];
+
+            // Auto-fill title if exactly one note is selected, clear if none selected
+            let newTitle = prev.title;
+            if (newNoteIds.length === 0) {
+                newTitle = '';
+            } else if (newNoteIds.length === 1) {
+                const selectedNote = notes.find(n => n.id === newNoteIds[0]);
+                if (selectedNote) {
+                    newTitle = selectedNote.title;
+                }
             }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+
+            return {
+                ...prev,
+                note_ids: newNoteIds,
+                title: newTitle
+            };
+        });
+    };
 
     const handleGenerateTest = async (e) => {
         e.preventDefault();
@@ -54,8 +70,8 @@ export default function TestGenerator({
             return;
         }
 
-        if (newTest.source_type === 'note' && !newTest.note_id) {
-            toast.error("Wybierz notatkę!");
+        if (newTest.source_type === 'note' && newTest.note_ids.length === 0) {
+            toast.error("Wybierz przynajmniej jedną notatkę!");
             return;
         }
 
@@ -69,7 +85,13 @@ export default function TestGenerator({
             return;
         }
 
-        setLoading(true);
+        setSubmitting(true);
+
+        // Close modal and show loading state immediately
+        onStartGenerating();
+        setNewTest({ title: '', topic: '', num_questions: 5, question_type: 'multiple_choice', source_type: 'manual', note_ids: [] });
+        setUploadFile(null);
+
         try {
             if (newTest.source_type === 'file') {
                 const formData = new FormData();
@@ -90,37 +112,36 @@ export default function TestGenerator({
                     user_id: userData.id,
                     notebook_id: notebookId,
                     title: newTest.title,
-                    topic: newTest.topic || 'Generuj pytania na podstawie notatki',
+                    topic: newTest.topic || 'Generuj pytania na podstawie notatek',
                     num_questions: parseInt(newTest.num_questions),
                     question_type: newTest.question_type,
-                    note_id: newTest.source_type === 'note' ? newTest.note_id : null,
+                    note_ids: newTest.source_type === 'note' ? newTest.note_ids : [],
                     folder_id: currentFolder?.id || null
                 });
             }
 
             toast.success("Test wygenerowany pomyślnie!");
-            setNewTest({ title: '', topic: '', num_questions: 5, question_type: 'multiple_choice', source_type: 'manual', note_id: null });
-            setUploadFile(null);
             onSuccess();
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.detail || "Błąd generowania testu. Upewnij się, że Gemini API jest skonfigurowane.");
+            onError();
         } finally {
-            setLoading(false);
+            setSubmitting(false);
         }
     };
 
     if (!show) return null;
 
     return (
-        <div className={styles.modalOverlay} onClick={() => !loading && onClose()}>
+        <div className={styles.modalOverlay} onClick={() => !submitting && onClose()}>
             <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>Wygeneruj nowy test</h2>
                     <button
                         className={styles.closeBtn}
                         onClick={onClose}
-                        disabled={loading}
+                        disabled={submitting}
                     >
                         <X size={20} />
                     </button>
@@ -136,8 +157,8 @@ export default function TestGenerator({
                                     name="source_type"
                                     value="manual"
                                     checked={newTest.source_type === 'manual'}
-                                    onChange={(e) => setNewTest({...newTest, source_type: e.target.value, note_id: null})}
-                                    disabled={loading}
+                                    onChange={(e) => setNewTest({...newTest, source_type: e.target.value, note_ids: []})}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="source-manual" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Ręczny opis</span>
@@ -150,8 +171,8 @@ export default function TestGenerator({
                                     name="source_type"
                                     value="file"
                                     checked={newTest.source_type === 'file'}
-                                    onChange={(e) => setNewTest({...newTest, source_type: e.target.value, note_id: null})}
-                                    disabled={loading}
+                                    onChange={(e) => setNewTest({...newTest, source_type: e.target.value, note_ids: []})}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="source-file" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Z pliku</span>
@@ -164,8 +185,8 @@ export default function TestGenerator({
                                     name="source_type"
                                     value="note"
                                     checked={newTest.source_type === 'note'}
-                                    onChange={(e) => setNewTest({...newTest, source_type: e.target.value, note_id: null})}
-                                    disabled={loading}
+                                    onChange={(e) => setNewTest({...newTest, source_type: e.target.value, note_ids: []})}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="source-note" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Z notatki</span>
@@ -191,7 +212,7 @@ export default function TestGenerator({
                                                 setNewTest({...newTest, title: filename});
                                             }
                                         }}
-                                        disabled={loading}
+                                        disabled={submitting}
                                         className={styles.fileInput}
                                     />
                                     <label htmlFor="file-upload" className={styles.fileLabel}>
@@ -204,51 +225,40 @@ export default function TestGenerator({
 
                     {newTest.source_type === 'note' && (
                         <div className={styles.formSection}>
-                            <div className={styles.formGroup}>
-                                <label>Wybierz notatkę</label>
-                                <div className={styles.customSelect} ref={dropdownRef}>
-                                    <div
-                                        className={`${styles.selectTrigger} ${dropdownOpen ? styles.selectOpen : ''}`}
-                                        onClick={() => !loading && setDropdownOpen(!dropdownOpen)}
-                                    >
-                                        <span>
-                                            {newTest.note_id
-                                                ? notes.find(n => n.id === newTest.note_id)?.title
-                                                : '-- Wybierz notatkę --'}
-                                        </span>
-                                        <ChevronDown size={20} className={styles.chevron} />
-                                    </div>
-                                    {dropdownOpen && (
-                                        <div className={styles.selectDropdown}>
-                                            <div
-                                                className={styles.selectOption}
-                                                onClick={() => {
-                                                    setNewTest({...newTest, note_id: null});
-                                                    setDropdownOpen(false);
-                                                }}
-                                            >
-                                                -- Wybierz notatkę --
-                                            </div>
-                                            {notes.map(note => (
-                                                <div
-                                                    key={note.id}
-                                                    className={`${styles.selectOption} ${newTest.note_id === note.id ? styles.selected : ''}`}
-                                                    onClick={() => {
-                                                        setNewTest({
-                                                            ...newTest,
-                                                            note_id: note.id,
-                                                            title: note.title
-                                                        });
-                                                        setDropdownOpen(false);
-                                                    }}
-                                                >
-                                                    {note.title}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                            <h3 className={styles.sectionTitle}>
+                                Wybierz notatki ({newTest.note_ids.length} zaznaczonych)
+                            </h3>
+
+                            {notes.length === 0 ? (
+                                <div className={styles.emptyNotes}>
+                                    <p>Brak dostępnych notatek w tym notatniku.</p>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className={styles.notesList}>
+                                    {notes.map(note => (
+                                        <div
+                                            key={note.id}
+                                            className={`${styles.noteItem} ${
+                                                newTest.note_ids.includes(note.id) ? styles.selected : ""
+                                            }`}
+                                            onClick={() => handleNoteToggle(note.id)}
+                                        >
+                                            <div className={styles.checkbox}>
+                                                {newTest.note_ids.includes(note.id) && (
+                                                    <CheckSquare size={20} />
+                                                )}
+                                                {!newTest.note_ids.includes(note.id) && (
+                                                    <div className={styles.unchecked}></div>
+                                                )}
+                                            </div>
+                                            <div className={styles.noteInfo}>
+                                                <h4>{note.title}</h4>
+                                                <p>{note.content?.substring(0, 100).replace(/<[^>]*>/g, '')}...</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -263,7 +273,7 @@ export default function TestGenerator({
                                     value={newTest.title}
                                     onChange={(e) => setNewTest({...newTest, title: e.target.value})}
                                     placeholder="np. Historia Polski"
-                                    disabled={loading}
+                                    disabled={submitting}
                                 />
                             </div>
                             <div className={styles.formGroup}>
@@ -274,7 +284,7 @@ export default function TestGenerator({
                                     max="20"
                                     value={newTest.num_questions}
                                     onChange={(e) => setNewTest({...newTest, num_questions: e.target.value})}
-                                    disabled={loading}
+                                    disabled={submitting}
                                 />
                             </div>
                         </div>
@@ -286,7 +296,7 @@ export default function TestGenerator({
                                 onChange={(e) => setNewTest({...newTest, topic: e.target.value})}
                                 placeholder={newTest.source_type === 'manual' ? "Opisz temat testu..." : "Opcjonalnie podaj dodatkowe wskazówki..."}
                                 rows={3}
-                                disabled={loading}
+                                disabled={submitting}
                             />
                         </div>
                     </div>
@@ -302,7 +312,7 @@ export default function TestGenerator({
                                     value="multiple_choice"
                                     checked={newTest.question_type === 'multiple_choice'}
                                     onChange={(e) => setNewTest({...newTest, question_type: e.target.value})}
-                                    disabled={loading}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="type-multiple" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Wielokrotny wybór</span>
@@ -316,7 +326,7 @@ export default function TestGenerator({
                                     value="true_false"
                                     checked={newTest.question_type === 'true_false'}
                                     onChange={(e) => setNewTest({...newTest, question_type: e.target.value})}
-                                    disabled={loading}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="type-truefalse" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Prawda/Fałsz</span>
@@ -330,7 +340,7 @@ export default function TestGenerator({
                                     value="multiple_answers"
                                     checked={newTest.question_type === 'multiple_answers'}
                                     onChange={(e) => setNewTest({...newTest, question_type: e.target.value})}
-                                    disabled={loading}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="type-multiple-answers" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Wiele odpowiedzi</span>
@@ -344,7 +354,7 @@ export default function TestGenerator({
                                     value="mixed"
                                     checked={newTest.question_type === 'mixed'}
                                     onChange={(e) => setNewTest({...newTest, question_type: e.target.value})}
-                                    disabled={loading}
+                                    disabled={submitting}
                                 />
                                 <label htmlFor="type-mixed" className={styles.radioLabel}>
                                     <span className={styles.radioText}>Mieszany</span>
@@ -358,16 +368,16 @@ export default function TestGenerator({
                             type="button"
                             className={styles.btnCancel}
                             onClick={onClose}
-                            disabled={loading}
+                            disabled={submitting}
                         >
                             Anuluj
                         </button>
                         <button
                             type="submit"
                             className={styles.btnSubmit}
-                            disabled={loading}
+                            disabled={submitting}
                         >
-                            {loading ? 'Generowanie...' : 'Generuj test'}
+                            {submitting ? 'Generowanie...' : 'Generuj test'}
                         </button>
                     </div>
                 </form>

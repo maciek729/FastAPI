@@ -1,13 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { Layers, Trash2, Play, Brain, Pin, Folder, MoreVertical } from "lucide-react";
 import styles from "../../../css/features/FlashcardsView.module.css";
 import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
-export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, highlightedItemId, sortBy, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange }) {
+export default function FlashcardSetsList({ sets, loading, userId, notebookId, folders, currentFolder, highlightedItemId, sortBy, onStartLearning, onManageSet, onDelete, onRefreshFolders, onOpenFolder, onDeleteFolder, onRenameFolder, onMoveSetToFolder, onDragStateChange, isGenerating }) {
+    const { language } = useContext(LanguageContext);
     const [progress, setProgress] = useState({});
     const [loadingProgress, setLoadingProgress] = useState({});
+
+    const t = (key) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        return translation || key;
+    };
 
     const [draggedSet, setDraggedSet] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -486,6 +499,28 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                         </div>
                     );
                 })}
+
+            {/* Skeleton card while generating */}
+            {isGenerating && (
+                <div className={`${styles.setCard} ${styles.skeletonCard}`}>
+                    <div className={styles.setCardHeader}>
+                        <div className={`${styles.skeleton} ${styles.skeletonTitle}`}></div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div className={`${styles.skeleton} ${styles.skeletonButton}`}></div>
+                            <div className={`${styles.skeleton} ${styles.skeletonButton}`}></div>
+                        </div>
+                    </div>
+                    <div className={styles.setStats}>
+                        <div className={`${styles.skeleton} ${styles.skeletonStat}`}></div>
+                        <div className={`${styles.skeleton} ${styles.skeletonStat}`}></div>
+                        <div className={`${styles.skeleton} ${styles.skeletonStat}`}></div>
+                    </div>
+                    <div className={styles.generatingText}>
+                        <div className={styles.spinner}></div>
+                        <span>{t('flashcardGenerator.generatingFlashcards')}</span>
+                    </div>
+                </div>
+            )}
 
             {/* Render flashcard sets */}
             {currentSets.map((set, index) => {

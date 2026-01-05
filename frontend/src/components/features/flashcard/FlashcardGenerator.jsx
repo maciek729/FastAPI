@@ -7,7 +7,7 @@ import translations from "../../../translations/translation.json";
 import { generateFlashcards, generateFlashcardsFromFile } from '../../../services/flashcardService';
 import ENDPOINTS from '../../../api/endpoints';
 
-export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCancel }) {
+export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCancel, onStartGenerating, onError }) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -93,9 +93,14 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
             return;
         }
 
-        try {
-            setGenerating(true);
+        setGenerating(true);
 
+        // Close modal and show loading state immediately
+        if (onStartGenerating) {
+            onStartGenerating();
+        }
+
+        try {
             if (formData.source_type === "file" && uploadFile) {
                 const requestData = new FormData();
                 requestData.append("user_id", userId);
@@ -125,6 +130,9 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
         } catch (error) {
             const errorMessage = error.response?.data?.detail || error.message || t('flashcardGenerator.unknownError');
             toast.error(t('flashcardGenerator.generationError') + ": " + errorMessage);
+            if (onError) {
+                onError();
+            }
         } finally {
             setGenerating(false);
         }

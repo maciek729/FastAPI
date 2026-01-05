@@ -275,7 +275,8 @@
       "noteError": "Wybierz przynajmniej jedną notatkę!",
       "success": "Fiszki zostały wygenerowane!",
       "unknownError": "Nieznany błąd",
-      "generationError": "Błąd podczas generowania fiszek"
+      "generationError": "Błąd podczas generowania fiszek",
+      "generatingFlashcards": "Generowanie fiszek..."
     },
     "flashcardLearning": {
       "loading": "Ładowanie fiszek...",
@@ -318,6 +319,13 @@
       "answerLabel": "O",
       "edit": "Edytuj",
       "delete": "Usuń"
+    },
+    "testGenerator": {
+      "generatingTest": "Generowanie testu...",
+      "loadingTests": "Ładowanie testów..."
+    },
+    "podcastGenerator": {
+      "generatingPodcast": "Generowanie podcastu..."
     },
     "dashboard": {
       "welcome": "Witaj z powrotem, {username}!",
@@ -756,7 +764,8 @@
       "noteError": "Select at least one note!",
       "success": "Flashcards have been generated!",
       "unknownError": "Unknown error",
-      "generationError": "Error during flashcard generation"
+      "generationError": "Error during flashcard generation",
+      "generatingFlashcards": "Generating flashcards..."
     },
     "flashcardLearning": {
       "loading": "Loading flashcards...",
@@ -799,6 +808,13 @@
       "answerLabel": "A",
       "edit": "Edit",
       "delete": "Delete"
+    },
+    "testGenerator": {
+      "generatingTest": "Generating test...",
+      "loadingTests": "Loading tests..."
+    },
+    "podcastGenerator": {
+      "generatingPodcast": "Generating podcast..."
     },
     "dashboard": {
       "welcome": "Welcome back, {username}!",

@@ -31,6 +31,7 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
     const [draggedSet, setDraggedSet] = useState(null);
     const [draggedFolder, setDraggedFolder] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -84,8 +85,8 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
     };
 
     const handleGenerateSuccess = () => {
+        setIsGenerating(false);
         fetchFlashcardSets();
-        setShowGenerateModal(false);
     };
 
     const handleStartLearning = (set) => {
@@ -460,6 +461,7 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                     setDraggedSet(draggedSet);
                     setDraggedFolder(draggedFolder);
                 }}
+                isGenerating={isGenerating}
             />
 
             {showGenerateModal && (
@@ -468,6 +470,13 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                     userId={userData.id}
                     onSuccess={handleGenerateSuccess}
                     onCancel={() => setShowGenerateModal(false)}
+                    onStartGenerating={() => {
+                        setShowGenerateModal(false);
+                        setIsGenerating(true);
+                    }}
+                    onError={() => {
+                        setIsGenerating(false);
+                    }}
                 />
             )}
 

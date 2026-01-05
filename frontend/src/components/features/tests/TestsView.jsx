@@ -37,6 +37,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
     const [editingFolder, setEditingFolder] = useState(null);
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const handleResize = () => {
@@ -60,10 +62,13 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         if (!notebookId) return;
 
         try {
+            setLoading(true);
             const data = await testsService.fetchTests(userData.id, notebookId);
             setTests(data);
         } catch (err) {
             console.error('Error fetching tests:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -414,6 +419,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 onOpenFolder={openFolder}
                 onDeleteFolder={handleDeleteFolder}
                 onRenameFolder={handleRenameFolder}
+                isGenerating={isGenerating}
+                loading={loading}
             />
 
             {/* Create Folder Modal */}
@@ -509,9 +516,16 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             <TestGenerator
                 show={showGenerateModal}
                 onClose={() => setShowGenerateModal(false)}
-                onSuccess={() => {
+                onStartGenerating={() => {
                     setShowGenerateModal(false);
+                    setIsGenerating(true);
+                }}
+                onSuccess={() => {
+                    setIsGenerating(false);
                     fetchTests();
+                }}
+                onError={() => {
+                    setIsGenerating(false);
                 }}
                 userData={userData}
                 notebookId={notebookId}
