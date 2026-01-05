@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
+import { PanelLeft } from 'lucide-react';
 import Sidebar from "./Sidebar";
 import Dashboard from "../features/dashboard/Dashboard";
 import Chat from "../features/chat/Chat";
@@ -265,6 +266,16 @@ export default function MainLayout() {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      {!isSidebarOpen && (
+        <button
+          className={styles.mobileExpandBtn}
+          onClick={toggleSidebar}
+          aria-label="Otwórz menu"
+        >
+          <PanelLeft size={20} />
+        </button>
+      )}
+
       {isSidebarOpen && (
         <div
           className={styles.sidebarOverlay}

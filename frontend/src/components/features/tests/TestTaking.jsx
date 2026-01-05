@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { X } from 'lucide-react';
@@ -17,6 +17,12 @@ export default function TestTaking({
 }) {
     const [loading, setLoading] = useState(false);
     const [userAnswers, setUserAnswers] = useState({});
+
+    useEffect(() => {
+        if (show && currentTest) {
+            setUserAnswers({});
+        }
+    }, [show, currentTest?.id]);
 
     const handleSelectAnswer = (questionId, answer, isMultiple = false) => {
         if (isMultiple) {
