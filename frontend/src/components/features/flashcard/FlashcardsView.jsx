@@ -373,8 +373,8 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                     >
                         <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
                         <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
-                        <option value="name_asc">{t('flashcardsView.sortAsc')}</option>
-                        <option value="name_desc">{t('flashcardsView.sortDesc')}</option>
+                        <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                        <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                     </select>
                 </div>
                 {showFilters && (
@@ -406,8 +406,8 @@ export default function FlashcardsView({ notebookId, userData, highlightedItemId
                         >
                             <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
                             <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
-                            <option value="name_asc">{t('flashcardsView.sortAsc')}</option>
-                            <option value="name_desc">{t('flashcardsView.sortDesc')}</option>
+                            <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                            <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                         </select>
                         {hasActiveFilters() && (
                             <button

@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useContext} from 'react';
 import toast from 'react-hot-toast';
 import { X, CheckSquare, Square } from 'lucide-react';
 import styles from "../../../css/features/FlashcardGenerator.module.css";
 import { generatePodcast } from '../../../services/podcastService';
+import { LanguageContext } from "../../../translations/LanguageContext";
+import translations from "../../../translations/translation.json";
 
 export default function PodcastGenerator({
     show,
@@ -17,6 +19,23 @@ export default function PodcastGenerator({
     const [selectedNoteIds, setSelectedNoteIds] = useState([]);
     const [topic, setTopic] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+    const keys = key.split('.');
+    let translation = translations[language];
+
+    for (const k of keys) {
+        translation = translation?.[k];
+        if (!translation) return key;
+    }
+
+    if (typeof translation === 'string' && Object.keys(params).length > 0) {
+        return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
+    }
+
+    return translation || key;
+    };
 
     const handleToggleNote = (noteId) => {
         setSelectedNoteIds(prev =>
@@ -30,7 +49,7 @@ export default function PodcastGenerator({
         e.preventDefault();
 
         if (!topic.trim()) {
-            toast.error("Podaj temat podcastu!");
+            toast.error(t('podcastGenerator.topicRequired'));
             return;
         }
 
@@ -43,12 +62,12 @@ export default function PodcastGenerator({
 
         try {
             await generatePodcast(notebookId, userData.id, topic, selectedNoteIds, null);
-            toast.success("Podcast został wygenerowany!");
+            toast.success(t('podcastGenerator.success'));
             setTopic('');
             setSelectedNoteIds([]);
             if (onSuccess) onSuccess();
         } catch (err) {
-            toast.error(err.message || "Nie udało się wygenerować podcastu");
+            toast.error(err.message || t('podcastGenerator.error'));
             if (onError) {
                 onError();
             }
@@ -63,12 +82,12 @@ export default function PodcastGenerator({
         <div className={styles.modalOverlay} onClick={() => !isGenerating && onClose()}>
             <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Wygeneruj nowy podcast</h2>
+                    <h2 className={styles.title}>{t('podcastGenerator.title')}</h2>
                     <button
                         className={styles.closeBtn}
                         onClick={onClose}
                         disabled={isGenerating}
-                        title="Zamknij"
+                        title={t('flashcardsView.close')}
                     >
                         <X size={20} />
                     </button>
@@ -76,22 +95,22 @@ export default function PodcastGenerator({
 
                 <form onSubmit={handleGenerate} className={styles.form}>
                     <div className={styles.formSection}>
-                        <h3 className={styles.sectionTitle}>Podstawowe informacje</h3>
+                        <h3 className={styles.sectionTitle}>{t('podcastGenerator.basicInfo')}</h3>
 
                         <div className={styles.formGroup}>
-                            <label>Tytuł podcastu *</label>
+                            <label>{t('podcastGenerator.topicLabel')}</label>
                             <input
                                 type="text"
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
-                                placeholder="np. Historia Polski - Średniowiecze"
+                                placeholder={t('podcastGenerator.topicPlaceholder')}
                                 disabled={isGenerating}
                                 required
                             />
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label>Wybierz notatki (opcjonalnie, {selectedNoteIds.length} wybrano)</label>
+                            <label>{t('podcastGenerator.selectNotes', { count: selectedNoteIds.length })}</label>
                             <div className={styles.notesContainer}>
                                 {notes && notes.length > 0 ? (
                                     notes.map(note => (
@@ -110,7 +129,7 @@ export default function PodcastGenerator({
                                     ))
                                 ) : (
                                     <p className={styles.emptyNote}>
-                                        Brak notatek w tym notesie
+                                        {t('podcastGenerator.noNotes')}
                                     </p>
                                 )}
                             </div>
@@ -124,14 +143,14 @@ export default function PodcastGenerator({
                             className={styles.btnCancel}
                             disabled={isGenerating}
                         >
-                            Anuluj
+                            {t('common.cancel')}
                         </button>
                         <button
                             type="submit"
                             className={styles.btnSubmit}
                             disabled={isGenerating}
                         >
-                            {isGenerating ? "Generowanie..." : "Generuj Podcast"}
+                            {isGenerating ? t('podcastGenerator.generating') : t('podcastGenerator.generate')}
                         </button>
                     </div>
                 </form>
