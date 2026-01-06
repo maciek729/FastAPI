@@ -145,7 +145,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             );
         } catch (err) {
             console.error('Error toggling pin:', err);
-            toast.error("Błąd przypinania zestawu fiszek");
+            toast.error(t('flashcardSetList.set.pinError'));
         }
     };
 
@@ -350,29 +350,29 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 onDelete(); // Refresh flashcard sets
             } catch (err) {
                 console.error('Error moving folder into folder:', err);
-                toast.error("Błąd przenoszenia folderu");
+                toast.error(t('flashcardSetList.folder.moveError'));
             }
         }
     };
 
     const handleDelete = async (setId) => {
-        const confirmed = await confirmModal("Czy na pewno chcesz usunąć ten zestaw fiszek?");
+        const confirmed = await confirmModal(t('flashcardSetList.set.deleteConfirm'));
         if (!confirmed) return;
 
         try {
             await deleteFlashcardSet(setId);
-            toast.success("Zestaw usunięty!");
+            toast.success(t('flashcardSetList.set.deleteSuccess'));
             onDelete();
         } catch (error) {
-            toast.error("Błąd podczas usuwania zestawu");
+            toast.error(t('flashcardSetList.set.deleteError'));
         }
     };
 
     const getDifficultyText = (difficulty) => {
         const difficultyMap = {
-            "łatwy": { color: "#4CAF50", label: "Łatwy" },
-            "średni": { color: "#FF9800", label: "Średni" },
-            "trudny": { color: "#F44336", label: "Trudny" }
+            "łatwy": { color: "#4CAF50", label: t('flashcardSetList.set.difficultyEasy') },
+            "średni": { color: "#FF9800", label: t('flashcardSetList.set.difficultyMedium') },
+            "trudny": { color: "#F44336", label: t('flashcardSetList.set.difficultyHard') }
         };
         const config = difficultyMap[difficulty] || difficultyMap["średni"];
         return (
@@ -386,7 +386,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         return (
             <div className={styles.loading}>
                 <div className={styles.spinner}></div>
-                <p>Ładowanie fiszek...</p>
+                <p>{t('flashcardSetList.loading')}</p>
             </div>
         );
     }
@@ -400,8 +400,8 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
         return (
             <div className={styles.emptyState}>
                 <Brain className={styles.emptyIcon} size={64} />
-                <h3>Brak zestawów fiszek</h3>
-                <p>Kliknij "Generuj fiszki", aby stworzyć pierwszy zestaw!</p>
+                <h3>{t('flashcardSetList.empty.title')}</h3>
+                <p>{t('flashcardSetList.empty.description')}</p>
             </div>
         );
     }
@@ -458,7 +458,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                     <Folder size={72} style={{color: '#f59e0b', filter: 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.15))'}} />
                                     <h3>{folder.name}</h3>
                                     <span className={styles.folderCount}>
-                                        {setsInFolder} {setsInFolder === 1 ? 'zestaw' : setsInFolder > 1 && setsInFolder < 5 ? 'zestawy' : 'zestawów'}
+                                        {setsInFolder} {setsInFolder === 1 ? t('flashcardSetList.folder.setCount.one') : setsInFolder > 1 && setsInFolder < 5 ? t('flashcardSetList.folder.setCount.few') : t('flashcardSetList.folder.setCount.many')}
                                     </span>
                                 </div>
                                 <button
@@ -482,7 +482,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                         }}
                                         className={styles.menuItem}
                                     >
-                                        Zmień nazwę
+                                        {t('flashcardSetList.folder.rename')}
                                     </button>
                                     <button
                                         onClick={(e) => {
@@ -492,7 +492,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                         }}
                                         className={styles.menuItemDanger}
                                     >
-                                        Usuń
+                                        {t('flashcardSetManager.delete')}
                                     </button>
                                 </div>
                             )}
@@ -560,14 +560,14 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                 <button
                                     className={`${styles.pinSetBtn} ${set.is_pinned ? styles.pinned : ''}`}
                                     onClick={(e) => handleTogglePin(set.id, !set.is_pinned, e)}
-                                    title={set.is_pinned ? "Odepnij zestaw" : "Przypnij zestaw"}
+                                    title={set.is_pinned ? t('flashcardSetList.set.pin') : t('flashcardSetList.set.unpin')}
                                 >
                                     <Pin size={16} />
                                 </button>
                                 <button
                                     className={styles.deleteSetBtn}
                                     onClick={(e) => { e.stopPropagation(); handleDelete(set.id); }}
-                                    title="Usuń zestaw"
+                                    title={t('flashcardSetList.set.delete')}
                                 >
                                     <Trash2 size={16} />
                                 </button>
@@ -580,17 +580,17 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
 
                         <div className={styles.setStats}>
                             <div className={styles.stat}>
-                                <span className={styles.statLabel}>Fiszek</span>
+                                <span className={styles.statLabel}>{t('flashcardSetList.set.cards')}</span>
                                 <span className={styles.statValue}>{set.total_cards}</span>
                             </div>
                             <div className={styles.stat}>
-                                <span className={styles.statLabel}>Poziom</span>
+                                <span className={styles.statLabel}>{t('flashcardSetList.set.level')}</span>
                                 <span className={styles.statValue}>
                                     {getDifficultyText(set.difficulty)}
                                 </span>
                             </div>
                             <div className={styles.stat}>
-                                <span className={styles.statLabel}>Postęp</span>
+                                <span className={styles.statLabel}>{t('flashcardSetList.set.progress')}</span>
                                 <span className={styles.statValue}>
                                     {setProgress && !isLoadingProgress
                                         ? `${setProgress.progress_percentage ?? 0}%`
@@ -610,7 +610,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                                 }}
                             >
                                 <Play size={18} />
-                                Ucz się
+                                {t('flashcardSetList.set.learn')}
                             </button>
                         </div>
                     </div>

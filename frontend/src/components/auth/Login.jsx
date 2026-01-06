@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { LoginUser } from "../../services/authService";
 import logo from "../Layout/logodark.png";
 
+import { LanguageContext } from "../../translations/LanguageContext";
+import translations from "../../translations/translation.json";
+
 function Login() {
+  const { language } = useContext(LanguageContext);
+
+  const t = (key) => {
+    if (!key) return "";
+    return key.split(".").reduce(
+      (obj, k) => (obj ? obj[k] : null),
+      translations[language]
+    ) || key;
+  };
+
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
@@ -33,55 +46,55 @@ function Login() {
     <div className={styles.authContainer}>
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
-        <span>Powrót do strony głównej</span>
+        <span>{t("auth.login.backHome")}</span>
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
         <img src={logo} alt="zdAI to!" className={styles.logo} />
         <h1 className={styles.brandName}>zdAI to!</h1>
-        <p className={styles.subtitle}>Zaloguj się do swojego konta</p>
-        
+        <p className={styles.subtitle}>{t("auth.login.subtitle")}</p>
+
         <div className={styles.formGroup}>
-          <label htmlFor="username">Nazwa użytkownika</label>
+          <label htmlFor="username">{t("auth.login.usernameLabel")}</label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Podaj swoją nazwę użytkownika"
+            placeholder={t("auth.login.usernamePlaceholder")}
             value={form.username}
             onChange={handleChange}
             required
             disabled={isLoading}
           />
         </div>
-        
+
         <div className={styles.formGroup}>
-          <label htmlFor="password">Hasło</label>
+          <label htmlFor="password">{t("auth.login.passwordLabel")}</label>
           <input
             id="password"
             name="password"
             type="password"
-            placeholder="Podaj swoje hasło"
+            placeholder={t("auth.login.passwordPlaceholder")}
             value={form.password}
             onChange={handleChange}
             required
             disabled={isLoading}
           />
         </div>
-        
+
         <button 
           type="submit" 
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Logowanie..." : "Zaloguj się"}
+          {isLoading ? t("auth.login.loading") : t("auth.login.submit")}
         </button>
-        
+
         {error && <div className={styles.errorMessage}>{error}</div>}
-        
+
         <div className={styles.authLinks}>
-          <Link to="/register">Nie masz konta? Zarejestruj się</Link>
-          <Link to="/forgot-password">Zapomniałeś hasła?</Link>
+          <Link to="/register">{t("auth.login.noAccount")}</Link>
+          <Link to="/forgot-password">{t("auth.login.forgotPassword")}</Link>
         </div>
       </form>
     </div>
