@@ -1,17 +1,32 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import styles from "../../css/shared/Auth.module.css";
 import { ResetPassword as ResetPasswordService } from "../../services/authService";
 
+import { LanguageContext } from "../../translations/LanguageContext";
+import translations from "../../translations/translation.json";
+
 function ResetPassword() {
+  const { language } = useContext(LanguageContext);
+
+  const t = (key) => {
+    if (!key) return "";
+    return key.split(".").reduce(
+      (obj, k) => (obj ? obj[k] : null),
+      translations[language]
+    ) || key;
+  };
+
   const { token } = useParams();
   const navigate = useNavigate();
+
   const [form, setForm] = useState({ newPassword: "", confirmPassword: "" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = e =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -19,12 +34,12 @@ function ResetPassword() {
     setMessage("");
 
     if (form.newPassword.length < 8) {
-      setError("Hasło musi mieć co najmniej 8 znaków");
+      setError(t("auth.resetPassword.passwordTooShort"));
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      setError("Hasła nie pasują do siebie");
+      setError(t("auth.resetPassword.passwordsNotMatch"));
       return;
     }
 
@@ -32,10 +47,10 @@ function ResetPassword() {
 
     try {
       await ResetPasswordService(token, form.newPassword);
-      setMessage("Hasło zostało zaktualizowane pomyślnie! Przekierowanie do logowania...");
+      setMessage(t("auth.resetPassword.success"));
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.message);
+      setError(err.message );
     } finally {
       setIsLoading(false);
     }
@@ -44,16 +59,23 @@ function ResetPassword() {
   return (
     <div className={styles.authContainer}>
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Resetuj hasło</h2>
-        <p className={styles.subtitle}>Wprowadź nowe hasło</p>
+        <h2 className={styles.title}>
+          {t("auth.resetPassword.title")}
+        </h2>
+
+        <p className={styles.subtitle}>
+          {t("auth.resetPassword.subtitle")}
+        </p>
 
         <div className={styles.formGroup}>
-          <label htmlFor="newPassword">Nowe hasło</label>
+          <label htmlFor="newPassword">
+            {t("auth.resetPassword.newPasswordLabel")}
+          </label>
           <input
             id="newPassword"
             name="newPassword"
             type="password"
-            placeholder="Wprowadź nowe hasło (min. 8 znaków)"
+            placeholder={t("auth.resetPassword.newPasswordPlaceholder")}
             value={form.newPassword}
             onChange={handleChange}
             required
@@ -63,12 +85,14 @@ function ResetPassword() {
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="confirmPassword">Potwierdź hasło</label>
+          <label htmlFor="confirmPassword">
+            {t("auth.resetPassword.confirmPassword")}
+          </label>
           <input
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            placeholder="Potwierdź nowe hasło"
+            placeholder={t("auth.resetPassword.confirmPasswordLabel")}
             value={form.confirmPassword}
             onChange={handleChange}
             required
@@ -82,14 +106,18 @@ function ResetPassword() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Resetowanie..." : "Zresetuj hasło"}
+          {isLoading
+            ? t("auth.resetPassword.loading")
+            : t("auth.resetPassword.submit")}
         </button>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
         {message && <div className={styles.successMessage}>{message}</div>}
 
         <div className={styles.authLinks}>
-          <Link to="/login">Powrót do logowania</Link>
+          <Link to="/login">
+            {t("auth.resetPassword.backLogin")}
+          </Link>
         </div>
       </form>
     </div>

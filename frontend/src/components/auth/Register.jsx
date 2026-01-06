@@ -1,12 +1,25 @@
-import { useState } from "react";
-import toast from 'react-hot-toast';
+import { useState, useContext } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { RegisterUser } from "../../services/authService";
 import logo from "../Layout/logodark.png";
 
+import { LanguageContext } from "../../translations/LanguageContext";
+import translations from "../../translations/translation.json";
+
 function Register() {
+  const { language } = useContext(LanguageContext);
+
+  const t = (key) => {
+    if (!key) return "";
+    return key.split(".").reduce(
+      (obj, k) => (obj ? obj[k] : null),
+      translations[language]
+    ) || key;
+  };
+
   const navigate = useNavigate();
   const [form, setForm] = useState({
     username: "",
@@ -17,21 +30,22 @@ function Register() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = e =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async e => {
     e.preventDefault();
     setError("");
 
     if (form.password !== form.password2) {
-      setError("Hasła nie pasują do siebie");
+      setError(t("auth.register.passwordMismatch"));
       return;
     }
 
     setIsLoading(true);
     try {
       await RegisterUser(form);
-      toast.success("Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.");
+      toast.success(t("auth.register.success"));
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
       setError(err.message);
@@ -44,63 +58,74 @@ function Register() {
     <div className={styles.authContainer}>
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
-        <span>Powrót do strony głównej</span>
+        <span>{t("auth.register.backHome")}</span>
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
         <img src={logo} alt="zdAI to!" className={styles.logo} />
         <h1 className={styles.brandName}>zdAI to!</h1>
-        <p className={styles.subtitle}>Zarejestruj się, aby rozpocząć</p>
-        
+
+        <p className={styles.subtitle}>
+          {t("auth.register.subtitle")}
+        </p>
+
         <div className={styles.formGroup}>
-          <label htmlFor="username">Nazwa użytkownika</label>
+          <label htmlFor="username">
+            {t("auth.register.usernameLabel")}
+          </label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Wybierz nazwę użytkownika"
+            placeholder={t("auth.register.usernamePlaceholder")}
             value={form.username}
             onChange={handleChange}
             required
             disabled={isLoading}
           />
         </div>
-        
+
         <div className={styles.formGroup}>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">
+            {t("auth.register.emailLabel")}
+          </label>
           <input
             id="email"
             name="email"
             type="email"
-            placeholder="Podaj swój email"
+            placeholder={t("auth.register.emailPlaceholder")}
             value={form.email}
             onChange={handleChange}
             required
             disabled={isLoading}
           />
         </div>
-        
+
         <div className={styles.formGroup}>
-          <label htmlFor="password">Hasło</label>
+          <label htmlFor="password">
+            {t("auth.register.passwordLabel")}
+          </label>
           <input
             id="password"
             name="password"
             type="password"
-            placeholder="Utwórz hasło"
+            placeholder={t("auth.register.passwordPlaceholder")}
             value={form.password}
             onChange={handleChange}
             required
             disabled={isLoading}
           />
         </div>
-        
+
         <div className={styles.formGroup}>
-          <label htmlFor="password2">Potwierdź hasło</label>
+          <label htmlFor="password2">
+            {t("auth.register.password2Label")}
+          </label>
           <input
             id="password2"
             name="password2"
             type="password"
-            placeholder="Powtórz swoje hasło"
+            placeholder={t("auth.register.password2Placeholder")}
             value={form.password2}
             onChange={handleChange}
             required
@@ -113,13 +138,17 @@ function Register() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Tworzenie konta..." : "Zarejestruj się"}
+          {isLoading
+            ? t("auth.register.loading")
+            : t("auth.register.submit")}
         </button>
         
         {error && <div className={styles.errorMessage}>{error}</div>}
         
         <div className={styles.authLinks}>
-          <Link to="/login">Masz już konto? Zaloguj się</Link>
+          <Link to="/login">
+            {t("auth.register.alreadyHaveAccount")}
+          </Link>
         </div>
       </form>
     </div>
