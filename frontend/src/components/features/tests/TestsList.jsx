@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { Trash2, Pin, Folder, MoreVertical, X } from 'lucide-react';
 import styles from "../../../css/features/TestsView.module.css";
 import * as testsService from '../../../services/testsService';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function TestsList({
     tests,
@@ -27,12 +29,25 @@ export default function TestsList({
     setEditingFolder,
     onOpenFolder,
     onDeleteFolder,
-    onRenameFolder
+    onRenameFolder,
+    isGenerating,
+    loading
 }) {
+    const { language } = useContext(LanguageContext);
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [dragNotAllowedIndex, setDragNotAllowedIndex] = useState(null);
     const [dragOverFolder, setDragOverFolder] = useState(null);
     const [dragOverFolderIndex, setDragOverFolderIndex] = useState(null);
+
+    const t = (key) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        return translation || key;
+    };
 
     const getSourceLabel = (sourceType) => {
         const labels = {
@@ -366,6 +381,15 @@ export default function TestsList({
     const filteredAndSortedTests = getFilteredAndSortedTests();
     const currentFolders = getCurrentFolders();
 
+    if (loading) {
+        return (
+            <div className={styles.loading}>
+                <div className={styles.spinner}></div>
+                <p>{t('testGenerator.loadingTests')}</p>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.cardsContainer}>
             {/* Folders */}
@@ -433,6 +457,37 @@ export default function TestsList({
                     </div>
                 );
             })}
+
+            {/* Generating Skeleton Card */}
+            {isGenerating && (
+                <div className={`${styles.testCard} ${styles.skeletonCard}`}>
+                    <div className={styles.testCardHeader}>
+                        <div className={`${styles.skeleton} ${styles.skeletonTitle}`}></div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <div className={`${styles.skeleton} ${styles.skeletonButton}`}></div>
+                            <div className={`${styles.skeleton} ${styles.skeletonButton}`}></div>
+                        </div>
+                    </div>
+                    <div className={styles.testStats}>
+                        <div className={styles.stat}>
+                            <span className={styles.statLabel}>Pytań</span>
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`}></div>
+                        </div>
+                        <div className={styles.stat}>
+                            <span className={styles.statLabel}>Źródło</span>
+                            <div className={`${styles.skeleton} ${styles.skeletonChip}`}></div>
+                        </div>
+                        <div className={styles.stat}>
+                            <span className={styles.statLabel}>Wyniki</span>
+                            <div className={`${styles.skeleton} ${styles.skeletonText}`}></div>
+                        </div>
+                    </div>
+                    <div className={styles.generatingText}>
+                        <div className={styles.spinner}></div>
+                        <span>{t('testGenerator.generatingTest')}</span>
+                    </div>
+                </div>
+            )}
 
             {/* Tests */}
             {filteredAndSortedTests.length > 0 ? (

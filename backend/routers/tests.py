@@ -51,7 +51,7 @@ class TestGenerateRequest(BaseModel):
     topic: str
     num_questions: int = 5
     question_type: str = "multiple_choice"
-    note_id: Optional[int] = None
+    note_ids: Optional[List[int]] = []
     folder_id: Optional[int] = None
 
 class QuestionOut(BaseModel):
@@ -421,11 +421,18 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
     try:
         context_text = None
         source_type = "manual"
-        if request.note_id:
-            note = db.query(Notes).filter(Notes.id == request.note_id).first()
-            if note:
-                context_text = note.content
+        note_id_for_db = None
+
+        if request.note_ids and len(request.note_ids) > 0:
+            notes = db.query(Notes).filter(Notes.id.in_(request.note_ids)).all()
+            if notes:
+                # Combine content from all selected notes
+                context_text = "\n\n--- Notatka: {} ---\n\n".join([
+                    f"{note.title}\n{note.content}" for note in notes
+                ])
                 source_type = "note"
+                # Store only the first note_id for backward compatibility
+                note_id_for_db = request.note_ids[0]
 
         questions_data = generate_test_with_gemini(request.topic, request.num_questions, request.question_type, context_text)
 
@@ -435,7 +442,7 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
             folder_id=request.folder_id,
             title=request.title,
             topic=request.topic,
-            note_id=request.note_id,
+            note_id=note_id_for_db,
             source_type=source_type,
             created_at=datetime.now()
         )

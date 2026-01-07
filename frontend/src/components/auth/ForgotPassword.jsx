@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { ForgotPassword as ForgotPasswordService } from "../../services/authService";
 
+import { LanguageContext } from "../../translations/LanguageContext";
+import translations from "../../translations/translation.json";
+
 function ForgotPassword() {
+  const { language } = useContext(LanguageContext);
+  const t = (key) => key.split(".").reduce((obj, k) => (obj ? obj[k] : null), translations[language]) || key;
+
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +24,7 @@ function ForgotPassword() {
 
     try {
       await ForgotPasswordService(email);
-      setMessage("Link do resetowania hasła został wysłany! Sprawdź swoją skrzynkę email.");
+      setMessage(t("auth.forgotPassword.successMessage"));
       setEmail("");
     } catch (err) {
       setError(err.message);
@@ -31,22 +37,20 @@ function ForgotPassword() {
     <div className={styles.authContainer}>
       <Link to="/" className={styles.backButton}>
         <ArrowLeft />
-        <span>Powrót do strony głównej</span>
+        <span>{t("auth.forgotPassword.backHome")}</span>
       </Link>
 
       <form className={styles.authCard} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Przypomnienie hasła</h2>
-        <p className={styles.subtitle}>
-          Podaj swój email, a wyślemy Ci link do resetowania
-        </p>
+        <h2 className={styles.title}>{t("auth.forgotPassword.title")}</h2>
+        <p className={styles.subtitle}>{t("auth.forgotPassword.subtitle")}</p>
 
         <div className={styles.formGroup}>
-          <label htmlFor="email">Adres email</label>
+          <label htmlFor="email">{t("auth.forgotPassword.emailLabel")}</label>
           <input
             id="email"
             name="email"
             type="email"
-            placeholder="Podaj swój email"
+            placeholder={t("auth.forgotPassword.emailPlaceholder")}
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -59,15 +63,15 @@ function ForgotPassword() {
           className={styles.submitButton}
           disabled={isLoading}
         >
-          {isLoading ? "Wysyłanie..." : "Wyślij link resetujący"}
+          {isLoading ? t("auth.forgotPassword.sending") : t("auth.forgotPassword.submit")}
         </button>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
         {message && <div className={styles.successMessage}>{message}</div>}
 
         <div className={styles.authLinks}>
-          <Link to="/login">Powrót do logowania</Link>
-          <Link to="/register">Nie masz konta? Zarejestruj się</Link>
+          <Link to="/login">{t("auth.forgotPassword.backLogin")}</Link>
+          <Link to="/register">{t("auth.forgotPassword.noAccount")}</Link>
         </div>
       </form>
     </div>

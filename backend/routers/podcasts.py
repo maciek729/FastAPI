@@ -114,7 +114,7 @@ def create_script(topic: str, context_text: str, api_key: str):
        Joe: [text]
        Jane: [text]
     3. Do not add narration, scene descriptions, or asterisks. just the lines.
-    4. Speak in Polish unless the topic suggests otherwise.
+    4. Speak in provided language unless the topic or reference section suggests otherwise.
     """
     
     response = client.models.generate_content(
@@ -124,10 +124,6 @@ def create_script(topic: str, context_text: str, api_key: str):
     return response.text
 
 def generate_and_upload_audio(script_text: str, api_key: str) -> str:
-    """
-    Generuje audio, zapisuje je do pamięci RAM (BytesIO),
-    wysyła do Supabase Storage i zwraca publiczny URL.
-    """
     if not supabase:
         raise Exception("Supabase client not initialized")
 

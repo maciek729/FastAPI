@@ -426,7 +426,7 @@
 
 .noteItem.selected {
     border-color: var(--purple_brighter);
-    background: rgba(139, 92, 246, 0.08);
+    background: var(--purple_brighter_bg);
 }
 
 .checkbox {
