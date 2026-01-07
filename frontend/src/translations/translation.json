@@ -290,7 +290,28 @@
         "large": "Duży",
         "veryLarge": "Bardzo duży"
       },
-      "createdAt": "Utworzono"
+      "createdAt": "Utworzono",
+      "unsavedConfirm": "Masz niezapisane zmiany. Czy na pewno chcesz opuścić bez zapisywania?",
+      "insertTable": "Wstaw tabelę",
+      "removeTable": "Usuń tabelę",
+      "tableRows": "Wiersze",
+      "tableColumns": "Kolumny",
+      "cancel": "Anuluj"
+    },
+    "aiAssistant": {
+      "title": "Asystent AI",
+      "explainTemplate": "Wyjaśnij lub rozwiń: \"{text}\"",
+      "sectionTitle": "Co chcesz, żeby AI napisało?",
+      "promptLabel": "Twoje polecenie",
+      "promptPlaceholder": "np. Napisz podsumowanie renesansu, albo wyjaśnij fotosyntezę prostym językiem...",
+      "helper": "Opisz, co chcesz otrzymać od AI. Bądź konkretny dla lepszych wyników.",
+      "cancel": "Anuluj",
+      "generate": "Generuj i wstaw",
+      "generating": "Generowanie...",
+      "emptyPrompt": "Proszę wprowadzić polecenie dla AI",
+      "returnedNoText": "AI nie zwróciło tekstu; wstawiono Twoje polecenie.",
+      "generateError": "Nie udało się wygenerować tekstu: {message}",
+      "insertSuccess": "Tekst wstawiony przez AI!"
     },
     "flashcard": {
       "question": "Pytanie",
@@ -1232,7 +1253,28 @@
         "veryLarge": "Very large"
       },
       "veryLarge": "Very large",
-      "createdAt": "Created at"
+      "createdAt": "Created at",
+      "unsavedConfirm": "You have unsaved changes. Leave without saving?",
+      "insertTable": "Insert Table",
+      "removeTable": "Remove Table",
+      "tableRows": "Rows",
+      "tableColumns": "Columns",
+      "cancel": "Cancel"
+    },
+    "aiAssistant": {
+      "title": "AI Assistant",
+      "explainTemplate": "Explain or elaborate on: \"{text}\"",
+      "sectionTitle": "What would you like AI to write?",
+      "promptLabel": "Your Prompt",
+      "promptPlaceholder": "e.g., Write a summary of the Renaissance period, or explain photosynthesis in simple terms...",
+      "helper": "Describe what you want AI to write. Be specific and clear for better results.",
+      "cancel": "Cancel",
+      "generate": "Generate & Insert",
+      "generating": "Generating...",
+      "emptyPrompt": "Please enter a prompt for AI",
+      "returnedNoText": "AI returned no text; inserted your prompt.",
+      "generateError": "Failed to generate text: {message}",
+      "insertSuccess": "Text added from AI!"
     },
     "flashcard": {
       "question": "Question",

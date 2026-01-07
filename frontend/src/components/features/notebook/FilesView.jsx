@@ -14,18 +14,14 @@ import { LanguageContext } from '../../../translations/LanguageContext';
 import translations from '../../../translations/translation.json';
 
 export default function FilesView({ details, userData, refreshNotebook, highlightedItemId }) {
-    const [showAddNoteModal, setShowAddNoteModal] = useState(false);
+    // showAddNoteModal removed: we now open the full NoteEditor for creating notes
     const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
     const [showNoteEditor, setShowNoteEditor] = useState(false);
     const [selectedNote, setSelectedNote] = useState(null);
     const [collaboratorUsername, setCollaboratorUsername] = useState('');
     const [collaborators, setCollaborators] = useState([]);
     const [isLoadingDetails, setIsLoadingDetails] = useState(true);
-    const [newNote, setNewNote] = useState({
-        title: '',
-        content: '',
-        type: 'Notatka'
-    });
+    // new note will be created via opening NoteEditor with isNew=true
     const { language } = useContext(LanguageContext);
 
 
@@ -170,38 +166,19 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
     if (!details) return <div className={styles.loading}>{t('filesView.loading')}</div>;
 
-    const handleAddNote = async (e) => {
-        e.preventDefault();
-
-        if (!newNote.title.trim() || !newNote.content.trim()) {
-            toast.error(t('filesView.writeAll'));
-            return;
-        }
-
-        const notePayload = {
+    const handleCreateNewNote = () => {
+        const emptyNote = {
+            id: null,
+            title: '',
+            content: '',
+            type: 'Notatka',
             user_id: userData.id,
             notebook_id: details.id,
-            title: newNote.title,
-            content: newNote.content,
-            type: newNote.type,
-            is_shared: false
+            is_shared: false,
+            created_at: new Date().toISOString()
         };
-
-        try {
-            const responseData = await createNote(notePayload);
-
-            if (currentFolder) {
-                await handleMoveNoteToFolder(responseData.id, currentFolder.id);
-            }
-
-            toast.success(t('filesView.noteAddSuccess'));
-            setNewNote({ title: '', content: '', type: 'Notatka' });
-            setShowAddNoteModal(false);
-            refreshNotebook();
-        } catch (err) {
-            console.error(err);
-            toast.error(t('filesView.noteAddError'));
-        }
+        setSelectedNote(emptyNote);
+        setShowNoteEditor(true);
     };
 
     const handleDeleteNote = async (noteId) => {
@@ -839,7 +816,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                         )}
                         <button
                             className={styles.addNoteBtn}
-                            onClick={() => setShowAddNoteModal(true)}
+                            onClick={handleCreateNewNote}
                         >
                             <Plus size={18} />
                             {t('filesView.addNote')}
@@ -1008,68 +985,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     )}
                 </div>
 
-                {showAddNoteModal && (
-                    <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowAddNoteModal(false)}>
-                        <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
-                            <div className={generatorStyles.header}>
-                                <h2 className={generatorStyles.title}>{t('filesView.addNote')}</h2>
-                                <button className={generatorStyles.closeBtn} onClick={() => setShowAddNoteModal(false)} title="Zamknij">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleAddNote} className={generatorStyles.form}>
-                                <div className={generatorStyles.formSection}>
-                                    <h3 className={generatorStyles.sectionTitle}>{t('filesView.info')}</h3>
-
-                                    <div className={generatorStyles.formGroup}>
-                                        <label>{t('filesView.titleNote')}</label>
-                                        <input
-                                            type="text"
-                                            value={newNote.title}
-                                            onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                                            placeholder={t('filesView.titleDesc')}
-                                        />
-                                    </div>
-
-                                    <div className={generatorStyles.formGroup}>
-                                        <label>Treść</label>
-                                        <textarea
-                                            value={newNote.content}
-                                            onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                                            placeholder={t('filesView.descPH')}
-                                        />
-                                    </div>
-
-                                    <div className={generatorStyles.formGroup}>
-                                        <label>{t('filesView.type')}</label>
-                                        <select
-                                            value={newNote.type}
-                                            onChange={(e) => setNewNote({ ...newNote, type: e.target.value })}
-                                        >
-                                            <option value="Notatka">{t('filesView.note')}</option>
-                                            <option value="Test">{t('filesView.test')}</option>
-                                            <option value="Fiszki">{t('filesView.flashcard')}</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className={generatorStyles.formActions}>
-                                    <button
-                                        type="button"
-                                        className={generatorStyles.btnCancel}
-                                        onClick={() => setShowAddNoteModal(false)}
-                                    >
-                                        {t('flashcardsView.cancel')}
-                                    </button>
-                                    <button type="submit" className={generatorStyles.btnSubmit}>
-                                        {t('filesView.add')}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
+                {/* Add-note modal replaced by opening NoteEditor for new notes */}
 
                 {showCollaboratorModal && (
                     <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCollaboratorModal(false)}>
@@ -1243,6 +1159,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 {showNoteEditor && selectedNote && (
                     <NoteEditor
                         note={selectedNote}
+                        isNew={selectedNote.id === null}
                         userData={userData}
                         onClose={() => {
                             setShowNoteEditor(false);
