@@ -1,26 +1,47 @@
 import { X, Play } from 'lucide-react';
+import { useContext } from 'react';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function TestDetails({ show, onClose, test, onStartTest, onViewResults }) {
+     const { language } = useContext(LanguageContext);
+
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+        }
+
+        return translation || key;
+    };
     if (!show || !test) return null;
 
     const getSourceLabel = (sourceType) => {
         const labels = {
             'manual': {
-                text: 'Ręczny opis',
+                text: t('flashcardGenerator.manual'),
                 color: 'var(--purple_brighter)',
                 bg: 'var(--purple_brighter_bg)',
                 border: 'var(--purple_brighter_border)'
             },
             'file': {
-                text: 'Z pliku',
+                text: t('flashcardGenerator.fromFile'),
                 color: '#3b82f6',
                 bg: '#3b82f615',
                 border: '#3b82f640'
             },
             'note': {
-                text: 'Z notatki',
+                text: t('flashcardGenerator.fromNote'),
                 color: '#10b981',
                 bg: '#10b98115',
                 border: '#10b98140'
@@ -30,7 +51,7 @@ export default function TestDetails({ show, onClose, test, onStartTest, onViewRe
     };
 
     const formatDate = (dateString) => {
-        if (!dateString) return 'Dziś';
+        if (!dateString) return t('filesView.today');
         const date = new Date(dateString);
         return date.toLocaleDateString('pl-PL', {
             day: 'numeric',
@@ -55,18 +76,18 @@ export default function TestDetails({ show, onClose, test, onStartTest, onViewRe
                     <div className={styles.detailsInfo}>
                         {test.topic && (
                             <div className={styles.detailSection}>
-                                <span className={styles.detailSectionLabel}>Opis:</span>
+                                <span className={styles.detailSectionLabel}>{t('testDetails.descriptionLabel')}</span>
                                 <p className={styles.topicDescription}>{test.topic}</p>
                             </div>
                         )}
                         {test.description && (
                             <div className={styles.detailSection}>
-                                <span className={styles.detailSectionLabel}>Zakres:</span>
+                                <span className={styles.detailSectionLabel}>{t('testDetails.scopeLabel')}</span>
                                 <p className={styles.topicDescription}>{test.description}</p>
                             </div>
                         )}
                         <div className={styles.detailSection}>
-                            <span className={styles.detailSectionLabel}>Metoda generowania:</span>
+                            <span className={styles.detailSectionLabel}>{t('testDetails.generationMethodLabel')}</span>
                             <span
                                 className={styles.sourceLabel}
                                 style={{
@@ -79,7 +100,7 @@ export default function TestDetails({ show, onClose, test, onStartTest, onViewRe
                             </span>
                         </div>
                         <div className={styles.detailSection}>
-                            <span className={styles.detailSectionLabel}>Data utworzenia:</span>
+                            <span className={styles.detailSectionLabel}>{t('testDetails.creationDateLabel')}</span>
                             <span className={styles.detailValue}>{formatDate(test.created_at)}</span>
                         </div>
                     </div>
@@ -89,13 +110,13 @@ export default function TestDetails({ show, onClose, test, onStartTest, onViewRe
                             onClick={() => onStartTest(test)}
                         >
                             <Play size={18} />
-                            Rozwiąż test
+                            {t('testDetails.takeTest')}
                         </button>
                         <button
                             className={styles.btnResultsLarge}
                             onClick={() => onViewResults(test)}
                         >
-                            Zobacz wyniki
+                            {t('testDetails.viewResults')}
                         </button>
                     </div>
                 </div>

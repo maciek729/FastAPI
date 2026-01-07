@@ -52,19 +52,19 @@ export default function TestsList({
     const getSourceLabel = (sourceType) => {
         const labels = {
             'manual': {
-                text: 'Ręczny opis',
+                text: t('testGenerator.sourceTypes.manual'),
                 color: 'var(--purple_brighter)',
                 bg: 'var(--purple_brighter_bg)',
                 border: 'var(--purple_brighter_border)'
             },
             'file': {
-                text: 'Z pliku',
+                text: t('testGenerator.sourceTypes.file'),
                 color: '#3b82f6',
                 bg: '#3b82f615',
                 border: '#3b82f640'
             },
             'note': {
-                text: 'Z notatki',
+                text: t('testGenerator.sourceTypes.note'),
                 color: '#10b981',
                 bg: '#10b98115',
                 border: '#10b98140'
@@ -83,21 +83,21 @@ export default function TestsList({
             );
         } catch (err) {
             console.error('Error toggling pin:', err);
-            toast.error("Błąd przypinania testu");
+            toast.error(t('testsList.pinError'));
         }
     };
 
     const handleDeleteTest = async (testId) => {
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten test?');
+        const confirmed = await confirmModal(t('testsList.deleteConfirm'));
         if (!confirmed) return;
 
         try {
             await testsService.deleteTest(testId, userData.id);
-            toast.success('Test usunięty');
+            toast.success(t('testsList.deleteTest'));
             setTests(prevTests => prevTests.filter(t => t.id !== testId));
         } catch (err) {
             console.error('Error deleting test:', err);
-            toast.error("Błąd usuwania testu");
+            toast.error(t('testsList.deleteError'));
         }
     };
 
@@ -267,7 +267,7 @@ export default function TestsList({
             );
         } catch (err) {
             console.error('Error moving test:', err);
-            toast.error("Błąd przenoszenia testu");
+            toast.error(t('testsList.moveError'));
         }
     };
 
@@ -300,7 +300,7 @@ export default function TestsList({
                 await onRefreshFolders();
             } catch (err) {
                 console.error('Error moving folder into folder:', err);
-                toast.error("Błąd przenoszenia folderu");
+                toast.error(t('testsList.moveError'));
             }
         }
     };
@@ -440,7 +440,7 @@ export default function TestsList({
                                     setEditingFolder(folder);
                                     setFolderMenuOpen(null);
                                 }}>
-                                    Zmień nazwę
+                                    {t('testsList.changeName')}
                                 </button>
                                 <button
                                     className={styles.deleteFolderBtn}
@@ -450,7 +450,7 @@ export default function TestsList({
                                         setFolderMenuOpen(null);
                                     }}
                                 >
-                                    Usuń folder
+                                    {t('testsList.deleteFolder')}
                                 </button>
                             </div>
                         )}
@@ -470,21 +470,21 @@ export default function TestsList({
                     </div>
                     <div className={styles.testStats}>
                         <div className={styles.stat}>
-                            <span className={styles.statLabel}>Pytań</span>
+                            <span className={styles.statLabel}>{t('testsList.que')}</span>
                             <div className={`${styles.skeleton} ${styles.skeletonText}`}></div>
                         </div>
                         <div className={styles.stat}>
-                            <span className={styles.statLabel}>Źródło</span>
+                            <span className={styles.statLabel}>{t('testsList.source')}</span>
                             <div className={`${styles.skeleton} ${styles.skeletonChip}`}></div>
                         </div>
                         <div className={styles.stat}>
-                            <span className={styles.statLabel}>Wyniki</span>
+                            <span className={styles.statLabel}>{t('testsList.results')}</span>
                             <div className={`${styles.skeleton} ${styles.skeletonText}`}></div>
                         </div>
                     </div>
                     <div className={styles.generatingText}>
                         <div className={styles.spinner}></div>
-                        <span>{t('testGenerator.generatingTest')}</span>
+                        <span>{t('testGenerator.buttons.generatingTest')}</span>
                     </div>
                 </div>
             )}
@@ -510,7 +510,7 @@ export default function TestsList({
                                         e.stopPropagation();
                                         handleTogglePin(test.id, !test.is_pinned);
                                     }}
-                                    title={test.is_pinned ? "Odepnij test" : "Przypnij test"}
+                                    title={test.is_pinned ? t('testsList.unpin') : t('testsList.pin')}
                                 >
                                     <Pin size={16} />
                                 </button>
@@ -520,7 +520,7 @@ export default function TestsList({
                                         e.stopPropagation();
                                         handleDeleteTest(test.id);
                                     }}
-                                    title="Usuń test"
+                                    title={t('testsList.deleteTest')}
                                 >
                                     <Trash2 size={16} />
                                 </button>
@@ -528,11 +528,11 @@ export default function TestsList({
                         </div>
                         <div className={styles.testStats}>
                             <div className={styles.stat}>
-                                <span className={styles.statLabel}>Pytań</span>
+                                <span className={styles.statLabel}>{t('testsList.que')}</span>
                                 <span className={styles.statValue}>{test.questions?.length || 0}</span>
                             </div>
                             <div className={styles.stat}>
-                                <span className={styles.statLabel}>Źródło</span>
+                                <span className={styles.statLabel}>{t('testsList.source')}</span>
                                 <span className={styles.statValue}>
                                     <span
                                         className={styles.sourceChip}
@@ -547,7 +547,7 @@ export default function TestsList({
                                 </span>
                             </div>
                             <div className={styles.stat}>
-                                <span className={styles.statLabel}>Wyniki</span>
+                                <span className={styles.statLabel}>{t('testsList.results')}</span>
                                 <span className={styles.statValue}>{test.last_result || '-'}</span>
                             </div>
                         </div>
@@ -555,13 +555,13 @@ export default function TestsList({
                             className={styles.btnDetails}
                             onClick={() => onShowDetails(test)}
                         >
-                            Szczegóły
+                            {t('testsList.details')}
                         </button>
                     </div>
                 ))
             ) : currentFolders.length === 0 ? (
                 <div className={styles.emptyState}>
-                    <p>{currentFolder ? "Ten folder jest pusty. Przeciągnij testy tutaj lub utwórz nowe!" : "Brak testów. Wygeneruj pierwszy test używając AI!"}</p>
+                    <p>{currentFolder ? t('testsList.emptyFolder') : t('testsList.notTests')}</p>
                 </div>
             ) : null}
         </div>
