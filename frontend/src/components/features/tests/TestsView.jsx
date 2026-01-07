@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { Plus, Search, Filter, X, Folder, ArrowLeft } from 'lucide-react';
@@ -11,6 +11,8 @@ import TestGenerator from './TestGenerator';
 import TestTaking from './TestTaking';
 import TestResults from './TestResults';
 import TestDetails from './TestDetails';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [tests, setTests] = useState([]);
@@ -39,6 +41,23 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [loading, setLoading] = useState(true);
+     const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+        }
+
+        return translation || key;
+    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -108,7 +127,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setShowTakeTestModal(true);
         } catch (err) {
             console.error('Error loading test:', err);
-            toast.error("Błąd ładowania testu");
+            toast.error(t('testsView.loadingError'));
         }
     };
 
@@ -120,7 +139,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setShowResultsModal(true);
         } catch (err) {
             console.error('Error loading results:', err);
-            toast.error("Błąd ładowania wyników");
+            toast.error(t('testsView.resultsError'));
         }
     };
 
@@ -157,7 +176,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             fetchFolders();
         } catch (err) {
             console.error('Error creating folder:', err);
-            toast.error("Błąd tworzenia folderu");
+            toast.error(t('flashcardsView.createFolderError'));
         }
     };
 
@@ -175,17 +194,17 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     };
 
     const handleDeleteFolder = async (folderId) => {
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.');
+        const confirmed = await confirmModal(t('testsView.deleteFolderConfirm'));
         if (!confirmed) return;
 
         try {
             await testsService.deleteTestFolder(folderId);
-            toast.success("Folder usunięty");
+            toast.success(t('flashcardsView.deleteFolderSuccess'));
             fetchFolders();
             fetchTests();
         } catch (err) {
             console.error('Error deleting folder:', err);
-            toast.error("Błąd usuwania folderu");
+            toast.error(t('flashcardsView.deleteFolderError'));
         }
     };
 
@@ -196,11 +215,11 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         try {
             await testsService.renameTestFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
-            toast.success("Nazwa folderu zmieniona");
+            toast.success(t('flashcardsView.renameFolderSuccess'));
             fetchFolders();
         } catch (err) {
             console.error('Error renaming folder:', err);
-            toast.error("Błąd zmiany nazwy folderu");
+            toast.error(t('flashcardsView.renameFolderError'));
         }
     };
 
@@ -241,7 +260,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 fetchTests();
             } catch (err) {
                 console.error('Error moving folder to parent:', err);
-                toast.error("Błąd przenoszenia folderu");
+                toast.error(t('flashcardsView.moveFolderError'));
             }
         }
     };
@@ -271,7 +290,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
                             >
                                 <ArrowLeft size={20} />
-                                Powrót
+                                {t('flashcardsView.back')}
                             </button>
                             <h1
                                 className={styles.notebookTitle}
@@ -294,13 +313,13 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                             </h1>
                         </>
                     ) : (
-                        <h1 className={styles.notebookTitle}>Sprawdziany</h1>
+                        <h1 className={styles.notebookTitle}>{t('testsView.tests')}</h1>
                     )}
                     <div className={styles.searchBox}>
                         <Search size={16} />
                         <input
                             type="text"
-                            placeholder="Szukaj testów..."
+                            placeholder={t('testsView.testPlaceHolder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={styles.searchInput}
@@ -311,20 +330,20 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         onChange={(e) => setFilterSource(e.target.value)}
                         className={styles.filterSelect}
                     >
-                        <option value="all">Wszystkie źródła</option>
-                        <option value="manual">Ręczny opis</option>
-                        <option value="file">Z pliku</option>
-                        <option value="note">Z notatki</option>
+                        <option value="all">{t('testsView.allSource')}</option>
+                        <option value="manual">{t('flashcardGenerator.manual')}</option>
+                        <option value="file">{t('flashcardGenerator.fromFile')}</option>
+                        <option value="note">{t('flashcardGenerator.fromNote')}</option>
                     </select>
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                         className={styles.filterSelect}
                     >
-                        <option value="date_desc">Najnowsze</option>
-                        <option value="date_asc">Najstarsze</option>
-                        <option value="name_asc">Nazwa A-Z</option>
-                        <option value="name_desc">Nazwa Z-A</option>
+                            <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                            <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
+                            <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                            <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                     </select>
                 </div>
                 {showFilters && (
@@ -344,20 +363,20 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                             onChange={(e) => setFilterSource(e.target.value)}
                             className={styles.filterSelect}
                         >
-                            <option value="all">Wszystkie źródła</option>
-                            <option value="manual">Ręczny opis</option>
-                            <option value="file">Z pliku</option>
-                            <option value="note">Z notatki</option>
+                            <option value="all">{t('testsView.allSource')}</option>
+                            <option value="manual">{t('flashcardGenerator.manual')}</option>
+                            <option value="file">{t('flashcardGenerator.fromFile')}</option>
+                            <option value="note">{t('flashcardGenerator.fromNote')}</option>
                         </select>
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className={styles.filterSelect}
                         >
-                            <option value="date_desc">Najnowsze</option>
-                            <option value="date_asc">Najstarsze</option>
-                            <option value="name_asc">Nazwa A-Z</option>
-                            <option value="name_desc">Nazwa Z-A</option>
+                            <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                            <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
+                            <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                            <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                         </select>
                         {hasActiveFilters() && (
                             <button
@@ -366,7 +385,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                 title="Wyczyść wszystkie filtry"
                             >
                                 <X size={16} />
-                                Wyczyść filtry
+                                {t('flashcardsView.clearFilters')}
                             </button>
                         )}
                     </div>
@@ -384,14 +403,14 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         onClick={() => setShowCreateFolderModal(true)}
                     >
                         <Folder size={18} />
-                        Nowy folder
+                        {t('flashcardsView.newFolder')}
                     </button>
                     <button
                         className={styles.addNoteBtn}
                         onClick={() => setShowGenerateModal(true)}
                     >
                         <Plus size={18} />
-                        Generuj test
+                        {t('testsView.testGen')}
                     </button>
                 </div>
             </div>
@@ -432,7 +451,7 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                             <button
                                 className={generatorStyles.closeBtn}
                                 onClick={() => setShowCreateFolderModal(false)}
-                                title="Zamknij"
+                                title={t('flashcardsView.close')}
                             >
                                 <X size={20} />
                             </button>
@@ -440,12 +459,12 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
                             <div className={generatorStyles.formSection}>
                                 <div className={generatorStyles.formGroup}>
-                                    <label>Nazwa folderu</label>
+                                    <label>{t('flashcardsView.folderName')}</label>
                                     <input
                                         type="text"
                                         value={newFolderName}
                                         onChange={(e) => setNewFolderName(e.target.value)}
-                                        placeholder="Wpisz nazwę folderu..."
+                                        placeholder={t('flashcardsView.folderNamePlaceholder')}
                                         autoFocus
                                         required
                                     />
@@ -457,10 +476,10 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                     className={generatorStyles.btnCancel}
                                     onClick={() => setShowCreateFolderModal(false)}
                                 >
-                                    Anuluj
+                                    {t('flashcardsView.cancel')}
                                 </button>
                                 <button type="submit" className={generatorStyles.btnSubmit}>
-                                    Utwórz folder
+                                    {t('flashcardsView.createFolder')}
                                 </button>
                             </div>
                         </form>
@@ -473,11 +492,11 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setEditingFolder(null)}>
                     <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
                         <div className={generatorStyles.header}>
-                            <h2 className={generatorStyles.title}>Zmień nazwę folderu</h2>
+                            <h2 className={generatorStyles.title}>{t('flashcardsView.renameFolderName')}</h2>
                             <button
                                 className={generatorStyles.closeBtn}
                                 onClick={() => setEditingFolder(null)}
-                                title="Zamknij"
+                                title={t('flashcardsView.close')}
                             >
                                 <X size={20} />
                             </button>
@@ -485,12 +504,12 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         <form onSubmit={handleRenameFolder} className={generatorStyles.form}>
                             <div className={generatorStyles.formSection}>
                                 <div className={generatorStyles.formGroup}>
-                                    <label>Nowa nazwa</label>
+                                    <label>{t('flashcardsView.newName')}</label>
                                     <input
                                         type="text"
                                         value={editingFolder.name}
                                         onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
-                                        placeholder="Wpisz nową nazwę folderu..."
+                                        placeholder={t('flashcardsView.folderNamePlaceholder')}
                                         autoFocus
                                         required
                                     />
@@ -502,10 +521,10 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                                     className={generatorStyles.btnCancel}
                                     onClick={() => setEditingFolder(null)}
                                 >
-                                    Anuluj
+                                    {t('flashcardsView.cancel')}
                                 </button>
                                 <button type="submit" className={generatorStyles.btnSubmit}>
-                                    Zmień nazwę
+                                    {t('flashcardsView.newName')}
                                 </button>
                             </div>
                         </form>
