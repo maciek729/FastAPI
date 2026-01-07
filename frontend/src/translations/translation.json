@@ -793,11 +793,13 @@
       "deleteError":"Błąd usuwania podcastu",
       "changeName":"Nazwa zmieniona",
       "changeNameError": "Błąd zmiany nazwy",
-      "folderSucces":"Folder utworzony",
+      "folderSuccess":"Folder utworzony",
+      "deleteFolderConfirm": "Czy na pewno chcesz usunąć folder? Podcasty wrócą do widoku głównego.",
       "positionError":"Błąd aktualizacji pozycji",
       "podcastPH":"Szukaj Podcastów...",
       "podcastGen":"Generuj podcast",
-      "name":"Nazwa podcastu"
+      "name":"Nazwa podcastu",
+      "emptyFolder":"Brak podcastów w tym folderze"
     }
 
   },
@@ -927,11 +929,13 @@
       "deleteError": "Error deleting podcast",
       "changeName": "Name changed",
       "changeNameError": "Error changing name",
-      "folderSucces": "Folder created",
+      "folderSuccess": "Folder created",
       "positionError": "Error updating position",
       "podcastPH": "Search Podcasts...",
       "podcastGen": "Generate podcast",
-      "name": "Podcast name"
+      "name": "Podcast name",
+      "emptyFolder":"There are no podcasts in this folder",
+      "deleteFolderConfirm":"Are you sure you want to delete this folder? Podcasts sets will be moved to the main view."
     },
     "sidebar": {
       "spaces": "Spaces",

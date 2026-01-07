@@ -210,7 +210,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
 
 
     const handleDelete = async (id) => {
-        const confirmed = await confirmModal("Czy na pewno chcesz usunąć ten podcast?");
+        const confirmed = await confirmModal(t('podcastView.deleteConfirm'));
         if(!confirmed) return;
         try {
             await deletePodcast(id);
@@ -220,10 +220,10 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                 setCurrentAudio(null);
                 setIsPlaying(false);
             }
-            toast.success("Podcast usunięty");
+            toast.success(t('podcastView.deleteSuccess'));
             refreshData();
         } catch(err) {
-            toast.error("Błąd usuwania.");
+            toast.error(t('podcastView.deleteError'));
         }
     };
 
@@ -241,9 +241,9 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
         try {
             await renamePodcast(editingPodcast.id, editingPodcast.title);
             setEditingPodcast(null);
-            toast.success("Nazwa zmieniona");
+            toast.success(t('podcastView.changeName'));
             refreshData();
-        } catch(err) { toast.error("Błąd zmiany nazwy"); }
+        } catch(err) { toast.error(t('podcastView.changeNameError')); }
     };
 
     const handleCreateFolder = async (e) => {
@@ -253,19 +253,19 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
             await createPodcastFolder(notebookId, userData.id, newFolderName, currentFolder?.id);
             setNewFolderName('');
             setShowCreateFolderModal(false);
-            toast.success("Folder utworzony");
+            toast.success(t('podcastView.folderSuccess'));
             refreshData();
-        } catch(err) { toast.error("Błąd tworzenia folderu"); }
+        } catch(err) { toast.error(t('flashcardsView.createFolderError')); }
     };
 
     const handleDeleteFolder = async (id) => {
-        const confirmed = await confirmModal("Czy na pewno chcesz usunąć folder? Podcasty wrócą do widoku głównego.");
+        const confirmed = await confirmModal(t('podcastView.deleteFolderConfirm'));
         if(!confirmed) return;
         try {
             await deletePodcastFolder(id);
-            toast.success("Folder usunięty");
+            toast.success(t('flashcardsView.deleteFolderSuccess'));
             refreshData();
-        } catch(err) { toast.error("Błąd usuwania folderu"); }
+        } catch(err) { toast.error(t('flashcardsView.deleteFolderError')); }
     };
 
     const handleRenameFolderSubmit = async (e) => {
@@ -273,9 +273,9 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
         try {
             await renamePodcastFolder(editingFolder.id, editingFolder.name);
             setEditingFolder(null);
-            toast.success("Nazwa folderu zmieniona");
+            toast.success(t('flashcasrdsView.renameFolderSuccess'));
             refreshData();
-        } catch(err) { toast.error("Błąd zmiany nazwy"); }
+        } catch(err) { toast.error(t('flashcasrdsView.renameFolderError')); }
     };
 
     const openFolder = (folder) => setCurrentFolder(folder);
@@ -351,7 +351,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
             await Promise.all(updated.map(p => updatePodcastPosition(p.id, p.grid_position)));
         } catch(err) {
             console.error('Error updating podcast positions:', err);
-            toast.error("Błąd aktualizacji pozycji");
+            toast.error(t('podcastView.positionError'));
             refreshData();
         }
         setDragOverIndex(null);
@@ -408,13 +408,13 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                             </h2>
                         </>
                     ) : (
-                        <h2 className={styles.title}>Podkasty</h2>
+                        <h2 className={styles.title}>{t('group_chat.Podcasts')}</h2>
                     )}
                     <div className={styles.searchBox}>
                         <Search size={16} />
                         <input
                             type="text"
-                            placeholder="Szukaj podcastów..."
+                            placeholder={t('podcastView.podcastPH')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={styles.searchInput}
@@ -425,10 +425,10 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         onChange={(e) => setSortBy(e.target.value)}
                         className={styles.filterSelect}
                     >
-                        <option value="date_desc">Najnowsze</option>
-                        <option value="date_asc">Najstarsze</option>
-                        <option value="name_asc">Nazwa A-Z</option>
-                        <option value="name_desc">Nazwa Z-A</option>
+                        <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                        <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
+                        <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                        <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                     </select>
                 </div>
                 {showFilters && (
@@ -437,7 +437,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                             <Search size={16} />
                             <input
                                 type="text"
-                                placeholder="Szukaj podcastów..."
+                                placeholder={t('podcastView.podcastPH')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className={styles.searchInput}
@@ -448,10 +448,10 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                             onChange={(e) => setSortBy(e.target.value)}
                             className={styles.filterSelect}
                         >
-                            <option value="date_desc">Najnowsze</option>
-                            <option value="date_asc">Najstarsze</option>
-                            <option value="name_asc">Nazwa A-Z</option>
-                            <option value="name_desc">Nazwa Z-A</option>
+                            <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                            <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
+                            <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                            <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                         </select>
                     </div>
                 )}
@@ -459,16 +459,16 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                     <button
                         className={styles.filterToggleBtn}
                         onClick={() => setShowFilters(!showFilters)}
-                        title="Filtry"
+                        title={t('flashcardsView.filters')}
                     >
                         <Filter size={18} />
                     </button>
                     <button className={styles.secondaryBtn} onClick={() => setShowCreateFolderModal(true)}>
-                        <Folder size={18} color="#f59e0b"/> Nowy folder
+                        <Folder size={18} color="#f59e0b"/> {t('flashcardsView.newFolder')}
                     </button>
                     <button className={styles.createBtn} onClick={() => setShowGenerateModal(true)}>
                         <Plus size={18} />
-                        Generuj podcast
+                        {t('podcastGenerator.generate')}
                     </button>
                 </div>
             </div>
@@ -496,8 +496,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         </button>
                         {folderMenuOpen === folder.id && (
                             <div className={styles.folderMenu}>
-                                <button onClick={(e) => { e.stopPropagation(); setEditingFolder(folder); setFolderMenuOpen(null); }}>Zmień nazwę</button>
-                                <button onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.id); setFolderMenuOpen(null); }} className={styles.deleteOption}>Usuń</button>
+                                <button onClick={(e) => { e.stopPropagation(); setEditingFolder(folder); setFolderMenuOpen(null); }}>{t('flashcardsView.newName')}</button>
+                                <button onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.id); setFolderMenuOpen(null); }} className={styles.deleteOption}>{t('flashcardSetManager.delete')}</button>
                             </div>
                         )}
                     </div>
@@ -558,8 +558,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                                 </div>
                                 {podcastMenuOpen === podcast.id && (
                                     <div className={styles.contextMenu}>
-                                        <button onClick={(e) => { e.stopPropagation(); setEditingPodcast(podcast); setPodcastMenuOpen(null); }}>Zmień nazwę</button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(podcast.id); setPodcastMenuOpen(null); }} className={styles.deleteOption}>Usuń</button>
+                                        <button onClick={(e) => { e.stopPropagation(); setEditingPodcast(podcast); setPodcastMenuOpen(null); }}>{t('flashcardsView.newName')}</button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(podcast.id); setPodcastMenuOpen(null); }} className={styles.deleteOption}>{t('flashcardSetManager.delete')}</button>
                                     </div>
                                 )}
                             </div>
@@ -580,7 +580,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                 {getFilteredAndSortedPodcasts().length === 0 && folders.length === 0 && (
                     <div className={styles.emptyState}>
                          <Headphones size={48} opacity={0.3}/>
-                         <p>Brak podcastów w tym folderze.</p>
+                         <p>{t('podcastView.emptyFolder')}</p>
                     </div>
                 )}
             </div>
@@ -591,7 +591,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                 <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Utwórz nowy folder</h2>
+                            <h2 className={styles.modalTitle}>{t('flashcardsView.createFolder')}</h2>
                             <button
                                 className={styles.closeBtn}
                                 onClick={() => setShowCreateFolderModal(false)}
@@ -601,19 +601,19 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         </div>
                         <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
                             <div className={styles.formGroup}>
-                                <label>Nazwa folderu</label>
+                                <label>{t('flashcardsView.folderName')}</label>
                                 <input
                                     autoFocus
                                     type="text"
                                     value={newFolderName}
                                     onChange={e => setNewFolderName(e.target.value)}
-                                    placeholder="Wpisz nazwę folderu..."
+                                    placeholder={t('flashcardsView.folderNamePlaceholder')}
                                     required
                                 />
                             </div>
                             <div className={styles.modalActions}>
-                                <button type="button" className={styles.btnCancel} onClick={() => setShowCreateFolderModal(false)}>Anuluj</button>
-                                <button type="submit" className={styles.btnSubmit}>Utwórz folder</button>
+                                <button type="button" className={styles.btnCancel} onClick={() => setShowCreateFolderModal(false)}>{t('flashcardsView.cancel')}</button>
+                                <button type="submit" className={styles.btnSubmit}>{t('flashcardsView.createFolder')}</button>
                             </div>
                         </form>
                     </div>
@@ -624,7 +624,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                 <div className={styles.modalOverlay} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>Zmień nazwę</h2>
+                            <h2 className={styles.modalTitle}>{t('flashcardsView.newName')}</h2>
                             <button
                                 className={styles.closeBtn}
                                 onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}
@@ -634,7 +634,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         </div>
                         <form onSubmit={editingFolder ? handleRenameFolderSubmit : handleRenamePodcastSubmit} style={{padding: '2rem'}}>
                             <div className={styles.formGroup}>
-                                <label>{editingFolder ? 'Nazwa folderu' : 'Nazwa podcastu'}</label>
+                                <label>{editingFolder ? t('flashcardsView.folderName') : t('podcastView.name')}</label>
                                 <input
                                     autoFocus
                                     type="text"
@@ -644,8 +644,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                                 />
                             </div>
                             <div className={styles.modalActions}>
-                                <button type="button" className={styles.btnCancel} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>Anuluj</button>
-                                <button type="submit" className={styles.btnSubmit}>Zapisz</button>
+                                <button type="button" className={styles.btnCancel} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>{t('flashcardsView.cancel')}</button>
+                                <button type="submit" className={styles.btnSubmit}>{t('noteEditor.saveButton')}</button>
                             </div>
                         </form>
                     </div>

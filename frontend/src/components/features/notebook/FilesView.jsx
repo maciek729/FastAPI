@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { promptModal } from '../../../utils/promptModal';
@@ -10,6 +10,8 @@ import generatorStyles from "../../../css/features/FlashcardGenerator.module.css
 import { getCollaborators, addCollaborator, removeCollaborator } from '../../../services/notebookService';
 import { createNote, updateNotePosition } from '../../../services/noteService';
 import ENDPOINTS from '../../../api/endpoints';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function FilesView({ details, userData, refreshNotebook, highlightedItemId }) {
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
@@ -24,6 +26,24 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         content: '',
         type: 'Notatka'
     });
+    const { language } = useContext(LanguageContext);
+
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+        }
+
+        return translation || key;
+    };
 
     // Drag and drop state
     const [draggedNote, setDraggedNote] = useState(null);
@@ -143,18 +163,18 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         return (
             <div className={styles.loading}>
                 <div className={styles.loadingSpinner}></div>
-                <p>Ładowanie notatnika...</p>
+                <p>{t('filesView.loading')}</p>
             </div>
         );
     }
 
-    if (!details) return <div className={styles.loading}>Ładowanie notatnika...</div>;
+    if (!details) return <div className={styles.loading}>{t('filesView.loading')}</div>;
 
     const handleAddNote = async (e) => {
         e.preventDefault();
 
         if (!newNote.title.trim() || !newNote.content.trim()) {
-            toast.error("Wypełnij wszystkie pola!");
+            toast.error(t('filesView.writeAll'));
             return;
         }
 
@@ -174,63 +194,63 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 await handleMoveNoteToFolder(responseData.id, currentFolder.id);
             }
 
-            toast.success("Notatka dodana!");
+            toast.success(t('filesView.noteAddSuccess'));
             setNewNote({ title: '', content: '', type: 'Notatka' });
             setShowAddNoteModal(false);
             refreshNotebook();
         } catch (err) {
             console.error(err);
-            toast.error("Błąd dodawania notatki");
+            toast.error(t('filesView.noteAddError'));
         }
     };
 
     const handleDeleteNote = async (noteId) => {
-        const confirmed = await confirmModal("Czy na pewno chcesz usunąć tę notatkę?");
+        const confirmed = await confirmModal(t('filesView.confirmDelete'));
         if (!confirmed) return;
 
         try{
             await axios.delete(ENDPOINTS.NOTES.DELETE(noteId), {
                 params: { user_id: userData.id }
             });
-            toast.success("Notatka usunięta!");
+            toast.success(t('filesView.deleteSuccess'));
             refreshNotebook();
         } catch (err) {
             console.error('Error deleting note:', err);
-            toast.error("Błąd usuwania notatki");
+            toast.error(t('filesView.deleteError'));
         }
     };
 
     const handleAddCollaborator = async (e) => {
         e.preventDefault();
         if (!collaboratorUsername.trim()) {
-            toast.error("Podaj nazwę użytkownika");
+            toast.error(t('filesView.userError'));
             return;
         }
 
         try {
             await addCollaborator(details.id, collaboratorUsername);
-            toast.success(`Dodano użytkownika ${collaboratorUsername}`);
+            toast.success(t('filesVIew.userAdded', { username: collaboratorUsername }));
             setCollaboratorUsername('');
             setShowCollaboratorModal(false);
             fetchCollaborators();
         } catch (err) {
             console.error('Błąd dodawania:', err);
-            toast.error(err.message || "Błąd dodawania współtwórcy");
+            toast.error(err.message || t('filesView.addColError'));
         }
     };
 
     const handleRemoveCollaborator = async (userId) => {
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć tego współtwórcę?');
+        const confirmed = await confirmModal(t('filesView.deleteColConfirm'));
         if (!confirmed) return;
 
         try {
             await removeCollaborator(details.id, userId);
 
-            toast.success('Współtwórca usunięty');
+            toast.success(t('filesView.deleteColSuccess'));
             fetchCollaborators();
         } catch (err) {
             console.error('Błąd usuwania:', err);
-            toast.error(err.message || "Błąd usuwania współtwórcy");
+            toast.error(err.message || t('filesView.deleteColError'));
         }
     };
 
@@ -247,16 +267,18 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         refreshNotebook();
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'Dziś';
+    const formatDate = (dateString, t) => {
+        if (!dateString) return t('filesView.today');
+
         const date = new Date(dateString);
         const now = new Date();
+
         if (
             date.getFullYear() === now.getFullYear() &&
             date.getMonth() === now.getMonth() &&
             date.getDate() === now.getDate()
         ) {
-            return 'Dziś';
+            return t('filesView.today');
         }
         const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
         if (diffDays <= 0) return 'Dziś';
@@ -267,9 +289,9 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
     const getTypeColor = (type) => {
         switch (type?.toLowerCase()) {
-            case 'notatka': return '#6c63ff';
-            case 'test': return '#4cafef';
-            case 'fiszki': return '#ff6f61';
+            case t('filesView.note'): return '#6c63ff';
+            case t('filesView.test'): return '#4cafef';
+            case t('filesView.flashcard'): return '#ff6f61';
             default: return '#6c63ff';
         }
     };
@@ -336,7 +358,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             );
         } catch (err) {
             console.error('Error toggling pin:', err);
-            toast.error("Błąd przypinania notatki");
+            toast.error(t('filesView.pinError'));
         }
     };
 
@@ -356,7 +378,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             fetchFolders();
         } catch (err) {
             console.error('Error creating folder:', err);
-            toast.error("Błąd tworzenia folderu");
+            toast.error(t('flashcardsView.createFolderError'));
         }
     };
 
@@ -374,7 +396,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     };
 
     const handleDeleteFolder = async (folderId) => {
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten folder? Notatki zostaną przeniesione do głównego widoku.');
+        const confirmed = await confirmModal(t('filesView.deleteFolderConfirm'));
         if (!confirmed) return;
 
         try {
@@ -386,7 +408,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             refreshNotebook();
         } catch (err) {
             console.error('Error deleting folder:', err);
-            toast.error("Błąd usuwania folderu");
+            toast.error(t('flashcardsView.deleteFolderError'));
         }
     };
 
@@ -402,7 +424,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             fetchFolders();
         } catch (err) {
             console.error('Error renaming folder:', err);
-            toast.error("Błąd zmiany nazwy folderu");
+            toast.error(t('flashcardsView.renameFolderError'));
         }
     };
 
@@ -429,7 +451,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
         } catch (err) {
             console.error('Error moving note:', err);
-            toast.error("Błąd przenoszenia notatki");
+            toast.error(t('filesView.noteMoveError'));
         }
     };
 
@@ -524,7 +546,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             );
         } catch (err) {
             console.error('Error updating note positions:', err);
-            toast.error("Błąd aktualizacji pozycji notatek");
+            toast.error(t('filesView.notePosError'));
             refreshNotebook();
         }
 
@@ -646,7 +668,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 refreshNotebook();
             } catch (err) {
                 console.error('Error moving folder into folder:', err);
-                toast.error("Błąd przenoszenia folderu");
+                toast.error(t('flashcardsView.moveFolderError'));
             }
         }
     };
@@ -691,7 +713,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 refreshNotebook();
             } catch (err) {
                 console.error('Error moving folder to parent:', err);
-                toast.error("Błąd przenoszenia folderu");
+                toast.error(t('flashcardsView.moveFolderError'));
             }
         }
     };
@@ -721,7 +743,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
                             >
                                 <ArrowLeft size={20} />
-                                Powrót
+                                {t('flashcardsView.back')}
                             </button>
                         )}
                         <h1
@@ -743,14 +765,14 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                     {currentFolder.name}
                                 </span>
                             ) : (
-                                'Moje Pliki'
+                                t('filesView.myFiles')
                             )}
                         </h1>
                         <div className={styles.searchBox}>
                             <Search size={16} />
                             <input
                                 type="text"
-                                placeholder="Szukaj notatek..."
+                                placeholder= {t('filesView.searchNotePlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className={styles.searchInput}
@@ -761,10 +783,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             onChange={(e) => setSortBy(e.target.value)}
                             className={styles.filterSelect}
                         >
-                            <option value="date_desc">Najnowsze</option>
-                            <option value="date_asc">Najstarsze</option>
-                            <option value="name_asc">Nazwa A-Z</option>
-                            <option value="name_desc">Nazwa Z-A</option>
+                            <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                            <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
+                            <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                            <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                         </select>
                     </div>
                     {showFilters && (
@@ -773,7 +795,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                 <Search size={16} />
                                 <input
                                     type="text"
-                                    placeholder="Szukaj notatek..."
+                                    placeholder={t('filesView.searchNotePlaceholder')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className={styles.searchInput}
@@ -784,10 +806,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className={styles.filterSelect}
                             >
-                                <option value="date_desc">Najnowsze</option>
-                                <option value="date_asc">Najstarsze</option>
-                                <option value="name_asc">Nazwa A-Z</option>
-                                <option value="name_desc">Nazwa Z-A</option>
+                                <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                                <option value="date_asc">{t('flashcardsView.sortOldest')}</option>
+                                <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                                <option value="name_desc">{t('flashcardsView.sortNameDesc')}</option>
                             </select>
                         </div>
                     )}
@@ -795,7 +817,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                         <button
                             className={styles.filterToggleBtn}
                             onClick={() => setShowFilters(!showFilters)}
-                            title="Filtry"
+                            title={t('flashcardsView.filters')}
                         >
                             <Filter size={18} />
                         </button>
@@ -804,7 +826,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             onClick={() => setShowCreateFolderModal(true)}
                         >
                             <Folder size={18} />
-                            Nowy folder
+                            {t('flashcardsView.newFolder')}
                         </button>
                         {details.is_shared && (
                             <button
@@ -812,7 +834,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                 onClick={() => setShowCollaboratorModal(true)}
                             >
                                 <UserPlus size={18} />
-                                <span>Współtwórcy</span>
+                                <span>{t('filesView.col')}</span>
                             </button>
                         )}
                         <button
@@ -820,7 +842,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             onClick={() => setShowAddNoteModal(true)}
                         >
                             <Plus size={18} />
-                            Dodaj notatkę
+                            {t('filesView.addNote')}
                         </button>
                     </div>
                 </div>
@@ -889,7 +911,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                             setEditingFolder(folder);
                                             setFolderMenuOpen(null);
                                         }}>
-                                            Zmień nazwę
+                                            {t('flashcardsView.newName')}
                                         </button>
                                         <button
                                             className={styles.deleteFolderBtn}
@@ -899,7 +921,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                                 setFolderMenuOpen(null);
                                             }}
                                         >
-                                            Usuń folder
+                                            {t('filesView.deleteFolder')}
                                         </button>
                                     </div>
                                 )}
@@ -940,7 +962,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                             <button
                                                 className={`${styles.pinNoteBtn} ${note.is_pinned ? styles.pinned : ''}`}
                                                 onClick={(e) => handleTogglePin(note.id, !note.is_pinned, e)}
-                                                title={note.is_pinned ? "Odepnij notatkę" : "Przypnij notatkę"}
+                                                title={note.is_pinned 
+                                                    ? t('filesView.notesView.unpinNote') 
+                                                    : t('filesView.notesView.pinNote')}
+
                                             >
                                                 <Pin size={16} />
                                             </button>
@@ -950,7 +975,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                                     e.stopPropagation();
                                                     handleDeleteNote(note.id);
                                                 }}
-                                                title="Usuń notatkę"
+                                                title={t('filesView.deleteNote')}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -962,7 +987,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                     </p>
                                     <div className={styles.noteFooter}>
                                         <span className={styles.noteDate}>
-                                            {formatDate(note.created_at)}
+                                            {formatDate(note.created_at, t)}
                                         </span>
                                         <span
                                             className={styles.noteType}
@@ -977,7 +1002,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     ) : (
                         folders.filter(f => currentFolder ? f.parent_folder_id === currentFolder.id : !f.parent_folder_id).length === 0 && (
                             <div className={styles.emptyState}>
-                                <p>{currentFolder ? 'Ten folder jest pusty. Przeciągnij notatki tutaj lub utwórz nowe!' : 'Brak notatek. Dodaj pierwszą!'}</p>
+                               <p>{currentFolder ? t('filesView.emptyFolder') : t('filesView.noFiles')}</p>
                             </div>
                         )
                     )}
@@ -987,7 +1012,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowAddNoteModal(false)}>
                         <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
                             <div className={generatorStyles.header}>
-                                <h2 className={generatorStyles.title}>Dodaj nową notatkę</h2>
+                                <h2 className={generatorStyles.title}>{t('filesView.addNote')}</h2>
                                 <button className={generatorStyles.closeBtn} onClick={() => setShowAddNoteModal(false)} title="Zamknij">
                                     <X size={20} />
                                 </button>
@@ -995,15 +1020,15 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
                             <form onSubmit={handleAddNote} className={generatorStyles.form}>
                                 <div className={generatorStyles.formSection}>
-                                    <h3 className={generatorStyles.sectionTitle}>Podstawowe informacje</h3>
+                                    <h3 className={generatorStyles.sectionTitle}>{t('filesView.info')}</h3>
 
                                     <div className={generatorStyles.formGroup}>
-                                        <label>Tytuł</label>
+                                        <label>{t('filesView.titleNote')}</label>
                                         <input
                                             type="text"
                                             value={newNote.title}
                                             onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                                            placeholder="Tytuł notatki"
+                                            placeholder={t('filesView.titleDesc')}
                                         />
                                     </div>
 
@@ -1012,19 +1037,19 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                         <textarea
                                             value={newNote.content}
                                             onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                                            placeholder="Treść notatki..."
+                                            placeholder={t('filesView.descPH')}
                                         />
                                     </div>
 
                                     <div className={generatorStyles.formGroup}>
-                                        <label>Typ</label>
+                                        <label>{t('filesView.type')}</label>
                                         <select
                                             value={newNote.type}
                                             onChange={(e) => setNewNote({ ...newNote, type: e.target.value })}
                                         >
-                                            <option value="Notatka">Notatka</option>
-                                            <option value="Test">Test</option>
-                                            <option value="Fiszki">Fiszki</option>
+                                            <option value="Notatka">{t('filesView.note')}</option>
+                                            <option value="Test">{t('filesView.test')}</option>
+                                            <option value="Fiszki">{t('filesView.flashcard')}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1035,10 +1060,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                         className={generatorStyles.btnCancel}
                                         onClick={() => setShowAddNoteModal(false)}
                                     >
-                                        Anuluj
+                                        {t('flashcardsView.cancel')}
                                     </button>
                                     <button type="submit" className={generatorStyles.btnSubmit}>
-                                        Dodaj
+                                        {t('filesView.add')}
                                     </button>
                                 </div>
                             </form>
@@ -1050,7 +1075,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCollaboratorModal(false)}>
                         <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
                             <div className={generatorStyles.header}>
-                                <h2 className={generatorStyles.title}>Zarządzaj współtwórcami</h2>
+                                <h2 className={generatorStyles.title}>{t('filesView.manageCol')}</h2>
                                 <button
                                     className={generatorStyles.closeBtn}
                                     onClick={() => setShowCollaboratorModal(false)}
@@ -1062,14 +1087,14 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
                             <div style={{ padding: '0 2rem 2rem 2rem', display: 'flex', flexDirection: 'column', gap: '2rem', flex: 1, overflowY: 'auto' }}>
                                 <div className={generatorStyles.formSection}>
-                                    <h3 className={generatorStyles.sectionTitle}>Dodaj nowego współtwórcę</h3>
+                                    <h3 className={generatorStyles.sectionTitle}>{t('filesView.addCol')}</h3>
                                     <form onSubmit={handleAddCollaborator}>
                                         <div className={styles.inputWithButton}>
                                             <input
                                                 type="text"
                                                 value={collaboratorUsername}
                                                 onChange={(e) => setCollaboratorUsername(e.target.value)}
-                                                placeholder="Nazwa użytkownika"
+                                                placeholder={t('filesView.nameCol')}
                                                 style={{
                                                     background: 'var(--inner_inner_section_bg)',
                                                     color: 'var(--title)',
@@ -1083,7 +1108,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                             />
                                             <button type="submit" className={styles.btnAdd}>
                                                 <UserPlus size={18} />
-                                                Dodaj
+                                                {t('filesView.add')}
                                             </button>
                                         </div>
                                     </form>
@@ -1091,7 +1116,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
                                 <div className={generatorStyles.formSection}>
                                     <h3 className={generatorStyles.sectionTitle}>
-                                        Współtwórcy ({collaborators.length})
+                                        {t('filesView.col')} ({collaborators.length})
                                     </h3>
                                     {collaborators.length > 0 ? (
                                         <div className={styles.collaboratorsItems}>
@@ -1106,7 +1131,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                                     <button
                                                         className={styles.btnRemove}
                                                         onClick={() => handleRemoveCollaborator(collab.id)}
-                                                        title="Usuń współtwórcę"
+                                                        title={t('filesView.deleteCol')}
                                                     >
                                                         <X size={16} />
                                                     </button>
@@ -1115,7 +1140,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                         </div>
                                     ) : (
                                         <div className={styles.emptyCollaborators}>
-                                            <p>Brak współtwórców. Dodaj pierwszego!</p>
+                                            <p>{t('filesView.noCol')}</p>
                                         </div>
                                     )}
                                 </div>
@@ -1129,11 +1154,11 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCreateFolderModal(false)}>
                         <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
                             <div className={generatorStyles.header}>
-                                <h2 className={generatorStyles.title}>Utwórz nowy folder</h2>
+                                <h2 className={generatorStyles.title}>{t('flashcardsView.createFolder')}</h2>
                                 <button
                                     className={generatorStyles.closeBtn}
                                     onClick={() => setShowCreateFolderModal(false)}
-                                    title="Zamknij"
+                                    title={t('flashcardsView.close')}
                                 >
                                     <X size={20} />
                                 </button>
@@ -1141,12 +1166,12 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
                                 <div className={generatorStyles.formSection}>
                                     <div className={generatorStyles.formGroup}>
-                                        <label>Nazwa folderu</label>
+                                        <label>{t('flashcardsView.folderName')}</label>
                                         <input
                                             type="text"
                                             value={newFolderName}
                                             onChange={(e) => setNewFolderName(e.target.value)}
-                                            placeholder="Wpisz nazwę folderu..."
+                                            placeholder={t('flashcardsView.folderNamePlaceholder')}
                                             autoFocus
                                             required
                                         />
@@ -1158,10 +1183,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                         className={generatorStyles.btnCancel}
                                         onClick={() => setShowCreateFolderModal(false)}
                                     >
-                                        Anuluj
+                                        {t('flashcardsView.cancel')}
                                     </button>
                                     <button type="submit" className={generatorStyles.btnSubmit}>
-                                        Utwórz folder
+                                        {t('flashcardsView.createFolder')}
                                     </button>
                                 </div>
                             </form>
@@ -1174,11 +1199,11 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setEditingFolder(null)}>
                         <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
                             <div className={generatorStyles.header}>
-                                <h2 className={generatorStyles.title}>Zmień nazwę folderu</h2>
+                                <h2 className={generatorStyles.title}>{t('flashcardsView.renameFolderName')}</h2>
                                 <button
                                     className={generatorStyles.closeBtn}
                                     onClick={() => setEditingFolder(null)}
-                                    title="Zamknij"
+                                    title={t('flashcardsView.close')}
                                 >
                                     <X size={20} />
                                 </button>
@@ -1186,12 +1211,12 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             <form onSubmit={handleRenameFolder} className={generatorStyles.form}>
                                 <div className={generatorStyles.formSection}>
                                     <div className={generatorStyles.formGroup}>
-                                        <label>Nowa nazwa</label>
+                                        <label>{t('flashcardsView.newNameFolder')}</label>
                                         <input
                                             type="text"
                                             value={editingFolder.name}
                                             onChange={(e) => setEditingFolder({ ...editingFolder, name: e.target.value })}
-                                            placeholder="Wpisz nową nazwę folderu..."
+                                            placeholder={t('flashcardsView.folderNamePlaceholder')}
                                             autoFocus
                                             required
                                         />
@@ -1203,10 +1228,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                         className={generatorStyles.btnCancel}
                                         onClick={() => setEditingFolder(null)}
                                     >
-                                        Anuluj
+                                        {t('flashcardsView.cancel')}
                                     </button>
                                     <button type="submit" className={generatorStyles.btnSubmit}>
-                                        Zmień nazwę
+                                        {t('flashcardsView.newName')}
                                     </button>
                                 </div>
                             </form>
