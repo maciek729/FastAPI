@@ -17,6 +17,7 @@ export default function PodcastGenerator({
     notes
 }) {
     const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+    const [title, setTitle] = useState('');
     const [topic, setTopic] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const { language } = useContext(LanguageContext);
@@ -48,6 +49,11 @@ export default function PodcastGenerator({
     const handleGenerate = async (e) => {
         e.preventDefault();
 
+        if (!title.trim()) {
+            toast.error(t('podcastGenerator.titleRequired'));
+            return;
+        }
+
         if (!topic.trim()) {
             toast.error(t('podcastGenerator.topicRequired'));
             return;
@@ -55,14 +61,14 @@ export default function PodcastGenerator({
 
         setIsGenerating(true);
 
-        // Close modal and show loading state immediately
         if (onStartGenerating) {
             onStartGenerating();
         }
 
         try {
-            await generatePodcast(notebookId, userData.id, topic, selectedNoteIds, null);
+            await generatePodcast(notebookId, userData.id, title, selectedNoteIds, null, topic);
             toast.success(t('podcastGenerator.success'));
+            setTitle('');
             setTopic('');
             setSelectedNoteIds([]);
             if (onSuccess) onSuccess();
@@ -101,12 +107,28 @@ export default function PodcastGenerator({
                             <label>{t('podcastGenerator.topicLabel')}</label>
                             <input
                                 type="text"
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                                 placeholder={t('podcastGenerator.topicPlaceholder')}
                                 disabled={isGenerating}
                                 required
                             />
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label>{t('podcastGenerator.descriptionLabel')} *</label>
+                            <textarea
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                placeholder={t('podcastGenerator.descriptionPlaceholder')}
+                                disabled={isGenerating}
+                                required
+                                rows={4}
+                                style={{ resize: 'vertical', minHeight: '80px' }}
+                            />
+                            <small style={{ color: 'var(--subtitle)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                                {t('podcastGenerator.descriptionHint')}
+                            </small>
                         </div>
 
                         <div className={styles.formGroup}>

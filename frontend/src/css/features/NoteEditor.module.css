@@ -3,19 +3,14 @@
 /* Overlay */
 .editorOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
-  padding-left: calc(1rem + 12%);
-  padding-right: calc(1rem - 12%);
   overflow-y: auto;
 }
 
@@ -24,11 +19,11 @@
   background: var(--inner_section_bg);
   border-radius: 12px;
   width: 100%;
-  max-width: 900px;
-  height: 90vh;
+  max-width: 1200px;
+  height: 92vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
   overflow: hidden;
   margin: auto;
 }
@@ -169,29 +164,32 @@
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: var(--inner_section_bg);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
   flex-shrink: 0;
   overflow-x: auto;
+  position: sticky;
+  top: 64px; /* below header */
+  z-index: 6;
 }
 
 .toolbar::-webkit-scrollbar {
-  height: 4px;
+  height: 6px;
 }
 
 .toolbar::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.2);
-  border-radius: 2px;
+  background: rgba(139, 92, 246, 0.18);
+  border-radius: 3px;
 }
 
 .toolbarGroup {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .toolbarSeparator {
   width: 1px;
-  height: 24px;
-  background: rgba(148, 163, 184, 0.2);
+  height: 28px;
+  background: rgba(148, 163, 184, 0.12);
   margin: 0 0.5rem;
 }
 
@@ -199,35 +197,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--subtitle);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.12s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
 }
 
 .toolBtn:hover {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.08);
   color: var(--purple_brighter);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(139,92,246,0.08);
 }
 
 .toolBtn:active {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.14);
 }
 
 .fontSizeSelect {
   padding: 0.5rem 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 6px;
-  font-size: 0.875rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  font-size: 0.9rem;
   color: var(--subtitle);
   background: var(--white_btn_bg);
   font-family: 'Inter', sans-serif;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .fontSizeSelect:hover {
@@ -237,16 +238,20 @@
 .fontSizeSelect:focus {
   outline: none;
   border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.06);
 }
 
 /* Editor Content */
 .editorContent {
   flex: 1;
-  overflow-y: auto;
-  padding: 2rem;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  padding: 2.5rem 3rem;
   background: var(--inner_inner_section_bg);
   min-height: 0;
+  display: flex;
+  justify-content: center;
+  -webkit-overflow-scrolling: touch;
 }
 
 .editorContent::-webkit-scrollbar {
@@ -258,21 +263,32 @@
 }
 
 .editorContent::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(148, 163, 184, 0.3);
   border-radius: 4px;
 }
 
 .editorContent::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(148, 163, 184, 0.5);
 }
 
+/* Center the editable column and constrain width to mimic a word processor */
 .editor {
-  min-height: 100%;
+  width: 100%;
+  max-width: 980px;
+  max-height: calc(92vh - 240px);
+  min-height: 60vh;
   outline: none;
   font-size: 1rem;
   line-height: 1.7;
   color: var(--title);
   font-family: 'Inter', sans-serif;
+  background: white;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.03);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .editor:empty:before {
@@ -294,6 +310,23 @@
   margin: 0.25rem 0;
 }
 
+.editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.editor::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+
+.editor::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
 .editor strong {
   font-weight: 700;
 }
@@ -310,14 +343,44 @@
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 10px 0;
+  margin: 12px 0;
   display: block;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 18px rgba(2,6,23,0.06);
+  border: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .editor img:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 28px rgba(2,6,23,0.08);
   cursor: pointer;
+}
+
+/* Table Styling */
+.editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(2,6,23,0.04);
+}
+
+.editor table td,
+.editor table th {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.editor table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.editor table tr:hover {
+  background-color: #fafafa;
+}
+
+.editor table tr:last-child td {
+  border-bottom: 1px solid #d1d5db;
 }
 
 /* Footer */
@@ -402,4 +465,96 @@
   .editorFooter {
     padding: 0.75rem 1rem;
   }
+}
+
+/* Overrides to improve layout on large screens and ensure responsive polish */
+/* Make header sticky on large screens and center the editable column */
+.editorHeader {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: var(--inner_section_bg);
+}
+
+/* Ensure toolbar stays visible under header */
+.toolbar {
+  position: sticky;
+  top: 64px;
+  z-index: 7;
+}
+
+/* Constrain editor column and add more whitespace like a word processor */
+.editorContent {
+  padding: 3rem 3.5rem;
+}
+
+.editor {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  border-radius: 10px;
+}
+
+/* Slightly larger toolbar buttons on wide screens */
+@media (min-width: 1100px) {
+  .toolBtn { width: 44px; height: 44px; border-radius: 10px; }
+  .fontSizeSelect { font-size: 1rem; padding: 0.6rem 0.85rem; }
+}
+
+/* Keep compact for narrow screens */
+@media (max-width: 768px) {
+  .editorContent { padding: 1rem 0.75rem; }
+  .editor { padding: 0.75rem 1rem; border-radius: 8px; box-shadow: none; }
+  .toolbar { top: 56px; }
+}
+/* AI Assistant Button */
+.aiAssistantBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+}
+
+.aiAssistantBtn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
+}
+
+.aiAssistantBtn:active {
+  transform: translateY(0);
+}
+
+/* Modal Overlay and Table Dialog */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 1.5rem;
+}
+
+.tableModalContainer {
+  background: var(--outer_section_bg);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border_gray);
+  z-index: 3001;
 }

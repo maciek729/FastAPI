@@ -42,8 +42,9 @@ db_dependency = Annotated[Session, Depends(get_db)]
 class PodcastCreateRequest(BaseModel):
     notebook_id: int
     user_id: int
+    title: str
     topic: str
-    note_ids: Optional[List[int]] = [] 
+    note_ids: Optional[List[int]] = []
     parent_folder_id: Optional[int] = None
 
 class FolderCreateRequest(BaseModel):
@@ -113,7 +114,7 @@ def create_script(topic: str, context_text: str, api_key: str):
        Joe: [text]
        Jane: [text]
     3. Do not add narration, scene descriptions, or asterisks. just the lines.
-    4. Speak in Polish unless the topic suggests otherwise.
+    4. Speak in provided language unless the topic or reference section suggests otherwise.
     """
     
     response = client.models.generate_content(
@@ -123,10 +124,6 @@ def create_script(topic: str, context_text: str, api_key: str):
     return response.text
 
 def generate_and_upload_audio(script_text: str, api_key: str) -> str:
-    """
-    Generuje audio, zapisuje je do pamięci RAM (BytesIO),
-    wysyła do Supabase Storage i zwraca publiczny URL.
-    """
     if not supabase:
         raise Exception("Supabase client not initialized")
 
@@ -213,7 +210,7 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     new_podcast = Podcasts(
         notebook_id=request.notebook_id,
         user_id=request.user_id,
-        title=request.topic,
+        title=request.title,
         script_content=script,
         file_path=storage_path,
         file_url=file_url,

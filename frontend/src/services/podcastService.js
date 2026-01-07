@@ -17,7 +17,7 @@ export const fetchPodcasts = async (notebookId) => {
   return handleResponse(response);
 };
 
-export const generatePodcast = async (notebookId, userId, topic, noteIds, parentFolderId = null) => {
+export const generatePodcast = async (notebookId, userId, title, noteIds, parentFolderId = null, description = null) => {
   const response = await fetch(ENDPOINTS.PODCASTS.GENERATE, {
     method: "POST",
     headers: getHeaders(),
@@ -25,7 +25,8 @@ export const generatePodcast = async (notebookId, userId, topic, noteIds, parent
     body: JSON.stringify({
       notebook_id: notebookId,
       user_id: userId,
-      topic: topic,
+      title: title,
+      topic: description || title, 
       note_ids: noteIds,
       parent_folder_id: parentFolderId
     }),
