@@ -156,7 +156,12 @@ const ENDPOINTS = {
     MARK_READ: (notifId) => `${API_BASE_URL}/notifications/${notifId}/read`,
     DELETE: (notifId) => `${API_BASE_URL}/notifications/${notifId}`,
     CLEAR_ALL: (userId) => `${API_BASE_URL}/notifications/user/${userId}/all`,
-  }
+  },
+  FILES: {
+    UPLOAD: `${API_BASE_URL}/files/upload`,
+    LIST: (notebookId) => `${API_BASE_URL}/files/list/${notebookId}`,
+    DELETE: (fileId) => `${API_BASE_URL}/files/${fileId}`,
+  },
 };
 
 export default ENDPOINTS;

@@ -3,12 +3,9 @@ import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { Plus, Search, Filter, X, Folder, ArrowLeft } from 'lucide-react';
 import styles from "../../../css/features/TestsView.module.css";
-import sharedStyles from "../../../css/features/NotebookView.module.css";
 import generatorStyles from "../../../css/features/FlashcardGenerator.module.css";
 import * as testsService from '../../../services/testsService';
 import TestsList from './TestsList';
-import translations from '../../../translations/translation.json';
-import { LanguageContext } from '../../../translations/LanguageContext';
 import TestGenerator from './TestGenerator';
 import TestTaking from './TestTaking';
 import TestResults from './TestResults';
@@ -19,7 +16,6 @@ import translations from '../../../translations/translation.json';
 export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [tests, setTests] = useState([]);
     const [folders, setFolders] = useState([]);
-    const [expandedFolders, setExpandedFolders] = useState([]);
     const [currentFolder, setCurrentFolder] = useState(null);
     const [notes, setNotes] = useState([]);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
@@ -43,8 +39,11 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [loading, setLoading] = useState(true);
-     const { language } = useContext(LanguageContext);
+    
+    // Kontekst językowy (tylko raz!)
+    const { language } = useContext(LanguageContext);
 
+    // Funkcja tłumaczeń (tylko raz!)
     const t = (key, params = {}) => {
         const keys = key.split('.');
         let translation = translations[language];
@@ -70,22 +69,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-
-    const { language } = useContext(LanguageContext);
-    const t = (key, params = {}) => {
-        const keys = key.split('.');
-        let translation = translations[language];
-        for (const k of keys) {
-            translation = translation?.[k];
-            if (!translation) return key;
-        }
-        if (typeof translation === 'string' && Object.keys(params).length > 0) {
-            return translation.replace(/\{(\w+)\}/g, (match, key) => {
-                return params[key] || match;
-            });
-        }
-        return translation || key;
-    };
 
     useEffect(() => {
         if (userData?.id && notebookId) {
