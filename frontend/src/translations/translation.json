@@ -496,17 +496,17 @@
     },
     "filesView": {
       "loading": "Ładowanie notatnika...",
-      "noteAddSucces": "Notatka dodana!",
+      "noteAddSuccess": "Notatka dodana!",
       "noteAddError": "Błąd dodawania notatki",
       "writeAll": "Wypełnij wszystkie pola!",
       "note": "Notatka",
       "test": "test",
       "flashcard": "fiszki",
       "confirmDelete": "Czy na pewno chcesz usunąć tę notatkę?",
-      "deleteNote": "Usuń notatkę",
-      "deleteSucces": "Notatka usunięta pomyślnie",
-      "deleteError": "Błąd usuwania notatki",
-      "userError": "Podaj nazwę użytkownika",
+      "deleteNote":"Usuń notatkę",
+      "deleteSuccess":"Notatka usunięta pomyślnie",
+      "deleteError":"Błąd usuwania notatki",
+      "userError":"Podaj nazwę użytkownika",
       "userAdded": "Dodano użytkownika {username}",
       "addColError": "Błąd dodawania współtwórcy",
       "deleteColConfirm": "Czy na pewno chcesz usunąć tego współtwórcę?",
@@ -728,16 +728,12 @@
       "scopeLabel": "Zakres",
       "generationMethodLabel": "Metoda generowania",
       "creationDateLabel": "Data utworzenia",
-      "sourceTypes": {
-        "manual": "Ręczny opis",
-        "file": "Z pliku",
-        "note": "Z notatki"
-      },
       "today": "Dziś",
       "takeTest": "Rozwiąż test",
       "viewResults": "Zobacz wyniki"
     },
     "testGenerator": {
+      "loadingTests":"Ładowanie testów...",
       "title": "Wygeneruj nowy test",
       "sections": {
         "source": "Źródło materiału",
@@ -773,7 +769,8 @@
       "buttons": {
         "cancel": "Anuluj",
         "generate": "Generuj test",
-        "generating": "Generowanie..."
+        "generating": "Generowanie...",
+        "generatingTest": "Generowanie testu"
       },
       "success": {
         "generated": "Test wygenerowany pomyślnie!"
@@ -795,7 +792,7 @@
     "testResults": {
       "title": "Wyniki testu",
       "question": "Pytanie",
-      "correctAnswers": "Poprawnych odpowiedzi",
+      "correctAnswers": "Poprawnych odpowiedzi:",
       "yourAnswer": "Twoja odpowiedź",
       "correctAnswer": "Prawidłowa odpowiedź",
       "noAnswer": "Nie udzielono odpowiedzi"
@@ -804,6 +801,8 @@
       "manualDescription": "Ręczny opis",
       "file": "Z pliku",
       "note": "Z notatki",
+      "pin": "przypnij test",
+      "unpin": "odepnij test",
       "pinError": "Błąd przypinania testu",
       "deleteConfirm": "Czy na pewno chcesz usunąć ten test?",
       "deleteSuccess": "Test usunięty",
@@ -824,28 +823,30 @@
       "noTests": "Brak testów. Wygeneruj pierwszy test używając AI!",
       "details": "Szczegóły"
     },
-    "testsView": {
-      "deleteFolderConfirm": "Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.",
-      "tests": "Sprawdziany",
-      "testPlaceHolder": "Szukaj testów...",
-      "allSource": "Wszystkie źródła",
-      "testGen": "Generuj test"
+    "testsView":{
+      "deleteFolderConfirm":"Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.",
+      "tests":"Sprawdziany",
+      "testPlaceHolder":"Szukaj testów...",
+      "allSource":"Wszystkie źródła",
+      "testGen":"Generuj test",
+      "loadingError": "Błąd ładowania testu",
+      "resultsError": "Błąd ładowania wyników"
     },
     "testTaking": {
       "unansweredConfirm": "Nie odpowiedziałeś na {count} pytań. Czy chcesz kontynuować?",
       "sendError": "Błąd podczas przesyłania odpowiedzi",
-      "true": "Prawda",
-      "false": "Fałsz",
-      "que": "Pytanie",
-      "choosecorrect": "Zaznacz wszystkie poprawne odpowiedzi",
-      "checking": "Sprawdzanie...",
-      "endTest": "Zakończ test"
+      "true":"Prawda",
+      "false":"Fałsz",
+      "que":"Pytanie",
+      "chooseCorrect":"Zaznacz wszystkie poprawne odpowiedzi",
+      "checking":"Sprawdzanie...",
+      "endTest":"Zakończ test"
     },
-    "podcastView": {
-      "deleteConfirm": "Czy na pewno chcesz usunąć ten podcast?",
-      "deleteSucces": "Podcast usunięty",
-      "deleteError": "Błąd usuwania podcastu",
-      "changeName": "Nazwa zmieniona",
+    "podcastView":{
+      "deleteConfirm":"Czy na pewno chcesz usunąć ten podcast?",
+      "deleteSuccess":"Podcast usunięty",
+      "deleteError":"Błąd usuwania podcastu",
+      "changeName":"Nazwa zmieniona",
       "changeNameError": "Błąd zmiany nazwy",
       "folderSuccess": "Folder utworzony",
       "deleteFolderConfirm": "Czy na pewno chcesz usunąć folder? Podcasty wrócą do widoku głównego.",
@@ -924,16 +925,12 @@
       "scopeLabel": "Scope",
       "generationMethodLabel": "Generation method",
       "creationDateLabel": "Creation date",
-      "sourceTypes": {
-        "manual": "Manual description",
-        "file": "From file",
-        "note": "From note"
-      },
       "today": "Today",
       "takeTest": "Take Test",
       "viewResults": "View Results"
     },
     "testGenerator": {
+      "loadingTests":"Loading Tests...",
       "title": "Generate New Test",
       "sections": {
         "source": "Material Source",
@@ -969,7 +966,8 @@
       "buttons": {
         "cancel": "Cancel",
         "generate": "Generate Test",
-        "generating": "Generating..."
+        "generating": "Generating...",
+        "generatingTest": "Generating test..."
       },
       "success": {
         "generated": "Test generated successfully!"
@@ -991,7 +989,7 @@
     "testResults": {
       "title": "Test Results",
       "question": "Question",
-      "correctAnswers": "Correct Answers",
+      "correctAnswers": "Correct Answers:",
       "yourAnswer": "Your Answer",
       "correctAnswer": "Correct Answer",
       "noAnswer": "No answer provided"
@@ -1000,6 +998,8 @@
       "manualDescription": "Manual description",
       "file": "From file",
       "note": "From note",
+      "pin": "Pin test",
+      "unpin" : "Unpin test",
       "pinError": "Error toggling test pin",
       "deleteConfirm": "Are you sure you want to delete this test?",
       "deleteSuccess": "Test deleted",
@@ -1025,7 +1025,9 @@
       "tests": "Tests",
       "testPlaceHolder": "Search tests...",
       "allSource": "All sources",
-      "testGen": "Generate test"
+      "testGen": "Generate test",
+      "loadingError":"Error loading tests",
+      "resultsError":"Error loading results"
     },
     "testTaking": {
       "unansweredConfirm": "You haven't answered {count} question(s). Do you want to continue?",
@@ -1033,13 +1035,13 @@
       "true": "True",
       "false": "False",
       "que": "Question",
-      "choosecorrect": "Select all correct answers",
+      "chooseCorrect": "Select all correct answers",
       "checking": "Checking...",
       "endTest": "Finish test"
     },
     "podcastView": {
       "deleteConfirm": "Are you sure you want to delete this podcast?",
-      "deleteSucces": "Podcast deleted",
+      "deleteSuccess": "Podcast deleted",
       "deleteError": "Error deleting podcast",
       "changeName": "Name changed",
       "changeNameError": "Error changing name",

@@ -1,5 +1,8 @@
 import { X, CheckCircle } from 'lucide-react';
 import MathText from './MathText';
+import {useContext } from 'react';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 
@@ -20,12 +23,28 @@ export default function TestResults({ show, onClose, testResults }) {
 
         return answerText;
     };
+    const { language } = useContext(LanguageContext);
 
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+        }
+
+        return translation || key;
+    };
     return (
         <div className={sharedStyles.modalOverlay} onClick={onClose}>
             <div className={styles.modalLarge} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>Wyniki testu</h2>
+                    <h2 className={styles.modalTitle}>{t('testResults.title')}</h2>
                     <button
                         className={sharedStyles.closeBtn}
                         onClick={onClose}
@@ -48,7 +67,7 @@ export default function TestResults({ show, onClose, testResults }) {
                     </div>
                     <div className={styles.scoreDetails}>
                         <p className={styles.scoreText}>
-                            Poprawnych odpowiedzi: <strong>{testResults.correct_answers} / {testResults.total_questions}</strong>
+                            {t('testResults.correctAnswers')} <strong>{testResults.correct_answers} / {testResults.total_questions}</strong>
                         </p>
                     </div>
                 </div>
@@ -63,7 +82,7 @@ export default function TestResults({ show, onClose, testResults }) {
                                 className={`${styles.answerBlock} ${answer.is_correct ? styles.correct : styles.incorrect}`}
                             >
                                 <div className={styles.answerHeader}>
-                                    <h3 className={styles.questionNumber}>Pytanie {index + 1}</h3>
+                                    <h3 className={styles.questionNumber}>{t('testResults.question')} {index + 1}</h3>
                                     {answer.is_correct ? (
                                         <CheckCircle size={20} color="#4ade80" />
                                     ) : (
@@ -75,13 +94,13 @@ export default function TestResults({ show, onClose, testResults }) {
                                 </p>
                                 {answer.user_answer ? (
                                     <>
-                                        <p className={styles.answerLabel}>Twoja odpowiedź:</p>
+                                        <p className={styles.answerLabel}>{t('testResults.yourAnswer')}</p>
                                         <p className={answer.is_correct ? styles.correctAnswer : styles.wrongAnswer}>
                                             <MathText text={userAnswerText} />
                                         </p>
                                         {!answer.is_correct && (
                                             <>
-                                                <p className={styles.answerLabel}>Prawidłowa odpowiedź:</p>
+                                                <p className={styles.answerLabel}>{t('testResults.correctAnswer')}</p>
                                                 <p className={styles.correctAnswer}>
                                                     <MathText text={correctAnswerText} />
                                                 </p>
@@ -89,7 +108,7 @@ export default function TestResults({ show, onClose, testResults }) {
                                         )}
                                     </>
                                 ) : (
-                                    <p className={styles.noAnswer}>Nie udzielono odpowiedzi</p>
+                                    <p className={styles.noAnswer}>{t('testResults.noAnswer')}</p>
                                 )}
                             </div>
                         );
