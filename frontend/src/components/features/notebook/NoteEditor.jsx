@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import {
@@ -12,6 +12,134 @@ import { useLanguage } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import AiAssistant from './AiAssistant';
 
+const ImageResizeOverlay = ({ image, containerRef, editorRef, onResizeEnd, deselect }) => {
+    const [dims, setDims] = useState({ width: 0, height: 0, top: 0, left: 0 });
+    
+    const updateOverlayPosition = () => {
+        if (!image || !containerRef.current) return;
+        
+        const imgRect = image.getBoundingClientRect();
+        const containerRect = containerRef.current.getBoundingClientRect();
+        
+        setDims({
+            width: image.offsetWidth,
+            height: image.offsetHeight,
+            top: imgRect.top - containerRect.top,
+            left: imgRect.left - containerRect.left
+        });
+    };
+
+    useLayoutEffect(() => {
+        updateOverlayPosition();
+        
+        const scrollContainer = editorRef.current;
+        
+        window.addEventListener('resize', updateOverlayPosition);
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', updateOverlayPosition);
+        }
+        
+        const resizeObserver = new ResizeObserver(() => updateOverlayPosition());
+        resizeObserver.observe(image);
+
+        return () => {
+            window.removeEventListener('resize', updateOverlayPosition);
+            if (scrollContainer) {
+                scrollContainer.removeEventListener('scroll', updateOverlayPosition);
+            }
+            resizeObserver.disconnect();
+        };
+    }, [image, containerRef, editorRef]);
+
+    const handleMouseDown = (e, direction) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = image.offsetWidth;
+        const startHeight = image.offsetHeight;
+        const aspectRatio = startWidth / startHeight;
+
+        const handleMouseMove = (moveEvent) => {
+            let newWidth = startWidth;
+            let newHeight = startHeight;
+            const deltaX = moveEvent.clientX - startX;
+            const deltaY = moveEvent.clientY - startY;
+
+            if (direction.includes('e')) newWidth = startWidth + deltaX;
+            if (direction.includes('w')) newWidth = startWidth - deltaX;
+            if (direction.includes('s')) newHeight = startHeight + deltaY;
+            if (direction.includes('n')) newHeight = startHeight - deltaY;
+
+            if (moveEvent.shiftKey) {
+                if (direction.includes('w') || direction.includes('e')) {
+                    newHeight = newWidth / aspectRatio;
+                } else {
+                    newWidth = newHeight * aspectRatio;
+                }
+            }
+
+            if (newWidth > 20) image.style.width = `${newWidth}px`;
+            if (newHeight > 20) image.style.height = `${newHeight}px`;
+            
+            updateOverlayPosition();
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            if (onResizeEnd) onResizeEnd();
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleStyle = {
+        position: 'absolute',
+        width: '10px',
+        height: '10px',
+        backgroundColor: '#6c63ff',
+        border: '1px solid white',
+        borderRadius: '2px',
+        zIndex: 100,
+    };
+
+    return (
+        <div 
+            style={{
+                position: 'absolute',
+                top: dims.top,
+                left: dims.left,
+                width: dims.width,
+                height: dims.height,
+                border: '2px solid #6c63ff',
+                pointerEvents: 'none',
+                zIndex: 50,
+                boxSizing: 'border-box' 
+            }}
+        >
+            <div 
+                style={{ ...handleStyle, top: -6, left: -6, cursor: 'nw-resize', pointerEvents: 'auto' }}
+                onMouseDown={(e) => handleMouseDown(e, 'nw')}
+            />
+            <div 
+                style={{ ...handleStyle, top: -6, right: -6, cursor: 'ne-resize', pointerEvents: 'auto' }}
+                onMouseDown={(e) => handleMouseDown(e, 'ne')}
+            />
+            <div 
+                style={{ ...handleStyle, bottom: -6, left: -6, cursor: 'sw-resize', pointerEvents: 'auto' }}
+                onMouseDown={(e) => handleMouseDown(e, 'sw')}
+            />
+            <div 
+                style={{ ...handleStyle, bottom: -6, right: -6, cursor: 'se-resize', pointerEvents: 'auto' }}
+                onMouseDown={(e) => handleMouseDown(e, 'se')}
+            />
+        </div>
+    );
+};
+
 export default function NoteEditor({ note, onClose, onSave, onDelete, userData, isNew = false }) {
     const [title, setTitle] = useState(note?.title || '');
     const [content, setContent] = useState(note?.content || '');
@@ -24,8 +152,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const [tableRows, setTableRows] = useState('3');
     const [tableCols, setTableCols] = useState('3');
     const [selectedTextContext, setSelectedTextContext] = useState('');
+    
+    const [selectedImage, setSelectedImage] = useState(null);
+
     const aiInsertRangeRef = useRef(null);
     const editorRef = useRef(null);
+    const containerRef = useRef(null);
     const fileInputRef = useRef(null);
     const lockCheckIntervalRef = useRef(null)
     const initialTitleRef = useRef(note?.title || '');
@@ -57,7 +189,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         const node = selection.anchorNode;
         if (!node) return;
 
-        // Find nearest ancestor table
         let el = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
         while (el && el !== editorRef.current) {
             if (el.tagName && el.tagName.toLowerCase() === 'table') {
@@ -69,7 +200,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             el = el.parentElement;
         }
 
-        // If not found via selection, try to remove last table in editor
         const lastTable = editorRef.current?.querySelector('table:last-of-type');
         if (lastTable) {
             lastTable.remove();
@@ -86,26 +216,20 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         const range = sel.getRangeAt(0);
 
         if (range.collapsed) {
-            // insert a span with zero-width space and set font-size
             const span = document.createElement('span');
             span.style.fontSize = px + 'px';
             span.appendChild(document.createTextNode('\u200B'));
             range.insertNode(span);
-
-            // place caret after the inserted zero-width space
             range.setStart(span.firstChild, 1);
             range.setEnd(span.firstChild, 1);
             sel.removeAllRanges();
             sel.addRange(range);
         } else {
-            // wrap selected content in a span with font-size
             try {
                 const span = document.createElement('span');
                 span.style.fontSize = px + 'px';
                 span.appendChild(range.extractContents());
                 range.insertNode(span);
-
-                // move caret after the inserted span
                 range.setStartAfter(span);
                 range.collapse(true);
                 sel.removeAllRanges();
@@ -124,10 +248,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             editorRef.current.innerHTML = note.content;
         }
 
-        // For existing notes, attempt to lock and poll lock status.
         if (!isNew) {
             lockNote();
-
             lockCheckIntervalRef.current = setInterval(() => {
                 checkLockStatus();
             }, 10000);
@@ -140,13 +262,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             };
         }
 
-        // For new notes, just set initial content and skip locking.
-        // initialize initial refs for dirty-checks
         initialTitleRef.current = note?.title || '';
         initialContentRef.current = note?.content || '';
     }, []);
 
-    // warn on unload if there are unsaved changes
     useEffect(() => {
         const handler = (e) => {
             if (!isDirty) return;
@@ -254,9 +373,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const handleAiText = (text) => {
         if (isReadOnly) return;
 
-        // Parse AI text and create formatted HTML structure
         const parseAndFormatText = (input) => {
-            // Helper function to convert markdown bold (**text**) to HTML <strong>
             const convertMarkdownBold = (text) => {
                 return text.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
             };
@@ -269,25 +386,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 const line = lines[i];
                 const trimmed = line.trim();
 
-                // Skip empty lines
                 if (!trimmed) {
                     i++;
                     continue;
                 }
 
-                // Detect bullet points (-, *, •)
                 if (/^[\s]*[-*•]\s+/.test(line)) {
                     const ul = document.createElement('ul');
                     ul.style.marginTop = '0.5rem';
                     ul.style.marginBottom = '0.5rem';
 
-                    // Collect all consecutive bullet items
                     while (i < lines.length) {
                         const currentLine = lines[i];
                         const currentTrimmed = currentLine.trim();
 
                         if (/^[\s]*[-*•]\s+/.test(currentLine)) {
-                            // Count leading spaces for indentation level
                             const leadingSpaces = currentLine.match(/^(\s*)/)[1].length;
                             const indentLevel = Math.floor(leadingSpaces / 4);
                             let itemText = currentTrimmed.replace(/^[-*•]\s+/, '');
@@ -308,13 +421,11 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
                     container.appendChild(ul);
                 }
-                // Detect numbered lists (1., 2., etc.)
                 else if (/^[\s]*\d+\.\s+/.test(line)) {
                     const ol = document.createElement('ol');
                     ol.style.marginTop = '0.5rem';
                     ol.style.marginBottom = '0.5rem';
 
-                    // Collect all consecutive numbered items
                     while (i < lines.length) {
                         const currentLine = lines[i];
                         const currentTrimmed = currentLine.trim();
@@ -340,7 +451,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
                     container.appendChild(ol);
                 }
-                // Regular paragraph
                 else {
                     let paragraphText = trimmed;
                     paragraphText = convertMarkdownBold(paragraphText);
@@ -361,19 +471,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         
         let inserted = false;
 
-        // Prefer inserting at the saved range (captured before opening the AI modal),
-        // otherwise try to use the current selection if it's inside the editor.
-        // If user had selected text when opening the AI assistant, we DO NOT replace
-        // the selection; instead append AI response to the end of the note.
         if (aiInsertRangeRef.current && editorRef.current && editorRef.current.contains(aiInsertRangeRef.current.startContainer)) {
             try {
                 const range = aiInsertRangeRef.current.cloneRange();
                 range.deleteContents();
-                // Insert all children of formattedContent into the range
                 while (formattedContent.firstChild) {
                     range.insertNode(formattedContent.firstChild);
                 }
-                // Move cursor after the inserted content
                 range.collapse(false);
                 const sel = window.getSelection();
                 sel.removeAllRanges();
@@ -384,10 +488,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 inserted = false;
             }
         } else {
-            // If there was a selected text when AI was opened, keep selection intact
-            // and append the AI response to the end of the editor.
             if (selectedTextContext && selectedTextContext.length > 0) {
-                // fallback: append to the end of the editor
                 while (formattedContent.firstChild) {
                     editorRef.current?.appendChild(formattedContent.firstChild);
                 }
@@ -398,11 +499,9 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     try {
                         const range = selection.getRangeAt(0);
                         range.deleteContents();
-                        // Insert all children of formattedContent into the range
                         while (formattedContent.firstChild) {
                             range.insertNode(formattedContent.firstChild);
                         }
-                        // Move cursor after the inserted content
                         range.collapse(false);
                         selection.removeAllRanges();
                         selection.addRange(range);
@@ -416,7 +515,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         }
 
         if (!inserted) {
-            // fallback: append to the end of the editor
             while (formattedContent.firstChild) {
                 editorRef.current?.appendChild(formattedContent.firstChild);
             }
@@ -424,13 +522,9 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
         setContent(editorRef.current?.innerHTML || '');
         setShowAiAssistant(false);
-        // provide single unified toast from the editor to avoid duplicates
         toast.success(t('aiAssistant.insertSuccess'));
-        // mark as dirty when AI inserts text
         setIsDirty(true);
-        // clear saved range after insertion
         aiInsertRangeRef.current = null;
-        // clear selected text context
         setSelectedTextContext('');
     };
 
@@ -453,10 +547,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         reader.onload = (event) => {
             const img = document.createElement('img');
             img.src = event.target.result;
+            img.style.minWidth = '50px';
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
             img.style.borderRadius = '8px';
             img.style.margin = '10px 0';
+            img.style.cursor = 'pointer';
             
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
@@ -495,7 +591,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             const updatedContent = editorRef.current.innerHTML;
 
             if (isNew) {
-                // create note
                 const { createNote } = await import('../../../services/noteService');
                 const payload = {
                     user_id: userData.id,
@@ -509,7 +604,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 const responseData = await createNote(payload);
                 onSave(responseData);
                 toast.success('Notatka utworzona!');
-                // reset dirty state after creation
                 initialTitleRef.current = responseData.title;
                 initialContentRef.current = responseData.content || '';
                 setIsDirty(false);
@@ -528,7 +622,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
             onSave({ ...note, title, content: updatedContent });
             toast.success('Notatka zapisana!');
-            // reset dirty state after save
             initialTitleRef.current = title;
             initialContentRef.current = updatedContent || '';
             setIsDirty(false);
@@ -542,21 +635,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
     const handleDelete = async () => {
         if (isReadOnly) {
-            toast.error('Nie możesz usunąć notatki, która jest edytowana przez innego użytkownika!');
+            toast.error(t('noteEditor.deleteLockedError'));
             return;
         }
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć tę notatkę?');
+        const confirmed = await confirmModal(t('noteEditor.deleteConfirm'));
         if (!confirmed) return;
 
         try {
             await deleteNote(note.id);
 
             onDelete(note.id);
-            toast.success('Notatka usunięta!');
+            toast.success(t('noteEditor.deleteSuccess'));
             onClose();
         } catch (err) {
             console.error(err);
-            toast.error(err.message || 'Błąd usuwania notatki');
+            toast.error(err.message || t('noteEditor.deleteError'));
         }
     };
 
@@ -575,7 +668,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const handleInput = () => {
         if (!isReadOnly) {
             setContent(editorRef.current.innerHTML);
-            // mark dirty if current differs from initial
             const curTitle = title || '';
             const curContent = editorRef.current?.innerHTML || '';
             setIsDirty(curTitle !== (initialTitleRef.current || '') || curContent !== (initialContentRef.current || ''));
@@ -588,6 +680,16 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             if (!confirmed) return;
         }
         onClose();
+    };
+
+    const handleEditorClick = (e) => {
+        if (isReadOnly) return;
+        
+        if (e.target.tagName === 'IMG') {
+            setSelectedImage(e.target);
+        } else {
+            setSelectedImage(null);
+        }
     };
 
     return (
@@ -782,18 +884,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.aiAssistantBtn}
                                 onClick={() => {
-                                    // Capture selected text from editor
                                     const selection = window.getSelection();
                                     let selectedText = '';
-                                    
                                     if (selection && selection.toString().length > 0 && editorRef.current && editorRef.current.contains(selection.anchorNode)) {
                                         selectedText = selection.toString().trim();
                                     }
-                                    
                                     setSelectedTextContext(selectedText);
 
-                                    // If text is selected, don't save the range (so response appends to end)
-                                    // If no text is selected, save range to insert at cursor position
                                     if (!selectedText) {
                                         try {
                                             const sel = window.getSelection();
@@ -806,7 +903,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                             aiInsertRangeRef.current = null;
                                         }
                                     } else {
-                                        // Clear range so insertion happens at end of editor
                                         aiInsertRangeRef.current = null;
                                     }
                                     setShowAiAssistant(true);
@@ -819,14 +915,29 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     </div>
                 )}
 
-                {/* Editor Content */}
-                <div className={styles.editorContent}>
+                {/* Editor Content - Dodano containerRef i position: relative */}
+                <div 
+                    className={styles.editorContent} 
+                    ref={containerRef}
+                    style={{ position: 'relative' }} 
+                >
+                    {!isReadOnly && selectedImage && (
+                        <ImageResizeOverlay 
+                            image={selectedImage}
+                            containerRef={containerRef} // Używamy teraz containerRef
+                            editorRef={editorRef}       // editorRef potrzebny do nasłuchiwania scrolla
+                            onResizeEnd={handleInput}
+                            deselect={() => setSelectedImage(null)}
+                        />
+                    )}
                     <div
                         ref={editorRef}
                         className={`${styles.editor} ${isReadOnly ? styles.readOnly : ''}`}
                         contentEditable={!isReadOnly}
                         onInput={handleInput}
+                        onClick={handleEditorClick}
                         suppressContentEditableWarning
+                        data-placeholder={t('noteEditor.editorPlaceholder')}
                     />
                 </div>
 

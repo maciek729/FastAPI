@@ -1,11 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { X } from 'lucide-react';
 import MathText from './MathText';
+import translations from '../../../translations/translation.json';
+import { LanguageContext } from '../../../translations/LanguageContext';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 import * as testsService from '../../../services/testsService';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function TestTaking({
     show,
@@ -17,7 +21,23 @@ export default function TestTaking({
 }) {
     const [loading, setLoading] = useState(false);
     const [userAnswers, setUserAnswers] = useState({});
+    const { language } = useContext(LanguageContext);
 
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+        }
+
+        return translation || key;
+    };
     useEffect(() => {
         if (show && currentTest) {
             setUserAnswers({});
@@ -50,6 +70,22 @@ export default function TestTaking({
         }
     };
 
+    const { language } = useContext(LanguageContext);
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        return translation || key;
+    };
+
     const handleSubmitTest = async () => {
         const unanswered = currentQuestions.filter(q => {
             const answer = userAnswers[q.id];
@@ -57,7 +93,7 @@ export default function TestTaking({
         });
 
         if (unanswered.length > 0) {
-            const confirmed = await confirmModal(`Nie odpowiedziałeś na ${unanswered.length} pytań. Czy chcesz kontynuować?`);
+            const confirmed = await confirmModal(t('testTaking.unansweredConfirm',{count : unanswered.length}));
             if (!confirmed) {
                 return;
             }
@@ -84,7 +120,7 @@ export default function TestTaking({
             onSubmitComplete(results);
         } catch (err) {
             console.error('Error submitting test:', err);
-            toast.error("Błąd podczas przesyłania odpowiedzi");
+            toast.error(t('testTaking.sendError'));
         } finally {
             setLoading(false);
         }
@@ -98,12 +134,12 @@ export default function TestTaking({
         if (questionType === 'true_false') {
             return (
                 <div key={question.id} className={styles.questionBlock}>
-                    <h3 className={styles.questionNumber}>Pytanie {index + 1}</h3>
+                    <h3 className={styles.questionNumber}>{t('testTaking.que')} {index + 1}</h3>
                     <p className={styles.questionText}>
                         <MathText text={question.question} />
                     </p>
                     <div className={styles.optionsGrid}>
-                        {['Prawda', 'Fałsz'].map((option) => (
+                        {[t('testTaking.true'), t('testTaking.false')].map((option) => (
                             <label
                                 key={option}
                                 className={`${styles.optionLabel} ${userAnswer === option ? styles.selected : ''}`}
@@ -128,12 +164,12 @@ export default function TestTaking({
 
             return (
                 <div key={question.id} className={styles.questionBlock}>
-                    <h3 className={styles.questionNumber}>Pytanie {index + 1}</h3>
+                    <h3 className={styles.questionNumber}>{t('testTaking.que')} {index + 1}</h3>
                     <p className={styles.questionText}>
                         <MathText text={question.question} />
                     </p>
                     <p className={styles.multipleAnswersHint}>
-                        (Zaznacz wszystkie poprawne odpowiedzi)
+                        {t('testTaking.chooseCorrect')}
                     </p>
                     <div className={styles.optionsGrid}>
                         {Object.entries(options).map(([key, value]) => (
@@ -161,7 +197,7 @@ export default function TestTaking({
             // multiple_choice (default)
             return (
                 <div key={question.id} className={styles.questionBlock}>
-                    <h3 className={styles.questionNumber}>Pytanie {index + 1}</h3>
+                    <h3 className={styles.questionNumber}>{t('testTaking.que') }{index + 1}</h3>
                     <p className={styles.questionText}>
                         <MathText text={question.question} />
                     </p>
@@ -214,14 +250,14 @@ export default function TestTaking({
                         onClick={onClose}
                         disabled={loading}
                     >
-                        Anuluj
+                        {t('flashcardsView.cancel')}
                     </button>
                     <button
                         className={sharedStyles.btnSubmit}
                         onClick={handleSubmitTest}
                         disabled={loading}
                     >
-                        {loading ? 'Sprawdzanie...' : 'Zakończ test'}
+                        {loading ? t('testTaking.checking') : t('testTaking.endTest')}
                     </button>
                 </div>
             </div>

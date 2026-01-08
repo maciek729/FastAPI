@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { X, CheckSquare } from 'lucide-react';
 import styles from "../../../css/features/FlashcardGenerator.module.css";
 import * as testsService from '../../../services/testsService';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function TestGenerator({
     show,
@@ -17,6 +19,23 @@ export default function TestGenerator({
 }) {
     const [uploadFile, setUploadFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const { language } = useContext(LanguageContext);
+
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+        }
+
+        return translation || key;
+    };
     const [newTest, setNewTest] = useState({
         title: '',
         topic: '',
@@ -56,32 +75,32 @@ export default function TestGenerator({
         e.preventDefault();
 
         if (!newTest.title.trim()) {
-            toast.error("Tytuł jest wymagany!");
+            toast.error(t('testGenerator.errors.titleRequired'));
             return;
         }
 
         if (newTest.source_type === 'manual' && !newTest.topic.trim()) {
-            toast.error("Opis/temat jest wymagany dla ręcznego wprowadzania!");
+            toast.error(t('testGenerator.errors.topicRequiredManual'));
             return;
         }
 
         if (newTest.source_type === 'file' && !uploadFile) {
-            toast.error("Wybierz plik!");
+            toast.error(t('testGenerator.errors.fileRequired'));
             return;
         }
 
         if (newTest.source_type === 'note' && newTest.note_ids.length === 0) {
-            toast.error("Wybierz przynajmniej jedną notatkę!");
+            toast.error(t('testGenerator.errors.noteRequired'));
             return;
         }
 
         if (newTest.num_questions < 1 || newTest.num_questions > 20) {
-            toast.error("Liczba pytań musi być między 1 a 20!");
+            toast.error(t('testGenerator.errors.numQuestionsInvalid'));
             return;
         }
 
         if (!notebookId) {
-            toast.error("Błąd: Brak ID notatnika");
+            toast.error(t('testGenerator.errors.notebookMissing'));
             return;
         }
 
@@ -99,7 +118,7 @@ export default function TestGenerator({
                 formData.append('user_id', userData.id);
                 formData.append('notebook_id', notebookId);
                 formData.append('title', newTest.title);
-                formData.append('topic', newTest.topic || 'Generuj pytania na podstawie pliku');
+                formData.append('topic', newTest.topic || t('testGenerator.defaults.topicFile'));
                 formData.append('num_questions', newTest.num_questions);
                 formData.append('question_type', newTest.question_type);
                 if (currentFolder) {
@@ -112,7 +131,7 @@ export default function TestGenerator({
                     user_id: userData.id,
                     notebook_id: notebookId,
                     title: newTest.title,
-                    topic: newTest.topic || 'Generuj pytania na podstawie notatek',
+                    topic: newTest.topic || t('testGenerator.defaults.topicNote'),
                     num_questions: parseInt(newTest.num_questions),
                     question_type: newTest.question_type,
                     note_ids: newTest.source_type === 'note' ? newTest.note_ids : [],
@@ -120,11 +139,11 @@ export default function TestGenerator({
                 });
             }
 
-            toast.success("Test wygenerowany pomyślnie!");
+            toast.success(t('testGenerator.success.generated'));
             onSuccess();
         } catch (err) {
             console.error(err);
-            toast.error(err.response?.data?.detail || "Błąd generowania testu. Upewnij się, że Gemini API jest skonfigurowane.");
+            toast.error(err.response?.data?.detail || t('testGenerator.errors.apiError'));
             onError();
         } finally {
             setSubmitting(false);
@@ -137,7 +156,7 @@ export default function TestGenerator({
         <div className={styles.modalOverlay} onClick={() => !submitting && onClose()}>
             <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Wygeneruj nowy test</h2>
+                    <h2 className={styles.title}>{t('testGenerator.title')}</h2>
                     <button
                         className={styles.closeBtn}
                         onClick={onClose}
@@ -148,7 +167,7 @@ export default function TestGenerator({
                 </div>
                 <form onSubmit={handleGenerateTest} className={styles.form}>
                     <div className={styles.formSection}>
-                        <h3 className={styles.sectionTitle}>Źródło materiału</h3>
+                        <h3 className={styles.sectionTitle}>{t('testGenerator.sections.source')}</h3>
                         <div className={styles.sourceOptions}>
                             <div className={styles.radioOption}>
                                 <input
@@ -161,7 +180,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="source-manual" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Ręczny opis</span>
+                                    <span className={styles.radioText}>{t('testGenerator.sourceTypes.manual')}</span>
                                 </label>
                             </div>
                             <div className={styles.radioOption}>
@@ -175,7 +194,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="source-file" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Z pliku</span>
+                                    <span className={styles.radioText}>{t('testGenerator.sourceTypes.file')}</span>
                                 </label>
                             </div>
                             <div className={styles.radioOption}>
@@ -189,7 +208,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="source-note" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Z notatki</span>
+                                    <span className={styles.radioText}>{t('testGenerator.sourceTypes.note')}</span>
                                 </label>
                             </div>
                         </div>
@@ -198,7 +217,7 @@ export default function TestGenerator({
                     {newTest.source_type === 'file' && (
                         <div className={styles.formSection}>
                             <div className={styles.formGroup}>
-                                <label>Załącz plik (PDF, DOCX, TXT, lub obraz)</label>
+                                <label>{t('flashcardGenerator.uploadFile')}</label>
                                 <div className={styles.fileUploadWrapper}>
                                     <input
                                         type="file"
@@ -216,7 +235,7 @@ export default function TestGenerator({
                                         className={styles.fileInput}
                                     />
                                     <label htmlFor="file-upload" className={styles.fileLabel}>
-                                        {uploadFile ? uploadFile.name : 'Wybierz plik'}
+                                        {uploadFile ? uploadFile.name : t('testGenerator.chooseFile')}
                                     </label>
                                 </div>
                             </div>
@@ -226,12 +245,12 @@ export default function TestGenerator({
                     {newTest.source_type === 'note' && (
                         <div className={styles.formSection}>
                             <h3 className={styles.sectionTitle}>
-                                Wybierz notatki ({newTest.note_ids.length} zaznaczonych)
+                                {t('podcastGenerator.selectNotes', {count : newTestnote_ids.length})}
                             </h3>
 
                             {notes.length === 0 ? (
                                 <div className={styles.emptyNotes}>
-                                    <p>Brak dostępnych notatek w tym notatniku.</p>
+                                    <p>{t('podcastGenerator.noNotes')}</p>
                                 </div>
                             ) : (
                                 <div className={styles.notesList}>
@@ -263,21 +282,21 @@ export default function TestGenerator({
                     )}
 
                     <div className={styles.formSection}>
-                        <h3 className={styles.sectionTitle}>Podstawowe informacje</h3>
+                        <h3 className={styles.sectionTitle}>{t('testGenerator.sections.basic')}</h3>
 
                         <div className={styles.formRow}>
                             <div className={styles.formGroup}>
-                                <label>Tytuł testu *</label>
+                                <label>{t('testGenerator.labels.title')}</label>
                                 <input
                                     type="text"
                                     value={newTest.title}
                                     onChange={(e) => setNewTest({...newTest, title: e.target.value})}
-                                    placeholder="np. Historia Polski"
+                                    placeholder={t('testGenerator.placeholders.title')}
                                     disabled={submitting}
                                 />
                             </div>
                             <div className={styles.formGroup}>
-                                <label>Liczba pytań</label>
+                                <label>{t('testGenerator.labels.numQuestions')}</label>
                                 <input
                                     type="number"
                                     min="1"
@@ -290,11 +309,11 @@ export default function TestGenerator({
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label>Temat / Zakres {newTest.source_type !== 'manual' && '(opcjonalny)'}</label>
+                            <label>{t('testGenerator.labels.topic')} {newTest.source_type !== 'manual' && t('testGenerator.optional')}</label>
                             <textarea
                                 value={newTest.topic}
                                 onChange={(e) => setNewTest({...newTest, topic: e.target.value})}
-                                placeholder={newTest.source_type === 'manual' ? "Opisz temat testu..." : "Opcjonalnie podaj dodatkowe wskazówki..."}
+                                placeholder={newTest.source_type === 'manual' ? t('testGenerator.placeholders.topicManual') : t('testGenerator.placeholders.topicOptional')}
                                 rows={3}
                                 disabled={submitting}
                             />
@@ -302,7 +321,7 @@ export default function TestGenerator({
                     </div>
 
                     <div className={styles.formSection}>
-                        <h3 className={styles.sectionTitle}>Typ pytań</h3>
+                        <h3 className={styles.sectionTitle}>{t('testGenerator.sections.questionType')}</h3>
                         <div className={styles.sourceOptions}>
                             <div className={styles.radioOption}>
                                 <input
@@ -315,7 +334,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="type-multiple" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Wielokrotny wybór</span>
+                                    <span className={styles.radioText}>{t('testGenerator.questionTypes.multiple_choice')}</span>
                                 </label>
                             </div>
                             <div className={styles.radioOption}>
@@ -329,7 +348,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="type-truefalse" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Prawda/Fałsz</span>
+                                    <span className={styles.radioText}>{t('testGenerator.questionTypes.true_false')}</span>
                                 </label>
                             </div>
                             <div className={styles.radioOption}>
@@ -343,7 +362,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="type-multiple-answers" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Wiele odpowiedzi</span>
+                                    <span className={styles.radioText}>{t('testGenerator.questionTypes.multiple_answers')}</span>
                                 </label>
                             </div>
                             <div className={styles.radioOption}>
@@ -357,7 +376,7 @@ export default function TestGenerator({
                                     disabled={submitting}
                                 />
                                 <label htmlFor="type-mixed" className={styles.radioLabel}>
-                                    <span className={styles.radioText}>Mieszany</span>
+                                    <span className={styles.radioText}>{t('testGenerator.questionTypes.mixed')}</span>
                                 </label>
                             </div>
                         </div>
@@ -370,14 +389,14 @@ export default function TestGenerator({
                             onClick={onClose}
                             disabled={submitting}
                         >
-                            Anuluj
+                            {t('flashcardsView.cancel')}
                         </button>
                         <button
                             type="submit"
                             className={styles.btnSubmit}
                             disabled={submitting}
                         >
-                            {submitting ? 'Generowanie...' : 'Generuj test'}
+                            {submitting ? t('testGenerator.buttons.generating') : t('testGenerator.buttons.generate')}
                         </button>
                     </div>
                 </form>

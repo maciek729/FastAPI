@@ -352,12 +352,22 @@
   transition: all 0.15s ease;
   border-left: 2px solid transparent;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .notebookItem:hover {
   background: var(--sidebar_notebook_hover_bg);
   color: var(--sidebar_notebook_hover_text);
   border-left-color: rgba(139, 92, 246, 0.3);
+}
+
+.notebookItem:hover :global([class*="menuTrigger"]) {
+  opacity: 1;
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--purple_brighter);
 }
 
 .notebookItem.active {
