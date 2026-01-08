@@ -88,16 +88,16 @@ export default function TestsList({
     };
 
     const handleDeleteTest = async (testId) => {
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten test?');
+        const confirmed = await confirmModal(t('testsList.deleteConfirm'));
         if (!confirmed) return;
 
         try {
             await testsService.deleteTest(testId, userData.id);
-            toast.success('Test usunięty');
+            toast.success(t('testsList.deleteSuccess'));
             setTests(prevTests => prevTests.filter(t => t.id !== testId));
         } catch (err) {
             console.error('Error deleting test:', err);
-            toast.error("Błąd usuwania testu");
+            toast.error(t('testsList.deleteError'));
         }
     };
 

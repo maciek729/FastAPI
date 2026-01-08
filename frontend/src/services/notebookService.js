@@ -44,3 +44,22 @@ export const removeCollaborator = async (notebookId, userId) => {
   });
   if (!res.ok) throw new Error('Failed to remove collaborator');
 };
+
+export const renameNotebook = async (notebookId, newName) => {
+  const res = await fetch(ENDPOINTS.NOTEBOOKS.UPDATE(notebookId), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ name: newName })
+  });
+  if (!res.ok) throw new Error('Failed to rename notebook');
+  return await res.json();
+};
+
+export const deleteNotebook = async (notebookId) => {
+  const res = await fetch(ENDPOINTS.NOTEBOOKS.DELETE(notebookId), {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  if (!res.ok) throw new Error('Failed to delete notebook');
+};

@@ -35,6 +35,10 @@ class CreateNotebookRequest(BaseModel):
     is_shared: bool = False
 
 
+class UpdateNotebookRequest(BaseModel):
+    name: str
+
+
 class NotebookOut(BaseModel):
     id: int
     name: str
@@ -142,13 +146,55 @@ def delete_notebook(notebook_id: int, db: db_dependency):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Notebook not found"
         )
-    db.delete(notebook)
-    db.commit()
-    return {"message": "Notebook deleted successfully"}
+    # Clean up dependent records in other tables to avoid FK constraint errors
+    from models import (
+        NoteFolders, TestFolders, FlashcardSets, Flashcards, FlashcardReviews,
+        FlashcardSetFolders, PodcastFolders, Podcasts, NotebookMessages, Notifications, Tests, NotebookCollaborator, Notes
+    )
+
+    try:
+        # Delete notifications and messages referencing the notebook
+        db.query(Notifications).filter(Notifications.notebook_id == notebook_id).delete(synchronize_session=False)
+        db.query(NotebookMessages).filter(NotebookMessages.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Delete podcasts and their folders
+        db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).delete(synchronize_session=False)
+        db.query(PodcastFolders).filter(PodcastFolders.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Delete tests and folders
+        db.query(Tests).filter(Tests.notebook_id == notebook_id).delete(synchronize_session=False)
+        db.query(TestFolders).filter(TestFolders.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Delete flashcard reviews, flashcards and sets
+        db.query(FlashcardReviews).join(Flashcards, FlashcardReviews.flashcard_id == Flashcards.id).filter(Flashcards.flashcard_set_id.in_(
+            db.query(FlashcardSets.id).filter(FlashcardSets.notebook_id == notebook_id)
+        )).delete(synchronize_session=False)
+        db.query(Flashcards).filter(Flashcards.flashcard_set_id.in_(
+            db.query(FlashcardSets.id).filter(FlashcardSets.notebook_id == notebook_id)
+        )).delete(synchronize_session=False)
+        db.query(FlashcardSets).filter(FlashcardSets.notebook_id == notebook_id).delete(synchronize_session=False)
+        db.query(FlashcardSetFolders).filter(FlashcardSetFolders.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Delete note folders
+        db.query(NoteFolders).filter(NoteFolders.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Delete collaborators (if any)
+        db.query(NotebookCollaborator).filter(NotebookCollaborator.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Notes should be removed by the relationship cascade, but ensure no orphaned notes remain
+        db.query(Notes).filter(Notes.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # Finally delete the notebook
+        db.delete(notebook)
+        db.commit()
+        return {"message": "Notebook deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete notebook: {str(e)}")
 
 
 @router.put("/{notebook_id}", response_model=NotebookOut)
-def update_notebook(notebook_id: int, request: CreateNotebookRequest, db: db_dependency):
+def update_notebook(notebook_id: int, request: UpdateNotebookRequest, db: db_dependency):
     notebook = db.query(Notebooks).filter(Notebooks.id == notebook_id).first()
     if not notebook:
         raise HTTPException(
@@ -166,11 +212,8 @@ def update_notebook(notebook_id: int, request: CreateNotebookRequest, db: db_dep
             detail="Notebook with this name already exists."
         )
 
+    # Only update the fields provided for rename
     notebook.name = request.name
-    notebook.created_by = request.created_by
-    notebook.created_at = request.created_at
-    notebook.space_type = request.space_type
-    notebook.is_shared = request.is_shared
 
     db.commit()
     db.refresh(notebook)

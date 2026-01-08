@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { X } from 'lucide-react';
 import MathText from './MathText';
+import translations from '../../../translations/translation.json';
+import { LanguageContext } from '../../../translations/LanguageContext';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 import * as testsService from '../../../services/testsService';
@@ -50,6 +52,22 @@ export default function TestTaking({
         }
     };
 
+    const { language } = useContext(LanguageContext);
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        return translation || key;
+    };
+
     const handleSubmitTest = async () => {
         const unanswered = currentQuestions.filter(q => {
             const answer = userAnswers[q.id];
@@ -57,7 +75,7 @@ export default function TestTaking({
         });
 
         if (unanswered.length > 0) {
-            const confirmed = await confirmModal(`Nie odpowiedziałeś na ${unanswered.length} pytań. Czy chcesz kontynuować?`);
+            const confirmed = await confirmModal(t('testTaking.unansweredConfirm', { count: unanswered.length }));
             if (!confirmed) {
                 return;
             }

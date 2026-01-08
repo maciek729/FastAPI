@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { Plus, Search, Filter, X, Folder, ArrowLeft } from 'lucide-react';
@@ -7,6 +7,8 @@ import sharedStyles from "../../../css/features/NotebookView.module.css";
 import generatorStyles from "../../../css/features/FlashcardGenerator.module.css";
 import * as testsService from '../../../services/testsService';
 import TestsList from './TestsList';
+import translations from '../../../translations/translation.json';
+import { LanguageContext } from '../../../translations/LanguageContext';
 import TestGenerator from './TestGenerator';
 import TestTaking from './TestTaking';
 import TestResults from './TestResults';
@@ -49,6 +51,22 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    const { language } = useContext(LanguageContext);
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        return translation || key;
+    };
 
     useEffect(() => {
         if (userData?.id && notebookId) {
@@ -175,12 +193,12 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     };
 
     const handleDeleteFolder = async (folderId) => {
-        const confirmed = await confirmModal('Czy na pewno chcesz usunąć ten folder? Testy zostaną przeniesione do głównego widoku.');
+        const confirmed = await confirmModal(t('testsView.deleteFolderConfirm'));
         if (!confirmed) return;
 
         try {
             await testsService.deleteTestFolder(folderId);
-            toast.success("Folder usunięty");
+            toast.success(t('testsView.folderDeleted') || "Folder usunięty");
             fetchFolders();
             fetchTests();
         } catch (err) {

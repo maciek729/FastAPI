@@ -10,7 +10,8 @@ const ENDPOINTS = {
   NOTEBOOKS: {
     LIST: (createdBy, spaceType) => `${API_BASE_URL}/notebooks/list?created_by=${createdBy}&space_type=${spaceType}`,
     CREATE: `${API_BASE_URL}/notebooks/create`,
-    DELETE: (id) => `${API_BASE_URL}/notebooks/${id}/delete`,
+    UPDATE: (id) => `${API_BASE_URL}/notebooks/${id}`,
+    DELETE: (id) => `${API_BASE_URL}/notebooks/${id}`,
     FETCH_COLLABORATORS: (id) => `${API_BASE_URL}/notebooks/${id}/collaborators`,
     ADD_COLLABORATOR: (id) => `${API_BASE_URL}/notebooks/${id}/add-collaborator`,
     REMOVE_COLLABORATOR: (notebookId, userId) => `${API_BASE_URL}/notebooks/${notebookId}/collaborator/${userId}`,
