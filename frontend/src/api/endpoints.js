@@ -10,7 +10,8 @@ const ENDPOINTS = {
   NOTEBOOKS: {
     LIST: (createdBy, spaceType) => `${API_BASE_URL}/notebooks/list?created_by=${createdBy}&space_type=${spaceType}`,
     CREATE: `${API_BASE_URL}/notebooks/create`,
-    DELETE: (id) => `${API_BASE_URL}/notebooks/${id}/delete`,
+    UPDATE: (id) => `${API_BASE_URL}/notebooks/${id}`,
+    DELETE: (id) => `${API_BASE_URL}/notebooks/${id}`,
     FETCH_COLLABORATORS: (id) => `${API_BASE_URL}/notebooks/${id}/collaborators`,
     ADD_COLLABORATOR: (id) => `${API_BASE_URL}/notebooks/${id}/add-collaborator`,
     REMOVE_COLLABORATOR: (notebookId, userId) => `${API_BASE_URL}/notebooks/${notebookId}/collaborator/${userId}`,
@@ -155,7 +156,15 @@ const ENDPOINTS = {
     MARK_READ: (notifId) => `${API_BASE_URL}/notifications/${notifId}/read`,
     DELETE: (notifId) => `${API_BASE_URL}/notifications/${notifId}`,
     CLEAR_ALL: (userId) => `${API_BASE_URL}/notifications/user/${userId}/all`,
-  }
+  },
+  FILES: {
+    UPLOAD: `${API_BASE_URL}/files/upload`,
+    LIST: (notebookId) => `${API_BASE_URL}/files/list/${notebookId}`,
+    DELETE: (fileId) => `${API_BASE_URL}/files/${fileId}`,
+  },
+  CONTACT: {
+    SUBMIT: `${API_BASE_URL}/contact/`,
+  },
 };
 
 export default ENDPOINTS;

@@ -5,6 +5,7 @@ import { User, Users, Plus, ChevronRight, PanelLeft } from "lucide-react";
 import styles from "../../css/layout/Sidebar.module.css";
 import UserFooter from "../features/sidebar_user_menu/UserFooter";
 import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
+import NotebookMenu from './NotebookMenu';
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
 import { getNotebooks, createNotebook } from "../../services/notebookService";
@@ -346,13 +347,22 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                             <div
                                                 key={notebook.id}
                                                 className={`${styles.notebookItem} ${selectedNotebook?.id === notebook.id ? styles.active : ''} ${dragOverNotebook === notebook.id ? styles.dragOver : ''}`}
-                                                onClick={() => handleNotebookClick(notebook, space.id)}
+                                                onClick={(e) => {
+                                                    if (e.target.closest('[role="button"]')) return;
+                                                    handleNotebookClick(notebook, space.id);
+                                                }}
                                                 onDragOver={(e) => handleDragOver(e, notebook)}
                                                 onDragLeave={handleDragLeave}
                                                 onDrop={(e) => handleDrop(e, notebook)}
                                                 title={notebook.name}
                                             >
                                                 <span className={styles.notebookName}>{notebook.name}</span>
+                                                <NotebookMenu
+                                                    notebook={notebook}
+                                                    spaceType={space.id}
+                                                    onRefresh={() => fetchNotebooks(space.id)}
+                                                    t={t}
+                                                />
                                             </div>
                                         ))}
                                         {(!notebooks[space.id] || notebooks[space.id].length === 0) && (

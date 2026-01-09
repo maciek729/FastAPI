@@ -93,7 +93,7 @@ export default function TestsList({
 
         try {
             await testsService.deleteTest(testId, userData.id);
-            toast.success(t('testsList.deleteTest'));
+            toast.success(t('testsList.deleteSuccess'));
             setTests(prevTests => prevTests.filter(t => t.id !== testId));
         } catch (err) {
             console.error('Error deleting test:', err);

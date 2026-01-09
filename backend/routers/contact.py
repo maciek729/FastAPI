@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status
-from pydantic import BaseModel, EmailStr
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, EmailStr, SecretStr
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig 
 from dotenv import load_dotenv
 import os
 from typing import Annotated
-from database import SessionLocal
 from sqlalchemy.orm import Session
-from models import Users
+from database import SessionLocal
 
-from pydantic import SecretStr 
 load_dotenv()
+
 conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
     MAIL_PASSWORD=SecretStr(os.getenv("MAIL_PASSWORD")),
@@ -22,20 +21,16 @@ conf = ConnectionConfig(
     VALIDATE_CERTS=False
 )
 
-
 router = APIRouter(
     prefix='/contact',
     tags=['contact']
 )
 
-# Klasa dla danych z formularza (opcjonalnie, ale dobra praktyka)
 class ContactRequest(BaseModel):
     title: str
     message: str
-    user_email: EmailStr # Email zalogowanego użytkownika
-    # user_id i user_name są opcjonalne, jeśli chcesz użyć tokenu JWT
+    user_email: EmailStr
 
-# Wymagany do użycia, jeśli używasz bazy danych
 def get_db():
     db = SessionLocal()
     try:
@@ -45,47 +40,32 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-# Funkcja do wysyłania wiadomości do Ciebie (administratora)
-async def send_contact_email(user_email: EmailStr, title: str, message_content: str):
-    admin_email = os.getenv("MAIL_FROM") # Załóżmy, że masz zmienną środowiskową dla administratora
-    if not admin_email:
-        raise ValueError("MAIL_FROM not configured")
-
-    body = f"Temat: {title}\n\nWiadomość:\n{message_content}"
+@router.post("/", status_code=status.HTTP_200_OK)
+async def submit_contact_form(contact_request: ContactRequest):
+    admin_email = os.getenv("MAIL_FROM")
+    
+    html = f"""
+    <h3>Nowa wiadomość ze zdAI to!</h3>
+    <p><b>Od:</b> {contact_request.user_email}</p>
+    <p><b>Temat:</b> {contact_request.title}</p>
+    <p><b>Treść:</b></p>
+    <p>{contact_request.message}</p>
+    """
 
     message = MessageSchema(
-        subject=f"NOWA WIADOMOŚĆ KONTAKTOWA: {title}",
+        subject=f"Formularz Kontaktowy: {contact_request.title}",
         recipients=[admin_email],
-        body=body,
-        subtype="plain",
-        reply_to=[user_email]
+        body=html,
+        subtype="html"
     )
+
     fm = FastMail(conf)
-    await fm.send_message(message)
-
-
-@router.post("/", status_code=status.HTTP_200_OK)
-async def submit_contact_form(
-    contact_request: ContactRequest,
-    db: db_dependency
-):
-
     try:
-        await send_contact_email(
-            contact_request.user_email,
-            contact_request.title,
-            contact_request.message
-        )
+        await fm.send_message(message)
         return {"message": "Wiadomość została wysłana pomyślnie!"}
-    except ValueError as e:
-        # Błąd konfiguracji
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
     except Exception as e:
-        # Inny błąd wysyłki (np. problem z połączeniem SMTP)
+        print(f"BŁĄD SMTP: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Wystąpił błąd podczas wysyłania wiadomości. Spróbuj ponownie później."
+            detail="Problem z serwerem pocztowym. Spróbuj ponownie później."
         )

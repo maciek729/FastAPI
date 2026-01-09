@@ -1,0 +1,238 @@
+.notebookMenuContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+  padding-right: 0.25rem;
+  margin-left: auto;
+}
+
+.menuTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--subtitle);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.notebookMenuContainer:hover .menuTrigger {
+  opacity: 1;
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--purple_brighter);
+}
+
+.menuTrigger:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.menuTrigger:active {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.contextMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--inner_section_bg);
+  border: 1px solid var(--border_gray);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  min-width: 180px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--title);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.menuItem:hover {
+  background: var(--inner_inner_section_bg);
+  color: var(--purple_brighter);
+}
+
+.menuItem.deleteItem {
+  color: #ef4444;
+}
+
+.menuItem.deleteItem:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.menuDivider {
+  height: 1px;
+  background: var(--border_gray);
+  margin: 0.5rem 0;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--inner_section_bg);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 450px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid var(--border_gray);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border_gray);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--title);
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--subtitle);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.closeBtn:hover {
+  background: var(--inner_inner_section_bg);
+  color: var(--title);
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.addForm {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.input {
+  flex: 1;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border_gray);
+  border-radius: 6px;
+  background: var(--inner_inner_section_bg);
+  color: var(--title);
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--purple_brighter);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.addBtn {
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.addBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.addBtn:active {
+  transform: translateY(0);
+}
+
+.collaboratorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.empty {
+  text-align: center;
+  color: var(--subtitle);
+  font-size: 0.875rem;
+  padding: 1rem;
+  margin: 0;
+}
+
+.collaboratorItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--inner_inner_section_bg);
+  border-radius: 6px;
+  color: var(--title);
+  font-size: 0.875rem;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}

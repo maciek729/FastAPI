@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { X } from 'lucide-react';
+import translations from '../translations/translation.json';
 
 export const confirmModal = (message) => {
   return new Promise((resolve) => {
@@ -21,6 +22,12 @@ export const confirmModal = (message) => {
     };
 
     const ConfirmModal = () => {
+      const language = typeof window !== 'undefined' ? (localStorage.getItem('language') || 'pl') : 'pl';
+      const t = translations[language] || translations.pl;
+      const title = (t.confirm && t.confirm.title) || (t.noteEditor && t.noteEditor.deleteTitle) || 'Confirm';
+      const cancelText = (t.confirm && t.confirm.cancel) || (t.noteEditor && t.noteEditor.cancel) || 'Cancel';
+      const confirmText = (t.confirm && t.confirm.confirm) || 'Confirm';
+
       return (
         <div
           style={{
@@ -67,7 +74,7 @@ export const confirmModal = (message) => {
                   color: 'var(--title)',
                 }}
               >
-                Potwierdzenie
+                {title}
               </h3>
               <button
                 onClick={handleCancel}
@@ -135,7 +142,7 @@ export const confirmModal = (message) => {
                   e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
                 }}
               >
-                Anuluj
+                {cancelText}
               </button>
               <button
                 onClick={handleConfirm}
@@ -160,7 +167,7 @@ export const confirmModal = (message) => {
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                Potwierdź
+                {confirmText}
               </button>
             </div>
           </div>

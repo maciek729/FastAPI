@@ -3,11 +3,11 @@ import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
 import { X } from 'lucide-react';
 import MathText from './MathText';
+import translations from '../../../translations/translation.json';
+import { LanguageContext } from '../../../translations/LanguageContext';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 import * as testsService from '../../../services/testsService';
-import { LanguageContext } from '../../../translations/LanguageContext';
-import translations from '../../../translations/translation.json';
 
 export default function TestTaking({
     show,
