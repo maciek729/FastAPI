@@ -13,9 +13,17 @@ import ENDPOINTS from "../../api/endpoints";
 import logoDark from "./logodark.png";
 import logoLight from "./logolight.png";
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
+const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook }) => {
     const { language } = useContext(LanguageContext);
     
+    useEffect(() => {
+        if (activeNotebook) {
+            setSelectedNotebook(activeNotebook);
+        } else {
+            setSelectedNotebook(null);
+        }
+    }, [activeNotebook]);
+
     const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
 
     const logoToShow = theme === 'dark' ? logoDark : logoDark;
@@ -43,6 +51,23 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [notebooks, setNotebooks] = useState({});
     const [selectedNotebook, setSelectedNotebook] = useState(null);
     const [dragOverNotebook, setDragOverNotebook] = useState(null);
+
+    useEffect(() => {
+        if (activeNotebook) {
+            setSelectedNotebook(activeNotebook);
+
+            const targetSpace = activeNotebook.space_type || (activeNotebook.is_shared ? 'shared' : 'personal');
+            
+            setExpandedSpaces(prev => {
+                if (!prev.includes(targetSpace)) {
+                    return [...prev, targetSpace];
+                }
+                return prev;
+            });
+        } else {
+            setSelectedNotebook(null);
+        }
+    }, [activeNotebook]);
 
     useEffect(() => {
         setSpaces([
