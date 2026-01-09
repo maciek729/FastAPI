@@ -162,6 +162,9 @@ const ENDPOINTS = {
     LIST: (notebookId) => `${API_BASE_URL}/files/list/${notebookId}`,
     DELETE: (fileId) => `${API_BASE_URL}/files/${fileId}`,
   },
+  CONTACT: {
+    SUBMIT: `${API_BASE_URL}/contact/`,
+  },
 };
 
 export default ENDPOINTS;
