@@ -181,7 +181,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                 {isShared && (
                     <>
                         <div className={styles.separator} />
-                        <button
+                        <button 
                             className={`${styles.tab} ${isGroupChatOpen ? styles.active : ""}`}
                             onClick={() => setIsGroupChatOpen(!isGroupChatOpen)}
                         >
@@ -195,7 +195,13 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
             {/* Tab Content & Sidebar */}
             <div className={styles.mainLayout}>
                 <div className={styles.tabContainer}>
-                    {activeTab === "chat" && <Chat userId={userData.id} notebookId={details?.id}/>}
+                    {activeTab === "chat" && (
+                    <Chat 
+                        userId={userData.id} 
+                        notebookId={details?.id}
+                        refreshNotebook={refreshNotebook}  
+                    />
+                    )}
                     {activeTab === "files" && (
                         <FilesView
                             details={details}

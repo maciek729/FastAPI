@@ -580,7 +580,15 @@
       "saveError": "Nie udało się zapisać notatki",
       "upload": "Prześlij",
       "uploadFile": "Prześlij plik",
-      "messagePlaceholder": "Napisz wiadomość..."
+      "messagePlaceholder": "Napisz wiadomość...",
+      "responseStyle": "Styl odpowiedzi",
+      "styleBrief": "Krótko",
+      "styleBalanced": "Średnio",
+      "styleDetailed": "Szczegółowo",
+      "styleBriefDesc": "Krótkie, zwięzłe odpowiedzi (2-3 zdania)",
+      "styleBalancedDesc": "Zrównoważone odpowiedzi o średniej długości",
+      "styleDetailedDesc": "Długie, szczegółowe i wyczerpujące odpowiedzi",
+      "savingNote": "Zapisywanie notatki..."
     },
     "userSettings": {
       "title": "Konto",
@@ -1545,7 +1553,15 @@
       "saveError": "Failed to save note",
       "upload": "Upload",
       "uploadFile": "Upload file",
-      "messagePlaceholder": "Write a message..."
+      "messagePlaceholder": "Write a message...",
+      "responseStyle": "Response style",
+      "styleBrief": "Brief",
+      "styleBalanced": "Balanced",
+      "styleDetailed": "Detailed",
+      "styleBriefDesc": "Short, concise answers (2-3 sentences)",
+      "styleBalancedDesc": "Balanced answers of medium length",
+      "styleDetailedDesc": "Long, detailed and comprehensive answers",
+      "savingNote": "saving notes..."
     },
     "userSettings": {
       "title": "Account",
