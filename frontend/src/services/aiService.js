@@ -14,12 +14,16 @@ export const UploadFile = async (file) => {
   return await res.json();
 };
 
-export const SendMessage = async (message, conversation) => {
+export const SendMessage = async (message, conversation, responseStyle = 'balanced') => {
   const res = await fetch(ENDPOINTS.AI.CHAT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: 'include',
-    body: JSON.stringify({ message, conversation })
+    body: JSON.stringify({ 
+      message, 
+      conversation,
+      response_style: responseStyle  
+    })
   });
 
   if (!res.ok) throw new Error("Failed to send message");
