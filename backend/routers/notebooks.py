@@ -278,4 +278,4 @@ def get_collaborators(notebook_id: int, db: db_dependency):
         NotebookCollaborator.notebook_id == notebook_id
     ).all()
 
-    return [{"id": user.id, "username": user.username} for user in collaborators]
+    return [{"id": user.id, "username": user.username, "avatar_url": user.avatar_url} for user in collaborators]

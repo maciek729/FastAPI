@@ -189,7 +189,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     // --- Collaborators Logic ---
     const handleAddCollaborator = async (e) => {
         e.preventDefault(); if (!collaboratorUsername.trim()) { toast.error(t('filesView.userError')); return; }
-        try { await addCollaborator(details.id, collaboratorUsername); toast.success(t('filesView.userAdded', { username: collaboratorUsername })); setCollaboratorUsername(''); setShowCollaboratorModal(false); fetchCollaborators(); } 
+        try { await addCollaborator(details.id, collaboratorUsername); toast.success(t('filesView.userAdded', { username: collaboratorUsername })); setCollaboratorUsername(''); setShowCollaboratorModal(true); fetchCollaborators(); } 
         catch (err) { toast.error(err.message || t('filesView.addColError')); }
     };
     const handleRemoveCollaborator = async (userId) => {
@@ -447,31 +447,68 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             )}
             
             {showCollaboratorModal && (
-                 <div className={generatorStyles.modalOverlay} onClick={() => setShowCollaboratorModal(false)}>
+                <div className={generatorStyles.modalOverlay} onClick={() => setShowCollaboratorModal(false)}>
                     <div className={generatorStyles.modalContainer} onClick={e => e.stopPropagation()}>
                         <div className={generatorStyles.header}>
-                             <h2 className={generatorStyles.title}>{t('filesView.manageCol')}</h2>
-                             <button className={generatorStyles.closeBtn} onClick={() => setShowCollaboratorModal(false)}><X size={20}/></button>
+                            <h2 className={generatorStyles.title}>{t('filesView.manageCol')}</h2>
+                            <button className={generatorStyles.closeBtn} onClick={() => setShowCollaboratorModal(false)}>
+                                <X size={20}/>
+                            </button>
                         </div>
-                        <div style={{padding: '2rem'}}>
-                            <form onSubmit={handleAddCollaborator} style={{marginBottom: '2rem'}}>
+                        
+                        <div className={styles.collaboratorModalContent}>
+                            <form onSubmit={handleAddCollaborator} className={styles.addCollaboratorForm}>
                                 <div className={styles.inputWithButton}>
-                                    <input type="text" value={collaboratorUsername} onChange={e => setCollaboratorUsername(e.target.value)} placeholder={t('filesView.nameCol')} className={styles.modalInput}/>
-                                    <button type="submit" className={styles.btnAdd}><UserPlus size={18}/> {t('filesView.add')}</button>
+                                    <input 
+                                        type="text" 
+                                        value={collaboratorUsername} 
+                                        onChange={e => setCollaboratorUsername(e.target.value)} 
+                                        placeholder={t('filesView.nameCol')} 
+                                        className={styles.modalInput}
+                                    />
+                                    <button type="submit" className={styles.btnAdd}>
+                                        <UserPlus size={18}/> {t('filesView.add')}
+                                    </button>
                                 </div>
                             </form>
-                            <div>
+
+                            <div className={styles.collaboratorsSection}>
                                 <h3>{t('filesView.col')} ({collaborators.length})</h3>
-                                {collaborators.map(c => (
-                                    <div key={c.id} className={styles.collaboratorItem}>
-                                        <span>{c.username}</span>
-                                        <button onClick={() => handleRemoveCollaborator(c.id)}><X size={16}/></button>
+                                {collaborators.length > 0 ? (
+                                    collaborators.map(c => (
+                                        <div key={c.id} className={styles.collaboratorItem}>
+                                            <div className={styles.collaboratorLeft}>
+                                                {c.avatar_url ? (
+                                                    <img 
+                                                        src={c.avatar_url} 
+                                                        alt={c.username} 
+                                                        className={styles.collaboratorAvatar} 
+                                                    />
+                                                ) : (
+                                                    <div className={styles.avatarFallback}>
+                                                        {c.username.charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
+                                                <span className={styles.collaboratorName}>{c.username}</span>
+                                            </div>
+                                            <button 
+                                                className={styles.btnRemove} 
+                                                onClick={() => handleRemoveCollaborator(c.id)}
+                                                title={t('filesView.deleteCol')}
+                                            >
+                                                <X size={16}/>
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className={styles.emptyCollaborators}>
+                                        <p>{t('filesView.noCollaborators')}</p>
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </div>
                     </div>
-                 </div>
+                </div>
             )}
             
              {showNoteEditor && selectedNote && (

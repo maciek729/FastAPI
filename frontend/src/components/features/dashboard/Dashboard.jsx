@@ -3,10 +3,12 @@ import { Bell, Clock } from 'lucide-react';
 import styles from "../../../css/features/Dashboard.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
-import ENDPOINTS from '../../../api/endpoints';
+import * as notifService from "../../../services/notificationService";
+import NotificationModal from '../settings/notifications/NotificationModal';
 
-export default function Dashboard({ userData }) {
+export default function Dashboard({ userData, onNavigateToResource }) {
   const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { language } = useContext(LanguageContext);
 
   const t = (key, params = {}) => {
@@ -35,15 +37,54 @@ export default function Dashboard({ userData }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(ENDPOINTS.NOTIFICATIONS.LIST(userData.id), {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data.slice(0, 5)); // Get last 5 notifications
-      }
+      setIsLoading(true);
+      const data = await notifService.getUserNotifications(userData.id);
+      setNotifications(data.slice(0, 5));
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('Błąd pobierania powiadomień:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      if (!notification.is_read) {
+        await notifService.markNotificationAsRead(notification.id);
+        
+        setNotifications(prev => prev.map(n => 
+          n.id === notification.id ? { ...n, is_read: true } : n
+        ));
+      }
+
+      if (onNavigateToResource) {
+        onNavigateToResource({
+          type: notification.redirect_type,
+          notebookId: notification.notebook_id,
+          tab: notification.tab_target,
+          targetId: notification.item_id
+        });
+      }
+
+    } catch (error) {
+      console.error('Błąd przy kliknięciu powiadomienia:', error);
+      if (onNavigateToResource) {
+        onNavigateToResource({
+          type: notification.redirect_type,
+          notebookId: notification.notebook_id,
+          tab: notification.tab_target,
+          targetId: notification.item_id
+        });
+      }
+    }
+  };
+
+  const handleDeleteNotification = async (id) => {
+    try {
+      await notifService.deleteNotification(id);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    } catch (error) {
+      console.error(t("notifications.deleteError"), error);
     }
   };
 
@@ -71,22 +112,15 @@ export default function Dashboard({ userData }) {
 
   return (
     <div className={styles.dashboardContainer}>
-      {/* Main Content */}
       <div className={styles.contentWrapper}>
-        {/* Left Side - Welcome Section */}
         <div className={styles.welcomeSection}>
           <h1 className={styles.greeting}>
             {getGreeting()}, <span className={styles.gradientText}>{userData?.username}</span>! 👋
           </h1>
-          <p className={styles.subtitle}>
-            {t('dashboard.readyToStudy')}
-          </p>
-          <p className={styles.description}>
-            {t('dashboard.startLearning')}
-          </p>
+          <p className={styles.subtitle}>{t('dashboard.readyToStudy')}</p>
+          <p className={styles.description}>{t('dashboard.startLearning')}</p>
         </div>
 
-        {/* Right Side - Notifications Section */}
         <div className={styles.notificationsSection}>
           <div className={styles.sectionHeader}>
             <div className={styles.sectionTitleWrapper}>
@@ -96,26 +130,22 @@ export default function Dashboard({ userData }) {
           </div>
 
           <div className={styles.notificationsList}>
-            {notifications.length === 0 ? (
+            {isLoading ? (
+              <div className={styles.loading}>{t('notifications.loading')}</div>
+            ) : notifications.length === 0 ? (
               <div className={styles.emptyNotifications}>
                 <Bell size={32} className={styles.emptyIcon} />
                 <p>{t('dashboard.noNotifications')}</p>
               </div>
             ) : (
-              notifications.map((notif) => (
-                <div key={notif.id} className={styles.notificationItem}>
-                  <div className={styles.notifIcon}>
-                    <Bell size={18} />
-                  </div>
-                  <div className={styles.notifContent}>
-                    <p className={styles.notifMessage}>{notif.message}</p>
-                    <div className={styles.notifMeta}>
-                      <Clock size={14} />
-                      <span>{formatNotificationTime(notif.created_at)}</span>
-                    </div>
-                  </div>
-                  {!notif.is_read && <div className={styles.unreadDot}></div>}
-                </div>
+              notifications.map((notification) => (
+                <NotificationModal 
+                  key={notification.id}
+                  notification={notification}
+                  onDelete={() => handleDeleteNotification(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
+                  t={t}
+                />
               ))
             )}
           </div>
