@@ -3,7 +3,10 @@
 /* Overlay */
 .editorOverlay {
   position: fixed;
-  inset: 0;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(4px);
   display: flex;
@@ -20,7 +23,8 @@
   border-radius: 12px;
   width: 100%;
   max-width: 1200px;
-  height: 92vh;
+  height: calc(100vh - 80px);
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
@@ -62,6 +66,9 @@
   border-bottom: 1px solid var(--border_gray);
   background: var(--inner_section_bg);
   flex-shrink: 0;
+  z-index: 101;
+  top: 0;
+  position: sticky;
 }
 
 .headerLeft {
@@ -169,7 +176,8 @@
   overflow-x: auto;
   position: sticky;
   top: 64px; /* below header */
-  z-index: 6;
+  z-index: 100;
+  overflow: visible;
 }
 
 .toolbar::-webkit-scrollbar {
@@ -192,6 +200,7 @@
   background: rgba(148, 163, 184, 0.12);
   margin: 0 0.5rem;
 }
+
 
 .toolBtn {
   display: flex;
@@ -275,8 +284,8 @@
 .editor {
   width: 100%;
   max-width: 980px;
-  max-height: calc(92vh - 240px);
-  min-height: 60vh;
+  max-height: calc(85vh - 280px);
+  min-height: 50vh;
   outline: none;
   font-size: 1rem;
   line-height: 1.7;
@@ -413,6 +422,62 @@
   font-size: 0.875rem;
   color: var(--subtitle);
   font-weight: 500;
+}
+
+[data-tooltip] {
+    position: relative;
+}
+
+/* Dymek z tekstem */
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 130%; /* Pozycja pod przyciskiem */
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px); /* Startuje 5px wyżej */
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Strzałka (teraz skierowana w górę) */
+[data-tooltip]::before {
+    content: "";
+    position: absolute;
+    top: 115%; /* Pozycja strzałki nad dymkiem */
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    border: 6px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.85); /* Kolor dolnej krawędzi tworzy strzałkę w górę */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Efekt Hover */
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0); /* Płynnie opada na miejsce */
+}
+
+@media (hover: none) {
+    .toolBtn::after, .toolBtn::before {
+        display: none !important;
+    }
 }
 
 /* Responsive */

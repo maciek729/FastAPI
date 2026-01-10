@@ -530,7 +530,22 @@
       "deleteFolder": "Usuń folder",
       "notesView": {
         "pinNote": "Przypnij notatkę",
-        "unpinNote": "Odepnij notatkę"
+        "unpinNote": "Odepnij notatkę",
+      "dropFile": "Upuść, aby dodać plik",
+      "dropFileDesc": "(Tylko PDF, Obrazy, TXT)",
+      "fileAdded": "Dodano plik!",
+      "fileDeleted": "Usunięto plik",
+      "deleteFileError": "Błąd usuwania pliku",
+      "deleteFileConfirm": "Czy na pewno chcesz usunąć plik \"{fileName}\"?",
+      "fileTooBig": "Plik jest zbyt duży (max 20MB)",
+      "formatNotSupported": "Format .{ext} nie jest obsługiwany. Dozwolone: PDF, Obrazy, TXT.",
+      "uploading": "Wysyłanie...",
+      "addFileBtn": "Plik",
+      "emptyNoteContent": "(Pusta notatka)",
+      "previewNotAvailable": "Podgląd tego formatu ({ext}) nie jest dostępny.",
+      "downloadFile": "Pobierz plik",
+      "openOriginal": "Otwórz oryginał / Pobierz",
+      "close": "Zamknij"
       },
       "emptyFolder": "Ten folder jest pusty. Przeciągnij notatki tutaj lub utwórz nowe!",
       "noFiles": "Brak notatek. Dodaj pierwszą!",
@@ -608,7 +623,15 @@
       "saveError": "Nie udało się zapisać notatki",
       "upload": "Prześlij",
       "uploadFile": "Prześlij plik",
-      "messagePlaceholder": "Napisz wiadomość..."
+      "messagePlaceholder": "Napisz wiadomość...",
+      "responseStyle": "Styl odpowiedzi",
+      "styleBrief": "Krótko",
+      "styleBalanced": "Średnio",
+      "styleDetailed": "Szczegółowo",
+      "styleBriefDesc": "Krótkie, zwięzłe odpowiedzi (2-3 zdania)",
+      "styleBalancedDesc": "Zrównoważone odpowiedzi o średniej długości",
+      "styleDetailedDesc": "Długie, szczegółowe i wyczerpujące odpowiedzi",
+      "savingNote": "Zapisywanie notatki..."
     },
     "userSettings": {
       "title": "Konto",
@@ -1522,7 +1545,22 @@
       "deleteFolder": "Delete folder",
       "notesView": {
         "pinNote": "Pin note",
-        "unpinNote": "Unpin note"
+        "unpinNote": "Unpin note",
+      "dropFile": "Drop to add file",
+      "dropFileDesc": "(PDF, Images, TXT only)",
+      "fileAdded": "File added!",
+      "fileDeleted": "File deleted",
+      "deleteFileError": "Error deleting file",
+      "deleteFileConfirm": "Are you sure you want to delete \"{fileName}\"?",
+      "fileTooBig": "File is too big (max 20MB)",
+      "formatNotSupported": "Format .{ext} not supported. Allowed: PDF, Images, TXT.",
+      "uploading": "Uploading...",
+      "addFileBtn": "File",
+      "emptyNoteContent": "(Empty note)",
+      "previewNotAvailable": "Preview for ({ext}) not available.",
+      "downloadFile": "Download file",
+      "openOriginal": "Open original / Download",
+      "close": "Close"
       },
       "emptyFolder": "This folder is empty. Drag notes here or create new ones!",
       "noFiles": "No notes yet. Add your first one!",
@@ -1600,7 +1638,15 @@
       "saveError": "Failed to save note",
       "upload": "Upload",
       "uploadFile": "Upload file",
-      "messagePlaceholder": "Write a message..."
+      "messagePlaceholder": "Write a message...",
+      "responseStyle": "Response style",
+      "styleBrief": "Brief",
+      "styleBalanced": "Balanced",
+      "styleDetailed": "Detailed",
+      "styleBriefDesc": "Short, concise answers (2-3 sentences)",
+      "styleBalancedDesc": "Balanced answers of medium length",
+      "styleDetailedDesc": "Long, detailed and comprehensive answers",
+      "savingNote": "saving notes..."
     },
     "userSettings": {
       "title": "Account",

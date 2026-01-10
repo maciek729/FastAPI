@@ -55,7 +55,6 @@ class NotebookOut(BaseModel):
 class AddCollaboratorRequest(BaseModel):
     username: str
 
-# --- ENDPOINTY ---
 
 @router.post("/create", status_code=status.HTTP_201_CREATED, response_model=NotebookOut)
 def create_notebook(request: CreateNotebookRequest, db: db_dependency):
@@ -90,23 +89,20 @@ def list_notebooks(created_by: int, space_type: str, db: db_dependency):
     from sqlalchemy import or_
     
     if space_type == "shared":
-        # Get notebooks shared with this user (as collaborator)
         collaborations = db.query(NotebookCollaborator).filter(
             NotebookCollaborator.user_id == created_by
         ).all()
         
         notebook_ids = [collab.notebook_id for collab in collaborations]
         
-        # Get both: notebooks created by user AND notebooks shared with user
         notebooks = db.query(Notebooks).filter(
             Notebooks.space_type == "shared",
             or_(
-                Notebooks.created_by == created_by,  # Created by this user
-                Notebooks.id.in_(notebook_ids) if notebook_ids else False  # Shared with this user
+                Notebooks.created_by == created_by, 
+                Notebooks.id.in_(notebook_ids) if notebook_ids else False 
             )
         ).all()
     else:
-        # Get personal notebooks created by this user
         notebooks = db.query(Notebooks).filter(
             Notebooks.created_by == created_by,
             Notebooks.space_type == space_type
@@ -146,50 +142,43 @@ def delete_notebook(notebook_id: int, db: db_dependency):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Notebook not found"
         )
-    # Clean up dependent records in other tables to avoid FK constraint errors
     from models import (
         NoteFolders, TestFolders, FlashcardSets, Flashcards, FlashcardReviews,
         FlashcardSetFolders, PodcastFolders, Podcasts, NotebookMessages, Notifications, Tests, NotebookCollaborator, Notes
     )
 
     try:
-        # Delete notifications and messages referencing the notebook
         db.query(Notifications).filter(Notifications.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(NotebookMessages).filter(NotebookMessages.notebook_id == notebook_id).delete(synchronize_session=False)
 
-        # Delete podcasts and their folders
         db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(PodcastFolders).filter(PodcastFolders.notebook_id == notebook_id).delete(synchronize_session=False)
 
-        # Delete tests and folders
         db.query(Tests).filter(Tests.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(TestFolders).filter(TestFolders.notebook_id == notebook_id).delete(synchronize_session=False)
-
-        # Delete flashcard reviews, flashcards and sets
-        db.query(FlashcardReviews).join(Flashcards, FlashcardReviews.flashcard_id == Flashcards.id).filter(Flashcards.flashcard_set_id.in_(
-            db.query(FlashcardSets.id).filter(FlashcardSets.notebook_id == notebook_id)
-        )).delete(synchronize_session=False)
-        db.query(Flashcards).filter(Flashcards.flashcard_set_id.in_(
-            db.query(FlashcardSets.id).filter(FlashcardSets.notebook_id == notebook_id)
-        )).delete(synchronize_session=False)
+        
+        flashcard_sets_subquery = db.query(FlashcardSets.id).filter(FlashcardSets.notebook_id == notebook_id)
+        
+        flashcards_subquery = db.query(Flashcards.id).filter(Flashcards.flashcard_set_id.in_(flashcard_sets_subquery))
+        
+        db.query(FlashcardReviews).filter(FlashcardReviews.flashcard_id.in_(flashcards_subquery)).delete(synchronize_session=False)
+        
+        db.query(Flashcards).filter(Flashcards.flashcard_set_id.in_(flashcard_sets_subquery)).delete(synchronize_session=False)
+        
         db.query(FlashcardSets).filter(FlashcardSets.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(FlashcardSetFolders).filter(FlashcardSetFolders.notebook_id == notebook_id).delete(synchronize_session=False)
 
-        # Delete note folders
+        db.query(Notes).filter(Notes.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(NoteFolders).filter(NoteFolders.notebook_id == notebook_id).delete(synchronize_session=False)
 
-        # Delete collaborators (if any)
         db.query(NotebookCollaborator).filter(NotebookCollaborator.notebook_id == notebook_id).delete(synchronize_session=False)
 
-        # Notes should be removed by the relationship cascade, but ensure no orphaned notes remain
-        db.query(Notes).filter(Notes.notebook_id == notebook_id).delete(synchronize_session=False)
-
-        # Finally delete the notebook
         db.delete(notebook)
         db.commit()
         return {"message": "Notebook deleted successfully"}
     except Exception as e:
         db.rollback()
+        print(f"Error deleting notebook: {e}") # Pomocne logowanie błędu w konsoli serwera
         raise HTTPException(status_code=500, detail=f"Failed to delete notebook: {str(e)}")
 
 
@@ -289,4 +278,4 @@ def get_collaborators(notebook_id: int, db: db_dependency):
         NotebookCollaborator.notebook_id == notebook_id
     ).all()
 
-    return [{"id": user.id, "username": user.username} for user in collaborators]
+    return [{"id": user.id, "username": user.username, "avatar_url": user.avatar_url} for user in collaborators]
