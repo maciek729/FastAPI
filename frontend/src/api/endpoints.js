@@ -126,6 +126,7 @@ const ENDPOINTS = {
     DELETE_AVATAR: `${API_BASE_URL}/user/avatar`,
     DELETE_ACCOUNT: `${API_BASE_URL}/user/delete-account`,
     GET_AVATAR: (avatarPath) => avatarPath ? `${API_BASE_URL}${avatarPath}` : null,
+    COMPLETE_TUTORIAL: `${API_BASE_URL}/user/complete-tutorial`,
   },
   AUTH: {
     REGISTER: `${API_BASE_URL}/auth/`,

@@ -1,7 +1,7 @@
-import { useEffect, useState, useContext, useCallback } from "react";
+import { useEffect, useState, useContext, useCallback, useRef } from "react";
 import toast from 'react-hot-toast';
 import { promptModal } from '../../utils/promptModal';
-import { User, Users, Plus, ChevronRight, PanelLeft } from "lucide-react";
+import { User, Users, Plus, ChevronRight, PanelLeft, Menu } from "lucide-react";
 import styles from "../../css/layout/Sidebar.module.css";
 import UserFooter from "../features/sidebar_user_menu/UserFooter";
 import UserFooterCollapsed from "../features/sidebar_user_menu/UserFooterCollapsed";
@@ -15,7 +15,10 @@ import logoLight from "./logolight.png";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook }) => {
     const { language } = useContext(LanguageContext);
-    
+    const sidebarRef = useRef(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
     useEffect(() => {
         if (activeNotebook) {
             setSelectedNotebook(activeNotebook);
@@ -52,12 +55,41 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [selectedNotebook, setSelectedNotebook] = useState(null);
     const [dragOverNotebook, setDragOverNotebook] = useState(null);
 
+    // Track window resize for mobile/desktop detection
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Close mobile menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!isMobile || !isMobileMenuOpen) return;
+
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [isMobile, isMobileMenuOpen]);
+
     useEffect(() => {
         if (activeNotebook) {
             setSelectedNotebook(activeNotebook);
 
             const targetSpace = activeNotebook.space_type || (activeNotebook.is_shared ? 'shared' : 'personal');
-            
+
             setExpandedSpaces(prev => {
                 if (!prev.includes(targetSpace)) {
                     return [...prev, targetSpace];
@@ -119,16 +151,26 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const handleNotebookClick = (notebook, spaceId) => {
-        if (!isSidebarOpen) return;
+        // Allow clicking on mobile even when sidebar is not "open"
+        if (!isSidebarOpen && !isMobile) return;
 
-        const notebookWithSpace = { 
-            ...notebook, 
-            space_type: spaceId, 
+        const notebookWithSpace = {
+            ...notebook,
+            space_type: spaceId,
             is_shared: spaceId === 'shared'
         };
 
         setSelectedNotebook(notebookWithSpace);
-        onSelectNotebook(notebookWithSpace); 
+        onSelectNotebook(notebookWithSpace);
+
+        // Close mobile menu after selecting notebook
+        if (isMobile) {
+            setIsMobileMenuOpen(false);
+        }
+    };
+
+    const handleMobileMenuToggle = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
     const handleBrandClick = () => {
@@ -284,43 +326,70 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     return (
-        <aside className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''}`}>
+        <aside ref={sidebarRef} className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''} ${isMobile ? styles.mobile : ''} ${isMobileMenuOpen ? styles.mobileOpen : ''}`}>
             <div className={styles.sidebarInner}>
-                <div className={styles.sidebarHeader}>
-                    <div
-                        className={styles.brandContainer}
-                        onClick={isSidebarOpen ? handleBrandClick : toggleSidebar}
-                        style={{ cursor: 'pointer' }}
-                        title={isSidebarOpen ? t('sidebar.dashboard') : t('sidebar.expandSidebar')}
-                    >
-                        <div className={styles.brandIcon}>
-                            {/* <Sparkles size={20} /> */}
-                            <img src={theme === 'light' ? logoLight : logoDark} alt="zdAI to logo" className={styles.logoImg} />
-                            {!isSidebarOpen && (
-                                <div className={styles.expandIconOverlay}>
-                                    <PanelLeft size={20} />
+                {/* Mobile top bar - zawsze widoczny na mobilce */}
+                {isMobile && (
+                    <div className={styles.mobileTopBar}>
+                        <div
+                            className={styles.mobileBrand}
+                            onClick={handleBrandClick}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            <div className={styles.mobileLogo}>
+                                <img src={theme === 'light' ? logoLight : logoDark} alt="zdAI to logo" className={styles.logoImg} />
+                            </div>
+                            <div className={styles.mobileBrandText}>
+                                <h1>zdAI to!</h1>
+                            </div>
+                        </div>
+                        <button
+                            className={styles.mobileMenuBtn}
+                            onClick={handleMobileMenuToggle}
+                            title={t('sidebar.menu')}
+                        >
+                            <Menu size={24} />
+                        </button>
+                    </div>
+                )}
+
+                {/* Desktop header */}
+                {!isMobile && (
+                    <div className={styles.sidebarHeader}>
+                        <div
+                            className={styles.brandContainer}
+                            onClick={isSidebarOpen ? handleBrandClick : toggleSidebar}
+                            style={{ cursor: 'pointer' }}
+                            title={isSidebarOpen ? t('sidebar.dashboard') : t('sidebar.expandSidebar')}
+                        >
+                            <div className={styles.brandIcon}>
+                                <img src={theme === 'light' ? logoLight : logoDark} alt="zdAI to logo" className={styles.logoImg} />
+                                {!isSidebarOpen && (
+                                    <div className={styles.expandIconOverlay}>
+                                        <PanelLeft size={20} />
+                                    </div>
+                                )}
+                            </div>
+                            {isSidebarOpen && (
+                                <div className={styles.brandText}>
+                                    <h1>zdAI to!</h1>
                                 </div>
                             )}
                         </div>
                         {isSidebarOpen && (
-                            <div className={styles.brandText}>
-                                <h1>zdAI to!</h1>
-                            </div>
+                            <button
+                                className={styles.toggleBtn}
+                                onClick={toggleSidebar}
+                                title={t('sidebar.collapseSidebar')}
+                            >
+                                <PanelLeft size={20} />
+                            </button>
                         )}
                     </div>
-                    {isSidebarOpen && (
-                        <button
-                            className={styles.toggleBtn}
-                            onClick={toggleSidebar}
-                            title={t('sidebar.collapseSidebar')}
-                        >
-                            <PanelLeft size={20} />
-                        </button>
-                    )}
-                </div>
+                )}
 
                 <div className={styles.sidebarContent}>
-                    {isSidebarOpen && (
+                    {(isSidebarOpen || isMobile) && (
                         <div className={styles.spacesLabel}>{t('sidebar.spaces')}</div>
                     )}
                     {spaces.map((space) => {
@@ -336,7 +405,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                     <div
                                         className={styles.sectionTitle}
                                         onClick={() => {
-                                            if (!isSidebarOpen) {
+                                            if (!isSidebarOpen && !isMobile) {
                                                 toggleSidebar();
                                             } else {
                                                 toggleSpace(space.id);
@@ -345,18 +414,18 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                         title={space.name}
                                     >
                                         <SpaceIcon size={16} className={styles.sectionIcon} />
-                                        {isSidebarOpen && (
+                                        {(isSidebarOpen || isMobile) && (
                                             <>
                                                 <span className={styles.sectionName}>{space.name}</span>
-                                                <ChevronRight 
-                                                    size={14} 
+                                                <ChevronRight
+                                                    size={14}
                                                     className={`${styles.chevronIcon} ${isExpanded ? styles.open : ''}`}
                                                 />
                                             </>
                                         )}
                                     </div>
-                                    {isSidebarOpen && (
-                                        <button 
+                                    {(isSidebarOpen || isMobile) && (
+                                        <button
                                             className={styles.addBtn}
                                             onClick={() => handleAddNotebook(space.id)}
                                             title={space.id === 'personal' ? t('sidebar.addPersonalNotebook') : t('sidebar.addSharedNotebook')}
@@ -366,14 +435,20 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                     )}
                                 </div>
 
-                                {isExpanded && isSidebarOpen && (
+                                {isExpanded && (isSidebarOpen || isMobile) && (
                                     <div className={styles.notebookList}>
                                         {notebooks[space.id]?.map((notebook) => (
                                             <div
                                                 key={notebook.id}
                                                 className={`${styles.notebookItem} ${selectedNotebook?.id === notebook.id ? styles.active : ''} ${dragOverNotebook === notebook.id ? styles.dragOver : ''}`}
                                                 onClick={(e) => {
-                                                    if (e.target.closest('[role="button"]')) return;
+                                                    // Don't open notebook if clicking on menu button or menu items
+                                                    if (e.target.closest('[role="button"]') ||
+                                                        e.target.closest('button') ||
+                                                        e.target.closest('[class*="notebookMenuContainer"]') ||
+                                                        e.target.closest('[class*="menuTrigger"]')) {
+                                                        return;
+                                                    }
                                                     handleNotebookClick(notebook, space.id);
                                                 }}
                                                 onDragOver={(e) => handleDragOver(e, notebook)}
@@ -403,7 +478,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 </div>
 
                 <div className={styles.sidebarFooter}>
-                    {isSidebarOpen ? (
+                    {(isSidebarOpen || isMobile) ? (
                         <UserFooter
                             userData={userData}
                             handleLogout={handleLogout}

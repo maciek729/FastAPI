@@ -191,3 +191,19 @@ async def archive_user_account(user: user_dependency, db: db_dependency):
     db.add(user_model)
     db.commit()
     return None
+
+@router.put("/complete-tutorial", status_code=status.HTTP_204_NO_CONTENT)
+async def mark_tutorial_completed(user: user_dependency, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Authentication Failed')
+
+    user_model = db.query(Users).filter(Users.id == user.get('id')).first()
+
+    if user_model is None:
+        raise HTTPException(status_code=404, detail='User not found')
+
+    user_model.has_completed_tutorial = True
+
+    db.add(user_model)
+    db.commit()
+    return None

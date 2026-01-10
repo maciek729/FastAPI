@@ -224,6 +224,7 @@ export default function MainLayout() {
             defaultSection={notebookSection}
             isSidebarOpen={isSidebarOpen}
             highlightMessageId={highlightMessageId}
+            setHighlightMessageId={setHighlightMessageId}
           />
         ) : (
           <div style={{ padding: '2rem', color: '#94a3b8' }}>
@@ -307,6 +308,7 @@ export default function MainLayout() {
 
       <Demo
         onSelectNotebook={handleSelectNotebook}
+        onNavigateToResource={handleNavigateToResource}
         userData={userData}
       />
     </div>

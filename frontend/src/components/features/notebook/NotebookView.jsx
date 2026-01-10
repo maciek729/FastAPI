@@ -10,7 +10,7 @@ import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import GroupChatSidebar from "../group_chat/GroupChatSidebar";
 
-export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen, highlightMessageId, setHighlightMessageId}) {
+export default function NotebookView({ details, userData, refreshNotebook, defaultSection, isSidebarOpen, highlightMessageId, setHighlightMessageId}) {
     const notebookId = details?.id;
     const [highlightedItemId, setHighlightedItemId] = useState(null);
     
@@ -134,6 +134,16 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         widths[notebookId] = chatWidth;
         localStorage.setItem('groupChat_widths', JSON.stringify(widths));
     }, [chatWidth, notebookId]);
+
+    // Handle defaultSection to open group chat when navigating from notifications or demo
+    useEffect(() => {
+        if (defaultSection === 'group-chat') {
+            setIsGroupChatOpen(true);
+        } else if (defaultSection) {
+            setActiveTab(defaultSection);
+            setIsGroupChatOpen(false);
+        }
+    }, [defaultSection]);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');
