@@ -24,6 +24,8 @@ class Users(Base):
 
     is_archived = Column(Boolean, default=False, nullable=True)
 
+    has_completed_tutorial = Column(Boolean, default=False, nullable=True)
+
 class Groups(Base):
     __tablename__ = 'groups'
 

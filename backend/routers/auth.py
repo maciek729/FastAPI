@@ -6,7 +6,7 @@ from pydantic import BaseModel # type: ignore
 from sqlalchemy.orm import Session # type: ignore
 from starlette import status # type: ignore
 from database import SessionLocal
-from models import Users
+from models import Users, Notebooks
 from passlib.context import CryptContext # type: ignore
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer    # type: ignore
 from jose import jwt, JWTError # type: ignore
@@ -153,6 +153,28 @@ async def create_user(db: db_dependency,
     )
 
     db.add(create_user_model)
+    db.commit()
+    db.refresh(create_user_model)
+
+    # Create two demo notebooks: one personal and one shared
+    personal_notebook = Notebooks(
+        name="Let's start",
+        created_by=create_user_model.id,
+        created_at=datetime.now(timezone.utc),
+        space_type="personal",
+        is_shared=False
+    )
+
+    shared_notebook = Notebooks(
+        name="Let's start",
+        created_by=create_user_model.id,
+        created_at=datetime.now(timezone.utc),
+        space_type="shared",
+        is_shared=True
+    )
+
+    db.add(personal_notebook)
+    db.add(shared_notebook)
     db.commit()
 
     await send_verification_email(thisEmail, token, base_url)
