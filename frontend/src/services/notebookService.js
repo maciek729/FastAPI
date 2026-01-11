@@ -34,7 +34,15 @@ export const addCollaborator = async (notebookId, username) => {
     credentials: 'include',
     body: JSON.stringify({ username })
   });
-  if (!res.ok) throw new Error('Failed to add collaborator');
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error('USER_NOT_FOUND');
+    }
+    
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to add collaborator');
+  }
 };
 
 export const removeCollaborator = async (notebookId, userId) => {

@@ -21,18 +21,20 @@
       "deleteNotebookConfirm": "Czy na pewno chcesz usunąć ten notatnik?",
       "deleteNotebookSuccess": "Notatnik usunięty pomyślnie",
       "deleteNotebookError": "Błąd usuwania notatnika",
-      "addCollaborators": "Dodaj współpracowników",
-      "collaborators": "Współpracownicy",
+      "addCollaborators": "Dodaj współtwórców",
+      "userNotFound": "Nie znaleziono użytkownika o takiej nazwie",
+      "collaborators": "Współtwórcy",
       "collaboratorPlaceholder": "Nazwa użytkownika",
       "add": "Dodaj",
-      "noCollaborators": "Brak współpracowników",
+      "noCollaborators": "Brak współtwórców. Dodaj pierwszego!",
       "userAdded": "Użytkownik {username} dodany",
       "addColError": "Błąd dodawania użytkownika",
       "userError": "Podaj nazwę użytkownika",
-      "deleteColConfirm": "Czy na pewno chcesz usunąć tego współpracownika?",
-      "deleteColSuccess": "Współpracownik usunięty",
-      "deleteColError": "Błąd usuwania współpracownika",
-      "removeColl": "Usuń współpracownika",
+      "deleteColConfirm": "Czy na pewno chcesz usunąć tego współtwórcę?",
+      "deleteColSuccess": "Współtwórca usunięty",
+      "deleteColError": "Błąd usuwania współtwórcy",
+      "removeColl": "Usuń współtwórcę",
+      "leaveNotebookSuccess": "Opuszczono notatnik",
       "copySuccess": {
         "test": "Test skopiowany do notatnika \"{notebookName}\"",
         "folder": "Folder skopiowany do notatnika \"{notebookName}\"",
@@ -500,13 +502,13 @@
       "noteAddError": "Błąd dodawania notatki",
       "writeAll": "Wypełnij wszystkie pola!",
       "note": "Notatka",
-      "test": "test",
-      "flashcard": "fiszki",
+      "test": "Test",
+      "flashcard": "Fiszki",
       "confirmDelete": "Czy na pewno chcesz usunąć tę notatkę?",
-      "deleteNote":"Usuń notatkę",
-      "deleteSuccess":"Notatka usunięta pomyślnie",
-      "deleteError":"Błąd usuwania notatki",
-      "userError":"Podaj nazwę użytkownika",
+      "deleteNote": "Usuń notatkę",
+      "deleteSuccess": "Notatka usunięta pomyślnie",
+      "deleteError": "Błąd usuwania notatki",
+      "userError": "Podaj nazwę użytkownika",
       "userAdded": "Dodano użytkownika {username}",
       "addColError": "Błąd dodawania współtwórcy",
       "deleteColConfirm": "Czy na pewno chcesz usunąć tego współtwórcę?",
@@ -528,9 +530,7 @@
       "col": "Współtwórcy",
       "addNote": "Dodaj notatkę",
       "deleteFolder": "Usuń folder",
-      "notesView": {
-        "pinNote": "Przypnij notatkę",
-        "unpinNote": "Odepnij notatkę",
+      "addFileBtn": "Dodaj plik",
       "dropFile": "Upuść, aby dodać plik",
       "dropFileDesc": "(Tylko PDF, Obrazy, TXT)",
       "fileAdded": "Dodano plik!",
@@ -540,13 +540,11 @@
       "fileTooBig": "Plik jest zbyt duży (max 20MB)",
       "formatNotSupported": "Format .{ext} nie jest obsługiwany. Dozwolone: PDF, Obrazy, TXT.",
       "uploading": "Wysyłanie...",
-      "addFileBtn": "Plik",
       "emptyNoteContent": "(Pusta notatka)",
       "previewNotAvailable": "Podgląd tego formatu ({ext}) nie jest dostępny.",
       "downloadFile": "Pobierz plik",
       "openOriginal": "Otwórz oryginał / Pobierz",
-      "close": "Zamknij"
-      },
+      "close": "Zamknij",
       "emptyFolder": "Ten folder jest pusty. Przeciągnij notatki tutaj lub utwórz nowe!",
       "noFiles": "Brak notatek. Dodaj pierwszą!",
       "info": "Podstawowe informacje",
@@ -558,6 +556,64 @@
       "add": "Dodaj",
       "titleDesc": "Tytuł notatki",
       "nameCol": "Nazwa współtwórcy"
+    },
+    "testGenerator": {
+      "loadingTests": "Ładowanie testów...",
+      "title": "Wygeneruj nowy test",
+      "chooseFile": "Wybierz plik",
+      "sections": {
+        "source": "Źródło materiału",
+        "basic": "Podstawowe informacje",
+        "questionType": "Typ pytań"
+      },
+      "sourceTypes": {
+        "manual": "Ręczny opis",
+        "file": "Z pliku",
+        "note": "Z notatki"
+      },
+      "questionTypes": {
+        "multiple_choice": "Wielokrotny wybór",
+        "true_false": "Prawda/Fałsz",
+        "multiple_answers": "Wiele odpowiedzi",
+        "mixed": "Mieszany"
+      },
+      "labels": {
+        "file": "Załącz plik",
+        "note": "Wybierz notatkę",
+        "title": "Tytuł testu",
+        "numQuestions": "Liczba pytań",
+        "topic": "Temat / Zakres"
+      },
+      "placeholders": {
+        "file": "Wybierz plik",
+        "selectNote": "-- Wybierz notatkę --",
+        "title": "np. Historia Polski",
+        "topicManual": "Opisz temat testu...",
+        "topicOptional": "Opcjonalnie podaj dodatkowe wskazówki..."
+      },
+      "optional": "opcjonalny",
+      "buttons": {
+        "cancel": "Anuluj",
+        "generate": "Generuj test",
+        "generating": "Generowanie...",
+        "generatingTest": "Generowanie testu"
+      },
+      "success": {
+        "generated": "Test wygenerowany pomyślnie!"
+      },
+      "errors": {
+        "titleRequired": "Tytuł jest wymagany!",
+        "topicRequiredManual": "Opis/temat jest wymagany dla ręcznego wprowadzania!",
+        "fileRequired": "Wybierz plik!",
+        "noteRequired": "Wybierz notatkę!",
+        "numQuestionsInvalid": "Liczba pytań musi być między 1 a 20!",
+        "notebookMissing": "Błąd: Brak ID notatnika",
+        "apiError": "Błąd generowania testu. Upewnij się, że Gemini API jest skonfigurowane."
+      },
+      "defaults": {
+        "topicFile": "Generuj pytania na podstawie pliku",
+        "topicNote": "Generuj pytania na podstawie notatki"
+      }
     },
     "podcastGenerator": {
       "title": "Wygeneruj nowy podcast",
@@ -908,6 +964,7 @@
       "deleteNotebookSuccess": "Notebook deleted successfully",
       "deleteNotebookError": "Error deleting notebook",
       "addCollaborators": "Add collaborators",
+      "userNotFound": "User with this username not found",
       "collaborators": "Collaborators",
       "collaboratorPlaceholder": "Username",
       "add": "Add",
@@ -918,6 +975,7 @@
       "deleteColConfirm": "Are you sure you want to remove this collaborator?",
       "deleteColSuccess": "Collaborator removed",
       "deleteColError": "Error removing collaborator",
+      "leaveNotebookSuccess": "You left the notebook",
       "removeColl": "Remove collaborator",
       "copySuccess": {
         "test": "Test copied to notebook \"{notebookName}\"",
@@ -1519,7 +1577,7 @@
       "flashcard": "Flashcards",
       "confirmDelete": "Are you sure you want to delete this note?",
       "deleteNote": "Delete note",
-      "deleteSuccess  ": "Note deleted successfully",
+      "deleteSuccess": "Note deleted successfully",
       "deleteError": "Error deleting note",
       "userError": "Please enter a username",
       "userAdded": "User {username} added",
@@ -1543,9 +1601,7 @@
       "col": "Collaborators",
       "addNote": "Add note",
       "deleteFolder": "Delete folder",
-      "notesView": {
-        "pinNote": "Pin note",
-        "unpinNote": "Unpin note",
+      "addFileBtn": "Add File",
       "dropFile": "Drop to add file",
       "dropFileDesc": "(PDF, Images, TXT only)",
       "fileAdded": "File added!",
@@ -1555,13 +1611,11 @@
       "fileTooBig": "File is too big (max 20MB)",
       "formatNotSupported": "Format .{ext} not supported. Allowed: PDF, Images, TXT.",
       "uploading": "Uploading...",
-      "addFileBtn": "File",
       "emptyNoteContent": "(Empty note)",
       "previewNotAvailable": "Preview for ({ext}) not available.",
       "downloadFile": "Download file",
       "openOriginal": "Open original / Download",
-      "close": "Close"
-      },
+      "close": "Close",
       "emptyFolder": "This folder is empty. Drag notes here or create new ones!",
       "noFiles": "No notes yet. Add your first one!",
       "info": "Basic information",
@@ -1573,6 +1627,64 @@
       "add": "Add",
       "titleDesc": "Note title",
       "nameCol": "Collaborator name"
+    },
+    "testGenerator": {
+      "loadingTests": "Loading Tests...",
+      "title": "Generate New Test",
+      "chooseFile": "Choose File",
+      "sections": {
+        "source": "Material Source",
+        "basic": "Basic Information",
+        "questionType": "Question Type"
+      },
+      "sourceTypes": {
+        "manual": "Manual Description",
+        "file": "From File",
+        "note": "From Note"
+      },
+      "questionTypes": {
+        "multiple_choice": "Multiple Choice",
+        "true_false": "True/False",
+        "multiple_answers": "Multiple Answers",
+        "mixed": "Mixed"
+      },
+      "labels": {
+        "file": "Attach File",
+        "note": "Select Note",
+        "title": "Test Title",
+        "numQuestions": "Number of Questions",
+        "topic": "Topic / Scope"
+      },
+      "placeholders": {
+        "file": "Select File",
+        "selectNote": "-- Select Note --",
+        "title": "e.g. Polish History",
+        "topicManual": "Describe the test topic...",
+        "topicOptional": "Optionally provide additional hints..."
+      },
+      "optional": "optional",
+      "buttons": {
+        "cancel": "Cancel",
+        "generate": "Generate Test",
+        "generating": "Generating...",
+        "generatingTest": "Generating test..."
+      },
+      "success": {
+        "generated": "Test generated successfully!"
+      },
+      "errors": {
+        "titleRequired": "Title is required!",
+        "topicRequiredManual": "Topic is required for manual entry!",
+        "fileRequired": "Please select a file!",
+        "noteRequired": "Please select a note!",
+        "numQuestionsInvalid": "Number of questions must be between 1 and 20!",
+        "notebookMissing": "Error: Notebook ID missing",
+        "apiError": "Error generating test. Make sure Gemini API is configured."
+      },
+      "defaults": {
+        "topicFile": "Generate questions based on file",
+        "topicNote": "Generate questions based on note"
+      }
     },
     "podcastGenerator": {
       "title": "Generate a new podcast",
