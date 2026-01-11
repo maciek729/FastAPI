@@ -188,10 +188,27 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     
     // --- Collaborators Logic ---
     const handleAddCollaborator = async (e) => {
-        e.preventDefault(); if (!collaboratorUsername.trim()) { toast.error(t('filesView.userError')); return; }
-        try { await addCollaborator(details.id, collaboratorUsername); toast.success(t('filesView.userAdded', { username: collaboratorUsername })); setCollaboratorUsername(''); setShowCollaboratorModal(true); fetchCollaborators(); } 
-        catch (err) { toast.error(err.message || t('filesView.addColError')); }
+        e.preventDefault(); 
+        if (!collaboratorUsername.trim()) { 
+            toast.error(t('filesView.userError')); 
+            return; 
+        }
+        
+        try { 
+            await addCollaborator(details.id, collaboratorUsername); 
+            toast.success(t('filesView.userAdded', { username: collaboratorUsername })); 
+            setCollaboratorUsername(''); 
+            setShowCollaboratorModal(true); 
+            fetchCollaborators(); 
+        } catch (err) { 
+            if (err.message === 'USER_NOT_FOUND') {
+                toast.error(t('sidebar.userNotFound'));
+            } else {
+                toast.error(err.message || t('filesView.addColError')); 
+            }
+        }
     };
+    
     const handleRemoveCollaborator = async (userId) => {
         if (!await confirmModal(t('filesView.deleteColConfirm'))) return;
         try { await removeCollaborator(details.id, userId); toast.success(t('filesView.deleteColSuccess')); fetchCollaborators(); } 

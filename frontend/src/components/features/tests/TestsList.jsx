@@ -561,7 +561,7 @@ export default function TestsList({
                 ))
             ) : currentFolders.length === 0 ? (
                 <div className={styles.emptyState}>
-                    <p>{currentFolder ? t('testsList.emptyFolder') : t('testsList.notTests')}</p>
+                    <p>{currentFolder ? t('testsList.emptyFolder') : t('testsList.noTests')}</p>
                 </div>
             ) : null}
         </div>
