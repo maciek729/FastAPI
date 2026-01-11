@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MessageSquare, AtSign, Share2, Clock, Settings, Bell } from 'lucide-react';
+import { X, MessageSquare, AtSign, Share2, Clock, Settings, Bell, UserPlus, UserMinus } from 'lucide-react';
 import styles from "../../../../css/features/settings/Notifications.module.css";
 
 export default function NotificationModal({ notification, onDelete, onClick, t }) {
@@ -7,6 +7,8 @@ export default function NotificationModal({ notification, onDelete, onClick, t }
     const getIcon = () => {
         if (notification.type === 'mention') return <AtSign size={18} />;
         if (notification.type === 'resource_share') return <Share2 size={18} />;
+        if (notification.type === 'info') return <UserPlus size={18} />;
+        if (notification.type === 'warning') return <UserMinus size={18} />;
         
         switch (notification.redirect_type) {
             case 'settings': return <Settings size={18} />;
@@ -27,6 +29,27 @@ export default function NotificationModal({ notification, onDelete, onClick, t }
         });
     };
 
+    const renderContent = () => {
+        if (notification.type === 'mention') {
+            return t('notifications.mention', { username: notification.content });
+        }
+
+        if (notification.type === 'info' || notification.type === 'warning') {
+            const sender = notification.sender_name || "System";
+
+            const originalContent = notification.content;
+            const lowerCasedContent = originalContent.charAt(0).toLowerCase() + originalContent.slice(1);
+
+            return (
+                <span>
+                    Użytkownik {sender} {lowerCasedContent}
+                </span>
+            );
+        }
+
+        return notification.content;
+    };
+
     return (
         <div 
             className={`${styles.notificationCard} ${!notification.is_read ? styles.unread : ''}`}
@@ -44,7 +67,7 @@ export default function NotificationModal({ notification, onDelete, onClick, t }
                         {formatTimestamp(notification.created_at)}
                     </span>
                 </div>
-                <p className={styles.notificationText}>{t('notifications.mention', { username: notification.content })}</p>
+                <p className={styles.notificationText}>{renderContent()}</p>
             </div>
 
             <button 

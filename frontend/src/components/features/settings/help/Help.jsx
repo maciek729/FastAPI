@@ -68,16 +68,22 @@ export default function Help({userData}) {
                 onToggle={() => handleQuestionToggle('question1')}
             />
             <HelpQuestion
-                question={"Jak utworzyć nowy notatnik?"}
-                answer={"Aby utworzyć nowy notatnik należy nakliknąć na dowolną przestrzeń, może to być osobista lub wspólna i kliknąć na znak plusa."}
-                isOpen={openQuestion === 'question3'}
-                onToggle={()=> handleQuestionToggle('question3')}
+                question={"Jak dodać lub usunąć współtwórcę do / z notatnika?"}
+                answer={"Aby dodać bądź usunąć współtwórcę do / z notatnika należy najechać na notatnik znajdujący się na pasku bocznym po lewej stronie i kliknąć na 3 kropeczki, a następnie wybrać opcję Dodaj współtwórcę. Otworzy się okno współtwórców notatnika."}
+                isOpen={openQuestion === 'question4'}
+                onToggle={()=> handleQuestionToggle('question4')}
             />
             <HelpQuestion
-                question={t('help.question2')}
-                answer={t('help.answer2')}
-                isOpen={openQuestion === 'question2'}
-                onToggle={() => handleQuestionToggle('question2')}
+                question={"Co to jest sekcja Chat z AI"}
+                answer={"Chat z AI to sekcja notatnika, w której użytkownik może zadawać dowolne pytania sztucznej inteligencji, może również przesyłać swoje pliki, a odpowiedzi sztucznej inteligencji można zapisywać do notatki."}
+                isOpen={openQuestion === 'question7'}
+                onToggle={()=> handleQuestionToggle('question7')}
+            />
+            <HelpQuestion
+                question={"Co to jest sekcja Moje Pliki"}
+                answer={"Moje pliki to sekcja notatnika, w której użytkownik może umieszczać swoje notatki, a także różnego rodzaju pliki np. pdf lub zdjęcia. Dzięki temu użytkownik może trzymać wszystkie pliki potrzebne do lepszej nauki w jednym miejscu. Notatki następnie możemy wykorzystać tworząc fiszki, sprawdziany bądź podcasty."}
+                isOpen={openQuestion === 'question6'}
+                onToggle={()=> handleQuestionToggle('question6')}
             />
 
             <div className={styles.sectionContainer}>
@@ -117,5 +123,4 @@ export default function Help({userData}) {
         </div>
     );
 }
-
 

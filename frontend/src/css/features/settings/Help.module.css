@@ -115,6 +115,7 @@
   color: var(--title);
   text-align: left;
   margin: 0;
+  margin-top: 10px;
 }
 
 .inputTitle {

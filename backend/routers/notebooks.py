@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import SessionLocal
-from models import Notebooks
+from models import Notebooks, Notifications
 from dotenv import load_dotenv
 from routers.notes import NoteOut 
 
@@ -238,6 +238,19 @@ def add_collaborator(notebook_id: int, request: AddCollaboratorRequest, db: db_d
 
     collaborator = NotebookCollaborator(notebook_id=notebook_id, user_id=user.id)
     db.add(collaborator)
+    sender_id = notebook.created_by
+    new_notif = Notifications(
+        user_id=user.id,
+        sender_id=sender_id,
+        content=f"Dodał Cię do notatnika: {notebook.name}", 
+        type="info",                   
+        redirect_type="notebook",
+        notebook_id=notebook.id,       
+        tab_target="files",            
+        is_read=False,
+        created_at=datetime.utcnow()
+    )
+    db.add(new_notif)
     db.commit()
     return {"message": f"User {user.username} added successfully"}
 
@@ -258,6 +271,19 @@ def remove_collaborator(notebook_id: int, user_id: int, db: db_dependency):
     if not collaborator:
         raise HTTPException(status_code=404, detail="Collaborator not found")
 
+    sender_id = notebook.created_by
+    new_notif = Notifications(
+        user_id=user_id,
+        sender_id=sender_id,
+        content=f"Usunął Cię z notatnika: {notebook.name}", 
+        type="warning",                
+        redirect_type="none",
+        notebook_id=None,
+        tab_target=None,
+        is_read=False,
+        created_at=datetime.utcnow()
+    )
+    db.add(new_notif)
     db.delete(collaborator)
     db.commit()
     return {"message": "Collaborator removed successfully"}
