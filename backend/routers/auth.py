@@ -190,81 +190,15 @@ async def verify_email(request: Request, token: str, db: Session = Depends(get_d
     else:
         frontend_url = "https://zdaito.pl"
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="pl">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Email Zweryfikowany - zdAI to!</title>
-        <style>
-            body {{
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-                color: #2d3436;
-            }}
-            .card {{
-                background: white;
-                padding: 40px;
-                border-radius: 20px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-                text-align: center;
-                max-width: 400px;
-                width: 90%;
-            }}
-            .icon {{
-                font-size: 60px;
-                color: #00b894;
-                margin-bottom: 20px;
-            }}
-            h1 {{
-                margin: 0 0 10px 0;
-                font-size: 24px;
-                color: #2d3436;
-            }}
-            p {{
-                color: #636e72;
-                line-height: 1.6;
-                margin-bottom: 30px;
-            }}
-            .btn {{
-                display: inline-block;
-                background: #0984e3;
-                color: white;
-                text-decoration: none;
-                padding: 12px 30px;
-                border-radius: 10px;
-                font-weight: bold;
-                transition: transform 0.2s, background 0.2s;
-            }}
-            .btn:hover {{
-                background: #9771F8;
-                transform: translateY(-2px);
-            }}
-            .logo {{
-                font-weight: bold;
-                color: #9771F8;
-                font-weight:800;
-                font-size: 2rem;
-                margin-bottom: 10px;
-                display: block;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <span class="logo">zdAI to!</span>
-            <div class="icon">✓</div>
-            <h1>Email zweryfikowany!</h1>
-            <p>Twoje konto zostało pomyślnie aktywowane. Możesz teraz wrócić do aplikacji i zacząć naukę.</p>
-            <a href="{frontend_url}/login" class="btn">Przejdź do logowania</a>
-        </div>
-    </body>
+    html_content = """
+    <html>
+        <head>
+            <title>Email Verified</title>
+        </head>
+        <body>
+            <h1>Email successfully verified!</h1>
+            <p>You can now <a href="/auth/login-page">log in</a>.</p>
+        </body>
     </html>
     """
     return HTMLResponse(content=html_content, status_code=200)
