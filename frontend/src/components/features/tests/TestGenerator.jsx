@@ -245,7 +245,7 @@ export default function TestGenerator({
                     {newTest.source_type === 'note' && (
                         <div className={styles.formSection}>
                             <h3 className={styles.sectionTitle}>
-                                {t('podcastGenerator.selectNotes', {count : newTestnote_ids.length})}
+                                {t('podcastGenerator.selectNotes', {count : newTest.note_ids.length})}
                             </h3>
 
                             {notes.length === 0 ? (

@@ -17,11 +17,9 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   const [collaboratorUsername, setCollaboratorUsername] = useState('');
   const menuRef = useRef(null);
 
-  // Fallback translation function if t is not provided correctly
   const translate = (key, params = {}) => {
     if (t && typeof t === 'function') {
       const result = t(key, params);
-      // If t returns the key itself, fall back to direct lookup
       if (result === key) {
         const keys = key.split('.');
         let translation = translations[language];
@@ -38,7 +36,6 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
       }
       return result;
     }
-    // Direct fallback
     const keys = key.split('.');
     let translation = translations[language];
     for (const k of keys) {
@@ -155,13 +152,17 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
             <Edit2 size={16} />
             <span>{translate('sidebar.rename')}</span>
           </button>
-          <button
-            className={styles.menuItem}
-            onClick={handleOpenCollaborators}
-          >
-            <UserPlus size={16} />
-            <span>{translate('sidebar.addCollaborators')}</span>
-          </button>
+          
+          {spaceType === 'shared' && (
+            <button
+              className={styles.menuItem}
+              onClick={handleOpenCollaborators}
+            >
+              <UserPlus size={16} />
+              <span>{translate('sidebar.addCollaborators')}</span>
+            </button>
+          )}
+
           <div className={styles.menuDivider}></div>
           <button
             className={`${styles.menuItem} ${styles.deleteItem}`}
