@@ -5,7 +5,7 @@ import styles from "../../../css/layout/SidebarFooter.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 
-const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, isUserMenuOpen, setIsUserMenuOpen }) => {
+const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, isUserMenuOpen, setIsUserMenuOpen, hasUnread }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const { language } = useContext(LanguageContext);
@@ -68,6 +68,7 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, is
                 <div className={styles.userProfile} onClick={toggleMenu}>
                     <div className={styles.userAvatar}>
                         {renderAvatarContent()}
+                        {hasUnread && <span className={styles.notificationDot} />}
                     </div>
                     <div className={styles.userInfo}>
                         <div className={styles.userName}>{userData?.username || "User"}</div>

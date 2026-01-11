@@ -152,6 +152,7 @@
 .styleDot {
   font-size: 1rem;
   line-height: 1;
+  margin-bottom: 2.5px;
 }
 
 .briefDot {
@@ -177,15 +178,18 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  margin: 0 2rem 1rem;
+  /* margin: 0 2rem 1rem; */
   background: var(--inner_section_bg);
-  color: var(--title);
+  color: var(--subtitle);
   border: 2px solid #8b5cf6;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.2s ease;
+}
+.saveMegaBtn svg {
+  stroke: #A07FE9;
 }
 
 .saveMegaBtn:hover {
