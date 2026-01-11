@@ -5,7 +5,7 @@ import styles from "../../../css/layout/SidebarFooter.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 
-const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) => {
+const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, isUserMenuOpen, setIsUserMenuOpen }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const { language } = useContext(LanguageContext);
@@ -41,6 +41,13 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection }) 
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        if (isUserMenuOpen) {
+            setIsMenuOpen(true);
+            setIsUserMenuOpen(false);
+        }
+    }, [isUserMenuOpen, setIsUserMenuOpen]);
 
     const renderAvatarContent = () => {
         if (userData?.avatar_url) {

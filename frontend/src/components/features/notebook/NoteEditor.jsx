@@ -921,8 +921,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                     }
                                     setShowAiAssistant(true);
                                 }}
-                                title={t('aiAssistant.title')}
-                                data-tooltip={t('aiAssistant.title')}
+                                title="AI Assistant"
+                                data-tooltip={t('aiAssistant')}
                             >
                                 <Zap size={18} />
                             </button>

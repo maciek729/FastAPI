@@ -15,6 +15,7 @@ import logoLight from "./logolight.png";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook }) => {
     const { language } = useContext(LanguageContext);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     
     useEffect(() => {
         if (activeNotebook) {
@@ -283,6 +284,13 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         }
     };
 
+    const handleCollapsedUserClick = () => {
+        if (!isSidebarOpen) {
+            toggleSidebar();
+            setIsUserMenuOpen(true);
+        }
+    };
+
     return (
         <aside className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''}`}>
             <div className={styles.sidebarInner}>
@@ -409,6 +417,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
+                            isUserMenuOpen={isUserMenuOpen}
+                            setIsUserMenuOpen={setIsUserMenuOpen}
                         />
                     ) : (
                         <UserFooterCollapsed
@@ -416,6 +426,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
+                            onExpandAndOpen={handleCollapsedUserClick}
                         />
                     )}
                 </div>
