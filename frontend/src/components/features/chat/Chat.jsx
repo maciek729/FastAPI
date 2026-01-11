@@ -12,13 +12,12 @@ import { createNote } from "../../../services/noteService";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 
-export default function Chat({ userId, notebookId, refreshNotebook }) {
+export default function Chat({ userId, notebookId }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState(null);
   const [selectedMessages, setSelectedMessages] = useState([]);
-  const [responseStyle, setResponseStyle] = useState('balanced');
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const { language } = useContext(LanguageContext);
@@ -104,29 +103,16 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
   const saveSelectedMessagesAsNote = async () => {
     if (selectedMessages.length === 0) return;
     const content = selectedMessages.map(i => messages[i].content).join("\n\n");
-    const savingToast = toast.loading(t('chat.savingNote'));
     try {
-      const response = await SendMessage(`Stwórz krótki, zwięzły tytuł dla tych wiadomości (w języku który jest użyty), maksymalnie 5 słów: ${content.slice(0, 500)}`, [], 'brief');
-      
-      const title = response.status === "success" 
-        ? response.response.replace(/["']/g, '').trim().slice(0, 50)
-        : content.slice(0, 50);
-      
       await createNote({
         user_id: userId,
         notebook_id: notebookId,
-        title: title,
-        content: content,
+        title: content.slice(0, 50),//WIEM ZMIENIE TO ALE MI SIĘ DZISIAJ NIE CHCE <3
+        content,
         type: "Chat AI",
         is_shared: false
       });
-      toast.dismiss(savingToast);
       toast.success(t('chat.saveSuccess'));
-      
-      if (refreshNotebook && typeof refreshNotebook === 'function') {
-        refreshNotebook();
-      }
-      
       setSelectedMessages([]);
     } catch (error) {
       console.error(error);
@@ -135,33 +121,22 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
   };
 
   const saveBotMessageAsNote = async (content) => {
-    const savingToast = toast.loading(t('chat.savingNote'));
     try {
-      const response = await SendMessage(`Stwórz krótki, zwięzły tytuł dla tej wiadomości (w języku który jest użyty), maksymalnie 5 słów: ${content.slice(0, 500)}`, [], 'brief');
-      const title = response.status === "success" 
-        ? response.response.replace(/["']/g, '').trim().slice(0, 50)
-        : content.slice(0, 50);
-      
       await createNote({
         user_id: userId,
         notebook_id: notebookId,
-        title: title,
-        content: content,
+        title: content.slice(0, 50),
+        content,
         type: "Chat AI",
         is_shared: false
       });
-      
-      toast.dismiss(savingToast);
       toast.success(t('chat.saveSuccess'));
-      
-      if (refreshNotebook && typeof refreshNotebook === 'function') {
-        refreshNotebook();
-      }
     } catch (error) {
       console.error(error);
       toast.error(t('chat.saveError'));
     }
   };
+
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
@@ -171,7 +146,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
     setIsLoading(true);
 
     try {
-      const data = await SendMessage(userMessage, messages, responseStyle);
+      const data = await SendMessage(userMessage, messages);
 
       if (data.status === "success") {
         setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
@@ -200,15 +175,6 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
     }
   };
 
-  const getStyleLabel = (style) => {
-    switch(style) {
-      case 'brief': return t('chat.styleBrief');
-      case 'balanced': return t('chat.styleBalanced');
-      case 'detailed': return t('chat.styleDetailed');
-      default: return style;
-    }
-  };
-
   return (
     <div className={styles.chatContainer}>
       <div className={styles.chatHeader}>
@@ -226,39 +192,6 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
           <Save size={16} /> {t('chat.saveSelected')}
         </button>
       )}
-
-      <div className={styles.styleSelector}>
-        <span className={styles.styleLabel}>{t('chat.responseStyle')}:</span>
-        <div className={styles.styleButtons}>
-          <button 
-            className={responseStyle === 'brief' ? styles.styleBtnActive : styles.styleBtn}
-            onClick={() => setResponseStyle('brief')}
-            title={t('chat.styleBriefDesc')}
-          >
-            {getStyleLabel('brief')}
-          </button>
-          <button 
-            className={responseStyle === 'balanced' ? styles.styleBtnActive : styles.styleBtn}
-            onClick={() => setResponseStyle('balanced')}
-            title={t('chat.styleBalancedDesc')}
-          >
-            {getStyleLabel('balanced')}
-          </button>
-          <button 
-            className={responseStyle === 'detailed' ? styles.styleBtnActive : styles.styleBtn}
-            onClick={() => setResponseStyle('detailed')}
-            title={t('chat.styleDetailedDesc')}
-          >
-            {getStyleLabel('detailed')}
-          </button>
-        </div>
-        <div className={styles.styleIndicator}>
-          {responseStyle === 'brief' && <span className={`${styles.styleDot} ${styles.briefDot}`}>●</span>}
-          {responseStyle === 'balanced' && <span className={`${styles.styleDot} ${styles.balancedDot}`}>●</span>}
-          {responseStyle === 'detailed' && <span className={`${styles.styleDot} ${styles.detailedDot}`}>●</span>}
-          <span className={styles.currentStyle}>{getStyleLabel(responseStyle)}</span>
-        </div>
-      </div>
 
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (

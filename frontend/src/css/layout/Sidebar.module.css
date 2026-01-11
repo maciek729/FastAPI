@@ -568,143 +568,21 @@
   justify-content: center;
 }
 
-/* Mobile Responsive Design */
+/* Responsive Design */
 @media (max-width: 768px) {
-  /* Sidebar jako dropdown od góry */
-  .sidebar.mobile {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: auto;
-    max-height: 60px;
-    border-right: none;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    z-index: 1000;
+  .sidebar {
+    width: 240px;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.15);
   }
 
-  .sidebar.mobile.mobileOpen {
-    max-height: 100vh;
-    overflow-y: auto;
+  .sidebar.collapsed {
+    width: 240px;
+    transform: translateX(-100%);
+    border-right: 1px solid rgba(148, 163, 184, 0.15);
   }
 
-  /* Mobile top bar - zawsze widoczny */
-  .mobileTopBar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    min-height: 60px;
-    background: var(--outer_section_bg);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-  }
-
-  .mobileBrand {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .mobileLogo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    flex-shrink: 0;
-  }
-
-  .mobileLogo .logoImg {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .mobileBrandText {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .mobileBrandText h1 {
-    font-size: 1.125rem;
-    font-weight: 800;
-    margin: 0;
-    font-family: 'Poppins', 'Inter', sans-serif;
-    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    white-space: nowrap;
-  }
-
-  .mobileMenuBtn {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    color: var(--title);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-  }
-
-  .mobileMenuBtn:hover {
-    background: rgba(139, 92, 246, 0.08);
-    color: #8b5cf6;
-  }
-
-  .mobileMenuBtn:active {
-    transform: scale(0.95);
-  }
-
-  /* Hide desktop header on mobile */
-  .sidebar.mobile .sidebarHeader {
-    display: none;
-  }
-
-  /* Sidebar content - visible only when menu is open */
-  .sidebar.mobile .sidebarContent {
-    display: none;
-    padding: 1rem;
-  }
-
-  .sidebar.mobile.mobileOpen .sidebarContent {
-    display: block;
-  }
-
-  /* Show section names on mobile even when "collapsed" */
-  .sidebar.mobile .sectionName {
-    opacity: 1 !important;
-    width: auto !important;
-  }
-
-  .sidebar.mobile .chevronIcon {
-    opacity: 1 !important;
-    width: auto !important;
-  }
-
-  /* Sidebar footer - visible only when menu is open */
-  .sidebar.mobile .sidebarFooter {
-    display: none;
-  }
-
-  .sidebar.mobile.mobileOpen .sidebarFooter {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  /* Touch-friendly sizing */
   .addBtn {
     min-width: 44px;
     min-height: 44px;
@@ -725,26 +603,6 @@
     min-width: 44px;
     min-height: 44px;
     padding: 0.625rem;
-  }
-
-  /* Hide collapsed state on mobile */
-  .sidebar.mobile.collapsed {
-    width: 100%;
-    transform: none;
-  }
-
-  /* Always show notebook menu buttons on mobile (no hover on touch) */
-  .sidebar.mobile .notebookItem :global([class*="menuTrigger"]) {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    width: 44px !important;
-    height: 44px !important;
-  }
-
-  .sidebar.mobile .notebookItem :global([class*="notebookMenuContainer"]) {
-    pointer-events: auto !important;
   }
 }
 

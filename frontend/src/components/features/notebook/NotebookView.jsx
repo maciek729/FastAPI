@@ -10,7 +10,7 @@ import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import GroupChatSidebar from "../group_chat/GroupChatSidebar";
 
-export default function NotebookView({ details, userData, refreshNotebook, defaultSection, isSidebarOpen, highlightMessageId, setHighlightMessageId}) {
+export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen, highlightMessageId, setHighlightMessageId}) {
     const notebookId = details?.id;
     const [highlightedItemId, setHighlightedItemId] = useState(null);
     
@@ -135,16 +135,6 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
         localStorage.setItem('groupChat_widths', JSON.stringify(widths));
     }, [chatWidth, notebookId]);
 
-    // Handle defaultSection to open group chat when navigating from notifications or demo
-    useEffect(() => {
-        if (defaultSection === 'group-chat') {
-            setIsGroupChatOpen(true);
-        } else if (defaultSection) {
-            setActiveTab(defaultSection);
-            setIsGroupChatOpen(false);
-        }
-    }, [defaultSection]);
-
     const t = (key, params = {}) => {
         const keys = key.split('.');
         let translation = translations[language];
@@ -191,7 +181,7 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
                 {isShared && (
                     <>
                         <div className={styles.separator} />
-                        <button 
+                        <button
                             className={`${styles.tab} ${isGroupChatOpen ? styles.active : ""}`}
                             onClick={() => setIsGroupChatOpen(!isGroupChatOpen)}
                         >
@@ -205,13 +195,7 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
             {/* Tab Content & Sidebar */}
             <div className={styles.mainLayout}>
                 <div className={styles.tabContainer}>
-                    {activeTab === "chat" && (
-                    <Chat 
-                        userId={userData.id} 
-                        notebookId={details?.id}
-                        refreshNotebook={refreshNotebook}  
-                    />
-                    )}
+                    {activeTab === "chat" && <Chat userId={userData.id} notebookId={details?.id}/>}
                     {activeTab === "files" && (
                         <FilesView
                             details={details}

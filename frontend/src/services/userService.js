@@ -96,15 +96,3 @@ export const archiveUserAccount = async (token) => {
     }
     return true;
 };
-
-export const completeTutorial = async (token) => {
-    const response = await fetch(ENDPOINTS.USERS.COMPLETE_TUTORIAL, {
-        method: 'PUT',
-        headers: getAuthHeaders(token),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to mark tutorial as completed');
-    }
-    return true;
-};

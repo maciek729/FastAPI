@@ -126,7 +126,6 @@ const ENDPOINTS = {
     DELETE_AVATAR: `${API_BASE_URL}/user/avatar`,
     DELETE_ACCOUNT: `${API_BASE_URL}/user/delete-account`,
     GET_AVATAR: (avatarPath) => avatarPath ? `${API_BASE_URL}${avatarPath}` : null,
-    COMPLETE_TUTORIAL: `${API_BASE_URL}/user/complete-tutorial`,
   },
   AUTH: {
     REGISTER: `${API_BASE_URL}/auth/`,
@@ -157,15 +156,7 @@ const ENDPOINTS = {
     MARK_READ: (notifId) => `${API_BASE_URL}/notifications/${notifId}/read`,
     DELETE: (notifId) => `${API_BASE_URL}/notifications/${notifId}`,
     CLEAR_ALL: (userId) => `${API_BASE_URL}/notifications/user/${userId}/all`,
-  },
-  FILES: {
-    UPLOAD: `${API_BASE_URL}/files/upload`,
-    LIST: (notebookId) => `${API_BASE_URL}/files/list/${notebookId}`,
-    DELETE: (fileId) => `${API_BASE_URL}/files/${fileId}`,
-  },
-  CONTACT: {
-    SUBMIT: `${API_BASE_URL}/contact/`,
-  },
+  }
 };
 
 export default ENDPOINTS;

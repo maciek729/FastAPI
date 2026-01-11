@@ -722,7 +722,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                         className={styles.deleteBtn}
                                         onClick={handleDelete}
                                         title={t('noteEditor.deleteTitle')}
-                                        data-tooltip={t('noteEditor.deleteTitle')}
                                     >
                                         <Trash2 size={18} />
                                     </button>
@@ -732,7 +731,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                     onClick={handleSave}
                                     disabled={isSaving}
                                     title={t('noteEditor.saveTitle')}
-                                    data-tooltip={t('noteEditor.saveTitle')}
                                 >
                                     <Save size={18} />
                                     {isSaving ? t('noteEditor.saving') : t('noteEditor.saveButton')}
@@ -749,7 +747,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             className={styles.closeBtn}
                             onClick={handleClose}
                             title={t('noteEditor.closeTitle')}
-                            data-tooltip={t('noteEditor.closeTitle')}
                         >
                             <X size={20} />
                         </button>
@@ -764,7 +761,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('bold')}
                                 title={`${t('noteEditor.bold')} (Ctrl+B)`}
-                                data-tooltip={t('noteEditor.bold')}
                             >
                                 <Bold size={18} />
                             </button>
@@ -772,7 +768,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('italic')}
                                 title={`${t('noteEditor.italic')} (Ctrl+I)`}
-                                data-tooltip={t('noteEditor.italic')}
                             >
                                 <Italic size={18} />
                             </button>
@@ -780,7 +775,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('underline')}
                                 title={`${t('noteEditor.underline')} (Ctrl+U)`}
-                                data-tooltip={t('noteEditor.underline')}
                             >
                                 <Underline size={18} />
                             </button>
@@ -793,7 +787,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyLeft')}
                                 title={t('noteEditor.alignLeft')}
-                                data-tooltip={t('noteEditor.alignLeft')}
                             >
                                 <AlignLeft size={18} />
                             </button>
@@ -801,7 +794,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyCenter')}
                                 title={t('noteEditor.alignCenter')}
-                                data-tooltip={t('noteEditor.alignCenter')}
                             >
                                 <AlignCenter size={18} />
                             </button>
@@ -809,7 +801,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyRight')}
                                 title={t('noteEditor.alignRight')}
-                                data-tooltip={t('noteEditor.alignRight')}
                             >
                                 <AlignRight size={18} />
                             </button>
@@ -822,7 +813,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertUnorderedList')}
                                 title={t('noteEditor.bulletList')}
-                                data-tooltip={t('noteEditor.bulletList')}
                             >
                                 <List size={18} />
                             </button>
@@ -830,7 +820,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertOrderedList')}
                                 title={t('noteEditor.numberedList')}
-                                data-tooltip={t('noteEditor.numberedList')}
                             >
                                 <ListOrdered size={18} />
                             </button>
@@ -850,7 +839,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => fileInputRef.current?.click()}
                                 title={t('noteEditor.insertImage')}
-                                data-tooltip={t('noteEditor.insertImage')}
                             >
                                 <Image size={18} />
                             </button>
@@ -882,8 +870,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.toolBtn}
                                 onClick={insertTable}
-                                title={t('noteEditor.insertTable')}
-                                data-tooltip={t('noteEditor.insertTable')}
+                                title="Insert Table"
                             >
                                 <Grid3x3 size={18} />
                             </button>
@@ -891,7 +878,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 className={styles.toolBtn}
                                 onClick={() => removeTable()}
                                 title={t('noteEditor.removeTable')}
-                                data-tooltip={t('noteEditor.removeTable')}
                             >
                                 <Trash2 size={16} />
                             </button>
@@ -921,8 +907,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                     }
                                     setShowAiAssistant(true);
                                 }}
-                                title={t('aiAssistant.title')}
-                                data-tooltip={t('aiAssistant.title')}
+                                title="AI Assistant"
                             >
                                 <Zap size={18} />
                             </button>

@@ -3,7 +3,6 @@ import styles from "../../../../css/features/settings/Help.module.css"
 import HelpQuestion from "./HelpQuestion.jsx";
 import { LanguageContext } from "../../../../translations/LanguageContext";
 import translations from "../../../../translations/translation.json";
-import { SendContactMessage } from "../../../../services/contactService";
 
 export default function Help({userData}) {
     const [title, setTitle] = useState("");
@@ -36,15 +35,33 @@ export default function Help({userData}) {
         setIsLoading(true);
         setStatus("");
 
+        const apiUrl = "http://localhost:8000/contact/";
+
         try {
-            const data = await SendContactMessage(title, message, userData.email);
-            
-            setStatus(data.message);
-            setTitle("");
-            setMessage("");
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    message: message,
+                    user_email: userData.email, 
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setStatus(data.message || t('help.successMessage'));
+                setTitle("");
+                setMessage("");
+            } else {
+                setStatus(data.detail || t('help.errorMessage'));
+            }
         } catch (error) {
-            console.error("Błąd kontaktu:", error);
-            setStatus(error.message);
+            console.error("Błąd sieci lub serwera:", error);
+            setStatus(t('help.connectionError'));
         } finally {
             setIsLoading(false);
         }
@@ -66,12 +83,6 @@ export default function Help({userData}) {
                 answer={t('help.answer1')}
                 isOpen={openQuestion === 'question1'}
                 onToggle={() => handleQuestionToggle('question1')}
-            />
-            <HelpQuestion
-                question={"Jak utworzyć nowy notatnik?"}
-                answer={"Aby utworzyć nowy notatnik należy nakliknąć na dowolną przestrzeń, może to być osobista lub wspólna i kliknąć na znak plusa."}
-                isOpen={openQuestion === 'question3'}
-                onToggle={()=> handleQuestionToggle('question3')}
             />
             <HelpQuestion
                 question={t('help.question2')}

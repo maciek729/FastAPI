@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SendHorizontal, Smile, Plus, FileText, X } from "lucide-react";
 import styles from "../../../css/features/groupchat/ChatInput.module.css";
 import EmojiPicker, { Theme } from 'emoji-picker-react';
-import ENDPOINTS from '../../../api/endpoints';
+import ENDPOINTS from '../../../api/endpoints'; // Importujemy Twoje endpointy
 
 const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
     const [text, setText] = useState("");
@@ -127,33 +127,24 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                                 className={styles.mentionItem}
                                 onClick={() => insertMention(member.username)}
                             >
-                                <div className={styles.mentionAvatarWrapper}>
+                                <div className={styles.mentionAvatar}>
                                     {member.username === 'wszyscy' ? (
-                                        <div className={styles.avatarAnnouncement}>📢</div>
+                                        '📢'
                                     ) : member.avatar_url ? (
                                         <img 
-                                            src={member.avatar_url} 
+                                            src={ENDPOINTS.USERS.GET_AVATAR(member.avatar_url)} 
                                             alt={member.username}
                                             className={styles.avatarImage}
                                             onError={(e) => {
-                                                // Jeśli obrazek nie zadziała, pokazujemy inicjał
                                                 e.target.style.display = 'none';
-                                                e.target.nextSibling.style.display = 'flex';
+                                                e.target.parentElement.innerText = member.username[0].toUpperCase();
                                             }}
                                         />
-                                    ) : null}
-                                    
-                                    {/* Fallback (widoczny gdy nie ma URL lub gdy obrazek rzuci błąd) */}
-                                    {member.username !== 'wszyscy' && (
-                                        <div 
-                                            className={styles.avatarFallback} 
-                                            style={{ display: member.avatar_url ? 'none' : 'flex' }}
-                                        >
-                                            {member.username[0].toUpperCase()}
-                                        </div>
+                                    ) : (
+                                        member.username[0].toUpperCase()
                                     )}
                                 </div>
-                                <span className={styles.mentionUsername}>
+                                <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>
                                     {member.username}
                                 </span>
                             </div>

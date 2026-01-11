@@ -18,16 +18,13 @@ router = APIRouter(
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+# List of models to try in order (single-model configuration)
+# Using only gemini-2.5-flash as requested
 GEMINI_MODELS = [
     "gemini-2.5-flash",
 ]
 
-STYLE_INSTRUCTIONS = {
-    "brief": "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE. Maksymalnie 2-3 zdania. Bądź konkretny bez zbędnych szczegółów.",
-    "balanced": "Odpowiadaj w sposób zrównoważony. Udziel wyczerpującej odpowiedzi, ale bez przesadnej długości.",
-    "detailed": "Odpowiadaj DŁUGO i SZCZEGÓŁOWO. Rozwiń temat, podaj przykłady, omów różne aspekty."
-}
-
+# Track which model was last successfully used today (single-model)
 last_used_model = GEMINI_MODELS[0]
 last_model_switch_date = datetime.now().date()
 
@@ -45,9 +42,13 @@ class ChatMessage(BaseModel):
     message: str
     conversation: list[dict] = []
     api_key: Optional[str] = None
-    response_style: Optional[str] = "balanced"
 
-def get_gemini_response(messages: list, files: list = None, tmp_client=None, response_style: str = "balanced") -> dict:    
+def get_gemini_response(messages: list, files: list = None, tmp_client=None) -> dict:    
+    """
+    Get response from Gemini with automatic fallback to alternative models
+    when quota is exceeded.
+    Returns dict with status, response text, and model used.
+    """
     global last_used_model, last_model_switch_date
     
     use_client = tmp_client or client
@@ -58,6 +59,7 @@ def get_gemini_response(messages: list, files: list = None, tmp_client=None, res
             "model_used": None
         }
     
+    # Reset model list if date changed (new day)
     if datetime.now().date() != last_model_switch_date:
         last_used_model = GEMINI_MODELS[0]
         last_model_switch_date = datetime.now().date()
@@ -68,19 +70,11 @@ def get_gemini_response(messages: list, files: list = None, tmp_client=None, res
         role = "Użytkownik" if msg["role"] == "user" else "Asystent"
         conversation_text += f"{role}: {msg['content']}\n"
     
-    style_instruction = STYLE_INSTRUCTIONS.get(response_style, STYLE_INSTRUCTIONS["balanced"])
-    
     final_prompt = f"""
     Jesteś asystentem AI, który odpowiada na pytania użytkownika. 
-    {style_instruction}
-    
-    WAŻNE: Nie witaj się za każdym razem. Jeśli kontynuujesz rozmowę, odpowiadaj bezpośrednio bez powitań.
-    
-    ZASADA JĘZYKOWA: Odpowiadaj zawsze w tym samym języku w którym użytkownik pisze do Ciebie. 
-    Jeśli użytkownik pisze po angielsku - odpowiadaj po angielsku.
-    Jeśli użytkownik pisze po polsku - odpowiadaj po polsku.
-    Jeśli użytkownik pisze w innym języku - odpowiadaj w tym języku.
-    
+    Odpowiadaj precyzyjnie i zwięźle. Odpowiadaj w języku polskim, 
+    chyba że użytkownik poprosi o inny język.
+
     Historia konwersacji:
     {conversation_text}
 
@@ -102,13 +96,14 @@ def get_gemini_response(messages: list, files: list = None, tmp_client=None, res
             )
             contents.append(file_part)
     
+    # Try models in order, starting from last_used_model
     start_idx = GEMINI_MODELS.index(last_used_model)
     models_to_try = GEMINI_MODELS[start_idx:] + GEMINI_MODELS[:start_idx]
     
     last_error = None
     for model in models_to_try:
         try:
-            print(f"[INFO] Próbuję model: {model} (styl: {response_style})")
+            print(f"[INFO] Próbuję model: {model}")
             response = use_client.models.generate_content(
                 model=model,
                 contents=contents
@@ -120,8 +115,7 @@ def get_gemini_response(messages: list, files: list = None, tmp_client=None, res
             return {
                 "status": "success",
                 "response": response.text,
-                "model_used": model,
-                "response_style": response_style  
+                "model_used": model
             }
 
         except Exception as model_error:
@@ -129,15 +123,18 @@ def get_gemini_response(messages: list, files: list = None, tmp_client=None, res
             error_lower = error_str.lower()
             last_error = model_error
 
+            # Check if this is a quota/rate limit error by looking for key indicators
             quota_indicators = ["429", "resource_exhausted", "quota exceeded", "rate_limit", "quota_failure"]
             is_quota_error = any(indicator in error_lower for indicator in quota_indicators)
 
             if is_quota_error:
                 print(f"[WARNING] Model {model} osiągnął limit - przechodzę do następnego")
                 print(f"[DEBUG] Błąd: {error_str[:150]}")
+                # Try next model
                 continue
             else:
                 print(f"[ERROR] Model {model} zwrócił nieznany błąd: {error_str[:150]}")
+                # Try next model anyway
                 continue
     
     error_msg = f"Wszystkie modele Gemini są niedostępne."
@@ -145,22 +142,21 @@ def get_gemini_response(messages: list, files: list = None, tmp_client=None, res
     return {
         "status": "error",
         "response": error_msg,
-        "model_used": None,
-        "response_style": response_style 
+        "model_used": None
     }
 
 def get_fallback_response(prompt: str) -> dict:
     return {
         "status": "fallback",
         "response": "Witaj! Jestem asystentem AI. Aby korzystać z pełnych funkcji, skonfiguruj klucz GEMINI_API_KEY w pliku .env",
-        "model_used": None,
-        "response_style": "balanced"  
+        "model_used": None
     }
 
 current_session_files = []
 
 @router.post("/upload", response_class=JSONResponse)
 async def upload_file(file: UploadFile = File(...)):
+    """Endpoint do przesyłania plików - tylko dla aktualnej sesji"""
     try:
         content = await file.read()
         
@@ -206,6 +202,7 @@ async def upload_file(file: UploadFile = File(...)):
 
 @router.post("/clear_files", response_class=JSONResponse)
 async def clear_files():
+    """Endpoint do czyszczenia plików"""
     current_session_files.clear()
     return {
         "status": "success", 
@@ -214,36 +211,29 @@ async def clear_files():
 
 @router.post("/chat", response_class=JSONResponse)
 async def chat_endpoint(chat_data: ChatMessage):
+    """Główny endpoint czatu - używa tylko aktualnej sesji"""
     messages = chat_data.conversation.copy()
     messages.append({"role": "user", "content": chat_data.message})
-    
-    response_style = chat_data.response_style or "balanced"
 
+    # If user supplied an API key for testing, create a client for this request
     local_client = None
     if chat_data.api_key:
         try:
             local_client = genai.Client(api_key=chat_data.api_key)
-            print(f"[INFO] Using per-request Gemini API key (styl: {response_style})")
+            print("[INFO] Using per-request Gemini API key for this call (local client)")
         except Exception as e:
             print(f"[ERROR] Failed to initialize local Gemini client from provided key: {e}")
             return JSONResponse(status_code=400, content={"status": "error", "response": "Invalid API key provided."})
 
     use_client = local_client or client
     if use_client:
-        response_data = get_gemini_response(
-            messages, 
-            current_session_files, 
-            tmp_client=use_client,
-            response_style=response_style
-        )
+        response_data = get_gemini_response(messages, current_session_files, tmp_client=use_client)
         response_text = response_data.get("response", "")
         model_used = response_data.get("model_used", "unknown")
-        response_style_used = response_data.get("response_style", response_style)
     else:
         response_data = get_fallback_response(chat_data.message)
         response_text = response_data.get("response", "")
         model_used = "fallback"
-        response_style_used = response_style
 
     updated_conversation = chat_data.conversation + [
         {"role": "user", "content": chat_data.message},
@@ -255,12 +245,12 @@ async def chat_endpoint(chat_data: ChatMessage):
         "response": response_text,
         "conversation": updated_conversation,
         "files_used": len(current_session_files) > 0,
-        "model_used": model_used,
-        "response_style": response_style_used 
+        "model_used": model_used
     }
 
 @router.post("/reset_session", response_class=JSONResponse)
 async def reset_session():
+    """Resetuje całą sesję - tworzy nową pustą"""
     current_session_files.clear()
     return {
         "status": "success", 
@@ -269,17 +259,18 @@ async def reset_session():
 
 @router.get("/api_status")
 async def api_status():
+    """Endpoint sprawdzający status API"""
     return {
         "status": "active",
         "gemini_configured": bool(GEMINI_API_KEY and client),
         "has_files": bool(current_session_files),
         "files_count": len(current_session_files),
-        "model": "gemini-2.5-flash",
-        "available_styles": list(STYLE_INSTRUCTIONS.keys()) 
+        "model": "gemini-2.5-flash"
     }
 
 @router.get("/files")
 async def get_files():
+    """Endpoint zwracający listę przesłanych plików"""
     return {
         "files": [
             {

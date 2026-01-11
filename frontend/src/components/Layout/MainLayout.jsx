@@ -92,12 +92,8 @@ export default function MainLayout() {
       })
         .then(res => res.json())
         .then(data => {
-          const fullNotebook = {
-            ...data,
-            space_type: data.space_type || (data.is_shared ? 'shared' : 'personal')
-          };
-          setSelectedNotebook(fullNotebook);
-          setNotebookDetails(fullNotebook);
+          setSelectedNotebook(data);
+          setNotebookDetails(data);
           setActiveSection('notebook');
           setNotebookSection(navData.tab || 'files');
         })
@@ -224,7 +220,6 @@ export default function MainLayout() {
             defaultSection={notebookSection}
             isSidebarOpen={isSidebarOpen}
             highlightMessageId={highlightMessageId}
-            setHighlightMessageId={setHighlightMessageId}
           />
         ) : (
           <div style={{ padding: '2rem', color: '#94a3b8' }}>
@@ -236,8 +231,7 @@ export default function MainLayout() {
         return (
           <Dashboard
             userData={userData}
-            onNavigateToResource={handleNavigateToResource}
-            // onSelectNotebook={handleSelectNotebook}
+            onSelectNotebook={handleSelectNotebook}
           />
         );
     }
@@ -297,7 +291,6 @@ export default function MainLayout() {
         onSelectNotebook={handleSelectNotebook}
         onGoToDashboard={handleBackToDashboard}
         onGoToSection={handleGoToSection}
-        activeNotebook={selectedNotebook}
       />
 
       <div
@@ -308,7 +301,6 @@ export default function MainLayout() {
 
       <Demo
         onSelectNotebook={handleSelectNotebook}
-        onNavigateToResource={handleNavigateToResource}
         userData={userData}
       />
     </div>

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Notes
 from dotenv import load_dotenv
-import re
 
 router = APIRouter(
     prefix="/notes",
@@ -24,75 +23,6 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
-
-def markdown_to_html(text: str) -> str:
-    if not text:
-        return text
-    
-    html = text
-    
-    html = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
-    html = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
-    html = re.sub(r'^# (.*?)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
-    
-    html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
-    html = re.sub(r'__(.*?)__', r'<strong>\1</strong>', html)
-    
-    html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
-    html = re.sub(r'_(.*?)_', r'<em>\1</em>', html)
-    
-    html = re.sub(r'^[*-] (.*?)$', r'<li>\1</li>', html, flags=re.MULTILINE)
-    lines = html.split('\n')
-    in_list = False
-    result_lines = []
-    
-    for line in lines:
-        if line.startswith('<li>'):
-            if not in_list:
-                result_lines.append('<ul>')
-                in_list = True
-            result_lines.append(line)
-        else:
-            if in_list:
-                result_lines.append('</ul>')
-                in_list = False
-            result_lines.append(line)
-    
-    if in_list:
-        result_lines.append('</ul>')
-    
-    html = '\n'.join(result_lines)
-    
-    lines = html.split('\n')
-    in_ol = False
-    result_lines = []
-    ol_counter = 1
-    
-    for line in lines:
-        num_match = re.match(r'^(\d+)\. (.*?)$', line)
-        if num_match:
-            if not in_ol:
-                result_lines.append('<ol>')
-                in_ol = True
-            result_lines.append(f'<li>{num_match.group(2)}</li>')
-        else:
-            if in_ol:
-                result_lines.append('</ol>')
-                in_ol = False
-            result_lines.append(line)
-    
-    if in_ol:
-        result_lines.append('</ol>')
-    
-    html = '\n'.join(result_lines)
-    
-    html = html.replace('\n', '<br>')
-    
-    html = html.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
-    
-    html = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', html)
-    
-    return html
 
 # --- MODELE ---
 
@@ -127,14 +57,11 @@ class NoteOut(BaseModel):
 
 @router.post("/create", response_model=NoteOut, status_code=status.HTTP_201_CREATED)
 def create_note(note: NoteCreate, db: db_dependency):
-    # Konwertuj markdown do HTML przed zapisem
-    html_content = markdown_to_html(note.content)
-    
     new_note = Notes(
         user_id=note.user_id,
         notebook_id=note.notebook_id,
         title=note.title,
-        content=html_content,  # Zapisuj jako HTML
+        content=note.content,
         type=note.type,
         is_shared=note.is_shared,
         created_at=datetime.utcnow(),
@@ -170,12 +97,9 @@ def update_note(note_id: int, request: NoteCreate, db: db_dependency):
             detail="Note not found"
         )
     
-    # Konwertuj markdown do HTML przed aktualizacją
-    html_content = markdown_to_html(request.content)
-    
     # Update note fields
     note.title = request.title
-    note.content = html_content  # Zaktualizowany HTML
+    note.content = request.content
     note.type = request.type
     note.is_shared = request.is_shared
     

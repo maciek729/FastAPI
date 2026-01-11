@@ -8,6 +8,8 @@ import { LanguageContext } from '../../../translations/LanguageContext';
 import styles from "../../../css/features/TestsView.module.css";
 import sharedStyles from "../../../css/features/NotebookView.module.css";
 import * as testsService from '../../../services/testsService';
+import { LanguageContext } from '../../../translations/LanguageContext';
+import translations from '../../../translations/translation.json';
 
 export default function TestTaking({
     show,
@@ -66,6 +68,22 @@ export default function TestTaking({
                 [questionId]: answer
             }));
         }
+    };
+
+    const { language } = useContext(LanguageContext);
+    const t = (key, params = {}) => {
+        const keys = key.split('.');
+        let translation = translations[language];
+        for (const k of keys) {
+            translation = translation?.[k];
+            if (!translation) return key;
+        }
+        if (typeof translation === 'string' && Object.keys(params).length > 0) {
+            return translation.replace(/\{(\w+)\}/g, (match, key) => {
+                return params[key] || match;
+            });
+        }
+        return translation || key;
     };
 
     const handleSubmitTest = async () => {

@@ -27,6 +27,7 @@ const MessageList = ({
         }
     };
 
+    // Funkcja aktywująca tryb edycji - TEGO BRAKOWAŁO
     const handleStartEdit = (msg) => {
         setEditingId(msg.id);
         setEditText(msg.text);

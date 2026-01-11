@@ -18,9 +18,7 @@
       "Bash(fastapienvScriptspip install supabase)",
       "Bash(.fastapienvScriptspip install supabase)",
       "Bash(./fastapienv/Scripts/pip.exe install:*)",
-      "Bash(./fastapienv/Scripts/pip.exe:*)",
-      "Bash(./fastapienv/Scripts/alembic.exe revision:*)",
-      "Bash(./fastapienv/Scripts/alembic.exe upgrade:*)"
+      "Bash(./fastapienv/Scripts/pip.exe:*)"
     ],
     "deny": [],
     "ask": []
