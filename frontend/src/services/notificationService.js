@@ -1,5 +1,9 @@
 import ENDPOINTS from '../api/endpoints';
 
+const triggerRefresh = () => {
+    window.dispatchEvent(new Event("refreshNotifications"));
+};
+
 const handleResponse = async (response) => {
     if (response.status === 204) return {}; 
     if (!response.ok) {
@@ -21,6 +25,7 @@ export const markNotificationAsRead = async (notificationId) => {
         method: 'PATCH',
         credentials: 'include',
     });
+    triggerRefresh();
     return handleResponse(response);
 };
 
@@ -29,6 +34,7 @@ export const deleteNotification = async (notificationId) => {
         method: 'DELETE',
         credentials: 'include',
     });
+    triggerRefresh();
     return handleResponse(response);
 };
 

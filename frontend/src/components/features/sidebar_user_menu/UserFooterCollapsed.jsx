@@ -3,7 +3,7 @@ import { LogOut } from "lucide-react";
 import UserMenu from "./UserMenu";
 import styles from "../../../css/layout/SidebarFooter.module.css";
 
-const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSection, onExpandAndOpen }) => {
+const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSection, onExpandAndOpen, hasUnread }) => {
 
     const renderAvatarContent = () => {
         if (userData?.avatar_url) {
@@ -29,6 +29,7 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSe
                     title={userData?.username || "User"}
                 >
                     {renderAvatarContent()}
+                    {hasUnread && <span className={styles.notificationDot} />}
                 </div>
             </div>
 

@@ -1,15 +1,17 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from supabase import create_client, Client
 from starlette import status
-from models import Users
+from models import Users, Notebooks, NotebookCollaborator, Notifications
 from database import SessionLocal
 from .auth import get_current_user
 from passlib.context import CryptContext
 import os
 import uuid
+from datetime import datetime
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -184,6 +186,51 @@ async def archive_user_account(user: user_dependency, db: db_dependency):
 
     if user_model is None:
         raise HTTPException(status_code=404, detail='User not found')
+
+    user_id = user.get('id')
+    username = user_model.username
+
+    owned_notebook_ids = db.query(Notebooks.id).filter(Notebooks.created_by == user_id).all()
+    owned_notebook_ids = [n_id for (n_id,) in owned_notebook_ids]
+
+    collab_notebook_ids = db.query(NotebookCollaborator.notebook_id).filter(NotebookCollaborator.user_id == user_id).all()
+    collab_notebook_ids = [n_id for (n_id,) in collab_notebook_ids]
+
+    all_notebook_ids = set(owned_notebook_ids + collab_notebook_ids)
+
+    if all_notebook_ids:
+        owners_query = db.query(Notebooks.created_by).filter(
+            Notebooks.id.in_(all_notebook_ids),
+            Notebooks.created_by != user_id
+        )
+        
+        collaborators_query = db.query(NotebookCollaborator.user_id).filter(
+            NotebookCollaborator.notebook_id.in_(all_notebook_ids),
+            NotebookCollaborator.user_id != user_id
+        )
+
+        users_to_notify = set()
+        for (owner_id,) in owners_query.all():
+            users_to_notify.add(owner_id)
+        
+        for (collab_id,) in collaborators_query.all():
+            users_to_notify.add(collab_id)
+
+        notifications_to_add = []
+        for recipient_id in users_to_notify:
+            new_notification = Notifications(
+                user_id=recipient_id,
+                sender_id=user_id,
+                content=f"zarchiwizował swoje konto.",
+                type="warning",
+                redirect_type="none",
+                is_read=False,
+                created_at=datetime.utcnow()
+            )
+            notifications_to_add.append(new_notification)
+
+        if notifications_to_add:
+            db.add_all(notifications_to_add)
 
     user_model.is_archived = True
     user_model.is_active = False

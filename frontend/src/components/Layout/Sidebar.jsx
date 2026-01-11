@@ -13,7 +13,7 @@ import ENDPOINTS from "../../api/endpoints";
 import logoDark from "./logodark.png";
 import logoLight from "./logolight.png";
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook }) => {
+const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook, hasUnread }) => {
     const { language } = useContext(LanguageContext);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     
@@ -419,6 +419,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
                             isUserMenuOpen={isUserMenuOpen}
                             setIsUserMenuOpen={setIsUserMenuOpen}
+                            hasUnread={hasUnread}
                         />
                     ) : (
                         <UserFooterCollapsed
@@ -427,6 +428,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
                             onExpandAndOpen={handleCollapsedUserClick}
+                            hasUnread={hasUnread}
                         />
                     )}
                 </div>
