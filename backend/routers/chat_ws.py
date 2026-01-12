@@ -1,17 +1,25 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, HTTPException
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List, Dict
 import json
 from datetime import datetime
 from database import SessionLocal
 from models import Notebooks, NotebookCollaborator, Users, NotebookMessages
-from models import Notes, Tests, FlashcardSets, Podcasts, Notifications
+from models import Notes, Tests, FlashcardSets, Podcasts, Notifications, ChatReadStatus
 import re
+from sqlalchemy import func
 
 router = APIRouter(
     prefix="/group-chat",
     tags=["group-chat"]
 )
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def format_time(dt: datetime):
     return dt.strftime("%H:%M")
@@ -319,3 +327,78 @@ async def get_notebook_members(notebook_id: int):
                 })
 
         return members
+    
+@router.post("/{notebook_id}/mark-read")
+def mark_chat_read(notebook_id: int, user_id: int, db: Session = Depends(get_db)):
+    read_status = db.query(ChatReadStatus).filter(
+        ChatReadStatus.user_id == user_id,
+        ChatReadStatus.notebook_id == notebook_id
+    ).first()
+
+    if read_status:
+        read_status.last_viewed_at = datetime.utcnow()
+    else:
+        new_status = ChatReadStatus(
+            user_id=user_id,
+            notebook_id=notebook_id,
+            last_viewed_at=datetime.utcnow()
+        )
+        db.add(new_status)
+    
+    db.commit()
+    return {"status": "success"}
+
+@router.get("/unread-status/{user_id}")
+def get_unread_status(user_id: int, db: Session = Depends(get_db)):
+    collab_notebooks = db.query(NotebookCollaborator.notebook_id).filter(
+        NotebookCollaborator.user_id == user_id
+    ).all()
+    
+    owner_shared_notebooks = db.query(Notebooks.id).filter(
+        Notebooks.created_by == user_id, 
+        Notebooks.space_type == 'shared'
+    ).all()
+    
+    notebook_ids = list(set(
+        [id[0] for id in collab_notebooks] + [id[0] for id in owner_shared_notebooks]
+    ))
+
+    if not notebook_ids:
+        return {}
+
+    last_messages = db.query(
+        NotebookMessages.notebook_id,
+        func.max(NotebookMessages.created_at).label('last_message_at')
+    ).filter(
+        NotebookMessages.notebook_id.in_(notebook_ids)
+    ).group_by(
+        NotebookMessages.notebook_id
+    ).all()
+
+    user_views = db.query(
+        ChatReadStatus.notebook_id,
+        ChatReadStatus.last_viewed_at
+    ).filter(
+        ChatReadStatus.user_id == user_id,
+        ChatReadStatus.notebook_id.in_(notebook_ids)
+    ).all()
+
+    views_map = {uv.notebook_id: uv.last_viewed_at for uv in user_views}
+
+    unread_notebooks = {}
+
+    for item in last_messages:
+        notebook_id = item.notebook_id
+        last_msg_date = item.last_message_at
+        
+        if not last_msg_date:
+            continue
+
+        last_viewed_date = views_map.get(notebook_id, datetime.min)
+        if last_msg_date > last_viewed_date:
+             iso_date = last_msg_date.isoformat()
+             if not iso_date.endswith("Z") and "+" not in iso_date:
+                iso_date += "Z"
+             unread_notebooks[notebook_id] = iso_date
+
+    return unread_notebooks

@@ -1,6 +1,5 @@
 import ENDPOINTS from '../api/endpoints';
 
-// Pomocnicza funkcja do nagłówków (możesz ją importować ze swojego pliku z usługami użytkownika)
 const getHeaders = (token) => ({
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
@@ -24,7 +23,6 @@ export const getPinnedMessage = async (notebookId) => {
     return await response.json();
 };
 
-// Agregacja zasobów z 4 różnych endpointów backendu
 export const getAvailableResources = async (notebookId) => {
     try {
         const [notes, tests, flashcards, podcasts] = await Promise.all([
@@ -71,4 +69,28 @@ export const unpinAllMessages = async (notebookId) => {
     });
     if (!response.ok) throw new Error('Błąd odpinania wiadomości');
     return true;
+};
+
+export const getUnreadStatus = async (userId) => {
+    const response = await fetch(ENDPOINTS.GROUP_CHAT.UNREAD_STATUS(userId));
+    
+    if (!response.ok) {
+        console.warn('Nie udało się pobrać statusu wiadomości');
+        return {}; 
+    }
+    
+    return await response.json();
+};
+
+export const markChatAsRead = async (notebookId, userId) => {
+    const response = await fetch(ENDPOINTS.GROUP_CHAT.MARK_READ(notebookId, userId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    if (!response.ok) {
+        console.warn('Błąd oznaczania jako przeczytane');
+    }
 };
