@@ -12,6 +12,7 @@ import { getNotebooks, createNotebook } from "../../services/notebookService";
 import ENDPOINTS from "../../api/endpoints";
 import logoDark from "./logodark.png";
 import logoLight from "./logolight.png";
+import * as chatService from "../../services/groupChatService";
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook, hasUnread }) => {
     const { language } = useContext(LanguageContext);
@@ -19,6 +20,60 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+    const [unreadNotebookIds, setUnreadNotebookIds] = useState(new Set());
+
+    const checkUnreadMessages = async () => {
+        if (!userData?.id) return;
+
+        try {
+            const unreadMap = await chatService.getUnreadStatus(userData.id);
+
+            if (!unreadMap) return;
+
+            const newUnreadSet = new Set();
+            
+            Object.keys(unreadMap).forEach((notebookIdStr) => {
+                const notebookId = parseInt(notebookIdStr);
+                
+                const isCurrentlySelected = activeNotebook?.id === notebookId;
+                
+                const savedChatStates = localStorage.getItem('groupChat_open_states');
+                const chatStates = savedChatStates ? JSON.parse(savedChatStates) : {};
+                const isChatOpen = chatStates[notebookId] === true;
+
+                if (isCurrentlySelected && isChatOpen) {
+                    // hihi
+                } else {
+                    newUnreadSet.add(notebookId);
+                }
+            });
+
+            setUnreadNotebookIds(newUnreadSet);
+
+        } catch (error) {
+            console.error("Błąd pobierania statusu:", error);
+        }
+    };
+
+    useEffect(() => {
+        checkUnreadMessages();
+
+        const intervalId = setInterval(() => {
+            checkUnreadMessages();
+        }, 60000); //60s 60 s
+
+        const handleChatRead = () => checkUnreadMessages();
+        window.addEventListener('chatRead', handleChatRead);
+        window.addEventListener('focus', checkUnreadMessages);
+        window.addEventListener('online', checkUnreadMessages);
+        return () => {
+            clearInterval(intervalId);
+            window.removeEventListener('chatRead', handleChatRead);
+            window.removeEventListener('focus', checkUnreadMessages);
+            window.removeEventListener('online', checkUnreadMessages);
+        };
+    }, [userData?.id, activeNotebook]);
 
     useEffect(() => {
         if (activeNotebook) {
@@ -56,7 +111,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [selectedNotebook, setSelectedNotebook] = useState(null);
     const [dragOverNotebook, setDragOverNotebook] = useState(null);
 
-    // Track window resize for mobile/desktop detection
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -66,7 +120,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!isMobile || !isMobileMenuOpen) return;
@@ -152,7 +205,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const handleNotebookClick = (notebook, spaceId) => {
-        // Allow clicking on mobile even when sidebar is not "open"
         if (!isSidebarOpen && !isMobile) return;
 
         const notebookWithSpace = {
@@ -164,7 +216,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         setSelectedNotebook(notebookWithSpace);
         onSelectNotebook(notebookWithSpace);
 
-        // Close mobile menu after selecting notebook
         if (isMobile) {
             setIsMobileMenuOpen(false);
         }
@@ -464,7 +515,20 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                                 onDrop={(e) => handleDrop(e, notebook)}
                                                 title={notebook.name}
                                             >
-                                                <span className={styles.notebookName}>{notebook.name}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                                                    <span className={styles.notebookName}>{notebook.name}</span>
+                                                    
+                                                    {unreadNotebookIds.has(notebook.id) && (
+                                                        <div style={{
+                                                            minWidth: '8px',
+                                                            height: '8px',
+                                                            backgroundColor: '#ef4444',
+                                                            borderRadius: '50%',
+                                                            marginLeft: '8px',
+                                                            boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)'
+                                                        }} />
+                                                    )}
+                                                </div>
                                                 <NotebookMenu
                                                     notebook={notebook}
                                                     spaceType={space.id}

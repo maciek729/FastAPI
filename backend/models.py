@@ -324,3 +324,11 @@ class StudyFiles(Base):
 
     notebook = relationship("Notebooks")
     user = relationship("Users")
+
+class ChatReadStatus(Base):
+    __tablename__ = "chat_read_status"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"), index=True)
+    last_viewed_at = Column(DateTime, default=datetime.utcnow)

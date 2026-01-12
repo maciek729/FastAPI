@@ -150,7 +150,9 @@ const ENDPOINTS = {
       TESTS: (notebookId) => `${API_BASE_URL}/group-chat/tests/notebook/${notebookId}`,
       FLASHCARDS: (notebookId) => `${API_BASE_URL}/group-chat/flashcards/notebook/${notebookId}`,
       PODCASTS: (notebookId) => `${API_BASE_URL}/group-chat/podcasts/notebook/${notebookId}`,
-    }
+    },
+    UNREAD_STATUS: (userId) => `${API_BASE_URL}/group-chat/unread-status/${userId}`,
+    MARK_READ: (notebookId, userId) => `${API_BASE_URL}/group-chat/${notebookId}/mark-read?user_id=${userId}`
   },
   NOTIFICATIONS: {
     LIST: (userId) => `${API_BASE_URL}/notifications/${userId}`,

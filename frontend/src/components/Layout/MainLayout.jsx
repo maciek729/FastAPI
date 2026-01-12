@@ -98,7 +98,7 @@ export default function MainLayout() {
 
     const intervalId = setInterval(() => {
       checkNotifications();
-    }, 60000);
+    }, 60000); //60s 60 s
 
     const onFocus = () => checkNotifications();
     const onOnline = () => checkNotifications();
