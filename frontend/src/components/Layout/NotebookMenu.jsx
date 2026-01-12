@@ -19,7 +19,9 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
   const [collaboratorUsername, setCollaboratorUsername] = useState('');
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
+  const triggerRef = useRef(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -58,7 +60,8 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (menuRef.current && !menuRef.current.contains(event.target) &&
+          triggerRef.current && !triggerRef.current.contains(event.target)) {
         setShowMenu(false);
       }
     };
@@ -66,6 +69,34 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const calculateMenuPosition = () => {
+    if (!triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const menuWidth = 180; // min-width from CSS
+    const menuHeight = 150; // approximate height
+
+    let top = rect.bottom + 4; // 4px margin below trigger
+    let left = rect.right - menuWidth; // align to right edge of trigger
+
+    // Ensure menu doesn't go off bottom of screen
+    if (top + menuHeight > window.innerHeight) {
+      top = rect.top - menuHeight - 4; // position above trigger
+    }
+
+    // Ensure menu doesn't go off right edge
+    if (left + menuWidth > window.innerWidth) {
+      left = window.innerWidth - menuWidth - 8;
+    }
+
+    // Ensure menu doesn't go off left edge
+    if (left < 8) {
+      left = 8;
+    }
+
+    setMenuPosition({ top, left });
+  };
 
   const fetchCollaborators = async () => {
     try {
@@ -153,18 +184,34 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
     }
   };
 
+  const handleToggleMenu = () => {
+    if (!showMenu) {
+      calculateMenuPosition();
+    }
+    setShowMenu(!showMenu);
+  };
+
   return (
-    <div ref={menuRef} className={styles.notebookMenuContainer}>
+    <div className={styles.notebookMenuContainer}>
       <button
+        ref={triggerRef}
         className={styles.menuTrigger}
-        onClick={() => setShowMenu(!showMenu)}
+        onClick={handleToggleMenu}
         title={translate('sidebar.notebookMenu')}
       >
         <MoreVertical size={16} />
       </button>
 
-      {showMenu && (
-        <div className={styles.contextMenu}>
+      {showMenu && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={menuRef}
+          className={styles.contextMenu}
+          style={{
+            position: 'fixed',
+            top: `${menuPosition.top}px`,
+            left: `${menuPosition.left}px`,
+          }}
+        >
           <button
             className={styles.menuItem}
             onClick={handleRename}
@@ -191,7 +238,8 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
             <Trash2 size={16} />
             <span>{translate('sidebar.delete')}</span>
           </button>
-        </div>
+        </div>,
+        document.body
       )}
 
       {showCollaboratorModal && typeof document !== 'undefined' && createPortal(

@@ -24,6 +24,8 @@ class Users(Base):
 
     is_archived = Column(Boolean, default=False, nullable=True)
 
+    has_completed_tutorial = Column(Boolean, default=False, nullable=True)
+
 class Groups(Base):
     __tablename__ = 'groups'
 
@@ -304,6 +306,24 @@ class Notifications(Base):
     user = relationship("Users", foreign_keys=[user_id])
     sender = relationship("Users", foreign_keys=[sender_id])
     notebook = relationship("Notebooks")
+
+class StudyFiles(Base):
+    __tablename__ = "study_files"
+
+    id = Column(Integer, primary_key=True, index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    file_name = Column(String)
+    file_path = Column(String)
+    file_url = Column(String)
+    file_type = Column(String)
+    file_size = Column(Integer)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    notebook = relationship("Notebooks")
+    user = relationship("Users")
 
 class ChatReadStatus(Base):
     __tablename__ = "chat_read_status"

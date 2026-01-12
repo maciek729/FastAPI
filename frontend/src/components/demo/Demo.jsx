@@ -4,16 +4,23 @@ import styles from '../../css/demo/Demo.module.css';
 import { LanguageContext } from '../../translations/LanguageContext';
 import translations from '../../translations/translation.json';
 import { getNotebooks } from '../../services/notebookService';
+import { completeTutorial } from '../../services/userService';
 
-const Demo = ({ onSelectNotebook, userData }) => {
+const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const { language, changeLanguage } = useContext(LanguageContext);
 
   useEffect(() => {
-    const hasSeenDemo = localStorage.getItem('hasSeenDemo');
-    if (!hasSeenDemo) {
+    // Check from database field instead of localStorage
+    console.log('Demo check - userData:', userData);
+    console.log('Demo check - has_completed_tutorial:', userData?.has_completed_tutorial);
+
+    if (userData && !userData.has_completed_tutorial) {
+      console.log('Opening demo - user has not completed tutorial');
       setTimeout(() => setIsOpen(true), 1000);
+    } else {
+      console.log('Not opening demo - userData:', userData, 'has_completed:', userData?.has_completed_tutorial);
     }
 
     const handleReopenDemo = () => {
@@ -25,7 +32,7 @@ const Demo = ({ onSelectNotebook, userData }) => {
     return () => {
       window.removeEventListener('reopenDemo', handleReopenDemo);
     };
-  }, []);
+  }, [userData]);
 
   const t = (key) => {
     const keys = key.split('.');
@@ -36,7 +43,7 @@ const Demo = ({ onSelectNotebook, userData }) => {
     return value || key;
   };
 
-  // Get first personal notebook for demo purposes
+  // Get first shared notebook for demo purposes
   const [firstNotebook, setFirstNotebook] = useState(null);
 
   useEffect(() => {
@@ -44,9 +51,9 @@ const Demo = ({ onSelectNotebook, userData }) => {
       if (!userData?.id) return;
 
       try {
-        const personalNotebooks = await getNotebooks(userData.id, 'personal');
-        if (personalNotebooks && personalNotebooks.length > 0) {
-          setFirstNotebook(personalNotebooks[0]);
+        const sharedNotebooks = await getNotebooks(userData.id, 'shared');
+        if (sharedNotebooks && sharedNotebooks.length > 0) {
+          setFirstNotebook(sharedNotebooks[0]);
         }
       } catch (err) {
         console.log('No notebooks available for demo');
@@ -141,7 +148,13 @@ const Demo = ({ onSelectNotebook, userData }) => {
       title: t('demo.steps.groupChat.title'),
       description: t('demo.steps.groupChat.description'),
       icon: "👥",
-      action: null 
+      action: firstNotebook ? () => {
+        onNavigateToResource?.({
+          type: 'notebook',
+          notebookId: firstNotebook.id,
+          tab: 'group-chat'
+        });
+      } : null
     },
     {
       title: t('demo.steps.ready.title'),
@@ -151,12 +164,20 @@ const Demo = ({ onSelectNotebook, userData }) => {
     }
   ];
 
-  const handleClose = () => {
+  const handleClose = async () => {
     setIsOpen(false);
-    localStorage.setItem('hasSeenDemo', 'true');
+    // Mark tutorial as completed in database
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await completeTutorial(token);
+      } catch (err) {
+        console.error('Failed to mark tutorial as completed:', err);
+      }
+    }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);
@@ -166,7 +187,15 @@ const Demo = ({ onSelectNotebook, userData }) => {
       }
     } else {
       setIsOpen(false);
-      localStorage.setItem('hasSeenDemo', 'true');
+      // Mark tutorial as completed in database
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          await completeTutorial(token);
+        } catch (err) {
+          console.error('Failed to mark tutorial as completed:', err);
+        }
+      }
     }
   };
 

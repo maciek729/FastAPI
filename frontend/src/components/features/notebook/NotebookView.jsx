@@ -136,12 +136,13 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
         localStorage.setItem('groupChat_widths', JSON.stringify(widths));
     }, [chatWidth, notebookId]);
 
+    // Handle defaultSection to open group chat when navigating from notifications or demo
     useEffect(() => {
         if (defaultSection === 'group-chat') {
             setIsGroupChatOpen(true);
         } else if (defaultSection) {
             setActiveTab(defaultSection);
-            // setIsGroupChatOpen(false);
+            setIsGroupChatOpen(false);
         }
     }, [defaultSection]);
 
@@ -191,7 +192,7 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
                 {isShared && (
                     <>
                         <div className={styles.separator} />
-                        <button
+                        <button 
                             className={`${styles.tab} ${isGroupChatOpen ? styles.active : ""}`}
                             onClick={() => setIsGroupChatOpen(!isGroupChatOpen)}
                         >
@@ -205,7 +206,13 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
             {/* Tab Content & Sidebar */}
             <div className={styles.mainLayout}>
                 <div className={styles.tabContainer}>
-                    {activeTab === "chat" && <Chat userId={userData.id} notebookId={details?.id}/>}
+                    {activeTab === "chat" && (
+                    <Chat 
+                        userId={userData.id} 
+                        notebookId={details?.id}
+                        refreshNotebook={refreshNotebook}  
+                    />
+                    )}
                     {activeTab === "files" && (
                         <FilesView
                             details={details}
