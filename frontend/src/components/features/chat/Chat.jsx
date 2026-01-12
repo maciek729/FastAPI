@@ -221,39 +221,6 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
         </button>
       </div>
 
-      <div className={styles.styleSelector}>
-        <span className={styles.styleLabel}>{t('chat.responseStyle')}:</span>
-        <div className={styles.styleButtons}>
-          <button 
-            className={responseStyle === 'brief' ? styles.styleBtnActive : styles.styleBtn}
-            onClick={() => setResponseStyle('brief')}
-            title={t('chat.styleBriefDesc')}
-          >
-            {getStyleLabel('brief')}
-          </button>
-          <button 
-            className={responseStyle === 'balanced' ? styles.styleBtnActive : styles.styleBtn}
-            onClick={() => setResponseStyle('balanced')}
-            title={t('chat.styleBalancedDesc')}
-          >
-            {getStyleLabel('balanced')}
-          </button>
-          <button 
-            className={responseStyle === 'detailed' ? styles.styleBtnActive : styles.styleBtn}
-            onClick={() => setResponseStyle('detailed')}
-            title={t('chat.styleDetailedDesc')}
-          >
-            {getStyleLabel('detailed')}
-          </button>
-        </div>
-        <div className={styles.styleIndicator}>
-          {responseStyle === 'brief' && <span className={`${styles.styleDot} ${styles.briefDot}`}>●</span>}
-          {responseStyle === 'balanced' && <span className={`${styles.styleDot} ${styles.balancedDot}`}>●</span>}
-          {responseStyle === 'detailed' && <span className={`${styles.styleDot} ${styles.detailedDot}`}>●</span>}
-          <span className={styles.currentStyle}>{getStyleLabel(responseStyle)}</span>
-        </div>
-      </div>
-
       {selectedMessages.length > 0 && (
         <button className={styles.saveMegaBtn} onClick={saveSelectedMessagesAsNote}>
           <Save size={16} /> {t('chat.saveSelected')}
