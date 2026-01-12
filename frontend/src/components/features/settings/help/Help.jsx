@@ -3,6 +3,7 @@ import styles from "../../../../css/features/settings/Help.module.css"
 import HelpQuestion from "./HelpQuestion.jsx";
 import { LanguageContext } from "../../../../translations/LanguageContext";
 import translations from "../../../../translations/translation.json";
+import { SendContactMessage } from "../../../../services/contactService";
 
 export default function Help({userData}) {
     const [title, setTitle] = useState("");
@@ -35,33 +36,15 @@ export default function Help({userData}) {
         setIsLoading(true);
         setStatus("");
 
-        const apiUrl = "http://localhost:8000/contact/";
-
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    title: title,
-                    message: message,
-                    user_email: userData.email, 
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setStatus(data.message || t('help.successMessage'));
-                setTitle("");
-                setMessage("");
-            } else {
-                setStatus(data.detail || t('help.errorMessage'));
-            }
+            const data = await SendContactMessage(title, message, userData.email);
+            
+            setStatus(data.message);
+            setTitle("");
+            setMessage("");
         } catch (error) {
-            console.error("Błąd sieci lub serwera:", error);
-            setStatus(t('help.connectionError'));
+            console.error("Błąd kontaktu:", error);
+            setStatus(error.message);
         } finally {
             setIsLoading(false);
         }
@@ -85,10 +68,22 @@ export default function Help({userData}) {
                 onToggle={() => handleQuestionToggle('question1')}
             />
             <HelpQuestion
-                question={t('help.question2')}
-                answer={t('help.answer2')}
-                isOpen={openQuestion === 'question2'}
-                onToggle={() => handleQuestionToggle('question2')}
+                question={"Jak dodać lub usunąć współtwórcę do / z notatnika?"}
+                answer={"Aby dodać bądź usunąć współtwórcę do / z notatnika należy najechać na notatnik znajdujący się na pasku bocznym po lewej stronie i kliknąć na 3 kropeczki, a następnie wybrać opcję Dodaj współtwórcę. Otworzy się okno współtwórców notatnika."}
+                isOpen={openQuestion === 'question4'}
+                onToggle={()=> handleQuestionToggle('question4')}
+            />
+            <HelpQuestion
+                question={"Co to jest sekcja Chat z AI"}
+                answer={"Chat z AI to sekcja notatnika, w której użytkownik może zadawać dowolne pytania sztucznej inteligencji, może również przesyłać swoje pliki, a odpowiedzi sztucznej inteligencji można zapisywać do notatki."}
+                isOpen={openQuestion === 'question7'}
+                onToggle={()=> handleQuestionToggle('question7')}
+            />
+            <HelpQuestion
+                question={"Co to jest sekcja Moje Pliki"}
+                answer={"Moje pliki to sekcja notatnika, w której użytkownik może umieszczać swoje notatki, a także różnego rodzaju pliki np. pdf lub zdjęcia. Dzięki temu użytkownik może trzymać wszystkie pliki potrzebne do lepszej nauki w jednym miejscu. Notatki następnie możemy wykorzystać tworząc fiszki, sprawdziany bądź podcasty."}
+                isOpen={openQuestion === 'question6'}
+                onToggle={()=> handleQuestionToggle('question6')}
             />
 
             <div className={styles.sectionContainer}>
@@ -128,5 +123,3 @@ export default function Help({userData}) {
         </div>
     );
 }
-
-

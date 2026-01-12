@@ -10,9 +10,10 @@ import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import GroupChatSidebar from "../group_chat/GroupChatSidebar";
 
-export default function NotebookView({ details, userData, refreshNotebook, isSidebarOpen, highlightMessageId, setHighlightMessageId}) {
+export default function NotebookView({ details, userData, refreshNotebook, defaultSection, isSidebarOpen, highlightMessageId, setHighlightMessageId, onGroupChatStatusChange}) {
     const notebookId = details?.id;
     const [highlightedItemId, setHighlightedItemId] = useState(null);
+    const [hasUnreadChat, setHasUnreadChat] = useState(false);
     
     const [activeTab, setActiveTab] = useState("files");
     const [isGroupChatOpen, setIsGroupChatOpen] = useState(() => {
@@ -81,7 +82,7 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
             const tab = event.detail;
             if (tab) {
                 setActiveTab(tab);
-                setIsGroupChatOpen(false);
+                // setIsGroupChatOpen(false);
             }
         };
 
@@ -134,6 +135,15 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
         widths[notebookId] = chatWidth;
         localStorage.setItem('groupChat_widths', JSON.stringify(widths));
     }, [chatWidth, notebookId]);
+
+    useEffect(() => {
+        if (defaultSection === 'group-chat') {
+            setIsGroupChatOpen(true);
+        } else if (defaultSection) {
+            setActiveTab(defaultSection);
+            // setIsGroupChatOpen(false);
+        }
+    }, [defaultSection]);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');
@@ -233,6 +243,12 @@ export default function NotebookView({ details, userData, refreshNotebook, isSid
                     onNavigateToResource={handleInternalResourceOpen}
                     highlightMessageId={highlightMessageId}
                     setHighlightMessageId={setHighlightMessageId}
+                    onUnreadStatusChange={(status) => {
+                        setHasUnreadChat(status);
+                        if (onGroupChatStatusChange) {
+                            onGroupChatStatusChange(status);
+                        }
+                    }}
                 />
             </div>
         </div>

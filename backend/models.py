@@ -304,3 +304,11 @@ class Notifications(Base):
     user = relationship("Users", foreign_keys=[user_id])
     sender = relationship("Users", foreign_keys=[sender_id])
     notebook = relationship("Notebooks")
+
+class ChatReadStatus(Base):
+    __tablename__ = "chat_read_status"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    notebook_id = Column(Integer, ForeignKey("notebooks.id"), index=True)
+    last_viewed_at = Column(DateTime, default=datetime.utcnow)

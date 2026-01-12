@@ -1,27 +1,31 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom'; 
 import toast from 'react-hot-toast';
-import { MoreVertical, Edit2, Trash2, UserPlus } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, UserPlus, X } from 'lucide-react';
 import { confirmModal } from '../../utils/confirmModal';
 import { promptModal } from '../../utils/promptModal';
 import styles from '../../css/layout/NotebookMenu.module.css';
+import generatorStyles from '../../css/features/FlashcardGenerator.module.css';
+import notebookStyles from '../../css/features/NotebookView.module.css';
 import { renameNotebook, deleteNotebook, getCollaborators, addCollaborator, removeCollaborator } from '../../services/notebookService';
 import { LanguageContext } from '../../translations/LanguageContext';
 import translations from '../../translations/translation.json';
 
 const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   const { language } = useContext(LanguageContext);
+  const navigate = useNavigate(); 
   const [showMenu, setShowMenu] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
   const [collaboratorUsername, setCollaboratorUsername] = useState('');
   const menuRef = useRef(null);
 
-  // Fallback translation function if t is not provided correctly
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
   const translate = (key, params = {}) => {
     if (t && typeof t === 'function') {
       const result = t(key, params);
-      // If t returns the key itself, fall back to direct lookup
       if (result === key) {
         const keys = key.split('.');
         let translation = translations[language];
@@ -38,7 +42,6 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
       }
       return result;
     }
-    // Direct fallback
     const keys = key.split('.');
     let translation = translations[language];
     for (const k of keys) {
@@ -104,6 +107,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   const handleOpenCollaborators = () => {
     fetchCollaborators();
     setShowCollaboratorModal(true);
+    setShowMenu(false);
   };
 
   const handleAddCollaborator = async (e) => {
@@ -119,7 +123,11 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
       setCollaboratorUsername('');
       fetchCollaborators();
     } catch (err) {
-      toast.error(err.message || translate('sidebar.addColError'));
+      if (err.message === 'USER_NOT_FOUND') {
+        toast.error(translate('sidebar.userNotFound'));
+      } else {
+        toast.error(err.message || translate('sidebar.addColError'));
+      }
     }
   };
 
@@ -129,8 +137,17 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
 
     try {
       await removeCollaborator(notebook.id, userId);
-      toast.success(translate('sidebar.deleteColSuccess'));
-      fetchCollaborators();
+      
+      if (currentUser.id === userId) {
+        toast.success(translate('sidebar.leaveNotebookSuccess'));
+        setShowCollaboratorModal(false);
+        navigate('/dashboard');
+        if (onRefresh) onRefresh(); 
+      } else {
+        toast.success(translate('sidebar.deleteColSuccess'));
+        fetchCollaborators();
+      }
+      
     } catch (err) {
       toast.error(err.message || translate('sidebar.deleteColError'));
     }
@@ -155,13 +172,17 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
             <Edit2 size={16} />
             <span>{translate('sidebar.rename')}</span>
           </button>
-          <button
-            className={styles.menuItem}
-            onClick={handleOpenCollaborators}
-          >
-            <UserPlus size={16} />
-            <span>{translate('sidebar.addCollaborators')}</span>
-          </button>
+          
+          {spaceType === 'shared' && (
+            <button
+              className={styles.menuItem}
+              onClick={handleOpenCollaborators}
+            >
+              <UserPlus size={16} />
+              <span>{translate('sidebar.addCollaborators')}</span>
+            </button>
+          )}
+
           <div className={styles.menuDivider}></div>
           <button
             className={`${styles.menuItem} ${styles.deleteItem}`}
@@ -174,48 +195,69 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
       )}
 
       {showCollaboratorModal && typeof document !== 'undefined' && createPortal(
-        <div className={styles.modalOverlay} onClick={() => setShowCollaboratorModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>{translate('sidebar.collaborators')}</h3>
+        <div className={generatorStyles.modalOverlay} onClick={() => setShowCollaboratorModal(false)}>
+          <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
+            <div className={generatorStyles.header}>
+              <h2 className={generatorStyles.title}>{translate('filesView.manageCol')}</h2>
               <button
-                className={styles.closeBtn}
+                className={generatorStyles.closeBtn}
                 onClick={() => setShowCollaboratorModal(false)}
               >
-                ×
+                <X size={20} />
               </button>
             </div>
 
-            <div className={styles.modalBody}>
-              <form onSubmit={handleAddCollaborator} className={styles.addForm}>
-                <input
-                  type="text"
-                  value={collaboratorUsername}
-                  onChange={(e) => setCollaboratorUsername(e.target.value)}
-                  placeholder={translate('sidebar.collaboratorPlaceholder')}
-                  className={styles.input}
-                />
-                <button type="submit" className={styles.addBtn}>
-                  {translate('sidebar.add')}
-                </button>
+            <div className={notebookStyles.collaboratorModalContent}>
+              <form onSubmit={handleAddCollaborator} className={notebookStyles.addCollaboratorForm}>
+                <div className={notebookStyles.inputWithButton}>
+                  <input
+                    type="text"
+                    value={collaboratorUsername}
+                    onChange={(e) => setCollaboratorUsername(e.target.value)}
+                    placeholder={translate('filesView.nameCol')}
+                    className={notebookStyles.modalInput}
+                  />
+                  <button type="submit" className={notebookStyles.btnAdd}>
+                    <UserPlus size={18} /> {translate('filesView.add')}
+                  </button>
+                </div>
               </form>
 
-              <div className={styles.collaboratorsList}>
-                {collaborators.length === 0 ? (
-                  <p className={styles.empty}>{translate('sidebar.noCollaborators')}</p>
-                ) : (
+              <div className={notebookStyles.collaboratorsSection}>
+                <h3>{translate('filesView.col')} ({collaborators.length})</h3>
+                {collaborators.length > 0 ? (
                   collaborators.map((col) => (
-                    <div key={col.id} className={styles.collaboratorItem}>
-                      <span>{col.username}</span>
+                    <div key={col.id} className={notebookStyles.collaboratorItem}>
+                      <div className={notebookStyles.collaboratorLeft}>
+                        {col.avatar_url ? (
+                            <img 
+                                src={col.avatar_url} 
+                                alt={col.username} 
+                                className={notebookStyles.collaboratorAvatar} 
+                            />
+                        ) : (
+                            <div className={notebookStyles.avatarFallback}>
+                                {col.username.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <span className={notebookStyles.collaboratorName}>
+                          {col.username} 
+                          {col.id === currentUser.id && " (Ty)"}
+                        </span>
+                      </div>
                       <button
-                        className={styles.removeBtn}
+                        className={notebookStyles.btnRemove}
                         onClick={() => handleRemoveCollaborator(col.id)}
                         title={translate('sidebar.removeColl')}
                       >
-                        <Trash2 size={14} />
+                        <X size={16} />
                       </button>
                     </div>
                   ))
+                ) : (
+                  <div className={notebookStyles.emptyCollaborators}>
+                     <p>{translate('filesView.noCol')}</p>
+                  </div>
                 )}
               </div>
             </div>

@@ -16,19 +16,19 @@ const GroupChatSidebar = ({
     t, 
     chatName, 
     onNavigateToResource,
-    highlightMessageId
+    highlightMessageId,
+    onUnreadStatusChange
 }) => {
     const autoScrollObjKey = 'groupChat_autoscroll_states';
+    
+    const [localUnreadIndicator, setLocalUnreadIndicator] = useState(false);
 
     const [members, setMembers] = useState([]);
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isResourcePickerOpen, setIsResourcePickerOpen] = useState(false);
     const [availableResources, setAvailableResources] = useState({ 
-        notes: [], 
-        tests: [], 
-        flashcards: [],
-        podcasts: [] 
+        notes: [], tests: [], flashcards: [], podcasts: [] 
     });
 
     const [autoScroll, setAutoScroll] = useState(() => {
@@ -47,8 +47,10 @@ const GroupChatSidebar = ({
     const [pinnedMessage, setPinnedMessage] = useState(null);
 
     const fetchInitialData = async () => {
-        if (!notebookId || !isOpen) return;
-        setIsLoading(true);
+        if (!notebookId) return; 
+        
+        if (messages.length === 0) setIsLoading(true);
+        
         try {
             const [history, chatMembers, pinned] = await Promise.all([
                 chatService.getChatHistory(notebookId).catch(() => []),
@@ -105,17 +107,21 @@ const GroupChatSidebar = ({
     };
 
     useEffect(() => {
-        if (isOpen) fetchInitialData();
-    }, [isOpen, notebookId]);
+        if (onUnreadStatusChange) {
+            onUnreadStatusChange(localUnreadIndicator);
+        }
+    }, [localUnreadIndicator, onUnreadStatusChange]);
+
+    useEffect(() => {
+        fetchInitialData();
+    }, [notebookId]);
 
     useEffect(() => {
         if (!notebookId) return;
         try {
             const saved = localStorage.getItem(autoScrollObjKey);
             let states = saved ? JSON.parse(saved) : {};
-            
             states[notebookId] = autoScroll;
-            
             localStorage.setItem(autoScrollObjKey, JSON.stringify(states));
         } catch (e) {
             console.error("Błąd zapisu do localStorage:", e);
@@ -123,19 +129,17 @@ const GroupChatSidebar = ({
     }, [autoScroll, notebookId]);
 
     useEffect(() => {
-        if (isOpen && notebookId && userData?.id) {
+        if (notebookId && userData?.id) {
             const host = API_BASE_URL.replace(/^https?:\/\//, '');
-            
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-            
             const wsUrl = `${protocol}://${host}/group-chat/ws/${notebookId}/${userData.id}`;
             
-            console.log("Łączenie z WebSocketem pod adresem:", wsUrl);
-            
+            console.log("Łączenie z WebSocketem:", wsUrl);
             socketRef.current = new WebSocket(wsUrl);
 
             socketRef.current.onmessage = (event) => {
                 const data = JSON.parse(event.data);
+                
                 if (data.type === 'message_delete') {
                     setMessages(prev => prev.filter(m => m.id !== data.messageId));
                     if (pinnedMessage?.id === data.messageId) setPinnedMessage(null);
@@ -146,12 +150,22 @@ const GroupChatSidebar = ({
                 } else if (data.type === 'message_unpin') {
                     setPinnedMessage(null); 
                 } else {
-                    setMessages(prev => prev.find(m => m.id === data.id) ? prev : [...prev, data]);
+                    setMessages(prev => {
+                        if (prev.find(m => m.id === data.id)) return prev;
+                        return [...prev, data];
+                    });
+
+                    const isMyMessage = data.senderId === userData.id;
+                    if (!isMyMessage) {
+                        if (!isOpen || !autoScroll) {
+                            setLocalUnreadIndicator(true);
+                        }
+                    }
                 }
             };
             return () => { if (socketRef.current) socketRef.current.close(); };
         }
-    }, [isOpen, notebookId, userData?.id]);
+    }, [notebookId, userData?.id, isOpen, autoScroll]);
 
     useEffect(() => {
         if (isOpen && autoScroll && !highlightMessageId && !localScrollId) {
@@ -159,18 +173,72 @@ const GroupChatSidebar = ({
         }
     }, [messages, isOpen, autoScroll, highlightMessageId, localScrollId]);
 
-    if (!isOpen) return null;
+
+    useEffect(() => {
+        const markAsRead = async () => {
+            if (isOpen && notebookId && userData?.id) {
+   
+                await chatService.markChatAsRead(notebookId, userData.id);
+                
+                window.dispatchEvent(new Event('chatRead'));
+
+                if (autoScroll) {
+                    setLocalUnreadIndicator(false);
+                }
+            }
+        };
+
+        markAsRead();
+    }, [isOpen, notebookId, messages.length, userData?.id, autoScroll]);
+
+    useEffect(() => {
+        const checkInitialStatus = async () => {
+            if (notebookId && userData?.id) {
+                // if (autoScroll) return;
+
+                const unreadMap = await chatService.getUnreadStatus(userData.id);
+                const unreadIds = Object.keys(unreadMap || {}).map(Number);
+                
+                if (unreadIds.includes(notebookId)) {
+                    setLocalUnreadIndicator(true);
+                }
+            }
+        };
+        checkInitialStatus();
+    }, [notebookId, userData?.id]);
 
     return (
-        <aside className={styles.sideGroupChat} style={{ width: `${width}px` }}>
+        <aside 
+            className={styles.sideGroupChat} 
+            style={{ 
+                width: `${width}px`,
+                display: isOpen ? 'flex' : 'none' 
+            }}
+        >
             <div className={styles.resizer} onMouseDown={onResizeStart} />
 
             <div className={styles.fixedTopSection}>
                 <div className={styles.sideChatHeader}>
-                    <div className={styles.sideChatTitle}><span>{chatName}</span></div>
+                    <div className={styles.sideChatTitle}>
+                        <span>{chatName}</span>
+                        {/* Tak wiem że tutaj jest styl, ale już mi się nie chciało zmieniać */}
+                        {localUnreadIndicator && (
+                            <div style={{
+                                width: '8px',
+                                height: '8px',
+                                backgroundColor: '#ef4444',
+                                borderRadius: '50%',
+                                display: 'inline-block',
+                                marginLeft: '8px'
+                            }} title="Nowe wiadomości na dole" />
+                        )}
+                    </div>
                     <div className={styles.headerActions}>
                         <button 
-                            onClick={() => setAutoScroll(!autoScroll)} 
+                            onClick={() => {
+                                setAutoScroll(!autoScroll);
+                                if (!autoScroll) setLocalUnreadIndicator(false); // Reset kropki przy włączeniu
+                            }} 
                             data-tooltip={autoScroll ? t('group_chat.autoScrollOff') : t('group_chat.autoScrollOn')}
                             className={`${styles.toggleScrollBtn} ${autoScroll ? styles.scrollActive : ""}`}
                         >

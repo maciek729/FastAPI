@@ -3,24 +3,7 @@ import { LogOut } from "lucide-react";
 import UserMenu from "./UserMenu";
 import styles from "../../../css/layout/SidebarFooter.module.css";
 
-const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSection }) => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef(null);
-
-    const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (menuRef.current && !menuRef.current.contains(e.target)) {
-                setIsMenuOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
+const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSection, onExpandAndOpen, hasUnread }) => {
 
     const renderAvatarContent = () => {
         if (userData?.avatar_url) {
@@ -37,26 +20,17 @@ const UserFooterCollapsed = ({ userData, handleLogout, onSettingsClick, onGoToSe
 
     return (
         <>
-            <div className={styles.userProfileWrapper} ref={menuRef}>
+            <div className={styles.userProfileWrapper}>
                 <div
                     className={styles.userAvatarCollapsed}
-                    onClick={toggleMenu}
+                    onClick={onExpandAndOpen}
                     role="button"
                     tabIndex="0"
                     title={userData?.username || "User"}
                 >
                     {renderAvatarContent()}
+                    {hasUnread && <span className={styles.notificationDot} />}
                 </div>
-
-                {isMenuOpen && (
-                    <UserMenu
-                        isCollapsed
-                        onGoToSection={onGoToSection}
-                        onSettingsClick={onSettingsClick}
-                        onClose={() => setIsMenuOpen(false)}
-                        userData={userData}
-                    />
-                )}
             </div>
 
             <button 

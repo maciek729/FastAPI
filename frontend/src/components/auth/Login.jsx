@@ -34,6 +34,7 @@ function Login() {
     try {
       const data = await LoginUser(form);
       document.cookie = `access_token=${data.access_token}; path=/`;
+      localStorage.setItem("token", data.access_token);
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);

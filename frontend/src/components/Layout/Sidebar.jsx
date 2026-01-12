@@ -12,10 +12,77 @@ import { getNotebooks, createNotebook } from "../../services/notebookService";
 import ENDPOINTS from "../../api/endpoints";
 import logoDark from "./logodark.png";
 import logoLight from "./logolight.png";
+import * as chatService from "../../services/groupChatService";
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection }) => {
+const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelectNotebook, onGoToDashboard, onGoToSection, activeNotebook, hasUnread }) => {
     const { language } = useContext(LanguageContext);
-    
+    const sidebarRef = useRef(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+    const [unreadNotebookIds, setUnreadNotebookIds] = useState(new Set());
+
+    const checkUnreadMessages = async () => {
+        if (!userData?.id) return;
+
+        try {
+            const unreadMap = await chatService.getUnreadStatus(userData.id);
+
+            if (!unreadMap) return;
+
+            const newUnreadSet = new Set();
+            
+            Object.keys(unreadMap).forEach((notebookIdStr) => {
+                const notebookId = parseInt(notebookIdStr);
+                
+                const isCurrentlySelected = activeNotebook?.id === notebookId;
+                
+                const savedChatStates = localStorage.getItem('groupChat_open_states');
+                const chatStates = savedChatStates ? JSON.parse(savedChatStates) : {};
+                const isChatOpen = chatStates[notebookId] === true;
+
+                if (isCurrentlySelected && isChatOpen) {
+                    // hihi
+                } else {
+                    newUnreadSet.add(notebookId);
+                }
+            });
+
+            setUnreadNotebookIds(newUnreadSet);
+
+        } catch (error) {
+            console.error("Błąd pobierania statusu:", error);
+        }
+    };
+
+    useEffect(() => {
+        checkUnreadMessages();
+
+        const intervalId = setInterval(() => {
+            checkUnreadMessages();
+        }, 60000); //60s 60 s
+
+        const handleChatRead = () => checkUnreadMessages();
+        window.addEventListener('chatRead', handleChatRead);
+        window.addEventListener('focus', checkUnreadMessages);
+        window.addEventListener('online', checkUnreadMessages);
+        return () => {
+            clearInterval(intervalId);
+            window.removeEventListener('chatRead', handleChatRead);
+            window.removeEventListener('focus', checkUnreadMessages);
+            window.removeEventListener('online', checkUnreadMessages);
+        };
+    }, [userData?.id, activeNotebook]);
+
+    useEffect(() => {
+        if (activeNotebook) {
+            setSelectedNotebook(activeNotebook);
+        } else {
+            setSelectedNotebook(null);
+        }
+    }, [activeNotebook]);
+
     const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'light');
 
     const logoToShow = theme === 'dark' ? logoDark : logoDark;
@@ -43,6 +110,50 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [notebooks, setNotebooks] = useState({});
     const [selectedNotebook, setSelectedNotebook] = useState(null);
     const [dragOverNotebook, setDragOverNotebook] = useState(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!isMobile || !isMobileMenuOpen) return;
+
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [isMobile, isMobileMenuOpen]);
+
+    useEffect(() => {
+        if (activeNotebook) {
+            setSelectedNotebook(activeNotebook);
+
+            const targetSpace = activeNotebook.space_type || (activeNotebook.is_shared ? 'shared' : 'personal');
+
+            setExpandedSpaces(prev => {
+                if (!prev.includes(targetSpace)) {
+                    return [...prev, targetSpace];
+                }
+                return prev;
+            });
+        } else {
+            setSelectedNotebook(null);
+        }
+    }, [activeNotebook]);
 
     useEffect(() => {
         setSpaces([
@@ -94,7 +205,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     };
 
     const handleNotebookClick = (notebook, spaceId) => {
-        if (!isSidebarOpen) return;
+        if (!isSidebarOpen && !isMobile) return;
 
         const notebookWithSpace = { 
             ...notebook, 
@@ -103,7 +214,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         };
 
         setSelectedNotebook(notebookWithSpace);
-        onSelectNotebook(notebookWithSpace); 
+        onSelectNotebook(notebookWithSpace);
+
+        if (isMobile) {
+            setIsMobileMenuOpen(false);
+        }
+    };
+
+    const handleMobileMenuToggle = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
     const handleBrandClick = () => {
@@ -258,6 +377,13 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         }
     };
 
+    const handleCollapsedUserClick = () => {
+        if (!isSidebarOpen) {
+            toggleSidebar();
+            setIsUserMenuOpen(true);
+        }
+    };
+
     return (
         <aside className={`${styles.sidebar} ${!isSidebarOpen ? styles.collapsed : ''}`}>
             <div className={styles.sidebarInner}>
@@ -356,7 +482,20 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                                                 onDrop={(e) => handleDrop(e, notebook)}
                                                 title={notebook.name}
                                             >
-                                                <span className={styles.notebookName}>{notebook.name}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                                                    <span className={styles.notebookName}>{notebook.name}</span>
+                                                    
+                                                    {unreadNotebookIds.has(notebook.id) && (
+                                                        <div style={{
+                                                            minWidth: '8px',
+                                                            height: '8px',
+                                                            backgroundColor: '#ef4444',
+                                                            borderRadius: '50%',
+                                                            marginLeft: '8px',
+                                                            boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)'
+                                                        }} />
+                                                    )}
+                                                </div>
                                                 <NotebookMenu
                                                     notebook={notebook}
                                                     spaceType={space.id}
@@ -384,6 +523,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
+                            isUserMenuOpen={isUserMenuOpen}
+                            setIsUserMenuOpen={setIsUserMenuOpen}
+                            hasUnread={hasUnread}
                         />
                     ) : (
                         <UserFooterCollapsed
@@ -391,6 +533,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
                             onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
+                            onExpandAndOpen={handleCollapsedUserClick}
+                            hasUnread={hasUnread}
                         />
                     )}
                 </div>

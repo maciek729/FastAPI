@@ -12,6 +12,7 @@ import Help from '../features/settings/help/Help';
 import NotificationView from "../features/settings/notifications/NotificationView";
 import API_BASE_URL from "../../api/config";
 import Demo from "../demo/Demo";
+import { getUserNotifications } from "../../services/notificationService";
 
 export default function MainLayout() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -27,6 +28,20 @@ export default function MainLayout() {
 
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+
+  const [hasUnread, setHasUnread] = useState(false);
+
+  const checkNotifications = useCallback(async () => {
+    if (!userData?.id) return;
+    try {
+      const notifications = await getUserNotifications(userData.id);
+      
+      const unreadExists = notifications.some(n => !n.is_read);
+      setHasUnread(unreadExists);
+    } catch (error) {
+      console.error("Błąd pobierania powiadomień:", error);
+    }
+  }, [userData?.id]);
 
   const getCookie = (name) => {
     let cookieValue = null;
@@ -77,6 +92,30 @@ export default function MainLayout() {
         handleLogout();
       });
   }, [navigate, handleLogout]);
+
+  useEffect(() => {
+    checkNotifications();
+
+    const intervalId = setInterval(() => {
+      checkNotifications();
+    }, 60000); //60s 60 s
+
+    const onFocus = () => checkNotifications();
+    const onOnline = () => checkNotifications();
+
+    const onRefreshSignal = () => checkNotifications();
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("refreshNotifications", onRefreshSignal);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("online", onOnline);
+      window.addEventListener("refreshNotifications", onRefreshSignal);
+    };
+  }, [checkNotifications]);
 
   useEffect(() => {
     fetchUserData();
@@ -291,6 +330,8 @@ export default function MainLayout() {
         onSelectNotebook={handleSelectNotebook}
         onGoToDashboard={handleBackToDashboard}
         onGoToSection={handleGoToSection}
+        activeNotebook={selectedNotebook}
+        hasUnread={hasUnread}
       />
 
       <div

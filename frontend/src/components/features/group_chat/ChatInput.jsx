@@ -137,11 +137,18 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                                             className={styles.avatarImage}
                                             onError={(e) => {
                                                 e.target.style.display = 'none';
-                                                e.target.parentElement.innerText = member.username[0].toUpperCase();
+                                                e.target.nextSibling.style.display = 'flex';
                                             }}
                                         />
-                                    ) : (
-                                        member.username[0].toUpperCase()
+                                    ) : null}
+                                    
+                                    {member.username !== 'wszyscy' && (
+                                        <div 
+                                            className={styles.avatarFallback} 
+                                            style={{ display: member.avatar_url ? 'none' : 'flex' }}
+                                        >
+                                            {member.username[0].toUpperCase()}
+                                        </div>
                                     )}
                                 </div>
                                 <span style={{ fontWeight: '600', fontSize: '0.85rem' }}>
