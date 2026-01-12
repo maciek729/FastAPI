@@ -13,8 +13,6 @@ import TestGenerator from './TestGenerator';
 import TestTaking from './TestTaking';
 import TestResults from './TestResults';
 import TestDetails from './TestDetails';
-import { LanguageContext } from '../../../translations/LanguageContext';
-import translations from '../../../translations/translation.json';
 
 export default function TestsView({ userData, notebookId, isSidebarOpen }) {
     const [tests, setTests] = useState([]);
@@ -70,22 +68,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-
-    const { language } = useContext(LanguageContext);
-    const t = (key, params = {}) => {
-        const keys = key.split('.');
-        let translation = translations[language];
-        for (const k of keys) {
-            translation = translation?.[k];
-            if (!translation) return key;
-        }
-        if (typeof translation === 'string' && Object.keys(params).length > 0) {
-            return translation.replace(/\{(\w+)\}/g, (match, key) => {
-                return params[key] || match;
-            });
-        }
-        return translation || key;
-    };
 
     useEffect(() => {
         if (userData?.id && notebookId) {
