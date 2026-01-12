@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import styles from "../../css/shared/Auth.module.css";
 import { RegisterUser } from "../../services/authService";
-import logo from "../Layout/logodark.png";
+import logo from "../layout/logodark.png";
 
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";

@@ -4,7 +4,7 @@ import { Menu, X, Users, Sparkles, LogIn } from 'lucide-react';
 import styles from '../../css/features/Intro.module.css';
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
-import logoLight from "../Layout/logolight.png";
+import logoLight from "../layout/logolight.png";
 
 const Intro = () => {
   const navigate = useNavigate();
