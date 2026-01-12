@@ -158,7 +158,10 @@ const ENDPOINTS = {
     MARK_READ: (notifId) => `${API_BASE_URL}/notifications/${notifId}/read`,
     DELETE: (notifId) => `${API_BASE_URL}/notifications/${notifId}`,
     CLEAR_ALL: (userId) => `${API_BASE_URL}/notifications/user/${userId}/all`,
-  }
+  },
+  CONTACT: {
+    SUBMIT: `${API_BASE_URL}/contact/`,
+  },
 };
 
 export default ENDPOINTS;
