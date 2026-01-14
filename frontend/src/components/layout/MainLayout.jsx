@@ -84,7 +84,6 @@ export default function MainLayout() {
         return res.json();
       })
       .then(data => {
-        console.log("Dane użytkownika pobrane/zaktualizowane:", data);
         setUserData(data);
       })
       .catch((err) => {
