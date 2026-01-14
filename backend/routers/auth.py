@@ -229,7 +229,7 @@ class ResetPasswordRequest(BaseModel):
 async def send_reset_password_email(email: EmailStr, token: str, base_url: str):
     reset_link = f"{base_url}reset-password/{token}"
     message = MessageSchema(
-        subject="Reset Hasła - Study Buddy",
+        subject="Reset Hasła - ZdAI to!",
         recipients=[email],
         body=f"Kliknij tutaj, aby zresetować hasło: {reset_link}",
         subtype="plain"
