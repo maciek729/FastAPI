@@ -427,7 +427,7 @@
     content: attr(data-tooltip);
     position: absolute;
     top: 130%;
-    right: 0;
+    left:50%;
     
     background: #1f2937;
     color: white;
@@ -439,25 +439,24 @@
     
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-5px);
+    transform: translateX(-50%) translateY(-5px);
     transition: all 0.2s ease;
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     pointer-events: none;
 }
-
 .toggleScrollBtn::before {
     content: "";
     position: absolute;
     top: 115%;
-    right: 10px;
+    left: 50%;
     
     border: 6px solid transparent;
     border-bottom-color: #1f2937;
     
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-5px);
+    transform: translateX(-50%) translateY(-5px);
     transition: all 0.2s ease;
     z-index: 1000;
 }
@@ -466,7 +465,7 @@
 .toggleScrollBtn:hover::before {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 .toggleScrollBtn svg {
     opacity: 0.5;

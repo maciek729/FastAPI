@@ -18,6 +18,8 @@ import os
 from fastapi.responses import HTMLResponse # type: ignore
 import re
 
+load_dotenv()
+
 router = APIRouter(
     prefix='/auth',
     tags=['auth']
@@ -29,7 +31,6 @@ ALGORITHM = 'HS256'
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
-load_dotenv()
 conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
     MAIL_PASSWORD=SecretStr(os.getenv("MAIL_PASSWORD")),
@@ -54,6 +55,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
 
 def get_db():
     db = SessionLocal()
@@ -67,8 +71,6 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 
 ### Endpoints ##
-
-
 def authenticate_user(identifier: str, password: str, db):
     if re.match(r"[^@]+@[^@]+\.[^@]+", identifier):
         user = db.query(Users).filter(Users.email == identifier).first()
@@ -139,8 +141,20 @@ async def send_verification_email(email: EmailStr, token: str, base_url:str):
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest, request: Request):
+    frontend_url = request.headers.get('origin')
+
+    if not frontend_url:
+        backend_url = str(request.base_url)
+        if "localhost" in backend_url or "127.0.0.1" in backend_url:
+            frontend_url = "http://localhost:5173"
+        else:
+            frontend_url = "https://zdaito.pl"
+
+    if not frontend_url.endswith('/'):
+        frontend_url += "/"
+
     token = secrets.token_urlsafe(32)
-    base_url = str(request.base_url)
+    # base_url = str(request.base_url)
     thisEmail = create_user_request.email
     create_user_model = Users(
         email=thisEmail,
@@ -177,7 +191,7 @@ async def create_user(db: db_dependency,
     db.add(shared_notebook)
     db.commit()
 
-    await send_verification_email(thisEmail, token, base_url)
+    await send_verification_email(thisEmail, token, frontend_url)
 
 
 @router.post("/token", response_model=Token)
@@ -193,7 +207,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
 
 @router.get("/verify")
-async def verify_email(request: Request, token: str, db: Session = Depends(get_db)):
+async def verify_email(token: str, db: Session = Depends(get_db)):
     user = db.query(Users).filter(Users.verification_token == token).first()
 
     if not user:
@@ -206,29 +220,22 @@ async def verify_email(request: Request, token: str, db: Session = Depends(get_d
     user.verification_token = None
     db.commit()
 
-    current_url = str(request.base_url)
-    if "localhost" in current_url:
-        frontend_url = "http://localhost:5173"
-    else:
-        frontend_url = "https://zdaito.pl"
-
-    html_content = """
-    <html>
-        <head>
-            <title>Email Verified</title>
-        </head>
-        <body>
-            <h1>Email successfully verified!</h1>
-            <p>You can now <a href="/auth/login-page">log in</a>.</p>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content, status_code=200)
+    return {"message": "Email successfully verified", "success": True}
 
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr
 
+async def send_reset_password_email(email: EmailStr, token: str, base_url: str):
+    reset_link = f"{base_url}reset-password/{token}"
+    message = MessageSchema(
+        subject="Reset Hasła - Study Buddy",
+        recipients=[email],
+        body=f"Kliknij tutaj, aby zresetować hasło: {reset_link}",
+        subtype="plain"
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message)
 
 @router.post("/forgot-password")
 async def forgot_password(
@@ -238,10 +245,18 @@ async def forgot_password(
 ):
     user = db.query(Users).filter(Users.email == email).first()
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Email not found"
-        )
+        raise HTTPException(status_code=404, detail="Email not found")
+
+    frontend_url = request.headers.get('origin')
+    if not frontend_url:
+        backend_url = str(request.base_url)
+        if "localhost" in backend_url or "127.0.0.1" in backend_url:
+            frontend_url = "http://localhost:5173"
+        else:
+            frontend_url = "https://zdaito.pl"
+    
+    if not frontend_url.endswith('/'):
+        frontend_url += "/"
 
     token = secrets.token_urlsafe(32)
     expires = datetime.utcnow() + timedelta(hours=1)
@@ -250,29 +265,13 @@ async def forgot_password(
     user.reset_password_token_expires = expires
     db.commit()
 
-    origin = request.headers.get('origin') 
-    if not origin:
-        origin = "https://zdaito.pl"
-
-    reset_link = f"{origin}/reset-password/{token}"
-
-    message = MessageSchema(
-        subject="Password Reset Request",
-        recipients=[email],
-        body=f"Click to reset password: {reset_link}",
-        subtype="plain"
-    )
-
-    fm = FastMail(conf)
-    await fm.send_message(message)
+    try:
+        await send_reset_password_email(email, token, frontend_url)
+    except Exception as e:
+        print(f"Błąd wysyłania maila: {e}") 
+        raise HTTPException(status_code=500, detail="Nie udało się wysłać wiadomości.")
 
     return {"message": "Password reset link sent to email"}
-
-
-class ResetPassword(BaseModel):
-    token: str
-    new_password: str
-
 
 @router.post("/reset-password")
 async def reset_password(

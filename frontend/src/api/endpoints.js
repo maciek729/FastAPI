@@ -133,6 +133,7 @@ const ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/auth/token`,
     FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
     RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+    VERIFY: (token) => `${API_BASE_URL}/auth/verify?token=${token}`
   },
   GROUP_CHAT: {
     HISTORY: (notebookId) => `${API_BASE_URL}/group-chat/${notebookId}/history`,
