@@ -136,12 +136,14 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                                             alt={member.username}
                                             className={styles.avatarImage}
                                             onError={(e) => {
+                                                // Jeśli obrazek nie zadziała, pokazujemy inicjał
                                                 e.target.style.display = 'none';
                                                 e.target.nextSibling.style.display = 'flex';
                                             }}
                                         />
                                     ) : null}
                                     
+                                    {/* Fallback (widoczny gdy nie ma URL lub gdy obrazek rzuci błąd) */}
                                     {member.username !== 'wszyscy' && (
                                         <div 
                                             className={styles.avatarFallback} 

@@ -123,4 +123,3 @@ export default function Help({userData}) {
         </div>
     );
 }
-

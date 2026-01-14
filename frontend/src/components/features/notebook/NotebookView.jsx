@@ -136,12 +136,13 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
         localStorage.setItem('groupChat_widths', JSON.stringify(widths));
     }, [chatWidth, notebookId]);
 
+    // Handle defaultSection to open group chat when navigating from notifications or demo
     useEffect(() => {
         if (defaultSection === 'group-chat') {
             setIsGroupChatOpen(true);
         } else if (defaultSection) {
             setActiveTab(defaultSection);
-            // setIsGroupChatOpen(false);
+            setIsGroupChatOpen(false);
         }
     }, [defaultSection]);
 
