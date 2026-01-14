@@ -111,6 +111,18 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     const [selectedNotebook, setSelectedNotebook] = useState(null);
     const [dragOverNotebook, setDragOverNotebook] = useState(null);
 
+    const fetchNotebooks = useCallback(async (spaceType) => {
+        if (!userData?.id) return;
+        try {
+            const data = await getNotebooks(userData.id, spaceType);
+            setNotebooks(prev => {
+                return { ...prev, [spaceType]: data };
+            });
+        } catch (error) {
+            console.error(t('sidebar.errors.fetchNotebooks'), error);
+        }
+    }, [userData?.id, t]);
+
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -169,14 +181,53 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
         }
     }, [userData?.id]);
 
-    const fetchNotebooks = async (spaceType) => {
-        try {
-            const data = await getNotebooks(userData.id, spaceType);
-            setNotebooks(prev => ({ ...prev, [spaceType]: data }));
-        } catch (error) {
-            console.error(t('sidebar.errors.fetchNotebooks'), error);
+    useEffect(() => {
+        if (!userData?.id) return;
+
+        const refreshAll = () => {
+            fetchNotebooks('personal');
+            fetchNotebooks('shared');
+        };
+
+        refreshAll();
+
+        const intervalId = setInterval(() => {
+            if (!document.hidden) {
+                refreshAll();
+            }
+        }, 5000); 
+
+        const handleForceRefresh = () => refreshAll();
+        window.addEventListener('refreshSidebar', handleForceRefresh);
+
+        return () => {
+            clearInterval(intervalId);
+            window.removeEventListener('refreshSidebar', handleForceRefresh);
+        };
+    }, [userData?.id, fetchNotebooks]);
+
+    useEffect(() => {
+        if (!activeNotebook) return;
+
+        const hasFetchedPersonal = Array.isArray(notebooks.personal);
+        const hasFetchedShared = Array.isArray(notebooks.shared);
+
+        if (!hasFetchedPersonal && !hasFetchedShared) return;
+
+        const allNotebooks = [
+            ...(notebooks.personal || []),
+            ...(notebooks.shared || [])
+        ];
+
+        const stillHasAccess = allNotebooks.some(n => n.id === activeNotebook.id);
+
+        if (!stillHasAccess) {
+            toast.error(t('sidebar.accessLost') || 'Utracono dostęp do tego notatnika');
+            if (onGoToDashboard) {
+                onGoToDashboard();
+            }
         }
-    };
+    }, [notebooks, activeNotebook, onGoToDashboard, t]);
 
     const handleAddNotebook = async (spaceType) => {
         const name = await promptModal(t('sidebar.notebookNamePrompt'));
