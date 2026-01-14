@@ -1,5 +1,22 @@
 import ENDPOINTS from "../api/endpoints";
 
+export const VerifyEmail = async (token) => {
+  const res = await fetch(ENDPOINTS.AUTH.VERIFY(token), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await res.json();
+  
+  if (!res.ok) {
+    throw new Error(data.detail || "Weryfikacja nie powiodła się");
+  }
+
+  return data;
+};
+
 export const RegisterUser = async (user) => {
   const payload = {
     username: user.username,

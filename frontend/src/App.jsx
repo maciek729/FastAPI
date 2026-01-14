@@ -6,6 +6,7 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import MainLayout from "./components/layout/MainLayout";
 import Intro from "./components/features/Intro";
+import VerifyEmailPage from "./components/auth/VerifyEmailPage";
 
 import { LanguageProvider } from "./translations/LanguageContext";
 
@@ -50,7 +51,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+          <Route path="/auth/verify" element={<VerifyEmailPage />} />
           {/* Protected dashboard route */}
           <Route path="/dashboard" element={<MainLayout />} />
         </Routes>
