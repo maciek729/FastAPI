@@ -86,13 +86,13 @@ function ResetPassword() {
 
         <div className={styles.formGroup}>
           <label htmlFor="confirmPassword">
-            {t("auth.resetPassword.confirmPassword")}
+            {t("auth.resetPassword.confirmPasswordLabel")}
           </label>
           <input
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            placeholder={t("auth.resetPassword.confirmPasswordLabel")}
+            placeholder={t("auth.resetPassword.confirmPasswordPlaceholder")}
             value={form.confirmPassword}
             onChange={handleChange}
             required

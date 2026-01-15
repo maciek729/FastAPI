@@ -221,7 +221,6 @@ const GroupChatSidebar = ({
                 <div className={styles.sideChatHeader}>
                     <div className={styles.sideChatTitle}>
                         <span>{chatName}</span>
-                        {/* Tak wiem że tutaj jest styl, ale już mi się nie chciało zmieniać */}
                         {localUnreadIndicator && (
                             <div style={{
                                 width: '8px',
@@ -230,14 +229,14 @@ const GroupChatSidebar = ({
                                 borderRadius: '50%',
                                 display: 'inline-block',
                                 marginLeft: '8px'
-                            }} title="Nowe wiadomości na dole" />
+                            }} title={t('group_chat.newTxt')} />
                         )}
                     </div>
                     <div className={styles.headerActions}>
                         <button 
                             onClick={() => {
                                 setAutoScroll(!autoScroll);
-                                if (!autoScroll) setLocalUnreadIndicator(false); // Reset kropki przy włączeniu
+                                if (!autoScroll) setLocalUnreadIndicator(false); 
                             }} 
                             data-tooltip={autoScroll ? t('group_chat.autoScrollOff') : t('group_chat.autoScrollOn')}
                             className={`${styles.toggleScrollBtn} ${autoScroll ? styles.scrollActive : ""}`}
@@ -302,7 +301,7 @@ const GroupChatSidebar = ({
 
                         {Object.values(availableResources).every(arr => arr.length === 0) && (
                             <div className={styles.noResources}>
-                                {t('group_chat.noResources') || 'Brak materiałów w tym notatniku.'}
+                                {t('group_chat.noResources') || t('group_chat.noMaterials')}
                             </div>
                         )}
                     </div>
