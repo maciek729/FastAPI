@@ -193,7 +193,7 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                         }}
                     >
                         <FileText size={18} />
-                        <span>Zasób</span>
+                        <span>{t('group_chat.Resource')}</span>
                     </button>
                 </div>
             )}
@@ -213,7 +213,7 @@ const ChatInput = ({ onSendMessage, t, members, onOpenResourcePicker }) => {
                 <textarea
                     ref={inputRef}
                     rows="1"
-                    placeholder="Wpisz wiadomość..."
+                    placeholder={t('group_chat.textPH')}
                     value={text}
                     onChange={handleTextChange}
                     onKeyDown={handleKeyDown}

@@ -525,7 +525,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                     ))
                                 ) : (
                                     <div className={styles.emptyCollaborators}>
-                                        <p>{t('filesView.noCollaborators')}</p>
+                                        <p>{t('filesView.noCol')}</p>
                                     </div>
                                 )}
                             </div>

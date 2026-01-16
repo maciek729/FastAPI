@@ -152,7 +152,7 @@ const MessageList = ({
                             className={styles.openResourceBtn} 
                             onClick={() => onOpenResource(resource)}
                         >
-                            Otwórz zasób
+                            {t('group_chat.openR')}
                         </button>
                     </div>
                 );
@@ -164,7 +164,7 @@ const MessageList = ({
         return (
             <div className={styles.messageText}>
                 {formatText(msg.text)}
-                {msg.is_edited && <span className={styles.editedTag}> ({t('group_chat.edited') || 'edytowano'})</span>}
+                {msg.is_edited && <span className={styles.editedTag}> ({t('group_chat.edited') || 'edited'})</span>}
             </div>
         );
     };
@@ -182,7 +182,7 @@ const MessageList = ({
                 
                 const isUserMentioned = msg.text && typeof msg.text === 'string' && (
                     (userData?.username && msg.text.includes(`@${userData.username}`)) || 
-                    msg.text.includes('@wszyscy')
+                    msg.text.includes(t('group_chat.all'))
                 );
 
                 if (isDeleted) {
@@ -247,7 +247,7 @@ const MessageList = ({
                                                     <button 
                                                         onClick={() => onPin(msg.id)} 
                                                         className={`${styles.smallActionBtn} ${styles.pinBtn}`} 
-                                                        data-tooltip="Przypnij wiadomość"
+                                                        data-tooltip={t('group_chat.pin')}
                                                     >
                                                         <Pin size={10} style={{ transform: 'rotate(45deg)' }} />
                                                     </button>
@@ -259,7 +259,7 @@ const MessageList = ({
                                                             <button 
                                                                 onClick={() => handleStartEdit(msg)} 
                                                                 className={`${styles.smallActionBtn} ${styles.editBtn}`}
-                                                                data-tooltip="Edytuj"
+                                                                data-tooltip={t('group_chat.edit')}
                                                             >
                                                                 <Pencil size={10} />
                                                             </button>
@@ -267,7 +267,7 @@ const MessageList = ({
                                                         <button 
                                                             onClick={() => onDelete(msg.id)} 
                                                             className={`${styles.smallActionBtn} ${styles.deleteBtn}`}
-                                                            data-tooltip="Usuń"
+                                                            data-tooltip={t('group_chat.delete')}
                                                         >
                                                             <Trash2 size={10} />
                                                         </button>

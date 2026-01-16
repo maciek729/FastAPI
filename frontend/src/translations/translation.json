@@ -1,6 +1,7 @@
 {
   "pl": {
     "sidebar": {
+      "accessLost":"Zostałeś usunięty z notatnika na którym obecnie się znajdujesz, przeniesiono na dashboard",
       "spaces": "Przestrzenie",
       "personalSpace": "Osobista",
       "sharedSpace": "Wspólna",
@@ -497,6 +498,7 @@
       "moveFolderError": "Błąd przenoszenia folderu"
     },
     "filesView": {
+      "addFileBtn": "Dodaj plik",
       "loading": "Ładowanie notatnika...",
       "noteAddSuccess": "Notatka dodana!",
       "noteAddError": "Błąd dodawania notatki",
@@ -530,7 +532,6 @@
       "col": "Współtwórcy",
       "addNote": "Dodaj notatkę",
       "deleteFolder": "Usuń folder",
-      "addFileBtn": "Dodaj plik",
       "dropFile": "Upuść, aby dodać plik",
       "dropFileDesc": "(Tylko PDF, Obrazy, TXT)",
       "fileAdded": "Dodano plik!",
@@ -548,21 +549,20 @@
       "notesView": {
         "pinNote": "Przypnij notatkę",
         "unpinNote": "Odepnij notatkę",
-      "dropFile": "Upuść, aby dodać plik",
-      "dropFileDesc": "(Tylko PDF, Obrazy, TXT)",
-      "fileAdded": "Dodano plik!",
-      "fileDeleted": "Usunięto plik",
-      "deleteFileError": "Błąd usuwania pliku",
-      "deleteFileConfirm": "Czy na pewno chcesz usunąć plik \"{fileName}\"?",
-      "fileTooBig": "Plik jest zbyt duży (max 20MB)",
-      "formatNotSupported": "Format .{ext} nie jest obsługiwany. Dozwolone: PDF, Obrazy, TXT.",
-      "uploading": "Wysyłanie...",
-      "addFileBtn": "Plik",
-      "emptyNoteContent": "(Pusta notatka)",
-      "previewNotAvailable": "Podgląd tego formatu ({ext}) nie jest dostępny.",
-      "downloadFile": "Pobierz plik",
-      "openOriginal": "Otwórz oryginał / Pobierz",
-      "close": "Zamknij"
+        "dropFile": "Upuść, aby dodać plik",
+        "dropFileDesc": "(Tylko PDF, Obrazy, TXT)",
+        "fileAdded": "Dodano plik!",
+        "fileDeleted": "Usunięto plik",
+        "deleteFileError": "Błąd usuwania pliku",
+        "deleteFileConfirm": "Czy na pewno chcesz usunąć plik \"{fileName}\"?",
+        "fileTooBig": "Plik jest zbyt duży (max 20MB)",
+        "formatNotSupported": "Format .{ext} nie jest obsługiwany. Dozwolone: PDF, Obrazy, TXT.",
+        "uploading": "Wysyłanie...",
+        "emptyNoteContent": "(Pusta notatka)",
+        "previewNotAvailable": "Podgląd tego formatu ({ext}) nie jest dostępny.",
+        "downloadFile": "Pobierz plik",
+        "openOriginal": "Otwórz oryginał / Pobierz",
+        "close": "Zamknij"
       },
       "emptyFolder": "Ten folder jest pusty. Przeciągnij notatki tutaj lub utwórz nowe!",
       "noFiles": "Brak notatek. Dodaj pierwszą!",
@@ -575,64 +575,6 @@
       "add": "Dodaj",
       "titleDesc": "Tytuł notatki",
       "nameCol": "Nazwa współtwórcy"
-    },
-    "testGenerator": {
-      "loadingTests": "Ładowanie testów...",
-      "title": "Wygeneruj nowy test",
-      "chooseFile": "Wybierz plik",
-      "sections": {
-        "source": "Źródło materiału",
-        "basic": "Podstawowe informacje",
-        "questionType": "Typ pytań"
-      },
-      "sourceTypes": {
-        "manual": "Ręczny opis",
-        "file": "Z pliku",
-        "note": "Z notatki"
-      },
-      "questionTypes": {
-        "multiple_choice": "Wielokrotny wybór",
-        "true_false": "Prawda/Fałsz",
-        "multiple_answers": "Wiele odpowiedzi",
-        "mixed": "Mieszany"
-      },
-      "labels": {
-        "file": "Załącz plik",
-        "note": "Wybierz notatkę",
-        "title": "Tytuł testu",
-        "numQuestions": "Liczba pytań",
-        "topic": "Temat / Zakres"
-      },
-      "placeholders": {
-        "file": "Wybierz plik",
-        "selectNote": "-- Wybierz notatkę --",
-        "title": "np. Historia Polski",
-        "topicManual": "Opisz temat testu...",
-        "topicOptional": "Opcjonalnie podaj dodatkowe wskazówki..."
-      },
-      "optional": "opcjonalny",
-      "buttons": {
-        "cancel": "Anuluj",
-        "generate": "Generuj test",
-        "generating": "Generowanie...",
-        "generatingTest": "Generowanie testu"
-      },
-      "success": {
-        "generated": "Test wygenerowany pomyślnie!"
-      },
-      "errors": {
-        "titleRequired": "Tytuł jest wymagany!",
-        "topicRequiredManual": "Opis/temat jest wymagany dla ręcznego wprowadzania!",
-        "fileRequired": "Wybierz plik!",
-        "noteRequired": "Wybierz notatkę!",
-        "numQuestionsInvalid": "Liczba pytań musi być między 1 a 20!",
-        "notebookMissing": "Błąd: Brak ID notatnika",
-        "apiError": "Błąd generowania testu. Upewnij się, że Gemini API jest skonfigurowane."
-      },
-      "defaults": {
-        "topicFile": "Generuj pytania na podstawie pliku",
-        "topicNote": "Generuj pytania na podstawie notatki"
-      }
     },
     "podcastGenerator": {
       "title": "Wygeneruj nowy podcast",
@@ -769,7 +711,13 @@
       "notes": "Notatki",
       "tests": "Testy",
       "flashcards": "Fiszki",
-      "Podcasts": "Podkasty"
+      "Podcasts": "Podkasty",
+      "Resource": "Zasoby",
+      "newTxt":"Nowe wiadomości na dole",
+      "noMaterials":"Brak materiałów w tym notatniku",
+      "openR":"Otwórz zasób",
+      "all":"@wszyscy",
+      "textPH": "Wpisz wiadomość..."
     },
     "demo": {
       "buttons": {
@@ -833,6 +781,7 @@
     "testGenerator": {
       "loadingTests":"Ładowanie testów...",
       "title": "Wygeneruj nowy test",
+      "chooseFile": "Wybierz plik",
       "sections": {
         "source": "Źródło materiału",
         "basic": "Podstawowe informacje",
@@ -962,6 +911,7 @@
       "confirm": "Confirm"
     },
     "sidebar": {
+      "accessLost":"You have been removed from the notebook you are currently on, moved to the dashboard",
       "spaces": "Spaces",
       "personalSpace": "Personal",
       "sharedSpace": "Shared",
@@ -1032,6 +982,7 @@
     "testGenerator": {
       "loadingTests":"Loading Tests...",
       "title": "Generate New Test",
+      "chooseFile": "Choose File",
       "sections": {
         "source": "Material Source",
         "basic": "Basic Information",
@@ -1587,6 +1538,7 @@
       "moveFolderError": "Error moving folder"
     },
     "filesView": {
+      "addFileBtn": "Add File",
       "loading": "Loading notebook...",
       "noteAddSuccess": "Note added!",
       "noteAddError": "Error adding note",
@@ -1620,9 +1572,6 @@
       "col": "Collaborators",
       "addNote": "Add note",
       "deleteFolder": "Delete folder",
-      "notesView": {
-        "pinNote": "Pin note",
-        "unpinNote": "Unpin note",
       "dropFile": "Drop to add file",
       "dropFileDesc": "(PDF, Images, TXT only)",
       "fileAdded": "File added!",
@@ -1632,13 +1581,11 @@
       "fileTooBig": "File is too big (max 20MB)",
       "formatNotSupported": "Format .{ext} not supported. Allowed: PDF, Images, TXT.",
       "uploading": "Uploading...",
-      "addFileBtn": "File",
       "emptyNoteContent": "(Empty note)",
       "previewNotAvailable": "Preview for ({ext}) not available.",
       "downloadFile": "Download file",
       "openOriginal": "Open original / Download",
-      "close": "Close"
-      },
+      "close": "Close",
       "notesView": {
         "pinNote": "Pin note",
         "unpinNote": "Unpin note"
@@ -1655,64 +1602,7 @@
       "titleDesc": "Note title",
       "nameCol": "Collaborator name"
     },
-    "testGenerator": {
-      "loadingTests": "Loading Tests...",
-      "title": "Generate New Test",
-      "chooseFile": "Choose File",
-      "sections": {
-        "source": "Material Source",
-        "basic": "Basic Information",
-        "questionType": "Question Type"
-      },
-      "sourceTypes": {
-        "manual": "Manual Description",
-        "file": "From File",
-        "note": "From Note"
-      },
-      "questionTypes": {
-        "multiple_choice": "Multiple Choice",
-        "true_false": "True/False",
-        "multiple_answers": "Multiple Answers",
-        "mixed": "Mixed"
-      },
-      "labels": {
-        "file": "Attach File",
-        "note": "Select Note",
-        "title": "Test Title",
-        "numQuestions": "Number of Questions",
-        "topic": "Topic / Scope"
-      },
-      "placeholders": {
-        "file": "Select File",
-        "selectNote": "-- Select Note --",
-        "title": "e.g. Polish History",
-        "topicManual": "Describe the test topic...",
-        "topicOptional": "Optionally provide additional hints..."
-      },
-      "optional": "optional",
-      "buttons": {
-        "cancel": "Cancel",
-        "generate": "Generate Test",
-        "generating": "Generating...",
-        "generatingTest": "Generating test..."
-      },
-      "success": {
-        "generated": "Test generated successfully!"
-      },
-      "errors": {
-        "titleRequired": "Title is required!",
-        "topicRequiredManual": "Topic is required for manual entry!",
-        "fileRequired": "Please select a file!",
-        "noteRequired": "Please select a note!",
-        "numQuestionsInvalid": "Number of questions must be between 1 and 20!",
-        "notebookMissing": "Error: Notebook ID missing",
-        "apiError": "Error generating test. Make sure Gemini API is configured."
-      },
-      "defaults": {
-        "topicFile": "Generate questions based on file",
-        "topicNote": "Generate questions based on note"
-      }
-    },
+
     "podcastGenerator": {
       "title": "Generate a new podcast",
       "basicInfo": "Basic information",
@@ -1848,7 +1738,13 @@
       "notes": "Notes",
       "tests": "Tests",
       "flashcards": "Flashcards",
-      "Podcasts": "Podcasts"
+      "Podcasts": "Podcasts",
+      "Resource": "Resource",
+      "newTxt":"New messages at the bottom",
+      "noMaterials":"There are no materials in this notebook",
+      "openR": "Open resource",
+      "all": "@all",
+      "textPH": "Type message..."
     },
     "demo": {
       "buttons": {
