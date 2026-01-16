@@ -267,7 +267,7 @@ const MessageList = ({
                                                         <button 
                                                             onClick={() => onDelete(msg.id)} 
                                                             className={`${styles.smallActionBtn} ${styles.deleteBtn}`}
-                                                            data-tooltip={t('flashcardSetManager.delete')}
+                                                            data-tooltip={t('group_chat.delete')}
                                                         >
                                                             <Trash2 size={10} />
                                                         </button>
