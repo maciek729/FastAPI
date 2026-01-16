@@ -164,7 +164,7 @@ const MessageList = ({
         return (
             <div className={styles.messageText}>
                 {formatText(msg.text)}
-                {msg.is_edited && <span className={styles.editedTag}> ({t('group_chat.edited') ||t('group_chat.edited')})</span>}
+                {msg.is_edited && <span className={styles.editedTag}> ({t('group_chat.edited') || 'edited'})</span>}
             </div>
         );
     };
