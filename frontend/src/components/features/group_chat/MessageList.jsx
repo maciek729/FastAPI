@@ -259,7 +259,7 @@ const MessageList = ({
                                                             <button 
                                                                 onClick={() => handleStartEdit(msg)} 
                                                                 className={`${styles.smallActionBtn} ${styles.editBtn}`}
-                                                                data-tooltip={t('flashcardSetManager.editSet')}
+                                                                data-tooltip={t('group_chat.edit')}
                                                             >
                                                                 <Pencil size={10} />
                                                             </button>
