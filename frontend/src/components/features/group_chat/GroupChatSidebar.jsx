@@ -301,7 +301,7 @@ const GroupChatSidebar = ({
 
                         {Object.values(availableResources).every(arr => arr.length === 0) && (
                             <div className={styles.noResources}>
-                                {t('group_chat.noResources') || t('group_chat.noMaterials')}
+                                {t('group_chat.noMaterials')}
                             </div>
                         )}
                     </div>
