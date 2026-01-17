@@ -34,7 +34,6 @@ export const getAvailableResources = async (notebookId) => {
 
         return { notes, tests, flashcards, podcasts };
     } catch (error) {
-        console.error("Błąd agregacji zasobów:", error);
         return { notes: [], tests: [], flashcards: [], podcasts: [] };
     }
 };
@@ -75,8 +74,7 @@ export const getUnreadStatus = async (userId) => {
     const response = await fetch(ENDPOINTS.GROUP_CHAT.UNREAD_STATUS(userId));
     
     if (!response.ok) {
-        console.warn('Nie udało się pobrać statusu wiadomości');
-        return {}; 
+        return {};
     }
     
     return await response.json();
@@ -89,8 +87,7 @@ export const markChatAsRead = async (notebookId, userId) => {
             'Content-Type': 'application/json'
         }
     });
-    
+
     if (!response.ok) {
-        console.warn('Błąd oznaczania jako przeczytane');
     }
 };

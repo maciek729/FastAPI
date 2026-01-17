@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
-import { Play, Pause, Trash2, Headphones, Folder, ArrowLeft, MoreVertical, Pin, Edit2, X, Search, Plus, Filter } from 'lucide-react';
+import { Play, Pause, Trash2, Folder, ArrowLeft, MoreVertical, Pin, X, Search, Plus, Filter } from 'lucide-react';
 import styles from '../../../css/features/PodcastView.module.css';
+import generatorStyles from '../../../css/features/FlashcardGenerator.module.css';
 
 import {
     fetchPodcasts, generatePodcast, deletePodcast, renamePodcast, pinPodcast, updatePodcastPosition,
@@ -63,8 +64,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth > 768) {
-                setShowFilters(true);
+            if (window.innerWidth <= 768) {
+                setShowFilters(false);
             }
         };
         window.addEventListener('resize', handleResize);
@@ -110,7 +111,6 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
             setPodcasts(pData);
             setFolders(fData);
         } catch (err) {
-            console.error("Błąd pobierania danych:", err);
         }
     };
 
@@ -119,7 +119,6 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
             const data = await getNotes(notebookId); 
             setNotes(data);
         } catch (err) {
-            console.error("Błąd pobierania notatek:", err);
         }
     };
 
@@ -186,7 +185,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
             setTimeout(() => {
                 if(audioRef.current) {
                     audioRef.current.load();
-                    audioRef.current.play().catch(e => console.error("Playback failed", e));
+                    audioRef.current.play().catch(e => {});
                 }
             }, 100);
         }
@@ -232,7 +231,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
         try {
             await pinPodcast(id, !currentStatus);
             refreshData();
-        } catch(err) { console.error(err); }
+        } catch(err) { }
     };
 
     const handleRenamePodcastSubmit = async (e) => {
@@ -350,7 +349,6 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
         try {
             await Promise.all(updated.map(p => updatePodcastPosition(p.id, p.grid_position)));
         } catch(err) {
-            console.error('Error updating podcast positions:', err);
             toast.error(t('podcastView.positionError'));
             refreshData();
         }
@@ -371,7 +369,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                 await movePodcastToFolder(draggedPodcast.podcast.id, folderId);
                 setDraggedPodcast(null);
                 refreshData();
-            } catch(err) { console.error(err); }
+            } catch(err) { }
         }
         if(draggedFolder) {
              if(draggedFolder.folder.id === folderId) return;
@@ -379,7 +377,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                  await movePodcastFolder(draggedFolder.folder.id, folderId);
                  setDraggedFolder(null);
                  refreshData();
-             } catch(err) { console.error(err); }
+             } catch(err) { }
         }
     };
 
@@ -414,6 +412,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         <Search size={16} />
                         <input
                             type="text"
+                            id="podcasts-search"
+                            name="search"
                             placeholder={t('podcastView.podcastPH')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -421,6 +421,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         />
                     </div>
                     <select
+                        id="podcasts-sort"
+                        name="sortBy"
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                         className={styles.filterSelect}
@@ -437,6 +439,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                             <Search size={16} />
                             <input
                                 type="text"
+                                id="podcasts-search-mobile"
+                                name="search"
                                 placeholder={t('podcastView.podcastPH')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -444,6 +448,8 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                             />
                         </div>
                         <select
+                            id="podcasts-sort-mobile"
+                            name="sortBy"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className={styles.filterSelect}
@@ -579,7 +585,6 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
 
                 {getFilteredAndSortedPodcasts().length === 0 && folders.length === 0 && (
                     <div className={styles.emptyState}>
-                         <Headphones size={48} opacity={0.3}/>
                          <p>{t('podcastView.emptyFolder')}</p>
                     </div>
                 )}
@@ -588,63 +593,98 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
             <audio ref={audioRef} src={currentAudio} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onEnded={() => setIsPlaying(false)} />
 
             {showCreateFolderModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2 className={styles.modalTitle}>{t('flashcardsView.createFolder')}</h2>
+                <div className={generatorStyles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
+                    <div className={generatorStyles.folderModal} onClick={e => e.stopPropagation()}>
+                        <div className={generatorStyles.folderModalHeader}>
+                            <h2 className={generatorStyles.folderModalTitle}>{t('flashcardsView.createFolder')}</h2>
                             <button
-                                className={styles.closeBtn}
+                                className={generatorStyles.folderModalClose}
                                 onClick={() => setShowCreateFolderModal(false)}
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleCreateFolder} style={{padding: '2rem'}}>
-                            <div className={styles.formGroup}>
-                                <label>{t('flashcardsView.folderName')}</label>
-                                <input
-                                    autoFocus
-                                    type="text"
-                                    value={newFolderName}
-                                    onChange={e => setNewFolderName(e.target.value)}
-                                    placeholder={t('flashcardsView.folderNamePlaceholder')}
-                                    required
-                                />
-                            </div>
-                            <div className={styles.modalActions}>
-                                <button type="button" className={styles.btnCancel} onClick={() => setShowCreateFolderModal(false)}>{t('flashcardsView.cancel')}</button>
-                                <button type="submit" className={styles.btnSubmit}>{t('flashcardsView.createFolder')}</button>
+                        <form onSubmit={handleCreateFolder} className={generatorStyles.folderModalForm}>
+                            <input
+                                type="text"
+                                id="podcasts-folder-name"
+                                name="folderName"
+                                className={generatorStyles.folderModalInput}
+                                value={newFolderName}
+                                onChange={e => setNewFolderName(e.target.value)}
+                                placeholder={t('flashcardsView.folderNamePlaceholder')}
+                                autoFocus
+                                required
+                            />
+                            <div className={generatorStyles.folderModalActions}>
+                                <button type="button" className={generatorStyles.folderModalCancel} onClick={() => setShowCreateFolderModal(false)}>{t('flashcardsView.cancel')}</button>
+                                <button type="submit" className={generatorStyles.folderModalSubmit}>{t('flashcardsView.createFolder')}</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
              
-            {(editingFolder || editingPodcast) && (
-                <div className={styles.modalOverlay} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>
+            {editingFolder && (
+                <div className={generatorStyles.modalOverlay} onClick={() => setEditingFolder(null)}>
+                    <div className={generatorStyles.folderModal} onClick={e => e.stopPropagation()}>
+                        <div className={generatorStyles.folderModalHeader}>
+                            <h2 className={generatorStyles.folderModalTitle}>{t('flashcardsView.renameFolderName')}</h2>
+                            <button
+                                className={generatorStyles.folderModalClose}
+                                onClick={() => setEditingFolder(null)}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleRenameFolderSubmit} className={generatorStyles.folderModalForm}>
+                            <input
+                                type="text"
+                                id="podcasts-rename-folder"
+                                name="folderName"
+                                className={generatorStyles.folderModalInput}
+                                value={editingFolder.name}
+                                onChange={e => setEditingFolder({...editingFolder, name: e.target.value})}
+                                placeholder={t('flashcardsView.folderNamePlaceholder')}
+                                autoFocus
+                                required
+                            />
+                            <div className={generatorStyles.folderModalActions}>
+                                <button type="button" className={generatorStyles.folderModalCancel} onClick={() => setEditingFolder(null)}>{t('flashcardsView.cancel')}</button>
+                                <button type="submit" className={generatorStyles.folderModalSubmit}>{t('flashcardsView.newName')}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {editingPodcast && (
+                <div className={styles.modalOverlay} onClick={() => setEditingPodcast(null)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
                             <h2 className={styles.modalTitle}>{t('flashcardsView.newName')}</h2>
                             <button
                                 className={styles.closeBtn}
-                                onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}
+                                onClick={() => setEditingPodcast(null)}
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={editingFolder ? handleRenameFolderSubmit : handleRenamePodcastSubmit} style={{padding: '2rem'}}>
+                        <form onSubmit={handleRenamePodcastSubmit} style={{padding: '2rem'}}>
                             <div className={styles.formGroup}>
-                                <label>{editingFolder ? t('flashcardsView.folderName') : t('podcastView.name')}</label>
+                                <label>{t('podcastView.name')}</label>
                                 <input
                                     autoFocus
                                     type="text"
-                                    value={editingFolder ? editingFolder.name : editingPodcast.title}
-                                    onChange={e => editingFolder ? setEditingFolder({...editingFolder, name: e.target.value}) : setEditingPodcast({...editingPodcast, title: e.target.value})}
+                                    id="podcast-rename"
+                                    name="podcastTitle"
+                                    value={editingPodcast.title}
+                                    onChange={e => setEditingPodcast({...editingPodcast, title: e.target.value})}
                                     required
                                 />
                             </div>
                             <div className={styles.modalActions}>
-                                <button type="button" className={styles.btnCancel} onClick={() => { setEditingFolder(null); setEditingPodcast(null); }}>{t('flashcardsView.cancel')}</button>
+                                <button type="button" className={styles.btnCancel} onClick={() => setEditingPodcast(null)}>{t('flashcardsView.cancel')}</button>
                                 <button type="submit" className={styles.btnSubmit}>{t('noteEditor.saveButton')}</button>
                             </div>
                         </form>

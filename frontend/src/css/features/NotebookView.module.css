@@ -13,10 +13,12 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 100%;
   width: 100%;
   background: transparent;
   font-family: 'Inter', sans-serif;
   overflow: hidden;
+  position: relative;
 }
 
 /* Tabs Bar - Fixed at top */
@@ -31,6 +33,9 @@
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 /* Tab Button */
@@ -72,6 +77,7 @@
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -111,6 +117,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow-x: hidden;
 }
 
 /* Header Section */
@@ -262,10 +269,11 @@
 /* Cards Container - Scrollable grid */
 .cardsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 1.25rem;
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   align-content: start;
   padding-bottom: 1rem;
 }
@@ -781,6 +789,12 @@ select option {
 
   .cardsContainer {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .noteCard {
+    width: 100%;
+    max-width: 100%;
   }
 
   .notebookTitle {
@@ -1070,8 +1084,7 @@ select option {
 
 .modalInput:focus {
     outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    border-color: var(--border_gray);
 }
 
 .collaboratorsSection::-webkit-scrollbar {
@@ -1228,10 +1241,40 @@ select option {
     .inputWithButton {
         flex-direction: column;
     }
-    
+
     .btnAdd {
         padding: 0.75rem;
         justify-content: center;
+    }
+
+    .filesView {
+        padding: 0.875rem 0.5rem 0.75rem 0.5rem;
+    }
+
+    .cardsContainer {
+        gap: 0.75rem;
+        grid-template-columns: 1fr;
+        padding: 0;
+        width: 100%;
+    }
+
+    .noteCard {
+        padding: 1rem;
+        min-height: 140px;
+        height: auto;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .headerSection {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .addNoteBtn {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
     }
 }
 

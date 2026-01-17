@@ -314,12 +314,13 @@ Wygeneruj fiszki:"""
     ]
 
     ai_response = get_gemini_response(messages)
-    flashcards_data = extract_flashcards_from_ai_response(ai_response)
+    response_text = ai_response.get("response", "") if isinstance(ai_response, dict) else ai_response
+    flashcards_data = extract_flashcards_from_ai_response(response_text)
 
     if not flashcards_data or len(flashcards_data) == 0:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI nie wygenerowało poprawnych fiszek. Odpowiedź: {ai_response[:200]}"
+            detail=f"AI nie wygenerowało poprawnych fiszek. Odpowiedź: {response_text[:200]}"
         )
 
     new_note = Notes(
@@ -450,12 +451,13 @@ Wygeneruj fiszki:"""
 
         messages = [{"role": "user", "content": prompt}]
         ai_response = get_gemini_response(messages)
-        flashcards_data = extract_flashcards_from_ai_response(ai_response)
+        response_text = ai_response.get("response", "") if isinstance(ai_response, dict) else ai_response
+        flashcards_data = extract_flashcards_from_ai_response(response_text)
 
         if not flashcards_data or len(flashcards_data) == 0:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"AI nie wygenerowało poprawnych fiszek."
+                detail=f"AI nie wygenerowało poprawnych fiszek. Odpowiedź: {response_text[:200] if response_text else 'brak'}"
             )
 
         new_note = Notes(

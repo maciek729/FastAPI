@@ -11,8 +11,15 @@
   font-family: 'Inter', sans-serif;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding: 2rem;
   position: relative;
+}
+
+.dashboardContainer::-webkit-scrollbar {
+  display: none;
 }
 
 /* Mobile Menu Button */

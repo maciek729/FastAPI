@@ -532,3 +532,164 @@
         flex-direction: column-reverse;
     }
 }
+
+/* Compact folder modal variant */
+.folderModal {
+    background: var(--inner_section_bg);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.folderModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.folderModalTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--title);
+    margin: 0;
+}
+
+.folderModalClose {
+    background: transparent;
+    border: none;
+    color: var(--subtitle);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.folderModalClose:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.folderModalForm {
+    padding: 1.5rem;
+}
+
+.folderModalInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border_gray);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: var(--white_btn_bg);
+    color: var(--title);
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+
+.folderModalInput:focus {
+    outline: none;
+    border-color: var(--border_gray);
+}
+
+.folderModalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.folderModalCancel {
+    padding: 0.625rem 1.25rem;
+    background: var(--white_btn_bg);
+    color: var(--subtitle);
+    border: 2px solid var(--border_gray);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+}
+
+.folderModalCancel:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: var(--subtitle);
+}
+
+.folderModalSubmit {
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+}
+
+.folderModalSubmit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+@media (max-width: 768px) {
+    .folderModal {
+        max-width: 95vw;
+        margin: 0 1rem;
+    }
+
+    .folderModalHeader {
+        padding: 1.5rem 1.5rem 0 1.5rem;
+    }
+
+    .folderModalTitle {
+        font-size: 1.25rem;
+    }
+
+    .folderModalClose {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.625rem;
+    }
+
+    .folderModalInput {
+        font-size: 16px;
+        padding: 0.625rem 0.875rem;
+    }
+
+    .folderModalActions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .folderModalCancel,
+    .folderModalSubmit {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .folderModal {
+        margin: 0 0.5rem;
+    }
+
+    .folderModalHeader {
+        padding: 1rem 1rem 0 1rem;
+    }
+
+    .folderModalTitle {
+        font-size: 1.125rem;
+    }
+}

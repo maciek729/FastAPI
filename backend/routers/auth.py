@@ -267,8 +267,7 @@ async def forgot_password(
 
     try:
         await send_reset_password_email(email, token, frontend_url)
-    except Exception as e:
-        print(f"Błąd wysyłania maila: {e}") 
+    except Exception:
         raise HTTPException(status_code=500, detail="Nie udało się wysłać wiadomości.")
 
     return {"message": "Password reset link sent to email"}

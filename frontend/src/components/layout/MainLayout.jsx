@@ -39,7 +39,6 @@ export default function MainLayout() {
       const unreadExists = notifications.some(n => !n.is_read);
       setHasUnread(unreadExists);
     } catch (error) {
-      console.error("Błąd pobierania powiadomień:", error);
     }
   }, [userData?.id]);
 
@@ -87,7 +86,6 @@ export default function MainLayout() {
         setUserData(data);
       })
       .catch((err) => {
-        console.error("Błąd pobierania danych użytkownika:", err);
         handleLogout();
       });
   }, [navigate, handleLogout]);
@@ -139,7 +137,7 @@ export default function MainLayout() {
           setActiveSection('notebook');
           setNotebookSection(navData.tab || 'files');
         })
-        .catch(err => console.error('Error deep linking to notebook:', err));
+        .catch(err => {});
 
         setTimeout(() => {
             setHighlightMessageId(null);
@@ -212,7 +210,7 @@ export default function MainLayout() {
       .then(data => {
         setNotebookDetails(prev => ({...prev, ...data}));
       })
-      .catch(err => console.error('Error fetching notebook:', err));
+      .catch(err => {});
   };
 
   const refreshNotebook = () => {

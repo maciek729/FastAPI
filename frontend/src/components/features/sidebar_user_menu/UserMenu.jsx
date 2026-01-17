@@ -5,7 +5,7 @@ import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import * as notifService from "../../../services/notificationService";
 
-const UserMenu = ({ isCollapsed = false, onGoToSection, onClose, userData }) => {
+const UserMenu = ({ isCollapsed = false, onGoToSection, onClose, userData, isMobile, onCloseMobileMenu }) => {
     const { language } = useContext(LanguageContext);
     const [hasUnread, setHasUnread] = useState(false);
 
@@ -32,6 +32,9 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose, userData }) => 
             onGoToSection(id);
         }
         onClose();
+        if (isMobile && onCloseMobileMenu) {
+            onCloseMobileMenu();
+        }
     }
 
     const menuItems = [
@@ -65,7 +68,6 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose, userData }) => 
                     const unreadExists = data.some(n => !n.is_read);
                     setHasUnread(unreadExists);
                 } catch (error) {
-                    console.error("Błąd sprawdzania powiadomień:", error);
                 }
             }
         };

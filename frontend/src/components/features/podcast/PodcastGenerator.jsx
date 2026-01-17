@@ -107,6 +107,8 @@ export default function PodcastGenerator({
                             <label>{t('podcastGenerator.topicLabel')}</label>
                             <input
                                 type="text"
+                                id="podcast-topic"
+                                name="podcastTopic"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder={t('podcastGenerator.topicPlaceholder')}
@@ -118,6 +120,8 @@ export default function PodcastGenerator({
                         <div className={styles.formGroup}>
                             <label>{t('podcastGenerator.descriptionLabel')} *</label>
                             <textarea
+                                id="podcast-description"
+                                name="podcastDescription"
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
                                 placeholder={t('podcastGenerator.descriptionPlaceholder')}

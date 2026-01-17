@@ -15,11 +15,11 @@
 /* Content Area - Main container for page content */
 .contentArea {
   height: 100vh;
+  max-height: 100vh;
   width: 100%;
   margin-left: 240px;
   padding: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
   position: relative;
   z-index: 1;
@@ -57,7 +57,17 @@
 .contentArea > * {
   flex: 1;
   min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   animation: contentFadeIn 0.5s ease-out;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.contentArea > *::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 @keyframes contentFadeIn {
@@ -119,11 +129,15 @@
     margin-left: 0;
     margin-top: 60px;
     height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
+    overflow: hidden;
   }
 
   .contentAreaCollapsed {
     margin-left: 0 !important;
     margin-top: 60px;
+    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
   }
 }
 

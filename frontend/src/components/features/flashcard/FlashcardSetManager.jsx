@@ -50,7 +50,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
             setLoading(true);
             const data = await getFlashcardSetCards(flashcardSet.id);
             setFlashcards(data);
-        } catch (error) {
+        } catch {
         } finally {
             setLoading(false);
         }
@@ -173,7 +173,7 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                     position: idx
                 }))
             });
-        } catch (error) {
+        } catch {
             fetchFlashcards();
         }
     };
@@ -208,6 +208,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                                 placeholder={t('flashcardSetManager.setTitlePlaceholder')}
                             />
                             <textarea
+                                id="set-description"
+                                name="setDescription"
                                 value={setDescription}
                                 onChange={(e) => setSetDescription(e.target.value)}
                                 className={styles.descriptionInput}
@@ -252,6 +254,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                     <div className={styles.addCardForm} onClick={(e) => e.stopPropagation()}>
                         <h3>{t('flashcardSetManager.addNewCard')}</h3>
                         <textarea
+                            id="new-card-question"
+                            name="newQuestion"
                             value={newQuestion}
                             onChange={(e) => setNewQuestion(e.target.value)}
                             className={styles.addQuestionInput}
@@ -259,6 +263,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                             rows={3}
                         />
                         <textarea
+                            id="new-card-answer"
+                            name="newAnswer"
                             value={newAnswer}
                             onChange={(e) => setNewAnswer(e.target.value)}
                             className={styles.addAnswerInput}
@@ -292,6 +298,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                     <div className={styles.addCardForm} onClick={(e) => e.stopPropagation()}>
                         <h3>{t('flashcardSetManager.editCard')}</h3>
                         <textarea
+                            id="edit-card-question"
+                            name="editQuestion"
                             value={editQuestion}
                             onChange={(e) => setEditQuestion(e.target.value)}
                             className={styles.addQuestionInput}
@@ -299,6 +307,8 @@ export default function FlashcardSetManager({ flashcardSet, userId, onBack }) {
                             rows={3}
                         />
                         <textarea
+                            id="edit-card-answer"
+                            name="editAnswer"
                             value={editAnswer}
                             onChange={(e) => setEditAnswer(e.target.value)}
                             className={styles.addAnswerInput}

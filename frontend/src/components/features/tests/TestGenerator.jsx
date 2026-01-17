@@ -142,7 +142,6 @@ export default function TestGenerator({
             toast.success(t('testGenerator.success.generated'));
             onSuccess();
         } catch (err) {
-            console.error(err);
             toast.error(err.response?.data?.detail || t('testGenerator.errors.apiError'));
             onError();
         } finally {
@@ -289,6 +288,8 @@ export default function TestGenerator({
                                 <label>{t('testGenerator.labels.title')}</label>
                                 <input
                                     type="text"
+                                    id="test-title"
+                                    name="testTitle"
                                     value={newTest.title}
                                     onChange={(e) => setNewTest({...newTest, title: e.target.value})}
                                     placeholder={t('testGenerator.placeholders.title')}
@@ -311,6 +312,8 @@ export default function TestGenerator({
                         <div className={styles.formGroup}>
                             <label>{t('testGenerator.labels.topic')} {newTest.source_type !== 'manual' && t('testGenerator.optional')}</label>
                             <textarea
+                                id="test-topic"
+                                name="testTopic"
                                 value={newTest.topic}
                                 onChange={(e) => setNewTest({...newTest, topic: e.target.value})}
                                 placeholder={newTest.source_type === 'manual' ? t('testGenerator.placeholders.topicManual') : t('testGenerator.placeholders.topicOptional')}

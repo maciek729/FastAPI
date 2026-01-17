@@ -235,7 +235,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 sel.removeAllRanges();
                 sel.addRange(range);
             } catch (err) {
-                console.error('applyFontSizePx error:', err);
             }
         }
 
@@ -290,7 +289,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 setLockedByUsername(responseData.locked_by_username);
             }
         } catch (err) {
-            console.error('Error locking note:', err);
             setIsReadOnly(true);
         }
     };
@@ -300,7 +298,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         try {
             await unlockNoteFunction(note.id, userData.id);
         } catch (err) {
-            console.error('Error unlocking note:', err);
         }
     };
 
@@ -315,7 +312,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 }
             }
         } catch (err) {
-            console.error('Error checking lock status:', err);
         }
     };
 
@@ -484,7 +480,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 sel.addRange(range);
                 inserted = true;
             } catch (err) {
-                console.error('Error inserting AI text at saved range:', err);
                 inserted = false;
             }
         } else {
@@ -507,7 +502,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                         selection.addRange(range);
                         inserted = true;
                     } catch (err) {
-                        console.error('Error inserting AI text at selection:', err);
                         inserted = false;
                     }
                 }
@@ -626,7 +620,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             initialContentRef.current = updatedContent || '';
             setIsDirty(false);
         } catch (err) {
-            console.error(err);
             toast.error(err.message || 'Błąd zapisywania notatki');
         } finally {
             setIsSaving(false);
@@ -648,7 +641,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             toast.success(t('noteEditor.deleteSuccess'));
             onClose();
         } catch (err) {
-            console.error(err);
             toast.error(err.message || t('noteEditor.deleteError'));
         }
     };
@@ -707,6 +699,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     <div className={styles.headerLeft}>
                         <input
                             type="text"
+                            id="note-title"
+                            name="noteTitle"
                             value={title}
                             onChange={(e) => !isReadOnly && setTitle(e.target.value)}
                             className={styles.titleInput}

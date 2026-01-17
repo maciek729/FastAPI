@@ -79,7 +79,11 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
     // --- Effects ---
     useEffect(() => {
-        const handleResize = () => { if (window.innerWidth > 768) setShowFilters(true); };
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                setShowFilters(false);
+            }
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -119,9 +123,9 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     }, [highlightedItemId, notes, folders]);
 
     // --- API ---
-    const fetchFolders = async () => { try { const response = await axios.get(ENDPOINTS.FOLDERS.NOTES.LIST(details.id, userData.id)); setFolders(response.data); } catch (err) { console.error(err); } };
-    const fetchFiles = async () => { try { const data = await getFiles(details.id); setFiles(data); } catch (error) { console.error(error); } };
-    const fetchCollaborators = async () => { try { const data = await getCollaborators(details.id); setCollaborators(data); } catch (err) { console.error(err); } };
+    const fetchFolders = async () => { try { const response = await axios.get(ENDPOINTS.FOLDERS.NOTES.LIST(details.id, userData.id)); setFolders(response.data); } catch (err) { } };
+    const fetchFiles = async () => { try { const data = await getFiles(details.id); setFiles(data); } catch (error) { } };
+    const fetchCollaborators = async () => { try { const data = await getCollaborators(details.id); setCollaborators(data); } catch (err) { } };
 
     // --- File Logic ---
     const handleFileUpload = async (e) => {
@@ -341,14 +345,25 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     </h1>
                     <div className={styles.searchBox}>
                         <Search size={16} />
-                        <input type="text" placeholder={t('filesView.searchNotePlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={styles.searchInput} />
+                        <input type="text" id="files-search" name="search" placeholder={t('filesView.searchNotePlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={styles.searchInput} />
                     </div>
-                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={styles.filterSelect}>
+                    <select id="files-sort" name="sortBy" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={styles.filterSelect}>
                         <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
                         <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
                     </select>
                 </div>
-                
+                {showFilters && (
+                    <div className={styles.filtersRow}>
+                        <div className={styles.searchBox}>
+                            <Search size={16} />
+                            <input type="text" id="files-search-mobile" name="search" placeholder={t('filesView.searchNotePlaceholder')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={styles.searchInput} />
+                        </div>
+                        <select id="files-sort-mobile" name="sortBy" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={styles.filterSelect}>
+                            <option value="date_desc">{t('flashcardsView.sortNewest')}</option>
+                            <option value="name_asc">{t('flashcardsView.sortNameAsc')}</option>
+                        </select>
+                    </div>
+                )}
                 <div className={styles.headerActions}>
                      <button className={styles.filterToggleBtn} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /></button>
                      <button className={styles.addFolderBtn} onClick={() => setShowCreateFolderModal(true)}><Folder size={18} /> {t('flashcardsView.newFolder')}</button>
@@ -459,11 +474,17 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             
             {showCreateFolderModal && (
                 <div className={generatorStyles.modalOverlay} onClick={() => setShowCreateFolderModal(false)}>
-                    <div className={generatorStyles.modalContainer} onClick={e => e.stopPropagation()}>
-                        <div className={generatorStyles.header}><h2 className={generatorStyles.title}>{t('flashcardsView.createFolder')}</h2><button className={generatorStyles.closeBtn} onClick={() => setShowCreateFolderModal(false)}><X size={20}/></button></div>
-                        <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
-                            <input type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder={t('flashcardsView.folderNamePlaceholder')} autoFocus required className={generatorStyles.input} style={{marginBottom: 20, padding: 10, width: '100%'}}/>
-                            <div className={generatorStyles.formActions}><button type="button" className={generatorStyles.btnCancel} onClick={() => setShowCreateFolderModal(false)}>{t('flashcardsView.cancel')}</button><button type="submit" className={generatorStyles.btnSubmit}>{t('flashcardsView.createFolder')}</button></div>
+                    <div className={generatorStyles.folderModal} onClick={e => e.stopPropagation()}>
+                        <div className={generatorStyles.folderModalHeader}>
+                            <h2 className={generatorStyles.folderModalTitle}>{t('flashcardsView.createFolder')}</h2>
+                            <button className={generatorStyles.folderModalClose} onClick={() => setShowCreateFolderModal(false)}><X size={20}/></button>
+                        </div>
+                        <form onSubmit={handleCreateFolder} className={generatorStyles.folderModalForm}>
+                            <input type="text" id="folder-name" name="folderName" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder={t('flashcardsView.folderNamePlaceholder')} autoFocus required className={generatorStyles.folderModalInput}/>
+                            <div className={generatorStyles.folderModalActions}>
+                                <button type="button" className={generatorStyles.folderModalCancel} onClick={() => setShowCreateFolderModal(false)}>{t('flashcardsView.cancel')}</button>
+                                <button type="submit" className={generatorStyles.folderModalSubmit}>{t('flashcardsView.createFolder')}</button>
+                            </div>
                         </form>
                     </div>
                 </div>

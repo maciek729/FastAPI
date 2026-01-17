@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { MoreVertical, Edit2, Trash2, UserPlus, X } from 'lucide-react';
 import { confirmModal } from '../../utils/confirmModal';
@@ -14,7 +14,7 @@ import translations from '../../translations/translation.json';
 
 const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   const { language } = useContext(LanguageContext);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [collaborators, setCollaborators] = useState([]);
@@ -74,23 +74,20 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
     if (!triggerRef.current) return;
 
     const rect = triggerRef.current.getBoundingClientRect();
-    const menuWidth = 180; // min-width from CSS
-    const menuHeight = 150; // approximate height
+    const menuWidth = 180;
+    const menuHeight = 150;
 
-    let top = rect.bottom + 4; // 4px margin below trigger
-    let left = rect.right - menuWidth; // align to right edge of trigger
+    let top = rect.bottom + 4;
+    let left = rect.right - menuWidth;
 
-    // Ensure menu doesn't go off bottom of screen
     if (top + menuHeight > window.innerHeight) {
-      top = rect.top - menuHeight - 4; // position above trigger
+      top = rect.top - menuHeight - 4;
     }
 
-    // Ensure menu doesn't go off right edge
     if (left + menuWidth > window.innerWidth) {
       left = window.innerWidth - menuWidth - 8;
     }
 
-    // Ensure menu doesn't go off left edge
     if (left < 8) {
       left = 8;
     }
@@ -102,8 +99,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
     try {
       const data = await getCollaborators(notebook.id);
       setCollaborators(data);
-    } catch (err) {
-      console.error('Error fetching collaborators:', err);
+    } catch {
     }
   };
 
@@ -116,7 +112,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
       toast.success(translate('sidebar.renameSuccess'));
       onRefresh();
       setShowMenu(false);
-    } catch (err) {
+    } catch {
       toast.error(translate('sidebar.renameError'));
     }
   };
@@ -130,7 +126,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
       toast.success(translate('sidebar.deleteNotebookSuccess'));
       onRefresh();
       setShowMenu(false);
-    } catch (err) {
+    } catch {
       toast.error(translate('sidebar.deleteNotebookError'));
     }
   };
@@ -168,17 +164,17 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
 
     try {
       await removeCollaborator(notebook.id, userId);
-      
+
       if (currentUser.id === userId) {
         toast.success(translate('sidebar.leaveNotebookSuccess'));
         setShowCollaboratorModal(false);
         navigate('/dashboard');
-        if (onRefresh) onRefresh(); 
+        if (onRefresh) onRefresh();
       } else {
         toast.success(translate('sidebar.deleteColSuccess'));
         fetchCollaborators();
       }
-      
+
     } catch (err) {
       toast.error(err.message || translate('sidebar.deleteColError'));
     }
@@ -219,7 +215,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
             <Edit2 size={16} />
             <span>{translate('sidebar.rename')}</span>
           </button>
-          
+
           {spaceType === 'shared' && (
             <button
               className={styles.menuItem}
@@ -278,10 +274,10 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
                     <div key={col.id} className={notebookStyles.collaboratorItem}>
                       <div className={notebookStyles.collaboratorLeft}>
                         {col.avatar_url ? (
-                            <img 
-                                src={col.avatar_url} 
-                                alt={col.username} 
-                                className={notebookStyles.collaboratorAvatar} 
+                            <img
+                                src={col.avatar_url}
+                                alt={col.username}
+                                className={notebookStyles.collaboratorAvatar}
                             />
                         ) : (
                             <div className={notebookStyles.avatarFallback}>
@@ -289,7 +285,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
                             </div>
                         )}
                         <span className={notebookStyles.collaboratorName}>
-                          {col.username} 
+                          {col.username}
                           {col.id === currentUser.id && " (Ty)"}
                         </span>
                       </div>

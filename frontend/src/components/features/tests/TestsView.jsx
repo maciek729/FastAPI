@@ -62,8 +62,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth > 768) {
-                setShowFilters(true);
+            if (window.innerWidth <= 768) {
+                setShowFilters(false);
             }
         };
         window.addEventListener('resize', handleResize);
@@ -86,7 +86,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             const data = await testsService.fetchTests(userData.id, notebookId);
             setTests(data);
         } catch (err) {
-            console.error('Error fetching tests:', err);
         } finally {
             setLoading(false);
         }
@@ -99,7 +98,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             const data = await testsService.fetchTestFolders(userData.id, notebookId);
             setFolders(data);
         } catch (err) {
-            console.error('Error fetching folders:', err);
         }
     };
 
@@ -110,7 +108,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             const data = await testsService.fetchNotes(notebookId);
             setNotes(data);
         } catch (err) {
-            console.error('Error fetching notes:', err);
         }
     };
 
@@ -127,7 +124,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setCurrentQuestions(data.questions);
             setShowTakeTestModal(true);
         } catch (err) {
-            console.error('Error loading test:', err);
             toast.error(t('testsView.loadingError'));
         }
     };
@@ -139,7 +135,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setTestResults(results);
             setShowResultsModal(true);
         } catch (err) {
-            console.error('Error loading results:', err);
             toast.error(t('testsView.resultsError'));
         }
     };
@@ -176,7 +171,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             setShowCreateFolderModal(false);
             fetchFolders();
         } catch (err) {
-            console.error('Error creating folder:', err);
             toast.error(t('flashcardsView.createFolderError'));
         }
     };
@@ -204,7 +198,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             fetchFolders();
             fetchTests();
         } catch (err) {
-            console.error('Error deleting folder:', err);
             toast.error(t('flashcardsView.deleteFolderError'));
         }
     };
@@ -219,7 +212,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             toast.success(t('flashcardsView.renameFolderSuccess'));
             fetchFolders();
         } catch (err) {
-            console.error('Error renaming folder:', err);
             toast.error(t('flashcardsView.renameFolderError'));
         }
     };
@@ -249,7 +241,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 setDraggedTest(null);
                 fetchTests();
             } catch (err) {
-                console.error('Error moving test to parent folder:', err);
             }
         }
 
@@ -260,7 +251,6 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                 await fetchFolders();
                 fetchTests();
             } catch (err) {
-                console.error('Error moving folder to parent:', err);
                 toast.error(t('flashcardsView.moveFolderError'));
             }
         }
@@ -320,6 +310,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         <Search size={16} />
                         <input
                             type="text"
+                            id="tests-search"
+                            name="search"
                             placeholder={t('testsView.testPlaceHolder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -327,6 +319,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         />
                     </div>
                     <select
+                        id="tests-filter-source"
+                        name="filterSource"
                         value={filterSource}
                         onChange={(e) => setFilterSource(e.target.value)}
                         className={styles.filterSelect}
@@ -337,6 +331,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                         <option value="note">{t('flashcardGenerator.fromNote')}</option>
                     </select>
                     <select
+                        id="tests-sort"
+                        name="sortBy"
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                         className={styles.filterSelect}
@@ -353,6 +349,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                             <Search size={16} />
                             <input
                                 type="text"
+                                id="tests-search-mobile"
+                                name="search"
                                 placeholder="Szukaj testów..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -360,6 +358,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                             />
                         </div>
                         <select
+                            id="tests-filter-source-mobile"
+                            name="filterSource"
                             value={filterSource}
                             onChange={(e) => setFilterSource(e.target.value)}
                             className={styles.filterSelect}
@@ -370,6 +370,8 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
                             <option value="note">{t('flashcardGenerator.fromNote')}</option>
                         </select>
                         <select
+                            id="tests-sort-mobile"
+                            name="sortBy"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className={styles.filterSelect}
@@ -446,40 +448,38 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             {/* Create Folder Modal */}
             {showCreateFolderModal && (
                 <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowCreateFolderModal(false)}>
-                    <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
-                        <div className={generatorStyles.header}>
-                            <h2 className={generatorStyles.title}>Utwórz nowy folder</h2>
+                    <div className={generatorStyles.folderModal} onClick={(e) => e.stopPropagation()}>
+                        <div className={generatorStyles.folderModalHeader}>
+                            <h2 className={generatorStyles.folderModalTitle}>{t('flashcardsView.createFolder')}</h2>
                             <button
-                                className={generatorStyles.closeBtn}
+                                className={generatorStyles.folderModalClose}
                                 onClick={() => setShowCreateFolderModal(false)}
                                 title={t('flashcardsView.close')}
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleCreateFolder} className={generatorStyles.form}>
-                            <div className={generatorStyles.formSection}>
-                                <div className={generatorStyles.formGroup}>
-                                    <label>{t('flashcardsView.folderName')}</label>
-                                    <input
-                                        type="text"
-                                        value={newFolderName}
-                                        onChange={(e) => setNewFolderName(e.target.value)}
-                                        placeholder={t('flashcardsView.folderNamePlaceholder')}
-                                        autoFocus
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={generatorStyles.formActions}>
+                        <form onSubmit={handleCreateFolder} className={generatorStyles.folderModalForm}>
+                            <input
+                                type="text"
+                                id="tests-folder-name"
+                                name="folderName"
+                                className={generatorStyles.folderModalInput}
+                                value={newFolderName}
+                                onChange={(e) => setNewFolderName(e.target.value)}
+                                placeholder={t('flashcardsView.folderNamePlaceholder')}
+                                autoFocus
+                                required
+                            />
+                            <div className={generatorStyles.folderModalActions}>
                                 <button
                                     type="button"
-                                    className={generatorStyles.btnCancel}
+                                    className={generatorStyles.folderModalCancel}
                                     onClick={() => setShowCreateFolderModal(false)}
                                 >
                                     {t('flashcardsView.cancel')}
                                 </button>
-                                <button type="submit" className={generatorStyles.btnSubmit}>
+                                <button type="submit" className={generatorStyles.folderModalSubmit}>
                                     {t('flashcardsView.createFolder')}
                                 </button>
                             </div>
@@ -491,40 +491,38 @@ export default function TestsView({ userData, notebookId, isSidebarOpen }) {
             {/* Rename Folder Modal */}
             {editingFolder && (
                 <div className={generatorStyles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setEditingFolder(null)}>
-                    <div className={generatorStyles.modalContainer} onClick={(e) => e.stopPropagation()}>
-                        <div className={generatorStyles.header}>
-                            <h2 className={generatorStyles.title}>{t('flashcardsView.renameFolderName')}</h2>
+                    <div className={generatorStyles.folderModal} onClick={(e) => e.stopPropagation()}>
+                        <div className={generatorStyles.folderModalHeader}>
+                            <h2 className={generatorStyles.folderModalTitle}>{t('flashcardsView.renameFolderName')}</h2>
                             <button
-                                className={generatorStyles.closeBtn}
+                                className={generatorStyles.folderModalClose}
                                 onClick={() => setEditingFolder(null)}
                                 title={t('flashcardsView.close')}
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleRenameFolder} className={generatorStyles.form}>
-                            <div className={generatorStyles.formSection}>
-                                <div className={generatorStyles.formGroup}>
-                                    <label>{t('flashcardsView.newName')}</label>
-                                    <input
-                                        type="text"
-                                        value={editingFolder.name}
-                                        onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
-                                        placeholder={t('flashcardsView.folderNamePlaceholder')}
-                                        autoFocus
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className={generatorStyles.formActions}>
+                        <form onSubmit={handleRenameFolder} className={generatorStyles.folderModalForm}>
+                            <input
+                                type="text"
+                                id="tests-rename-folder"
+                                name="folderName"
+                                className={generatorStyles.folderModalInput}
+                                value={editingFolder.name}
+                                onChange={(e) => setEditingFolder({...editingFolder, name: e.target.value})}
+                                placeholder={t('flashcardsView.folderNamePlaceholder')}
+                                autoFocus
+                                required
+                            />
+                            <div className={generatorStyles.folderModalActions}>
                                 <button
                                     type="button"
-                                    className={generatorStyles.btnCancel}
+                                    className={generatorStyles.folderModalCancel}
                                     onClick={() => setEditingFolder(null)}
                                 >
                                     {t('flashcardsView.cancel')}
                                 </button>
-                                <button type="submit" className={generatorStyles.btnSubmit}>
+                                <button type="submit" className={generatorStyles.folderModalSubmit}>
                                     {t('flashcardsView.newName')}
                                 </button>
                             </div>

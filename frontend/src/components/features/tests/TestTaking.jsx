@@ -101,7 +101,6 @@ export default function TestTaking({
             const results = await testsService.getTestResults(currentTest.id, userData.id);
             onSubmitComplete(results);
         } catch (err) {
-            console.error('Error submitting test:', err);
             toast.error(t('testTaking.sendError'));
         } finally {
             setLoading(false);

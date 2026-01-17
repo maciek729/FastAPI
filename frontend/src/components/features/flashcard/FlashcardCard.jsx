@@ -76,14 +76,14 @@ export default function FlashcardCard({ question, answer, onReview }) {
                         className={`${styles.qualityBtn} ${styles.btnNotKnow}`}
                         onClick={() => handleResponse(false)}
                     >
-                        <XCircle size={24} />
+                        <XCircle size={20} />
                         <span>{t('flashcard.dontKnow')}</span>
                     </button>
                     <button
                         className={`${styles.qualityBtn} ${styles.btnKnow}`}
                         onClick={() => handleResponse(true)}
                     >
-                        <CheckCircle size={24} />
+                        <CheckCircle size={20} />
                         <span>{t('flashcard.know')}</span>
                     </button>
                 </div>

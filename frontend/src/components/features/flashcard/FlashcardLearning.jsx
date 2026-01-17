@@ -51,7 +51,7 @@ export default function FlashcardLearning({ flashcardSet, userId, onBack }) {
             setAllFlashcards(data);
             setFlashcards(data);
             setSessionStats(prev => ({...prev, total: data.length}));
-        } catch (error) {
+        } catch {
         } finally {
             setLoading(false);
         }

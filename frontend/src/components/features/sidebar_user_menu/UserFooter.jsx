@@ -5,7 +5,7 @@ import styles from "../../../css/layout/SidebarFooter.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 
-const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, isUserMenuOpen, setIsUserMenuOpen, hasUnread }) => {
+const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, isUserMenuOpen, setIsUserMenuOpen, hasUnread, isMobile, onCloseMobileMenu }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const { language } = useContext(LanguageContext);
@@ -80,6 +80,8 @@ const UserFooter = ({ userData, handleLogout, onSettingsClick, onGoToSection, is
                         onGoToSection={onGoToSection}
                         onClose={() => setIsMenuOpen(false)}
                         userData={userData}
+                        isMobile={isMobile}
+                        onCloseMobileMenu={onCloseMobileMenu}
                     />
                 )}
             </div>
