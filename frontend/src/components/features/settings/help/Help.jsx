@@ -43,7 +43,6 @@ export default function Help({userData}) {
             setTitle("");
             setMessage("");
         } catch (error) {
-            console.error("Błąd kontaktu:", error);
             setStatus(error.message);
         } finally {
             setIsLoading(false);
@@ -94,6 +93,8 @@ export default function Help({userData}) {
 
                     <input
                         type="text"
+                        id="help-title"
+                        name="helpTitle"
                         placeholder={t('help.titlePlaceholder')}
                         value={title}
                         onChange={(t) => setTitle(t.target.value)}
@@ -103,6 +104,8 @@ export default function Help({userData}) {
                     />
 
                     <textarea
+                        id="help-message"
+                        name="helpMessage"
                         placeholder={t('help.messagePlaceholder')}
                         value={message}
                         onChange={(m) => setMessage(m.target.value)}

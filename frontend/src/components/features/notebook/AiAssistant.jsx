@@ -72,7 +72,6 @@ export default function AiAssistant({ onClose, onInsert, selectedText = '' }) {
             }
             setPrompt('');
         } catch (err) {
-            console.error('AI Error:', err);
             toast.error(t('aiAssistant.generateError', { message: err.message || err }));
             onInsert(prompt);
             setPrompt('');

@@ -12,15 +12,9 @@ const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
   const { language, changeLanguage } = useContext(LanguageContext);
 
   useEffect(() => {
-    // Check from database field instead of localStorage
-    console.log('Demo check - userData:', userData);
-    console.log('Demo check - has_completed_tutorial:', userData?.has_completed_tutorial);
 
     if (userData && !userData.has_completed_tutorial) {
-      console.log('Opening demo - user has not completed tutorial');
       setTimeout(() => setIsOpen(true), 1000);
-    } else {
-      console.log('Not opening demo - userData:', userData, 'has_completed:', userData?.has_completed_tutorial);
     }
 
     const handleReopenDemo = () => {
@@ -43,7 +37,6 @@ const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
     return value || key;
   };
 
-  // Get first shared notebook for demo purposes
   const [firstNotebook, setFirstNotebook] = useState(null);
 
   useEffect(() => {
@@ -55,8 +48,7 @@ const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
         if (sharedNotebooks && sharedNotebooks.length > 0) {
           setFirstNotebook(sharedNotebooks[0]);
         }
-      } catch (err) {
-        console.log('No notebooks available for demo');
+      } catch {
       }
     };
     fetchFirstNotebook();
@@ -84,7 +76,6 @@ const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
       action: firstNotebook ? () => {
         onSelectNotebook?.(firstNotebook);
         setTimeout(() => {
-          // Ensure we're on files tab after selecting notebook
           window.dispatchEvent(new CustomEvent('selectNotebookTab', { detail: 'files' }));
         }, 100);
       } : null
@@ -166,13 +157,11 @@ const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
 
   const handleClose = async () => {
     setIsOpen(false);
-    // Mark tutorial as completed in database
     const token = localStorage.getItem('token');
     if (token) {
       try {
         await completeTutorial(token);
-      } catch (err) {
-        console.error('Failed to mark tutorial as completed:', err);
+      } catch {
       }
     }
   };
@@ -187,13 +176,11 @@ const Demo = ({ onSelectNotebook, onNavigateToResource, userData }) => {
       }
     } else {
       setIsOpen(false);
-      // Mark tutorial as completed in database
       const token = localStorage.getItem('token');
       if (token) {
         try {
           await completeTutorial(token);
-        } catch (err) {
-          console.error('Failed to mark tutorial as completed:', err);
+        } catch {
         }
       }
     }

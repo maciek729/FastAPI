@@ -41,10 +41,15 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
     };
 
     useEffect(() => {
-        fetchNotes();
+        if (notebookId) {
+            fetchNotes();
+        }
     }, [notebookId]);
 
     const fetchNotes = async () => {
+        if (!notebookId) {
+            return;
+        }
         try {
             setLoading(true);
             const response = await fetch(ENDPOINTS.NOTES.LIST(notebookId), {
@@ -54,8 +59,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 const data = await response.json();
                 setNotes(data.filter(note => note.type !== "Fiszki"));
             }
-        } catch (error) {
-            console.error('Error fetching notes:', error);
+        } catch {
         } finally {
             setLoading(false);
         }
@@ -232,6 +236,8 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                         <label>{t('flashcardGenerator.setTitle')} *</label>
                         <input
                             type="text"
+                            id="flashcard-set-title"
+                            name="setTitle"
                             value={formData.title}
                             onChange={(e) => setFormData({...formData, title: e.target.value})}
                             placeholder={t('flashcardGenerator.titlePlaceholder')}
@@ -243,6 +249,8 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                         <div className={styles.formGroup}>
                             <label>{t('flashcardGenerator.materialDescription')} *</label>
                             <textarea
+                                id="flashcard-description-manual"
+                                name="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                                 placeholder={t('flashcardGenerator.descriptionPlaceholder')}
@@ -256,6 +264,8 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                         <div className={styles.formGroup}>
                             <label>{t('flashcardGenerator.descriptionOptional')}</label>
                             <textarea
+                                id="flashcard-description"
+                                name="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                                 placeholder={t('flashcardGenerator.additionalInfo')}

@@ -61,7 +61,6 @@ const GroupChatSidebar = ({
             setMembers([{ id: 'everyone', username: 'wszyscy' }, ...chatMembers]);
             setPinnedMessage(pinned);
         } catch (error) {
-            console.error("Błąd inicjalizacji:", error);
         } finally {
             setIsLoading(false);
         }
@@ -73,7 +72,6 @@ const GroupChatSidebar = ({
             const data = await chatService.getAvailableResources(notebookId);
             setAvailableResources(data);
         } catch (error) {
-            console.error("Błąd ładowania zasobów:", error);
         }
     };
 
@@ -102,7 +100,6 @@ const GroupChatSidebar = ({
         try {
             await chatService.editMessage(messageId, userData.id, newText);
         } catch (error) {
-            console.error("Błąd edycji:", error);
         }
     };
 
@@ -124,7 +121,6 @@ const GroupChatSidebar = ({
             states[notebookId] = autoScroll;
             localStorage.setItem(autoScrollObjKey, JSON.stringify(states));
         } catch (e) {
-            console.error("Błąd zapisu do localStorage:", e);
         }
     }, [autoScroll, notebookId]);
 
@@ -133,8 +129,7 @@ const GroupChatSidebar = ({
             const host = API_BASE_URL.replace(/^https?:\/\//, '');
             const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
             const wsUrl = `${protocol}://${host}/group-chat/ws/${notebookId}/${userData.id}`;
-            
-            console.log("Łączenie z WebSocketem:", wsUrl);
+
             socketRef.current = new WebSocket(wsUrl);
 
             socketRef.current.onmessage = (event) => {

@@ -85,7 +85,6 @@ export default function Modal({
             
             return data.available;
         } catch (error) {
-            console.error("Błąd sprawdzania nazwy:", error);
             setValidationError('Nie można sprawdzić dostępności nazwy. Spróbuj później.');
             return false; 
         }

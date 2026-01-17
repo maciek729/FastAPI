@@ -288,10 +288,8 @@ const Intro = () => {
       <footer className={styles.introFooter}>
         <div className={styles.introFooterContent}>
           <div className={styles.introFooterLogo}>
-            <div className={styles.introFooterLogoIcon}>
-              <Sparkles className={styles.introFooterSparkles} />
-            </div>
-            <span className={styles.introFooterLogoText}>{t('intro.logo')}</span>
+            <img src={logoLight} alt="zdAI to logo" className={styles.logoImg} />
+            <span className={styles.introLogoText}>{t('intro.logo')}</span>
           </div>
           
           <div className={styles.introFooterLinks}>

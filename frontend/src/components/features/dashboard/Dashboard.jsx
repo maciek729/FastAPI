@@ -40,8 +40,7 @@ export default function Dashboard({ userData, onNavigateToResource }) {
       setIsLoading(true);
       const data = await notifService.getUserNotifications(userData.id);
       setNotifications(data.slice(0, 5));
-    } catch (error) {
-      console.error('Błąd pobierania powiadomień:', error);
+    } catch {
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +66,6 @@ export default function Dashboard({ userData, onNavigateToResource }) {
       }
 
     } catch (error) {
-      console.error('Błąd przy kliknięciu powiadomienia:', error);
       if (onNavigateToResource) {
         onNavigateToResource({
           type: notification.redirect_type,
@@ -83,8 +81,7 @@ export default function Dashboard({ userData, onNavigateToResource }) {
     try {
       await notifService.deleteNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
-    } catch (error) {
-      console.error(t("notifications.deleteError"), error);
+    } catch {
     }
   };
 

@@ -1,6 +1,7 @@
 .sideGroupChat {
     position: relative;
     height: 100%;
+    max-height: 100%;
     min-width: 250px;
     background: var(--inner_section_bg);
     border-left: 1px solid var(--border_gray);
@@ -10,11 +11,15 @@
     z-index: 10;
     transition: background 0.3s ease;
     animation: fadeIn 0.3s ease-out;
+    overflow: hidden;
 }
 .fixedTopSection {
     flex-shrink: 0;
-    z-index: 10;
+    z-index: 20;
     border-bottom: 1px solid var(--border_gray);
+    background: var(--inner_section_bg);
+    position: sticky;
+    top: 0;
 }
 
 @keyframes fadeIn {

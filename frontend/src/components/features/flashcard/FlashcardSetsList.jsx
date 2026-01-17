@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import toast from 'react-hot-toast';
 import { confirmModal } from '../../../utils/confirmModal';
-import { Layers, Trash2, Play, Brain, Pin, Folder, MoreVertical } from "lucide-react";
+import { Layers, Trash2, Play, Pin, Folder, MoreVertical } from "lucide-react";
 import styles from "../../../css/features/FlashcardsView.module.css";
 import { getFlashcardProgress, deleteFlashcardSet, pinFlashcardSet, updateFlashcardSetPosition, updateFlashcardFolderPosition, moveFlashcardFolder } from '../../../services/flashcardService';
 import { LanguageContext } from '../../../translations/LanguageContext';
@@ -85,7 +85,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             setLoadingProgress(prev => ({...prev, [setId]: true}));
             const data = await getFlashcardProgress(userId, setId);
             setProgress(prev => ({...prev, [setId]: data}));
-        } catch (error) {
+        } catch {
             setProgress(prev => ({...prev, [setId]: { progress_percentage: 0 }}));
         } finally {
             setLoadingProgress(prev => ({...prev, [setId]: false}));
@@ -143,8 +143,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                     set.id === setId ? { ...set, is_pinned: isPinned } : set
                 )
             );
-        } catch (err) {
-            console.error('Error toggling pin:', err);
+        } catch {
             toast.error(t('flashcardSetList.set.pinError'));
         }
     };
@@ -244,7 +243,6 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 )
             );
         } catch (err) {
-            console.error('Error updating flashcard set positions:', err);
             setLocalSets(sets);
         }
 
@@ -307,8 +305,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                     updateFlashcardFolderPosition(folder.id, folder.grid_position)
                 )
             );
-        } catch (err) {
-            console.error('Error updating folder positions:', err);
+        } catch {
         }
 
         setDragOverFolderIndex(null);
@@ -336,8 +333,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
             try {
                 await onMoveSetToFolder(draggedSet.set.id, folderId);
                 setDraggedSet(null);
-            } catch (err) {
-                console.error('Error dropping set into folder:', err);
+            } catch {
             }
         }
 
@@ -349,7 +345,6 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
                 await onRefreshFolders(); // Refresh folders
                 onDelete(); // Refresh flashcard sets
             } catch (err) {
-                console.error('Error moving folder into folder:', err);
                 toast.error(t('flashcardSetList.folder.moveError'));
             }
         }
@@ -399,9 +394,7 @@ export default function FlashcardSetsList({ sets, loading, userId, notebookId, f
     if (currentFolders.length === 0 && currentSets.length === 0) {
         return (
             <div className={styles.emptyState}>
-                <Brain className={styles.emptyIcon} size={64} />
-                <h3>{t('flashcardSetList.empty.title')}</h3>
-                <p>{t('flashcardSetList.empty.description')}</p>
+                <p>{currentFolder ? t('flashcardSetList.emptyFolder') : t('flashcardSetList.empty.title')}</p>
             </div>
         );
     }

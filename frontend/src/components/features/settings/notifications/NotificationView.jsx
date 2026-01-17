@@ -42,7 +42,6 @@ export default function NotificationView({ userData, onNavigateToResource }) {
             const data = await notifService.getUserNotifications(userData.id);
             setNotifications(data);
         } catch (error) {
-            console.error(t("notifications.downloadError"), error);
         } finally {
             setLoading(false);
         }
@@ -66,8 +65,6 @@ export default function NotificationView({ userData, onNavigateToResource }) {
             });
 
         } catch (error) {
-            console.error(t("notifications.clickError"), error);
-            
             onNavigateToResource({
                 type: notification.redirect_type,
                 notebookId: notification.notebook_id,
@@ -82,7 +79,6 @@ export default function NotificationView({ userData, onNavigateToResource }) {
             await notifService.deleteNotification(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
         } catch (error) {
-            console.error(t("notifications.deleteError"), error);
         }
     };
 
@@ -93,7 +89,6 @@ export default function NotificationView({ userData, onNavigateToResource }) {
             await notifService.clearAllNotifications(userData.id);
             setNotifications([]);
         } catch (error) {
-            console.error(t("notifications.clearError"), error);
         }
     };
 

@@ -147,14 +147,15 @@
 
 .qualityBtn {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.75rem 1rem;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.625rem 1.25rem;
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 600;
-    font-size: 1.125rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
     background: var(--white_btn_bg);
@@ -171,7 +172,7 @@
 }
 
 .qualityBtn span {
-    font-size: 1.125rem;
+    font-size: 1rem;
 }
 
 .btnNotKnow {
@@ -220,11 +221,12 @@
     }
 
     .qualityBtn {
-        padding: 1.25rem 0.75rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9375rem;
     }
 
     .qualityBtn span {
-        font-size: 1rem;
+        font-size: 0.9375rem;
     }
 }
 
@@ -260,10 +262,11 @@
     }
 
     .qualityBtn {
-        padding: 1rem 0.5rem;
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
     }
 
     .qualityBtn span {
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
     }
 }

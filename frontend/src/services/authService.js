@@ -33,7 +33,6 @@ export const RegisterUser = async (user) => {
 
   const data = await res.json();
   if (!res.ok) {
-    console.log("Błąd backendu:", data);
     throw new Error(data.detail || "Rejestracja nie powiodła się");
   }
 

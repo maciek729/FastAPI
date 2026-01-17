@@ -53,7 +53,6 @@ export default function AvatarModal({ onClose, onSave, onDelete, userData }) {
             const croppedFile = new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" });
             onSave(croppedFile);
         } catch (e) {
-            console.error(t('userSettings.cropError'), e);
         }
     };
 

@@ -52,7 +52,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
             setUnreadNotebookIds(newUnreadSet);
 
         } catch (error) {
-            console.error("Błąd pobierania statusu:", error);
         }
     };
 
@@ -119,7 +118,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 return { ...prev, [spaceType]: data };
             });
         } catch (error) {
-            console.error(t('sidebar.errors.fetchNotebooks'), error);
         }
     }, [userData?.id, t]);
 
@@ -423,7 +421,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                 toast.success(t('sidebar.copySuccess.flashcardSetFolder', { notebookName: targetNotebook.name }));
             }
         } catch (error) {
-            console.error(t('sidebar.errors.copy'), error);
             toast.error(t('sidebar.errors.copy'));
         }
     };
@@ -606,17 +603,19 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
                             userData={userData}
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
-                            onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
+                            onSettingsClick={() => {}}
                             isUserMenuOpen={isUserMenuOpen}
                             setIsUserMenuOpen={setIsUserMenuOpen}
                             hasUnread={hasUnread}
+                            isMobile={isMobile}
+                            onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
                         />
                     ) : (
                         <UserFooterCollapsed
                             userData={userData}
                             handleLogout={handleLogout}
                             onGoToSection={onGoToSection}
-                            onSettingsClick={() => console.log(t('sidebar.userMenu.settings'))}
+                            onSettingsClick={() => {}}
                             onExpandAndOpen={handleCollapsedUserClick}
                             hasUnread={hasUnread}
                         />

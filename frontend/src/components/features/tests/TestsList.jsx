@@ -82,7 +82,6 @@ export default function TestsList({
                 )
             );
         } catch (err) {
-            console.error('Error toggling pin:', err);
             toast.error(t('testsList.pinError'));
         }
     };
@@ -96,7 +95,6 @@ export default function TestsList({
             toast.success(t('testsList.deleteSuccess'));
             setTests(prevTests => prevTests.filter(t => t.id !== testId));
         } catch (err) {
-            console.error('Error deleting test:', err);
             toast.error(t('testsList.deleteError'));
         }
     };
@@ -249,7 +247,6 @@ export default function TestsList({
                 )
             );
         } catch (err) {
-            console.error('Error updating test positions:', err);
             // Revert on error - could fetch fresh data here
         }
 
@@ -266,7 +263,6 @@ export default function TestsList({
                 )
             );
         } catch (err) {
-            console.error('Error moving test:', err);
             toast.error(t('testsList.moveError'));
         }
     };
@@ -299,7 +295,6 @@ export default function TestsList({
                 setDraggedFolder(null);
                 await onRefreshFolders();
             } catch (err) {
-                console.error('Error moving folder into folder:', err);
                 toast.error(t('testsList.moveError'));
             }
         }
@@ -365,7 +360,6 @@ export default function TestsList({
             );
             await onRefreshFolders();
         } catch (err) {
-            console.error('Error updating folder positions:', err);
         }
 
         setDragOverFolderIndex(null);

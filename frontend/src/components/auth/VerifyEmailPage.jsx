@@ -38,8 +38,7 @@ const VerifyEmailPage = () => {
       .then(() => {
         handleSuccess();
       })
-      .catch((error) => {
-        console.warn("Weryfikacja zwróciła błąd (ignorowany dla UX):", error);
+      .catch(() => {
         handleSuccess();
       });
 
