@@ -120,6 +120,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
         type: "Chat AI",
         is_shared: false
       });
+
       toast.dismiss(savingToast);
       toast.success(t('chat.saveSuccess'));
       
@@ -150,7 +151,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
         type: "Chat AI",
         is_shared: false
       });
-      
+
       toast.dismiss(savingToast);
       toast.success(t('chat.saveSuccess'));
       
@@ -162,6 +163,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
       toast.error(t('chat.saveError'));
     }
   };
+
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
@@ -269,9 +271,23 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
           </div>
         ) : (
           messages.map((msg, index) => (
-            <div key={index} className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.assistantMessage}`}>
-              <div className={styles.avatar}>{msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}</div>
-              <div className={styles.messageContent}>{msg.content}</div>
+            <div
+              key={index}
+              className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.assistantMessage}`}
+            >
+              <div className={styles.avatar}>
+                {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
+              </div>
+
+              {msg.role === 'assistant' ? (
+                <div
+                  className={styles.messageContent}
+                  dangerouslySetInnerHTML={{ __html: msg.content }}
+                />
+              ) : (
+                <div className={styles.messageContent}>{msg.content}</div>
+              )}
+
               {msg.role === 'assistant' && (
                 <div className={styles.dymekActions}>
                   <button className={styles.saveBtn} onClick={() => saveBotMessageAsNote(msg.content)} title={t('chat.saveSingle')}>
@@ -288,6 +304,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
             </div>
           ))
         )}
+
         {isLoading && (
           <div className={`${styles.message} ${styles.assistantMessage}`}>
             <div className={styles.avatar}><Bot size={18} /></div>
@@ -306,7 +323,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
       )}
 
       <div className={styles.inputContainer}>
-        <button className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()} title={t('chat.uploadFile')}>
+        <button className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
           <Upload size={20} />
         </button>
         <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileChange} accept=".pdf,.txt,.jpg,.jpeg,.png,.webp" />

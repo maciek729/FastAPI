@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from datetime import datetime
+from .notes import markdown_to_html
 
 load_dotenv()
 
@@ -244,6 +245,8 @@ async def chat_endpoint(chat_data: ChatMessage):
         response_text = response_data.get("response", "")
         model_used = "fallback"
         response_style_used = response_style
+
+    response_text = markdown_to_html(response_text)
 
     updated_conversation = chat_data.conversation + [
         {"role": "user", "content": chat_data.message},
