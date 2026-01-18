@@ -310,6 +310,52 @@
   color: white;
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
+.messageContent p {
+  margin-bottom: 0.75rem;
+}
+.messageContent p:last-child {
+  margin-bottom: 0;
+}
+
+.messageContent h1, 
+.messageContent h2, 
+.messageContent h3 {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--title);
+}
+
+.messageContent ul, 
+.messageContent ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.messageContent table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  display: block;
+  overflow-x: auto;
+}
+
+.messageContent th, 
+.messageContent td {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.messageContent th {
+  background-color: rgba(139, 92, 246, 0.1);
+  font-weight: 600;
+}
+
+.messageContent a {
+  color: #8b5cf6;
+  text-decoration: underline;
+}
 
 .assistantMessage .avatar {
   background: var(--inner_section_bg);
@@ -321,9 +367,11 @@
   padding: 0.875rem 1.125rem;
   border-radius: 12px;
   font-size: 0.9375rem;
-  line-height: 1.5;
+  line-height: 1.6;
   word-wrap: break-word;
-  white-space: pre-wrap;
+  white-space: normal;
+  overflow-x: auto;
+  display: block;
 }
 
 .userMessage .messageContent {
