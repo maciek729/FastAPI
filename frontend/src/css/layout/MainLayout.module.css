@@ -4,7 +4,7 @@
 /* Main Layout Container */
 .mainLayout {
   position: relative;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
   background: var(--outer_section_bg);
   font-family: 'Inter', sans-serif;
@@ -136,8 +136,8 @@
   .contentAreaCollapsed {
     margin-left: 0 !important;
     margin-top: 60px;
-    height: calc(100vh - 60px);
-    max-height: calc(100vh - 60px);
+    height: calc(100dvh - 60px);
+    max-height: calc(100dvh - 60px);
   }
 }
 
