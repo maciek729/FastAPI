@@ -15,6 +15,7 @@ import { LanguageContext } from '../../../translations/LanguageContext';
 import translations from '../../../translations/translation.json';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
@@ -575,17 +576,23 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                             <ReactMarkdown
                                                 children={item.content || ''}
                                                 remarkPlugins={[remarkMath]}
-                                                rehypePlugins={[rehypeKatex]}
+                                                rehypePlugins={[rehypeKatex, rehypeRaw]} // <--- TU JEST KLUCZ DO HTML
                                                 components={{
-                                                    p: ({node, ...props}) => <span {...props} style={{ margin: 0 }} />, // Paragrafy jako span, żeby nie robić odstępów
-                                                    h1: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0' }} />, // Nagłówki jako pogrubienie
-                                                    h2: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0' }} />,
-                                                    h3: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0' }} />,
-                                                    ul: ({node, ...props}) => <span {...props} />, // Listy w jednej linii lub uproszczone
+                                                    p: ({node, ...props}) => <span {...props} style={{ margin: 0, display: 'inline' }} />,
+                                                    div: ({node, ...props}) => <span {...props} />, // Divy zamieniamy na spany
+                                                    span: ({node, ...props}) => <span {...props} />,
+                                                    h1: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0', fontSize: '1em' }} />,
+                                                    h2: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0', fontSize: '1em' }} />,
+                                                    h3: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0', fontSize: '1em' }} />,
+                                                    ul: ({node, ...props}) => <span {...props} style={{ display: 'block' }} />,
+                                                    ol: ({node, ...props}) => <span {...props} style={{ display: 'block' }} />,
                                                     li: ({node, ...props}) => <span {...props} style={{ marginRight: '5px' }}>• </span>,
+                                                    strong: ({node, ...props}) => <strong {...props} style={{ fontWeight: 'bold', color: 'var(--purple_brighter)' }} />,
+                                                    b: ({node, ...props}) => <strong {...props} style={{ fontWeight: 'bold' }} />,
+                                                    em: ({node, ...props}) => <em {...props} style={{ fontStyle: 'italic' }} />,
+                                                    i: ({node, ...props}) => <em {...props} style={{ fontStyle: 'italic' }} />,
                                                     img: () => <span style={{color: '#3498db', fontSize: '0.8em'}}>[Obraz]</span>,
                                                     table: () => <span style={{color: '#e67e22', fontSize: '0.8em'}}>[Tabela]</span>,
-                                                    div: ({node, ...props}) => <span {...props} /> // Blokowe równania wymuszamy do inline
                                                 }}
                                             />
                                         </div>
