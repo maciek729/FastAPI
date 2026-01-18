@@ -719,7 +719,8 @@
       "noMaterials":"Brak materiałów w tym notatniku",
       "openR":"Otwórz zasób",
       "all":"@wszyscy",
-      "textPH": "Wpisz wiadomość..."
+      "textPH": "Wpisz wiadomość...",
+      "pinned": "Przypięte wiadomości"
     },
     "demo": {
       "buttons": {
@@ -1748,7 +1749,8 @@
       "noMaterials":"There are no materials in this notebook",
       "openR": "Open resource",
       "all": "@all",
-      "textPH": "Type message..."
+      "textPH": "Type message...",
+      "pinned": "Pinned message"
     },
     "demo": {
       "buttons": {
