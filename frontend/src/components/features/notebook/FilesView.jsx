@@ -40,11 +40,13 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     
     // Drag & Drop
     const [draggedNote, setDraggedNote] = useState(null);
+    const [draggedFile, setDraggedFile] = useState(null);
     const [draggedFolder, setDraggedFolder] = useState(null);
     const [dragOverIndex, setDragOverIndex] = useState(null);
     const [dragNotAllowedIndex, setDragNotAllowedIndex] = useState(null);
     const [dragOverFolder, setDragOverFolder] = useState(null);
     const [isGlobalDragOver, setIsGlobalDragOver] = useState(false);
+    const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
 
     // Filter & Sort
     const [searchQuery, setSearchQuery] = useState('');
@@ -182,6 +184,15 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         try { await axios.patch(ENDPOINTS.NOTES.TOGGLE_PIN(noteId), { is_pinned: isPinned }); setNotes(prev => prev.map(n => n.id === noteId ? { ...n, is_pinned: isPinned } : n)); } 
         catch (err) { toast.error(t('filesView.pinError')); }
     };
+    
+    const handleToggleFilePin = async (fileId, isPinned, e) => {
+        e.stopPropagation();
+        try { 
+            await axios.patch(ENDPOINTS.FILES.TOGGLE_PIN(fileId), { is_pinned: isPinned }); 
+            setFiles(prev => prev.map(f => f.id === fileId ? { ...f, is_pinned: isPinned } : f)); 
+        } 
+        catch (err) { toast.error(t('filesView.pinError')); }
+    };
 
     // --- Folder Logic ---
     const handleCreateFolder = async (e) => { e.preventDefault(); if(!newFolderName.trim()) return; try { await axios.post(ENDPOINTS.FOLDERS.NOTES.CREATE, { notebook_id: details.id, user_id: userData.id, name: newFolderName, parent_folder_id: currentFolder?.id || null }); setNewFolderName(''); setShowCreateFolderModal(false); fetchFolders(); } catch(err){toast.error(t('flashcardsView.createFolderError'));} };
@@ -258,10 +269,17 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         processedNotes = processedNotes.map(n => ({...n, itemType: 'note'}));
 
         let processedFiles = [];
-        if (!currentFolder) {
-             processedFiles = files.map(f => ({
+        if (currentFolder) {
+            processedFiles = files.filter(f => f.folder_id === currentFolder.id).map(f => ({
                 id: f.id, title: f.file_name, content: null, created_at: f.created_at,
-                type: f.file_type.includes('pdf') ? 'PDF' : 'Obraz', is_pinned: false, itemType: 'file', originalFile: f
+                type: f.file_type.includes('pdf') ? 'PDF' : 'Obraz', is_pinned: f.is_pinned || false, 
+                grid_position: f.grid_position, itemType: 'file', originalFile: f
+             }));
+        } else {
+             processedFiles = files.filter(f => !f.folder_id).map(f => ({
+                id: f.id, title: f.file_name, content: null, created_at: f.created_at,
+                type: f.file_type.includes('pdf') ? 'PDF' : 'Obraz', is_pinned: f.is_pinned || false, 
+                grid_position: f.grid_position, itemType: 'file', originalFile: f
              }));
         }
 
@@ -269,10 +287,23 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         if (searchQuery) combined = combined.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
         combined.sort((a, b) => {
+            // First, pinned items always come first
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
-            if (sortBy === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
-            if (sortBy === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+            
+            // For date sorting, use grid_position if available
+            if (sortBy === 'date_desc' || sortBy === 'date_asc') {
+                // If both items have grid_position, sort by position
+                if (a.grid_position !== null && a.grid_position !== undefined && 
+                    b.grid_position !== null && b.grid_position !== undefined) {
+                    return a.grid_position - b.grid_position;
+                }
+                
+                // Otherwise sort by date
+                if (sortBy === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
+                if (sortBy === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+            }
+            
             if (sortBy === 'name_asc') return a.title.localeCompare(b.title);
             if (sortBy === 'name_desc') return b.title.localeCompare(a.title);
             return 0;
@@ -284,31 +315,96 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
     // --- Drag & Drop ---
     const handleDragStart = (e, item, index) => {
-        if (item.itemType === 'file') { e.preventDefault(); return; }
-        setDraggedNote({ note: item, index });
+        if (item.itemType === 'note') {
+            setDraggedNote({ note: item, index });
+            e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', noteId: item.id }));
+        } else if (item.itemType === 'file') {
+            setDraggedFile({ file: item, index });
+            e.dataTransfer.setData('application/json', JSON.stringify({ type: 'file', fileId: item.id }));
+        }
         e.dataTransfer.effectAllowed = 'move';
         e.currentTarget.style.opacity = '0.5';
-        e.dataTransfer.setData('application/json', JSON.stringify({ type: 'note', noteId: item.id }));
     };
-    const handleDragEnd = (e) => { e.currentTarget.style.opacity = '1'; setDraggedNote(null); setDragOverIndex(null); };
+    const handleDragEnd = (e) => { e.currentTarget.style.opacity = '1'; setDraggedNote(null); setDraggedFile(null); setDragOverIndex(null); };
     const handleDragOver = (e, index) => {
         e.preventDefault();
-        if (draggedNote && mixedItems[index]?.itemType === 'note') setDragOverIndex(index);
+        if ((draggedNote || draggedFile) && mixedItems[index]) setDragOverIndex(index);
     };
     const handleDrop = async (e, dropIndex) => {
         e.preventDefault(); setDragOverIndex(null);
-        if (!draggedNote || draggedNote.index === dropIndex) return;
-        toast(t('filesView.notePosError'), {icon: 'ℹ️'});
+        const draggedItem = draggedNote || draggedFile;
+        if (!draggedItem || draggedItem.index === dropIndex) return;
+        
+        // Calculate new position based on drop location
+        const newPosition = dropIndex;
+        
+        try {
+            if (draggedNote) {
+                await axios.patch(ENDPOINTS.NOTES.UPDATE_POSITION(draggedNote.note.id), { grid_position: newPosition });
+                setNotes(prev => prev.map(n => n.id === draggedNote.note.id ? { ...n, grid_position: newPosition } : n));
+            } else if (draggedFile) {
+                await axios.patch(ENDPOINTS.FILES.UPDATE_POSITION(draggedFile.file.id), { grid_position: newPosition });
+                fetchFiles();
+            }
+        } catch (err) {
+            toast.error(t('filesView.notePosError'));
+        }
     };
     const handleFolderDrop = async (e, folderId) => {
         e.preventDefault(); e.stopPropagation(); setDragOverFolder(null);
         if (draggedNote) {
             try {
                 await axios.post(ENDPOINTS.FOLDERS.NOTES.MOVE_ITEM, { note_id: draggedNote.note.id, folder_id: folderId });
+                setDraggedNote(null);
                 refreshNotebook(); fetchFolders();
             } catch (err) { toast.error(t('filesView.noteMoveError')); }
+        } else if (draggedFile) {
+            try {
+                await axios.post(ENDPOINTS.FILES.MOVE_TO_FOLDER, { file_id: draggedFile.file.id, folder_id: folderId });
+                setDraggedFile(null);
+                fetchFiles();
+            } catch (err) { toast.error(t('filesView.fileMoveError')); }
         }
     };
+    const handleBreadcrumbDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverBreadcrumb(true);
+    };
+
+    const handleBreadcrumbDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverBreadcrumb(false);
+    };
+
+    const handleBreadcrumbDrop = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverBreadcrumb(false);
+
+        const parentFolderId = currentFolder?.parent_folder_id || null;
+
+        if (draggedNote) {
+            try {
+                await axios.post(ENDPOINTS.FOLDERS.NOTES.MOVE_ITEM, { note_id: draggedNote.note.id, folder_id: parentFolderId });
+                setDraggedNote(null);
+                refreshNotebook();
+                fetchFolders();
+            } catch (err) {
+                toast.error(t('filesView.noteMoveError'));
+            }
+        } else if (draggedFile) {
+            try {
+                await axios.post(ENDPOINTS.FILES.MOVE_TO_FOLDER, { file_id: draggedFile.file.id, folder_id: parentFolderId });
+                setDraggedFile(null);
+                fetchFiles();
+            } catch (err) {
+                toast.error(t('filesView.fileMoveError'));
+            }
+        }
+    };
+    
     const handleGlobalDrop = async (e) => {
         e.preventDefault(); e.stopPropagation(); setIsGlobalDragOver(false);
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) await uploadSingleFile(e.dataTransfer.files[0]);
@@ -340,7 +436,19 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             <ArrowLeft size={20} /> {t('flashcardsView.back')}
                         </button>
                     )}
-                    <h1 className={styles.notebookTitle} style={{ padding: currentFolder ? '0.5rem' : '0' }}>
+                    <h1 
+                        className={styles.notebookTitle} 
+                        style={{ 
+                            padding: currentFolder ? '0.5rem' : '0',
+                            borderRadius: '8px',
+                            transition: 'all 0.2s ease',
+                            backgroundColor: dragOverBreadcrumb ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
+                            border: dragOverBreadcrumb ? '2px dashed #f59e0b' : '2px solid transparent'
+                        }}
+                        onDragOver={currentFolder ? handleBreadcrumbDragOver : undefined}
+                        onDragLeave={currentFolder ? handleBreadcrumbDragLeave : undefined}
+                        onDrop={currentFolder ? handleBreadcrumbDrop : undefined}
+                    >
                         {currentFolder ? <><Folder size={24} style={{color: '#f59e0b', marginRight: '8px'}} />{currentFolder.name}</> : t('filesView.myFiles')}
                     </h1>
                     <div className={styles.searchBox}>
@@ -386,8 +494,8 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                     <div
                         key={`folder-${folder.id}`}
                         className={`${styles.folderCard} ${dragOverFolder === folder.id ? styles.folderDragOver : ''}`}
-                        onClick={() => !draggedNote && openFolder(folder)}
-                        onDragOver={(e) => { e.preventDefault(); if(draggedNote) setDragOverFolder(folder.id); }}
+                        onClick={() => !(draggedNote || draggedFile) && openFolder(folder)}
+                        onDragOver={(e) => { e.preventDefault(); if(draggedNote || draggedFile) setDragOverFolder(folder.id); }}
                         onDragLeave={() => setDragOverFolder(null)}
                         onDrop={(e) => handleFolderDrop(e, folder.id)}
                     >
@@ -395,7 +503,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             <div className={styles.folderLeft}>
                                 <Folder size={72} />
                                 <span className={styles.folderName}>{folder.name}</span>
-                                <span className={styles.folderCount}>({notes.filter(n => n.folder_id === folder.id).length})</span>
+                                <span className={styles.folderCount}>({notes.filter(n => n.folder_id === folder.id).length + files.filter(f => f.folder_id === folder.id).length})</span>
                             </div>
                             <button className={styles.btnFolderOptions} onClick={(e) => { e.stopPropagation(); setFolderMenuOpen(folderMenuOpen === folder.id ? null : folder.id); }}>
                                 <MoreVertical size={18} />
@@ -420,7 +528,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             key={`${item.itemType}-${item.id}`}
                             id={isNote ? `note-card-${item.id}` : `item-card-${item.id}`}
                             className={`${styles.noteCard} ${item.is_pinned ? styles.pinnedCard : ''} ${isDragOver ? styles.dragOver : ''} ${isHighlighted ? styles.highlighted : ''}`}
-                            draggable={isNote}
+                            draggable={true}
                             onDragStart={(e) => handleDragStart(e, item, index)}
                             onDragEnd={handleDragEnd}
                             onDragOver={(e) => handleDragOver(e, index)}
@@ -431,11 +539,9 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                             <div className={styles.noteCardHeader}>
                                 <h3 className={styles.noteTitle} title={item.title}>{item.title}</h3>
                                 <div className={styles.noteCardActions}>
-                                    {isNote && (
-                                        <button className={`${styles.pinNoteBtn} ${item.is_pinned ? styles.pinned : ''}`} onClick={(e) => handleTogglePin(item.id, !item.is_pinned, e)}>
-                                            <Pin size={16} />
-                                        </button>
-                                    )}
+                                    <button className={`${styles.pinNoteBtn} ${item.is_pinned ? styles.pinned : ''}`} onClick={(e) => isNote ? handleTogglePin(item.id, !item.is_pinned, e) : handleToggleFilePin(item.id, !item.is_pinned, e)}>
+                                        <Pin size={16} />
+                                    </button>
                                     <button className={styles.deleteNoteBtn} onClick={(e) => { 
                                         e.stopPropagation(); 
                                         isNote ? handleDeleteNote(item.id) : handleDeleteFile(e, item.originalFile) 

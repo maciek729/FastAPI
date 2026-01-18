@@ -1,7 +1,7 @@
 import os
 import uuid
 from datetime import datetime
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from database import SessionLocal
@@ -40,10 +40,19 @@ class FileOut(BaseModel):
     file_url: str
     file_type: str
     file_size: int
+    folder_id: Optional[int] = None
+    grid_position: Optional[int] = None
+    is_pinned: Optional[bool] = False
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+class UpdateFilePinRequest(BaseModel):
+    is_pinned: bool
+
+class UpdateFilePositionRequest(BaseModel):
+    grid_position: int
 
 # --- Endpointy ---
 
@@ -93,8 +102,15 @@ async def upload_file(
 
 @router.get("/list/{notebook_id}", response_model=List[FileOut])
 def list_files(notebook_id: int, db: db_dependency):
-    files = db.query(StudyFiles).filter(StudyFiles.notebook_id == notebook_id).order_by(StudyFiles.created_at.desc()).all()
-    return files
+    try:
+        files = db.query(StudyFiles).filter(StudyFiles.notebook_id == notebook_id).order_by(StudyFiles.created_at.desc()).all()
+        print(f"Found {len(files)} files for notebook {notebook_id}")
+        return files
+    except Exception as e:
+        print(f"Error listing files: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to list files: {str(e)}")
 
 @router.delete("/{file_id}")
 def delete_file(file_id: int, db: db_dependency):
@@ -112,3 +128,53 @@ def delete_file(file_id: int, db: db_dependency):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
+
+@router.patch("/{file_id}/pin")
+def toggle_pin_file(file_id: int, request: UpdateFilePinRequest, db: db_dependency):
+    file_record = db.query(StudyFiles).filter(StudyFiles.id == file_id).first()
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    try:
+        file_record.is_pinned = request.is_pinned
+        db.commit()
+        db.refresh(file_record)
+        return {"message": "File pin status updated", "is_pinned": file_record.is_pinned}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Update failed: {str(e)}")
+
+@router.patch("/{file_id}/position")
+def update_file_position(file_id: int, request: UpdateFilePositionRequest, db: db_dependency):
+    file_record = db.query(StudyFiles).filter(StudyFiles.id == file_id).first()
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    try:
+        file_record.grid_position = request.grid_position
+        db.commit()
+        db.refresh(file_record)
+        return {"message": "File position updated", "grid_position": file_record.grid_position}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Update failed: {str(e)}")
+
+class MoveFileToFolderRequest(BaseModel):
+    file_id: int
+    folder_id: Optional[int] = None
+
+@router.post("/move-to-folder")
+def move_file_to_folder(request: MoveFileToFolderRequest, db: db_dependency):
+    """Move a file into or out of a folder"""
+    file_record = db.query(StudyFiles).filter(StudyFiles.id == request.file_id).first()
+    if not file_record:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    try:
+        file_record.folder_id = request.folder_id
+        db.commit()
+        db.refresh(file_record)
+        return {"message": "File moved successfully", "file": file_record}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Move failed: {str(e)}")

@@ -81,7 +81,7 @@ const FileViewer = ({ file, onClose }) => {
     };
 
     return (
-        <div className={generatorStyles.modalOverlay} onClick={onClose} style={{zIndex: 2000}}>
+        <div className={generatorStyles.modalOverlay} onClick={onClose} style={{zIndex: 2000, backgroundColor: 'rgba(0, 0, 0, 0.75)'}}>
             <div 
                 className={generatorStyles.modalContainer} 
                 onClick={(e) => e.stopPropagation()}
@@ -91,11 +91,25 @@ const FileViewer = ({ file, onClose }) => {
                     maxWidth: '1400px',
                     display: 'flex',
                     flexDirection: 'column',
-                    background: 'var(--bg-secondary)' 
+                    background: 'var(--inner_section_bg, #fff)',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
                 }}
             >
-                <div className={generatorStyles.header} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-                    <h2 className={generatorStyles.title} style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                <div className={generatorStyles.header} style={{ 
+                    borderBottom: '1px solid var(--border_gray)', 
+                    paddingBottom: '1rem',
+                    background: 'var(--inner_section_bg, #fff)'
+                }}>
+                    <h2 className={generatorStyles.title} style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '10px', 
+                        overflow: 'hidden', 
+                        whiteSpace: 'nowrap', 
+                        textOverflow: 'ellipsis',
+                        color: 'var(--title, #000)',
+                        margin: 0
+                    }}>
                         {file.file_name}
                     </h2>
                     <div style={{ display: 'flex', gap: '10px' }}>
@@ -119,7 +133,13 @@ const FileViewer = ({ file, onClose }) => {
                     </div>
                 </div>
                 
-                <div style={{ flex: 1, padding: '1rem', overflow: 'hidden', position: 'relative' }}>
+                <div style={{ 
+                    flex: 1, 
+                    padding: '1rem', 
+                    overflow: 'hidden', 
+                    position: 'relative',
+                    background: '#f5f5f5'
+                }}>
                     {renderContent()}
                 </div>
             </div>

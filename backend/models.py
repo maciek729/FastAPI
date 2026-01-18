@@ -313,12 +313,16 @@ class StudyFiles(Base):
     id = Column(Integer, primary_key=True, index=True)
     notebook_id = Column(Integer, ForeignKey("notebooks.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
+    folder_id = Column(Integer, ForeignKey("note_folders.id"), nullable=True)
     
     file_name = Column(String)
     file_path = Column(String)
     file_url = Column(String)
     file_type = Column(String)
     file_size = Column(Integer)
+    
+    grid_position = Column(Integer, nullable=True)
+    is_pinned = Column(Boolean, default=False)
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
