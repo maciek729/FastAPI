@@ -13,9 +13,12 @@ import { uploadFile, getFiles, deleteFile } from '../../../services/fileService'
 import ENDPOINTS from '../../../api/endpoints';
 import { LanguageContext } from '../../../translations/LanguageContext';
 import translations from '../../../translations/translation.json';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 export default function FilesView({ details, userData, refreshNotebook, highlightedItemId }) {
-    // --- State ---
     const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
     const [showNoteEditor, setShowNoteEditor] = useState(false);
     const [selectedNote, setSelectedNote] = useState(null);
@@ -24,13 +27,11 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     const [isLoadingDetails, setIsLoadingDetails] = useState(true);
     const [isLoadingData, setIsLoadingData] = useState(true);
     
-    // Dane
     const [notes, setNotes] = useState([]);
     const [folders, setFolders] = useState([]);
     const [files, setFiles] = useState([]);
     const [currentFolder, setCurrentFolder] = useState(null);
     
-    // UI Actions
     const [isUploading, setIsUploading] = useState(false);
     const [viewingFile, setViewingFile] = useState(null);
     const fileInputRef = useRef(null);
@@ -39,7 +40,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     const [folderMenuOpen, setFolderMenuOpen] = useState(null);
     const [editingFolder, setEditingFolder] = useState(null);
     
-    // Drag & Drop
     const [draggedNote, setDraggedNote] = useState(null);
     const [draggedFile, setDraggedFile] = useState(null);
     const [draggedFolder, setDraggedFolder] = useState(null);
@@ -49,7 +49,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     const [isGlobalDragOver, setIsGlobalDragOver] = useState(false);
     const [dragOverBreadcrumb, setDragOverBreadcrumb] = useState(false);
 
-    // Filter & Sort
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('date_desc');
     const [showFilters, setShowFilters] = useState(window.innerWidth > 768);
@@ -80,7 +79,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         return true;
     };
 
-    // --- Effects ---
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth <= 768) {
@@ -106,7 +104,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             if (details?.id && userData?.id) {
                 setIsLoadingData(true);
                 try {
-                    // Fetch all data in parallel
                     await Promise.all([
                         fetchFolders(),
                         fetchFiles(),
@@ -143,12 +140,10 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         }
     }, [highlightedItemId, notes, folders]);
 
-    // --- API ---
     const fetchFolders = async () => { try { const response = await axios.get(ENDPOINTS.FOLDERS.NOTES.LIST(details.id, userData.id)); setFolders(response.data); } catch (err) { } };
     const fetchFiles = async () => { try { const data = await getFiles(details.id); setFiles(data); } catch (error) { } };
     const fetchCollaborators = async () => { try { const data = await getCollaborators(details.id); setCollaborators(data); } catch (err) { } };
 
-    // --- File Logic ---
     const handleFileUpload = async (e) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (!file) return;
@@ -188,7 +183,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         } catch (error) { toast.error(t('filesView.deleteFileError')); }
     };
 
-    // --- Note Logic ---
     const handleCreateNewNote = () => {
         const emptyNote = { id: null, title: '', content: '', type: 'Notatka', user_id: userData.id, notebook_id: details.id, is_shared: false, created_at: new Date().toISOString() };
         setSelectedNote(emptyNote); setShowNoteEditor(true);
@@ -213,14 +207,12 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         catch (err) { toast.error(t('filesView.pinError')); }
     };
 
-    // --- Folder Logic ---
     const handleCreateFolder = async (e) => { e.preventDefault(); if(!newFolderName.trim()) return; try { await axios.post(ENDPOINTS.FOLDERS.NOTES.CREATE, { notebook_id: details.id, user_id: userData.id, name: newFolderName, parent_folder_id: currentFolder?.id || null }); setNewFolderName(''); setShowCreateFolderModal(false); fetchFolders(); } catch(err){toast.error(t('flashcardsView.createFolderError'));} };
     const openFolder = (folder) => setCurrentFolder(folder);
     const closeFolder = () => { if(currentFolder?.parent_folder_id) { setCurrentFolder(folders.find(f => f.id === currentFolder.parent_folder_id)); } else setCurrentFolder(null); };
     const handleDeleteFolder = async (id) => { if(await confirmModal(t('filesView.deleteFolderConfirm'))) { try { await axios.delete(ENDPOINTS.FOLDERS.NOTES.DELETE(id)); if(currentFolder?.id===id) setCurrentFolder(null); fetchFolders(); refreshNotebook(); } catch(e){toast.error(t('flashcardsView.deleteFolderError'));}} };
     const handleRenameFolder = async (e) => { e.preventDefault(); if(!editingFolder?.name.trim()) return; try { await axios.patch(ENDPOINTS.FOLDERS.NOTES.RENAME(editingFolder.id), {name: editingFolder.name}); setEditingFolder(null); fetchFolders(); } catch(e){toast.error(t('flashcardsView.renameFolderError'));} };
     
-    // --- Collaborators Logic ---
     const handleAddCollaborator = async (e) => {
         e.preventDefault(); 
         if (!collaboratorUsername.trim()) { 
@@ -255,7 +247,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         catch (err) { toast.error(err.message || t('filesView.deleteColError')); }
     };
 
-    // --- Helpers UI ---
     const formatDate = (dateString) => {
         if (!dateString) return t('filesView.today');
         const date = new Date(dateString);
@@ -280,7 +271,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         return <AlertCircle size={48} color="#f39c12" strokeWidth={1} />;
     };
 
-    // --- MIXING & SORTING ---
     const getMixedItems = () => {
         let processedNotes = notes.filter(n => n.type !== "Fiszki");
         if (currentFolder) processedNotes = processedNotes.filter(n => n.folder_id === currentFolder.id);
@@ -306,19 +296,15 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         if (searchQuery) combined = combined.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
         combined.sort((a, b) => {
-            // First, pinned items always come first
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
             
-            // For date sorting, use grid_position if available
             if (sortBy === 'date_desc' || sortBy === 'date_asc') {
-                // If both items have grid_position, sort by position
                 if (a.grid_position !== null && a.grid_position !== undefined && 
                     b.grid_position !== null && b.grid_position !== undefined) {
                     return a.grid_position - b.grid_position;
                 }
                 
-                // Otherwise sort by date
                 if (sortBy === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
                 if (sortBy === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
             }
@@ -332,7 +318,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
 
     const mixedItems = getMixedItems();
 
-    // --- Drag & Drop ---
     const handleDragStart = (e, item, index) => {
         if (item.itemType === 'note') {
             setDraggedNote({ note: item, index });
@@ -354,7 +339,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         const draggedItem = draggedNote || draggedFile;
         if (!draggedItem || draggedItem.index === dropIndex) return;
         
-        // Calculate new position based on drop location
         const newPosition = dropIndex;
         
         try {
@@ -429,7 +413,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) await uploadSingleFile(e.dataTransfer.files[0]);
     };
 
-    // --- Render ---
     if (isLoadingDetails || isLoadingData) return <div className={styles.loading}><div className={styles.loadingSpinner}></div><p>{t('filesView.loading')}</p></div>;
 
     return (
@@ -570,10 +553,42 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                                 </div>
                             </div>
 
-                            <div className={styles.noteContent} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: isNote ? 'auto' : '120px', color: isNote ? 'inherit' : '#bdc3c7' }}>
+                            <div className={styles.noteContent} style={{ 
+                                display: isNote ? 'block' : 'flex',
+                                alignItems: isNote ? 'flex-start' : 'center',
+                                justifyContent: isNote ? 'flex-start' : 'center',
+                                height: '120px',
+                                overflow: 'hidden',
+                                color: isNote ? 'inherit' : '#bdc3c7',
+                                paddingTop: isNote ? '10px' : '0'
+                            }}>
                                 {isNote ? (
                                     <>
-                                        {item.content?.substring(0, 120).replace(/<[^>]*>/g, '')}{item.content?.length > 120 ? '...' : ''}
+                                        <div style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 4,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            fontSize: '0.85rem'
+                                        }}>
+                                            <ReactMarkdown
+                                                children={item.content || ''}
+                                                remarkPlugins={[remarkMath]}
+                                                rehypePlugins={[rehypeKatex]}
+                                                components={{
+                                                    p: ({node, ...props}) => <span {...props} style={{ margin: 0 }} />, // Paragrafy jako span, żeby nie robić odstępów
+                                                    h1: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0' }} />, // Nagłówki jako pogrubienie
+                                                    h2: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0' }} />,
+                                                    h3: ({node, ...props}) => <strong {...props} style={{ display: 'block', margin: '4px 0' }} />,
+                                                    ul: ({node, ...props}) => <span {...props} />, // Listy w jednej linii lub uproszczone
+                                                    li: ({node, ...props}) => <span {...props} style={{ marginRight: '5px' }}>• </span>,
+                                                    img: () => <span style={{color: '#3498db', fontSize: '0.8em'}}>[Obraz]</span>,
+                                                    table: () => <span style={{color: '#e67e22', fontSize: '0.8em'}}>[Tabela]</span>,
+                                                    div: ({node, ...props}) => <span {...props} /> // Blokowe równania wymuszamy do inline
+                                                }}
+                                            />
+                                        </div>
                                         {!item.content && <span style={{fontStyle:'italic', opacity:0.5}}>{t('filesView.emptyNoteContent')}</span>}
                                     </>
                                 ) : (
@@ -594,7 +609,6 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                 )}
             </div>
             
-            {/* Modale */}
             {viewingFile && <FileViewer file={viewingFile} onClose={() => setViewingFile(null)} />}
             
             {showCreateFolderModal && (
