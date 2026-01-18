@@ -25,26 +25,22 @@ export default function Settings({userData, onGoToSection}) {
         return translation || key;
     };
 
-    // Theme options z tłumaczeniami
     const ThemeOptions = [
         { value: 'light', label: t('settings.themeOptions.light') },
         { value: 'dark', label: t('settings.themeOptions.dark') },
         { value: 'system', label: t('settings.themeOptions.system') }
     ];
 
-    // Language options z tłumaczeniami
     const LanguageOptions = [
         { value: 'pl', label: t('settings.languageOptions.polish') },
         { value: 'en', label: t('settings.languageOptions.english') }
     ];
 
-    // Local Storage
     const getInitialTheme = () => {
         const savedTheme = localStorage.getItem('appTheme');
         return savedTheme ? savedTheme : 'light';
     }
 
-    // Obsluga zmiany ustawien
     const [theme, setTheme] = useState(getInitialTheme());
     const [selectedLanguage, setSelectedLanguage] = useState(language);
 
@@ -57,24 +53,12 @@ export default function Settings({userData, onGoToSection}) {
 
     const [saved, setSaved] = useState(false);
 
-    /*
-    To użyć, gdy będę mieć theme i language w tabeli usera
-    useEffect(() => {
-        if (userData) {
-            setTheme(userData.theme || "light");
-            setLanguage(userData.language || "pl");
-            setSavedTheme(userData.theme || "light");
-            setSavedLanguage(userData.language || "pl");
-        }
-    }, [userData]);
-    */
     useEffect(() => {
         if (savedTheme === 'light') {
             document.documentElement.removeAttribute('data-theme');
         } else if (savedTheme === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
         } else if (savedTheme === 'system') {
-            // automatyczne dopasowanie do systemu
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (prefersDark) {
                 document.documentElement.setAttribute('data-theme', 'dark');

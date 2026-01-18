@@ -37,7 +37,19 @@ function Login() {
       localStorage.setItem("token", data.access_token);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      console.error("Login error:", err);
+      if (err.message === "Invalid credentials") {
+        setError(t("auth.login.errorInvalidCredentials"));
+      } 
+      else if (err.message === "Please verify your email before logging in") {
+        setError(t("auth.login.errorVerifyEmail"));
+      } 
+      else if (err.message.includes("zostało zarchiwizowane")) {
+        setError(err.message);
+      } 
+      else {
+        setError(t("auth.login.errorGeneric"));
+      }
     } finally {
       setIsLoading(false);
     }

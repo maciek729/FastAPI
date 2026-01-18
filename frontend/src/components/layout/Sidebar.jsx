@@ -228,7 +228,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, userData, handleLogout, onSelec
     }, [notebooks, activeNotebook, onGoToDashboard, t]);
 
     const handleAddNotebook = async (spaceType) => {
-        const name = await promptModal(t('sidebar.notebookNamePrompt'));
+        const name = await promptModal(t('sidebar.notebookNamePrompt'), "", t('sidebar.editText'), t('sidebar.btnCancel'), t('sidebar.btnOk'));
         if (!name) return;
         try {
             await createNotebook({
