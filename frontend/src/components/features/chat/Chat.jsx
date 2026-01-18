@@ -50,7 +50,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
     setMessages([]);
     setFile(null);
     setInputValue('');
-  }, []);
+  }, [notebookId]);
 
   const resetServerSession = async () => {
     try {

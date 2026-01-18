@@ -327,7 +327,11 @@
       "editorPlaceholder": "Zacznij pisać...",
       "tableRows": "Wiersze",
       "tableColumns": "Kolumny",
-      "cancel": "Anuluj"
+      "cancel": "Anuluj",
+      "editing": "edytuje",
+      "editingPlural": "edytują",
+      "updatedNote": "zaktualizował(a) notatkę",
+      "savedNote": "zapisał(a) notatkę"
     },
     "aiAssistant": {
       "title": "Asystent AI",
@@ -1370,7 +1374,11 @@
       "imageInvalidSize": "Invalid size format. Use e.g. 200px or 50%.",
       "tableRows": "Rows",
       "tableColumns": "Columns",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "editing": "editing",
+      "editingPlural": "editing",
+      "updatedNote": "updated the note",
+      "savedNote": "saved the note"
     },
     "aiAssistant": {
       "title": "AI Assistant",

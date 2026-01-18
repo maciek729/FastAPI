@@ -4,10 +4,11 @@ import { confirmModal } from '../../../utils/confirmModal';
 import {
     Save, X, Trash2, Bold, Italic, Underline,
     AlignLeft, AlignCenter, AlignRight, List, ListOrdered,
-    Type, Calendar, Image as ImageIcon, Lock, Eye, Grid3x3, Zap, Columns
+    Type, Calendar, Image as ImageIcon, Lock, Eye, Grid3x3, Zap, Columns, Users
 } from 'lucide-react';
 import styles from '../../../css/features/NoteEditor.module.css';
 import { lockNoteFunction, unlockNoteFunction, checkLockStatusFunction, updateNote, deleteNote } from '../../../services/noteService';
+import noteCollabService from '../../../services/noteCollaborationService';
 import { useLanguage } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import AiAssistant from './AiAssistant';
@@ -196,6 +197,11 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const [tableCols, setTableCols] = useState('3');
     const [selectedTextContext, setSelectedTextContext] = useState('');
     
+    // Collaborative editing state
+    const [activeEditors, setActiveEditors] = useState([]);
+    const [showEditorsList, setShowEditorsList] = useState(false);
+    const contentChangeTimeoutRef = useRef(null);
+    
     const [tooltipState, setTooltipState] = useState({ visible: false, x: 0, y: 0, text: '' });
     const [isSplitView, setIsSplitView] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -309,17 +315,62 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             editorRef.current.innerHTML = note.content;
         }
 
-        if (!isNew) {
-            lockNote();
-            lockCheckIntervalRef.current = setInterval(() => {
-                checkLockStatus();
-            }, 10000);
+        if (!isNew && note?.id) {
+            // Connect to collaborative editing
+            noteCollabService.connect(note.id, userData.id);
+
+            // Listen for presence updates
+            const handlePresence = (editors) => {
+                setActiveEditors(editors.filter(e => e.user_id !== userData.id));
+            };
+
+            // Listen for content changes from other users
+            const handleContentChange = (message) => {
+                if (message.user_id !== userData.id && editorRef.current) {
+                    // Save cursor position
+                    const selection = window.getSelection();
+                    const range = selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+                    
+                    // Update content
+                    editorRef.current.innerHTML = message.content;
+                    setContent(message.content);
+                    
+                    // Restore cursor position if possible
+                    if (range) {
+                        try {
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        } catch (e) {
+                            // Cursor restoration failed, ignore
+                        }
+                    }
+                    
+                    toast.success(`${message.username} ${t('noteEditor.updatedNote') || 'updated the note'}`, {
+                        duration: 2000,
+                        icon: '👥'
+                    });
+                }
+            };
+
+            // Listen for save events from other users
+            const handleSaved = (message) => {
+                if (message.user_id !== userData.id) {
+                    toast.success(`${message.username} ${t('noteEditor.savedNote') || 'saved the note'}`, {
+                        duration: 2000,
+                        icon: '💾'
+                    });
+                }
+            };
+
+            noteCollabService.on('onPresence', handlePresence);
+            noteCollabService.on('onContentChange', handleContentChange);
+            noteCollabService.on('onSaved', handleSaved);
 
             return () => {
-                unlockNote();
-                if (lockCheckIntervalRef.current) {
-                    clearInterval(lockCheckIntervalRef.current);
-                }
+                noteCollabService.off('onPresence', handlePresence);
+                noteCollabService.off('onContentChange', handleContentChange);
+                noteCollabService.off('onSaved', handleSaved);
+                noteCollabService.disconnect();
             };
         }
 
@@ -715,6 +766,11 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 is_shared: note.is_shared
             });
 
+            // Broadcast save event to other users
+            if (!isNew && note?.id) {
+                noteCollabService.sendSave(updatedContent, title);
+            }
+
             onSave({ ...note, title, content: updatedContent });
             toast.success('Notatka zapisana!');
             initialTitleRef.current = title;
@@ -760,10 +816,22 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
     const handleInput = () => {
         if (!isReadOnly) {
-            setContent(editorRef.current.innerHTML);
+            const newContent = editorRef.current.innerHTML;
+            setContent(newContent);
             const curTitle = title || '';
             const curContent = editorRef.current?.innerHTML || '';
             setIsDirty(curTitle !== (initialTitleRef.current || '') || curContent !== (initialContentRef.current || ''));
+            
+            // Broadcast content changes to other users (debounced)
+            if (!isNew && note?.id) {
+                if (contentChangeTimeoutRef.current) {
+                    clearTimeout(contentChangeTimeoutRef.current);
+                }
+                
+                contentChangeTimeoutRef.current = setTimeout(() => {
+                    noteCollabService.sendContentChange(newContent);
+                }, 500); // Debounce for 500ms
+            }
         }
     };
 
@@ -806,6 +874,30 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             placeholder={t('noteEditor.titlePlaceholder')}
                             disabled={isReadOnly}
                         />
+                        {/* Active Editors Indicator */}
+                        {activeEditors.length > 0 && (
+                            <div className={styles.activeEditorsIndicator} onClick={() => setShowEditorsList(!showEditorsList)}>
+                                <Users size={16} />
+                                <span>{activeEditors.length} {activeEditors.length === 1 ? t('noteEditor.editing') || 'editing' : t('noteEditor.editingPlural') || 'editing'}</span>
+                                {showEditorsList && (
+                                    <div className={styles.editorsList} onClick={(e) => e.stopPropagation()}>
+                                        {activeEditors.map((editor, idx) => (
+                                            <div key={editor.user_id} className={styles.editorItem}>
+                                                {editor.avatar_url ? (
+                                                    <img src={editor.avatar_url} alt={editor.username} className={styles.editorAvatar} />
+                                                ) : (
+                                                    <div className={styles.editorAvatarFallback} style={{ backgroundColor: `hsl(${idx * 137.5}, 70%, 60%)` }}>
+                                                        {editor.username.charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
+                                                <span className={styles.editorName}>{editor.username}</span>
+                                                <div className={styles.editorIndicator} style={{ backgroundColor: `hsl(${idx * 137.5}, 70%, 60%)` }} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <div className={styles.headerRight}>
                         {!isReadOnly && (

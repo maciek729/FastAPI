@@ -206,13 +206,13 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
             {/* Tab Content & Sidebar */}
             <div className={styles.mainLayout}>
                 <div className={styles.tabContainer}>
-                    {activeTab === "chat" && (
-                    <Chat 
-                        userId={userData.id} 
-                        notebookId={details?.id}
-                        refreshNotebook={refreshNotebook}  
-                    />
-                    )}
+                    <div style={{ display: activeTab === "chat" ? "flex" : "none", height: "100%", width: "100%" }}>
+                        <Chat 
+                            userId={userData.id} 
+                            notebookId={details?.id}
+                            refreshNotebook={refreshNotebook}  
+                        />
+                    </div>
                     {activeTab === "files" && (
                         <FilesView
                             details={details}

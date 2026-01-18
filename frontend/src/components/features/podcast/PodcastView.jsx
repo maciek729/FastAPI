@@ -496,6 +496,7 @@ export default function PodcastView({ notebookId, userData, highlightedItemId })
                         <div className={styles.folderContent}>
                             <Folder size={64} className={styles.folderIcon}/>
                             <span className={styles.folderName}>{folder.name}</span>
+                            <span className={styles.folderCount}>({podcasts.filter(p => p.folder_id === folder.id).length})</span>
                         </div>
                         <button className={styles.btnFolderOptions} onClick={(e) => { e.stopPropagation(); setFolderMenuOpen(folderMenuOpen === folder.id ? null : folder.id); }}>
                             <MoreVertical size={18}/>
