@@ -4,13 +4,50 @@ import { confirmModal } from '../../../utils/confirmModal';
 import {
     Save, X, Trash2, Bold, Italic, Underline,
     AlignLeft, AlignCenter, AlignRight, List, ListOrdered,
-    Type, Calendar, Image, Lock, Eye, Grid3x3, Zap
+    Type, Calendar, Image as ImageIcon, Lock, Eye, Grid3x3, Zap
 } from 'lucide-react';
 import styles from '../../../css/features/NoteEditor.module.css';
 import { lockNoteFunction, unlockNoteFunction, checkLockStatusFunction, updateNote, deleteNote } from '../../../services/noteService';
 import { useLanguage } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import AiAssistant from './AiAssistant';
+
+const GlobalTooltip = ({ text, x, y, visible }) => {
+    if (!visible || !text) return null;
+    
+    return (
+        <div style={{
+            position: 'fixed',
+            top: y, 
+            left: x,
+            transform: 'translateX(-50%)', 
+            backgroundColor: '#1f2937', 
+            color: '#ffffff',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
+            pointerEvents: 'none', 
+            zIndex: 999999,
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            border: '1px solid #374151'
+        }}>
+            {text}
+            <div style={{
+                position: 'absolute',
+                top: '-4px',
+                left: '50%',
+                transform: 'translateX(-50%) rotate(45deg)',
+                width: '8px',
+                height: '8px',
+                backgroundColor: '#1f2937',
+                borderLeft: '1px solid #374151',
+                borderTop: '1px solid #374151'
+            }} />
+        </div>
+    );
+};
 
 const ImageResizeOverlay = ({ image, containerRef, editorRef, onResizeEnd, deselect }) => {
     const [dims, setDims] = useState({ width: 0, height: 0, top: 0, left: 0 });
@@ -153,6 +190,9 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const [tableCols, setTableCols] = useState('3');
     const [selectedTextContext, setSelectedTextContext] = useState('');
     
+    // --- NOWY STAN DLA TOOLTIPA ---
+    const [tooltipState, setTooltipState] = useState({ visible: false, x: 0, y: 0, text: '' });
+    
     const [selectedImage, setSelectedImage] = useState(null);
 
     const aiInsertRangeRef = useRef(null);
@@ -180,6 +220,22 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         }
         
         return translation || key;
+    };
+
+    // --- FUNKCJE OBSŁUGI TOOLTIPA ---
+    const handleTooltipEnter = (e, text) => {
+    if(!text) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        setTooltipState({
+            visible: true,
+            x: rect.left + rect.width / 2, // Środek poziomo (bez zmian)
+            y: rect.top, // ZMIANA: Bierzemy górną krawędź przycisku, a nie dolną
+            text: text
+        });
+    };
+
+    const handleTooltipLeave = () => {
+        setTooltipState(prev => ({ ...prev, visible: false }));
     };
 
     const removeTable = () => {
@@ -716,7 +772,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                         className={styles.deleteBtn}
                                         onClick={handleDelete}
                                         title={t('noteEditor.deleteTitle')}
-                                        data-tooltip={t('noteEditor.deleteTitle')}
+                                        onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.deleteTitle'))}
+                                        onMouseLeave={handleTooltipLeave}
                                     >
                                         <Trash2 size={18} />
                                     </button>
@@ -726,7 +783,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                     onClick={handleSave}
                                     disabled={isSaving}
                                     title={t('noteEditor.saveTitle')}
-                                    data-tooltip={t('noteEditor.saveTitle')}
+                                    onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.saveTitle'))}
+                                    onMouseLeave={handleTooltipLeave}
                                 >
                                     <Save size={18} />
                                     {isSaving ? t('noteEditor.saving') : t('noteEditor.saveButton')}
@@ -743,7 +801,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             className={styles.closeBtn}
                             onClick={handleClose}
                             title={t('noteEditor.closeTitle')}
-                            data-tooltip={t('noteEditor.closeTitle')}
+                            onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.closeTitle'))}
+                            onMouseLeave={handleTooltipLeave}
                         >
                             <X size={20} />
                         </button>
@@ -757,24 +816,24 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('bold')}
-                                title={`${t('noteEditor.bold')} (Ctrl+B)`}
-                                data-tooltip={t('noteEditor.bold')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.bold'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <Bold size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('italic')}
-                                title={`${t('noteEditor.italic')} (Ctrl+I)`}
-                                data-tooltip={t('noteEditor.italic')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.italic'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <Italic size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('underline')}
-                                title={`${t('noteEditor.underline')} (Ctrl+U)`}
-                                data-tooltip={t('noteEditor.underline')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.underline'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <Underline size={18} />
                             </button>
@@ -786,24 +845,24 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyLeft')}
-                                title={t('noteEditor.alignLeft')}
-                                data-tooltip={t('noteEditor.alignLeft')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.alignLeft'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <AlignLeft size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyCenter')}
-                                title={t('noteEditor.alignCenter')}
-                                data-tooltip={t('noteEditor.alignCenter')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.alignCenter'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <AlignCenter size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('justifyRight')}
-                                title={t('noteEditor.alignRight')}
-                                data-tooltip={t('noteEditor.alignRight')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.alignRight'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <AlignRight size={18} />
                             </button>
@@ -815,16 +874,16 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertUnorderedList')}
-                                title={t('noteEditor.bulletList')}
-                                data-tooltip={t('noteEditor.bulletList')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.bulletList'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <List size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('insertOrderedList')}
-                                title={t('noteEditor.numberedList')}
-                                data-tooltip={t('noteEditor.numberedList')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.numberedList'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <ListOrdered size={18} />
                             </button>
@@ -843,10 +902,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => fileInputRef.current?.click()}
-                                title={t('noteEditor.insertImage')}
-                                data-tooltip={t('noteEditor.insertImage')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.insertImage'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
-                                <Image size={18} />
+                                <ImageIcon size={18} />
                             </button>
                         </div>
 
@@ -876,16 +935,16 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             <button
                                 className={styles.toolBtn}
                                 onClick={insertTable}
-                                title={t('noteEditor.insertTable')}
-                                data-tooltip={t('noteEditor.insertTable')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.insertTable'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <Grid3x3 size={18} />
                             </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => removeTable()}
-                                title={t('noteEditor.removeTable')}
-                                data-tooltip={t('noteEditor.removeTable')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, t('noteEditor.removeTable'))}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <Trash2 size={16} />
                             </button>
@@ -915,8 +974,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                     }
                                     setShowAiAssistant(true);
                                 }}
-                                title="AI Assistant"
-                                data-tooltip={t('aiAssistant')}
+                                onMouseEnter={(e) => handleTooltipEnter(e, "AI Assistant")}
+                                onMouseLeave={handleTooltipLeave}
                             >
                                 <Zap size={18} />
                             </button>
@@ -955,7 +1014,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     <div className={styles.footerInfo}>
                         <span className={styles.noteType} style={{
                             backgroundColor: note.type === 'Notatka' ? '#6c63ff' : 
-                                        note.type === 'Test' ? '#4cafef' : '#ff6f61'
+                                            note.type === 'Test' ? '#4cafef' : '#ff6f61'
                         }}>
                             {note.type}
                         </span>
@@ -1089,6 +1148,14 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     </div>
                 </div>
             )}
+            
+            {/* GLOBAL TOOLTIP - Renderowany poza strukturą paska narzędzi */}
+            <GlobalTooltip 
+                text={tooltipState.text}
+                x={tooltipState.x}
+                y={tooltipState.y}
+                visible={tooltipState.visible}
+            />
         </div>
     );
 }

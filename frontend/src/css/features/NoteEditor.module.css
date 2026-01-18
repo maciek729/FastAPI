@@ -179,16 +179,12 @@
   top: 64px; /* below header */
   z-index: 100;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
 }
 
 .toolbar::-webkit-scrollbar {
-  height: 6px;
-}
-
-.toolbar::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.18);
-  border-radius: 3px;
+  display: none; /* Hide scrollbar for Chrome, Safari and Opera */
 }
 
 .toolbarGroup {
