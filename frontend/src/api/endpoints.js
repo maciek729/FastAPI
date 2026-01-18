@@ -165,6 +165,9 @@ const ENDPOINTS = {
     UPLOAD: `${API_BASE_URL}/files/upload`,
     LIST: (notebookId) => `${API_BASE_URL}/files/list/${notebookId}`,
     DELETE: (fileId) => `${API_BASE_URL}/files/${fileId}`,
+    TOGGLE_PIN: (fileId) => `${API_BASE_URL}/files/${fileId}/pin`,
+    UPDATE_POSITION: (fileId) => `${API_BASE_URL}/files/${fileId}/position`,
+    MOVE_TO_FOLDER: `${API_BASE_URL}/files/move-to-folder`,
   },
   CONTACT: {
     SUBMIT: `${API_BASE_URL}/contact/`,
