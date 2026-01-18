@@ -24,9 +24,9 @@ GEMINI_MODELS = [
 ]
 
 STYLE_INSTRUCTIONS = {
-    "brief": "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE. Maksymalnie 2-3 zdania. Bądź konkretny bez zbędnych szczegółów.",
-    "balanced": "Odpowiadaj w sposób zrównoważony. Udziel wyczerpującej odpowiedzi, ale bez przesadnej długości.",
-    "detailed": "Odpowiadaj DŁUGO i SZCZEGÓŁOWO. Rozwiń temat, podaj przykłady, omów różne aspekty."
+    "brief": "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE. Maksymalnie 2-3 zdania. Bądź konkretny bez zbędnych szczegółów. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$).",
+    "balanced": "Odpowiadaj w sposób zrównoważony. Udziel wyczerpującej odpowiedzi, ale bez przesadnej długości. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$, $\\sum$).",
+    "detailed": "Odpowiadaj DŁUGO i SZCZEGÓŁOWO. Rozwiń temat, podaj przykłady, omów różne aspekty. Używaj formatowania LaTeX do wzorów matematycznych. Stosuj bloki kodu tam gdzie to zasadne."
 }
 
 last_used_model = GEMINI_MODELS[0]
@@ -246,7 +246,7 @@ async def chat_endpoint(chat_data: ChatMessage):
         model_used = "fallback"
         response_style_used = response_style
 
-    response_text = markdown_to_html(response_text)
+    # response_text = markdown_to_html(response_text)
 
     updated_conversation = chat_data.conversation + [
         {"role": "user", "content": chat_data.message},

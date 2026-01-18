@@ -11,6 +11,10 @@ import {
 import { createNote } from "../../../services/noteService";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 export default function Chat({ userId, notebookId, refreshNotebook }) {
   const [messages, setMessages] = useState([]);
@@ -280,10 +284,17 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
               </div>
 
               {msg.role === 'assistant' ? (
-                <div
-                  className={styles.messageContent}
-                  dangerouslySetInnerHTML={{ __html: msg.content }}
-                />
+                <div className={styles.messageContent}>
+                  <ReactMarkdown
+                    children={msg.content}
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                    components={{
+                      p: ({node, ...props}) => <p style={{ margin: '0.5em 0' }} {...props} />,
+                      a: ({node, ...props}) => <a style={{ color: '#007bff', textDecoration: 'underline' }} {...props} />,
+                    }}
+                  />
+                </div>
               ) : (
                 <div className={styles.messageContent}>{msg.content}</div>
               )}
