@@ -259,18 +259,33 @@ async def generate_flashcards(
 
         prompt = f"""Stwórz dokładnie {request.count} fiszek do nauki języka obcego o poziomie trudności: {request.difficulty}.
 
-MATERIAŁ:
+INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
 {combined_content[:6000]}
 
 POZIOM TRUDNOŚCI - {request.difficulty.upper()}:
 {difficulty_vocab_hints.get(request.difficulty, 'standardowy')}
 
-WYMAGANIA:
-- Format fiszek: pytanie = słowo/fraza w jednym języku, odpowiedź = tłumaczenie w drugim języku
-- Każda fiszka to PROSTE tłumaczenie (np. "dog" → "pies", "unprecedented" → "bezprecedensowy")
-- NIE twórz pytań opisowych ani zdań
-- Tylko słówka lub krótkie frazy (max 3-4 słowa)
-- LIMIT ZNAKÓW: pytanie MAX 100 znaków, odpowiedź MAX 150 znaków
+ZASADY OBOWIĄZKOWE - PRZECZYTAJ UWAŻNIE:
+
+1. Jeśli materiał zawiera KONKRETNE SŁÓWKA (np. lista "dog - pies, cat - kot"):
+   - Użyj TYLKO tych słówek z materiału
+   - NIE dodawaj słówek spoza listy
+
+2. Jeśli materiał zawiera TYLKO TEMAT/OPIS (np. "słówka o kotach", "na temat kotów"):
+   - Wygeneruj słówka ściśle związane z TYM TEMATEM
+   - NIE generuj losowych słówek niezwiązanych z tematem
+
+   PRZYKŁADY TEMATYCZNE:
+   - Temat "koty" → cat (kot), kitten (kotek), meow (miauczeć), whiskers (wąsy), paw (łapa), tail (ogon), fur (futro)
+   - Temat "jedzenie" → food (jedzenie), bread (chleb), milk (mleko), apple (jabłko), water (woda)
+   - Temat "szkoła" → school (szkoła), teacher (nauczyciel), book (książka), lesson (lekcja)
+
+FORMAT FISZEK:
+- Pytanie = słowo w jednym języku (MAX 100 znaków)
+- Odpowiedź = tłumaczenie w drugim języku (MAX 150 znaków)
+- PROSTE tłumaczenie 1:1 (np. "cat" → "kot")
+- NIE twórz zdań ani pytań opisowych
+- Tylko pojedyncze słówka lub krótkie frazy (max 3-4 słowa)
 - KONIECZNIE dostosuj ZAAWANSOWANIE SŁÓWEK do poziomu {request.difficulty}!
 - Dla poziomu "łatwy": tylko podstawowe słówka A1-A2
 - Dla poziomu "średni": słówka B1-B2
@@ -278,11 +293,6 @@ WYMAGANIA:
 - Format JSON: [{{"question": "słowo1", "answer": "tłumaczenie1"}}, ...]
 - Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
 - Dokładnie {request.count} fiszek
-
-Przykłady dla różnych poziomów:
-ŁATWY (A1-A2): {{"question": "dog", "answer": "pies"}}, {{"question": "dom", "answer": "house"}}
-ŚREDNI (B1-B2): {{"question": "accomplish", "answer": "osiągnąć"}}, {{"question": "despite", "answer": "pomimo"}}
-TRUDNY (C1): {{"question": "unprecedented", "answer": "bezprecedensowy"}}, {{"question": "mitigate", "answer": "łagodzić"}}
 
 Wygeneruj fiszki:"""
     else:
@@ -294,18 +304,33 @@ Wygeneruj fiszki:"""
 
         prompt = f"""Stwórz dokładnie {request.count} fiszek edukacyjnych o poziomie trudności: {request.difficulty}.
 
-MATERIAŁ DO NAUKI:
+MATERIAŁ ŹRÓDŁOWY/TEMAT:
 {combined_content[:6000]}
+
+ZASADY OBOWIĄZKOWE:
+
+1. Jeśli materiał zawiera KONKRETNE INFORMACJE (tekst, fakty, definicje):
+   - Fiszki MUSZĄ być oparte WYŁĄCZNIE na treści z materiału
+   - NIE dodawaj informacji spoza podanego materiału
+   - Każda fiszka dotyczy konkretnych faktów/pojęć z materiału
+
+2. Jeśli materiał zawiera TYLKO TEMAT (np. "historia Polski", "biologia - fotosynteza"):
+   - Wygeneruj fiszki ściśle związane z podanym tematem
+   - NIE generuj ogólnej wiedzy niezwiązanej z tematem
+   - Fiszki muszą dotyczyć tego konkretnego tematu
 
 WYMAGANIA:
 - Każda fiszka: pytanie (krótkie, konkretne) + odpowiedź (zwięzła, kompletna)
 - LIMIT ZNAKÓW: pytanie MAX 150 znaków, odpowiedź MAX 300 znaków
 - Poziom {request.difficulty}: {difficulty_hints.get(request.difficulty, 'standardowy')}
-- Dla słówek językowych dostosuj poziom zgodnie z CEFR (A1-A2 dla łatwego, B1-B2 dla średniego, C1 dla trudnego)
 - Format JSON: [{{"question": "...", "answer": "..."}}, ...]
 - Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
 - Pytania i odpowiedzi w języku polskim
 - Dokładnie {request.count} fiszek
+
+PRZYKŁAD:
+Materiał: "Bitwa pod Grunwaldem odbyła się 15 lipca 1410 roku."
+Fiszka: {{"question": "Kiedy odbyła się bitwa pod Grunwaldem?", "answer": "15 lipca 1410 roku"}}
 
 Wygeneruj fiszki:"""
 
@@ -404,8 +429,22 @@ async def generate_flashcards_from_file(
         if is_language_learning:
             prompt = f"""Stwórz dokładnie {count} fiszek do nauki języka obcego.
 
-MATERIAŁ:
+INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
 {combined_content[:6000]}
+
+ZASADY OBOWIĄZKOWE:
+
+1. Jeśli materiał zawiera KONKRETNE SŁÓWKA (np. lista "dog - pies, cat - kot"):
+   - Użyj TYLKO tych słówek z materiału
+   - NIE dodawaj słówek spoza listy
+
+2. Jeśli materiał zawiera TYLKO TEMAT/OPIS (np. "słówka o kotach"):
+   - Wygeneruj słówka ściśle związane z TYM TEMATEM
+   - NIE generuj losowych słówek niezwiązanych z tematem
+
+   PRZYKŁADY TEMATYCZNE:
+   - Temat "koty" → cat (kot), kitten (kotek), meow (miauczeć), whiskers (wąsy), paw (łapa)
+   - Temat "jedzenie" → food (jedzenie), bread (chleb), milk (mleko), apple (jabłko)
 
 WYMAGANIA:
 - Format fiszek: pytanie = słowo/fraza w jednym języku, odpowiedź = tłumaczenie w drugim języku
@@ -417,13 +456,6 @@ WYMAGANIA:
 - Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
 - Dokładnie {count} fiszek
 
-Przykład:
-[
-  {{"question": "dog", "answer": "pies"}},
-  {{"question": "cat", "answer": "kot"}},
-  {{"question": "lew", "answer": "lion"}}
-]
-
 Wygeneruj fiszki:"""
         else:
             difficulty_hints = {
@@ -434,14 +466,23 @@ Wygeneruj fiszki:"""
 
             prompt = f"""Stwórz dokładnie {count} fiszek edukacyjnych o poziomie trudności: {difficulty}.
 
-MATERIAŁ DO NAUKI:
+MATERIAŁ ŹRÓDŁOWY/TEMAT:
 {combined_content[:6000]}
+
+ZASADY OBOWIĄZKOWE:
+
+1. Jeśli materiał zawiera KONKRETNE INFORMACJE (tekst, fakty, definicje):
+   - Fiszki MUSZĄ być oparte WYŁĄCZNIE na treści z materiału
+   - NIE dodawaj informacji spoza podanego materiału
+
+2. Jeśli materiał zawiera TYLKO TEMAT (np. "historia Polski"):
+   - Wygeneruj fiszki ściśle związane z podanym tematem
+   - NIE generuj ogólnej wiedzy niezwiązanej z tematem
 
 WYMAGANIA:
 - Każda fiszka: pytanie (krótkie, konkretne) + odpowiedź (zwięzła, kompletna)
 - LIMIT ZNAKÓW: pytanie MAX 150 znaków, odpowiedź MAX 300 znaków
 - Poziom {difficulty}: {difficulty_hints.get(difficulty, 'standardowy')}
-- Dla słówek językowych dostosuj poziom zgodnie z CEFR (A1-A2 dla łatwego, B1-B2 dla średniego, C1 dla trudnego)
 - Format JSON: [{{"question": "...", "answer": "..."}}, ...]
 - Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
 - Pytania i odpowiedzi w języku polskim
