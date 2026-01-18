@@ -265,34 +265,62 @@ INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
 POZIOM TRUDNOŚCI - {request.difficulty.upper()}:
 {difficulty_vocab_hints.get(request.difficulty, 'standardowy')}
 
-ZASADY OBOWIĄZKOWE - PRZECZYTAJ UWAŻNIE:
+KROK 1 - ANALIZA INSTRUKCJI:
+Przeanalizuj instrukcję i określ:
+a) TEMAT: O czym mają być słówka? (np. koty, jedzenie, podróże, sport)
+b) JĘZYKI: Jaki jest kierunek tłumaczenia?
+   - Jeśli "angielsko-polskie" → pytanie po angielsku, odpowiedź po polsku
+   - Jeśli "polsko-angielskie" → pytanie po polsku, odpowiedź po angielsku
+   - Jeśli "niemiecko-polskie" → pytanie po niemiecku, odpowiedź po polsku
+   - Analogicznie dla innych języków
+c) CZY SĄ KONKRETNE SŁÓWKA w materiale? Jeśli tak, użyj ich. Jeśli nie, generuj na temat.
 
-1. Jeśli materiał zawiera KONKRETNE SŁÓWKA (np. lista "dog - pies, cat - kot"):
-   - Użyj TYLKO tych słówek z materiału
-   - NIE dodawaj słówek spoza listy
+KROK 2 - GENEROWANIE SŁÓWEK:
 
-2. Jeśli materiał zawiera TYLKO TEMAT/OPIS (np. "słówka o kotach", "na temat kotów"):
-   - Wygeneruj słówka ściśle związane z TYM TEMATEM
-   - NIE generuj losowych słówek niezwiązanych z tematem
+Scenariusz A - Materiał zawiera KONKRETNĄ LISTĘ słówek:
+   → Użyj TYLKO tych słówek, nie dodawaj innych
 
-   PRZYKŁADY TEMATYCZNE:
-   - Temat "koty" → cat (kot), kitten (kotek), meow (miauczeć), whiskers (wąsy), paw (łapa), tail (ogon), fur (futro)
-   - Temat "jedzenie" → food (jedzenie), bread (chleb), milk (mleko), apple (jabłko), water (woda)
-   - Temat "szkoła" → school (szkoła), teacher (nauczyciel), book (książka), lesson (lekcja)
+Scenariusz B - Materiał zawiera TYLKO TEMAT/OPIS:
+   → Wygeneruj słówka ŚCIŚLE związane z podanym tematem
+   → Słówka MUSZĄ dotyczyć TYLKO tego tematu, nic więcej
 
-FORMAT FISZEK:
-- Pytanie = słowo w jednym języku (MAX 100 znaków)
-- Odpowiedź = tłumaczenie w drugim języku (MAX 150 znaków)
-- PROSTE tłumaczenie 1:1 (np. "cat" → "kot")
-- NIE twórz zdań ani pytań opisowych
+   PRZYKŁADY - SŁÓWKA NA TEMAT:
+
+   Temat: "koty" (angielsko-polskie)
+   ✅ DOBRZE: cat, kitten, meow, whiskers, paw, tail, fur, purr, claw, feline
+   ❌ ŹLE: accomplish, despite, manage (to NIE MA nic wspólnego z kotami!)
+
+   Temat: "jedzenie" (polsko-angielskie)
+   ✅ DOBRZE: chleb (bread), mleko (milk), jabłko (apple), woda (water), ser (cheese)
+   ❌ ŹLE: osiągnąć (accomplish), pomimo (despite) - to NIE jedzenie!
+
+   Temat: "podróże" (angielsko-polskie)
+   ✅ DOBRZE: airport, ticket, passport, luggage, hotel, journey, flight
+   ❌ ŹLE: cat, dog, food - to NIE podróże!
+
+KROK 3 - USTALENIE KIERUNKU TŁUMACZENIA:
+- Sprawdź instrukcję: czy jest "angielsko-polskie", "polsko-angielskie", etc.
+- Jeśli w instrukcji jest "angielsko polskie" lub "angielskie polskie":
+  → PYTANIE = po angielsku, ODPOWIEDŹ = po polsku
+- Jeśli w instrukcji jest "polsko angielskie" lub "polskie angielskie":
+  → PYTANIE = po polsku, ODPOWIEDŹ = po angielsku
+- Analogicznie dla innych języków (niemiecki, francuski, hiszpański, włoski, etc.)
+
+FORMAT KOŃCOWY FISZEK:
+- Pytanie = słowo w PIERWSZYM języku (MAX 100 znaków)
+- Odpowiedź = tłumaczenie w DRUGIM języku (MAX 150 znaków)
+- PROSTE tłumaczenie 1:1, np. "cat" → "kot" lub "kot" → "cat"
+- NIE twórz zdań, NIE dodawaj kontekstu, TYLKO słowo i jego tłumaczenie
 - Tylko pojedyncze słówka lub krótkie frazy (max 3-4 słowa)
 - KONIECZNIE dostosuj ZAAWANSOWANIE SŁÓWEK do poziomu {request.difficulty}!
-- Dla poziomu "łatwy": tylko podstawowe słówka A1-A2
-- Dla poziomu "średni": słówka B1-B2
-- Dla poziomu "trudny": zaawansowane słówka C1
 - Format JSON: [{{"question": "słowo1", "answer": "tłumaczenie1"}}, ...]
 - Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
 - Dokładnie {request.count} fiszek
+
+UWAGA KRYTYCZNA:
+- Każde słówko MUSI być związane z tematem z instrukcji
+- NIE generuj losowych, ogólnych słówek jak "accomplish", "despite", "manage" jeśli temat to np. "koty"
+- Kierunek tłumaczenia MUSI być zgodny z instrukcją (angielsko-polskie vs polsko-angielskie)
 
 Wygeneruj fiszki:"""
     else:
@@ -429,32 +457,55 @@ async def generate_flashcards_from_file(
         if is_language_learning:
             prompt = f"""Stwórz dokładnie {count} fiszek do nauki języka obcego.
 
-INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
+MATERIAŁ/INSTRUKCJA Z PLIKU:
 {combined_content[:6000]}
 
-ZASADY OBOWIĄZKOWE:
+KROK 1 - ANALIZA:
+a) TEMAT: Określ temat słówek z pliku (np. koty, jedzenie, biznes, podróże)
+b) JĘZYKI: Określ kierunek tłumaczenia
+   - Jeśli "angielsko-polskie" → pytanie po angielsku, odpowiedź po polsku
+   - Jeśli "polsko-angielskie" → pytanie po polsku, odpowiedź po angielsku
+   - Jeśli "niemiecko-polskie" → pytanie po niemiecku, odpowiedź po polsku
+   - Analogicznie dla innych języków
+c) CZY SĄ KONKRETNE SŁÓWKA? Jeśli tak, użyj ich. Jeśli nie, generuj na temat.
 
-1. Jeśli materiał zawiera KONKRETNE SŁÓWKA (np. lista "dog - pies, cat - kot"):
-   - Użyj TYLKO tych słówek z materiału
-   - NIE dodawaj słówek spoza listy
+KROK 2 - GENEROWANIE:
 
-2. Jeśli materiał zawiera TYLKO TEMAT/OPIS (np. "słówka o kotach"):
-   - Wygeneruj słówka ściśle związane z TYM TEMATEM
-   - NIE generuj losowych słówek niezwiązanych z tematem
+Scenariusz A - Plik zawiera LISTĘ SŁÓWEK:
+   → Użyj TYLKO tych słówek z listy
+
+Scenariusz B - Plik zawiera TEMAT:
+   → Generuj słówka ŚCIŚLE związane z tym tematem
 
    PRZYKŁADY TEMATYCZNE:
-   - Temat "koty" → cat (kot), kitten (kotek), meow (miauczeć), whiskers (wąsy), paw (łapa)
-   - Temat "jedzenie" → food (jedzenie), bread (chleb), milk (mleko), apple (jabłko)
 
-WYMAGANIA:
-- Format fiszek: pytanie = słowo/fraza w jednym języku, odpowiedź = tłumaczenie w drugim języku
-- Każda fiszka to PROSTE tłumaczenie (np. "dog" → "pies", "kot" → "cat")
-- NIE twórz pytań opisowych ani zdań
-- Tylko słówka lub krótkie frazy (max 3-4 słowa)
-- LIMIT ZNAKÓW: pytanie MAX 100 znaków, odpowiedź MAX 150 znaków
+   Temat: "koty"
+   ✅ DOBRZE: cat, kitten, meow, whiskers, paw, tail, fur, purr, claw
+   ❌ ŹLE: accomplish, despite (NIE MA związku z kotami!)
+
+   Temat: "jedzenie"
+   ✅ DOBRZE: food, bread, milk, apple, water, cheese, meat
+   ❌ ŹLE: computer, car (to NIE jedzenie!)
+
+KROK 3 - KIERUNEK TŁUMACZENIA:
+- Sprawdź plik: czy wskazuje kierunek (np. "angielsko-polskie")?
+- Ustaw pytanie i odpowiedź w odpowiednich językach
+- "angielsko-polskie" → PYTANIE (angielski), ODPOWIEDŹ (polski)
+- "polsko-angielskie" → PYTANIE (polski), ODPOWIEDŹ (angielski)
+
+FORMAT:
+- Pytanie = słowo w pierwszym języku (MAX 100 znaków)
+- Odpowiedź = tłumaczenie w drugim języku (MAX 150 znaków)
+- PROSTE tłumaczenie 1:1
+- NIE twórz zdań, TYLKO słowa
 - Format JSON: [{{"question": "słowo1", "answer": "tłumaczenie1"}}, ...]
-- Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
+- Zwróć TYLKO tablicę JSON
 - Dokładnie {count} fiszek
+
+UWAGA:
+- Każde słówko MUSI być związane z tematem
+- NIE dodawaj losowych słówek niezwiązanych z tematem
+- Kierunek tłumaczenia zgodny z plikiem
 
 Wygeneruj fiszki:"""
         else:
