@@ -227,12 +227,6 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
         </button>
       </div>
 
-      {selectedMessages.length > 0 && (
-        <button className={styles.saveMegaBtn} onClick={saveSelectedMessagesAsNote}>
-          <Save size={16} /> {t('chat.saveSelected')}
-        </button>
-      )}
-
       <div className={styles.styleSelector}>
         <span className={styles.styleLabel}>{t('chat.responseStyle')}:</span>
         <div className={styles.styleButtons}>
@@ -265,6 +259,12 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
           <span className={styles.currentStyle}>{getStyleLabel(responseStyle)}</span>
         </div>
       </div>
+
+      {selectedMessages.length > 0 && (
+        <button className={styles.saveMegaBtn} onClick={saveSelectedMessagesAsNote}>
+          <Save size={16} /> {t('chat.saveSelected')}
+        </button>
+      )}
 
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (

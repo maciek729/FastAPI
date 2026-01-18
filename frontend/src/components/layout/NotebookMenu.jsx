@@ -24,7 +24,7 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   const triggerRef = useRef(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-
+  
   const translate = (key, params = {}) => {
     if (t && typeof t === 'function') {
       const result = t(key, params);
@@ -104,7 +104,13 @@ const NotebookMenu = ({ notebook, spaceType, onRefresh, t }) => {
   };
 
   const handleRename = async () => {
-    const newName = await promptModal(translate('sidebar.renamePrompt'));
+    const newName = await promptModal(
+      translate('sidebar.renamePrompt'),
+      '',
+      translate('sidebar.editText'),
+      translate('sidebar.btnCancel'),
+      translate('sidebar.btnOk')
+    );
     if (!newName) return;
 
     try {

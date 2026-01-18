@@ -479,7 +479,15 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
                      <button className={styles.filterToggleBtn} onClick={() => setShowFilters(!showFilters)}><Filter size={18} /></button>
                      <button className={styles.addFolderBtn} onClick={() => setShowCreateFolderModal(true)}><Folder size={18} /> {t('flashcardsView.newFolder')}</button>
                      {details.is_shared && (
-                        <button className={styles.collaboratorBtn} onClick={() => setShowCollaboratorModal(true)}><UserPlus size={18} /> <span>{t('filesView.col')}</span></button>
+                        <button 
+                            className={styles.collaboratorBtn} 
+                            onClick={() => {
+                                fetchCollaborators();
+                                setShowCollaboratorModal(true);
+                            }}
+                        >
+                            <UserPlus size={18} /> <span>{t('filesView.col')}</span>
+                        </button>
                      )}
                      
                      <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".pdf,.jpg,.jpeg,.png,.txt" />

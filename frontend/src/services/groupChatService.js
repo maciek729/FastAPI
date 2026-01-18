@@ -25,16 +25,17 @@ export const getPinnedMessage = async (notebookId) => {
 
 export const getAvailableResources = async (notebookId) => {
     try {
-        const [notes, tests, flashcards, podcasts] = await Promise.all([
+        const [notes, tests, flashcards, podcasts, files] = await Promise.all([
             fetch(ENDPOINTS.GROUP_CHAT.RESOURCES.NOTES(notebookId)).then(res => res.json()),
             fetch(ENDPOINTS.GROUP_CHAT.RESOURCES.TESTS(notebookId)).then(res => res.json()),
             fetch(ENDPOINTS.GROUP_CHAT.RESOURCES.FLASHCARDS(notebookId)).then(res => res.json()),
             fetch(ENDPOINTS.GROUP_CHAT.RESOURCES.PODCASTS(notebookId)).then(res => res.json()),
+            fetch(ENDPOINTS.GROUP_CHAT.RESOURCES.FILES(notebookId)).then(res => res.json()),
         ]);
 
-        return { notes, tests, flashcards, podcasts };
+        return { notes, tests, flashcards, podcasts, files };
     } catch (error) {
-        return { notes: [], tests: [], flashcards: [], podcasts: [] };
+        return { notes: [], tests: [], flashcards: [], podcasts: [], files: [] };
     }
 };
 

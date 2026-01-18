@@ -4,7 +4,7 @@ from typing import List, Dict
 import json
 from datetime import datetime
 from database import SessionLocal
-from models import Notebooks, NotebookCollaborator, Users, NotebookMessages
+from models import Notebooks, NotebookCollaborator, Users, NotebookMessages, StudyFiles
 from models import Notes, Tests, FlashcardSets, Podcasts, Notifications, ChatReadStatus
 import re
 from sqlalchemy import func
@@ -276,7 +276,10 @@ async def unpin_message(notebook_id: int):
 @router.get("/notes/notebook/{notebook_id}")
 async def get_notebook_notes(notebook_id: int):
     with SessionLocal() as db:
-        notes = db.query(Notes).filter(Notes.notebook_id == notebook_id, Notes.type == "Notatka").all()
+        notes = db.query(Notes).filter(
+            Notes.notebook_id == notebook_id, 
+            Notes.type.in_(["Notatka", "Chat AI"])
+            ).all()
         return [{"id": n.id, "title": n.title} for n in notes]
 
 @router.get("/tests/notebook/{notebook_id}")
@@ -296,6 +299,12 @@ async def get_notebook_podcasts(notebook_id: int):
     with SessionLocal() as db:
         podcasts = db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).all()
         return [{"id": p.id, "title": p.title} for p in podcasts]
+    
+@router.get("/files/notebook/{notebook_id}")
+async def get_notebook_files(notebook_id: int):
+    with SessionLocal() as db:
+        files = db.query(StudyFiles).filter(StudyFiles.notebook_id == notebook_id).all()
+        return [{"id": f.id, "title": f.file_name, "type": "file"} for f in files]
     
 @router.get("/{notebook_id}/members")
 async def get_notebook_members(notebook_id: int):

@@ -35,6 +35,7 @@ export default function NotebookView({ details, userData, refreshNotebook, defau
         else if (type === 'test') setActiveTab('tests');
         else if (type === 'flashcards') setActiveTab('flashcards');
         else if (type === 'podcast') setActiveTab('podcasts');
+        else if (type === 'file') setActiveTab('files');
         
         setTimeout(() => setHighlightedItemId(null), 10000);
     };

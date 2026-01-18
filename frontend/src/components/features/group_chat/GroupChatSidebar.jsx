@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowDownCircle, FileText, ClipboardCheck, Layers, Mic, Pin } from "lucide-react";
+import { X, ArrowDownCircle, FileText, ClipboardCheck, Layers, Mic, Pin, File } from "lucide-react";
 import styles from "../../../css/features/groupchat/GroupChat.module.css";
 import MessageList from "./MessageList";
 import ChatInput from './ChatInput';
@@ -28,7 +28,7 @@ const GroupChatSidebar = ({
     const [isLoading, setIsLoading] = useState(false);
     const [isResourcePickerOpen, setIsResourcePickerOpen] = useState(false);
     const [availableResources, setAvailableResources] = useState({ 
-        notes: [], tests: [], flashcards: [], podcasts: [] 
+        notes: [], tests: [], flashcards: [], podcasts: [], files: []
     });
 
     const [autoScroll, setAutoScroll] = useState(() => {
@@ -273,6 +273,13 @@ const GroupChatSidebar = ({
                             </div>
                         ))}
 
+                        {availableResources.files.length > 0 && <h4>{t('group_chat.files')}</h4>}
+                        {availableResources.files.map(file => (
+                            <div key={file.id} className={styles.resourceItem} onClick={() => handleShareResource(file, 'file')}>
+                                <File size={16} /> <span>{file.title}</span>
+                            </div>
+                        ))}
+
                         {availableResources.tests.length > 0 && <h4>{t('group_chat.tests')}</h4>}
                         {availableResources.tests.map(test => (
                             <div key={test.id} className={styles.resourceItem} onClick={() => handleShareResource(test, 'test')}>
@@ -287,7 +294,7 @@ const GroupChatSidebar = ({
                             </div>
                         ))}
 
-                        {availableResources.podcasts.length > 0 && <h4>{t('group_chat.podcasts')}</h4>}
+                        {availableResources.podcasts.length > 0 && <h4>{t('group_chat.Podcasts')}</h4>}
                         {availableResources.podcasts.map(podcast => (
                             <div key={podcast.id} className={styles.resourceItem} onClick={() => handleShareResource(podcast, 'podcast')}>
                                 <Mic size={16} /> <span>{podcast.title}</span>
