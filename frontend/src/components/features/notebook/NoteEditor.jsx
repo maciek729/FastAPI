@@ -4,13 +4,19 @@ import { confirmModal } from '../../../utils/confirmModal';
 import {
     Save, X, Trash2, Bold, Italic, Underline,
     AlignLeft, AlignCenter, AlignRight, List, ListOrdered,
-    Type, Calendar, Image as ImageIcon, Lock, Eye, Grid3x3, Zap
+    Type, Calendar, Image as ImageIcon, Lock, Eye, Grid3x3, Zap, Columns
 } from 'lucide-react';
 import styles from '../../../css/features/NoteEditor.module.css';
 import { lockNoteFunction, unlockNoteFunction, checkLockStatusFunction, updateNote, deleteNote } from '../../../services/noteService';
 import { useLanguage } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import AiAssistant from './AiAssistant';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import 'katex/dist/katex.min.css';
 
 const GlobalTooltip = ({ text, x, y, visible }) => {
     if (!visible || !text) return null;
@@ -190,9 +196,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const [tableCols, setTableCols] = useState('3');
     const [selectedTextContext, setSelectedTextContext] = useState('');
     
-    // --- NOWY STAN DLA TOOLTIPA ---
     const [tooltipState, setTooltipState] = useState({ visible: false, x: 0, y: 0, text: '' });
-    
+    const [isSplitView, setIsSplitView] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
 
     const aiInsertRangeRef = useRef(null);
@@ -203,6 +208,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     const initialTitleRef = useRef(note?.title || '');
     const initialContentRef = useRef(note?.content || '');
     const { language, changeLanguage } = useLanguage();
+    const previewRef = useRef(null);
+    const isScrollingRef = useRef(false);
     
     const t = (key, params = {}) => {
         const keys = key.split('.');
@@ -222,14 +229,13 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         return translation || key;
     };
 
-    // --- FUNKCJE OBSŁUGI TOOLTIPA ---
     const handleTooltipEnter = (e, text) => {
     if(!text) return;
         const rect = e.currentTarget.getBoundingClientRect();
         setTooltipState({
             visible: true,
-            x: rect.left + rect.width / 2, // Środek poziomo (bez zmian)
-            y: rect.top, // ZMIANA: Bierzemy górną krawędź przycisku, a nie dolną
+            x: rect.left + rect.width / 2,
+            y: rect.top,
             text: text
         });
     };
@@ -332,6 +338,14 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         window.addEventListener('beforeunload', handler);
         return () => window.removeEventListener('beforeunload', handler);
     }, [isDirty]);
+
+    useEffect(() => {
+        if (editorRef.current && content) {
+            if (editorRef.current.innerHTML !== content) {
+                editorRef.current.innerHTML = content;
+            }
+        }
+    }, [isSplitView, isReadOnly]);
 
     const lockNote = async () => {
         if (isNew) return;
@@ -626,6 +640,37 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         e.target.value = '';
     };
 
+    const handleSyncScroll = (source) => {
+        if (!isSplitView || !editorRef.current || !previewRef.current) return;
+        
+        if (isScrollingRef.current) return;
+
+        isScrollingRef.current = true;
+
+        window.requestAnimationFrame(() => {
+            const left = editorRef.current;
+            const right = previewRef.current;
+
+            if (!left || !right) {
+                isScrollingRef.current = false;
+                return;
+            }
+
+            if (source === 'editor') {
+                const percentage = left.scrollTop / (left.scrollHeight - left.clientHeight);
+                const newScrollTop = percentage * (right.scrollHeight - right.clientHeight) || 0;
+                right.scrollTop = newScrollTop;
+            } else {
+                const percentage = right.scrollTop / (right.scrollHeight - right.clientHeight);
+                const newScrollTop = percentage * (left.scrollHeight - left.clientHeight) || 0;
+                left.scrollTop = newScrollTop;
+            }
+            setTimeout(() => {
+                isScrollingRef.current = false;
+            }, 10);
+        });
+    };
+
     const handleSave = async () => {
         if (isReadOnly) {
             toast.error('Notatka jest edytowana przez innego użytkownika!');
@@ -743,14 +788,12 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
     return (
         <div className={styles.editorOverlay}>
             <div className={styles.editorContainer}>
-                {/* Read-only banner */}
                 {isReadOnly && (
                     <div className={styles.readOnlyBanner}>
                         <Lock size={16} />
                         <span>{t('noteEditor.readOnlyMessage', { username: lockedByUsername })}</span>
                     </div>
                 )}
-                {/* Header */}
                 <div className={styles.editorHeader}>
                     <div className={styles.headerLeft}>
                         <input
@@ -809,10 +852,21 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     </div>
                 </div>
 
-                {/* Toolbar */}
                 {!isReadOnly && (
                     <div className={styles.toolbar}>
                         <div className={styles.toolbarGroup}>
+                            <button
+                                className={styles.toolBtn}
+                                onClick={() => setIsSplitView(!isSplitView)}
+                                style={{ 
+                                    backgroundColor: isSplitView ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
+                                    color: isSplitView ? '#8b5cf6' : 'inherit'
+                                }}
+                                onMouseEnter={(e) => handleTooltipEnter(e, isSplitView ? "Wyłącz podgląd" : "Podgląd na żywo (Split View)")}
+                                onMouseLeave={handleTooltipLeave}
+                            >
+                                <Columns size={18} />
+                            </button>
                             <button
                                 className={styles.toolBtn}
                                 onClick={() => execCommand('bold')}
@@ -983,33 +1037,123 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     </div>
                 )}
 
-                {/* Editor Content - Dodano containerRef i position: relative */}
                 <div 
                     className={styles.editorContent} 
                     ref={containerRef}
-                    style={{ position: 'relative' }} 
+                    style={{ position: 'relative', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }} 
                 >
                     {!isReadOnly && selectedImage && (
                         <ImageResizeOverlay 
                             image={selectedImage}
-                            containerRef={containerRef} // Używamy teraz containerRef
-                            editorRef={editorRef}       // editorRef potrzebny do nasłuchiwania scrolla
+                            containerRef={containerRef}
+                            editorRef={editorRef}
                             onResizeEnd={handleInput}
                             deselect={() => setSelectedImage(null)}
                         />
                     )}
-                    <div
-                        ref={editorRef}
-                        className={`${styles.editor} ${isReadOnly ? styles.readOnly : ''}`}
-                        contentEditable={!isReadOnly}
-                        onInput={handleInput}
-                        onClick={handleEditorClick}
-                        suppressContentEditableWarning
-                        data-placeholder={t('noteEditor.editorPlaceholder')}
-                    />
+
+                    {!isReadOnly && isSplitView ? (
+                        <div style={{ display: 'flex', height: '100%', width: '100%' }}>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border_gray)', overflow: 'hidden' }}>
+                                <div
+                                    ref={editorRef}
+                                    className={styles.editor}
+                                    contentEditable={true}
+                                    onInput={handleInput}
+                                    onClick={handleEditorClick}
+                                    onScroll={() => handleSyncScroll('editor')}
+                                    suppressContentEditableWarning
+                                    data-placeholder="Wpisz tekst... (np. $$x^2$$)"
+                                    style={{ height: '100%', overflowY: 'auto', padding: '1.5rem' }}
+                                />
+                            </div>
+                            
+                            <div 
+                                ref={previewRef}
+                                onScroll={() => handleSyncScroll('preview')}
+                                style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: 'var(--inner_section_bg)' }}>
+                                <div className={styles.readOnly}>
+                                    <ReactMarkdown
+                                        children={content}
+                                        remarkPlugins={[remarkMath, remarkGfm]}
+                                        rehypePlugins={[rehypeKatex, rehypeRaw]}
+                                        urlTransform={(value) => value} 
+                                        components={{
+                                            p: ({node, ...props}) => <p style={{ marginBottom: '0.75rem', lineHeight: '1.6' }} {...props} />,
+                                            a: ({node, ...props}) => <a style={{ color: '#8b5cf6', textDecoration: 'underline' }} {...props} />,
+                                            ul: ({node, ...props}) => <ul style={{ marginLeft: '1.5rem', marginBottom: '0.75rem' }} {...props} />,
+                                            ol: ({node, ...props}) => <ol style={{ marginLeft: '1.5rem', marginBottom: '0.75rem' }} {...props} />,
+                                            h1: ({node, ...props}) => <h1 style={{ fontSize: '1.5em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            h2: ({node, ...props}) => <h2 style={{ fontSize: '1.25em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            h3: ({node, ...props}) => <h3 style={{ fontSize: '1.1em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            table: ({node, ...props}) => <div style={{overflowX:'auto', marginBottom: '1rem'}}><table style={{width:'100%', borderCollapse:'collapse'}} {...props}/></div>,
+                                            th: ({node, ...props}) => <th style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px', background:'rgba(139, 92, 246, 0.1)', fontWeight: 600}} {...props}/>,
+                                            td: ({node, ...props}) => <td style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px'}} {...props}/>,
+                                            
+                                            img: ({node, ...props}) => (
+                                                <img 
+                                                    {...props} 
+                                                    style={{
+                                                        maxWidth: '100%', 
+                                                        borderRadius: '8px', 
+                                                        ...props.style
+                                                    }} 
+                                                />
+                                            )
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {!isReadOnly ? (
+                                <div
+                                    ref={editorRef}
+                                    className={`${styles.editor} ${isReadOnly ? styles.readOnly : ''}`}
+                                    contentEditable={true}
+                                    onInput={handleInput}
+                                    onClick={handleEditorClick}
+                                    suppressContentEditableWarning
+                                    data-placeholder={t('noteEditor.editorPlaceholder')}
+                                    style={{ height: '100%', overflowY: 'auto' }}
+                                />
+                            ) : (
+                                <div className={`${styles.editor} ${styles.readOnly}`} style={{ height: '100%', overflowY: 'auto' }}>
+                                    <ReactMarkdown
+                                        children={content}
+                                        remarkPlugins={[remarkMath, remarkGfm]}
+                                        rehypePlugins={[rehypeKatex, rehypeRaw]} 
+                                        urlTransform={(value) => value}
+                                        components={{
+                                            p: ({node, ...props}) => <p style={{ marginBottom: '0.75rem', lineHeight: '1.6' }} {...props} />,
+                                            a: ({node, ...props}) => <a style={{ color: '#8b5cf6', textDecoration: 'underline' }} {...props} />,
+                                            ul: ({node, ...props}) => <ul style={{ marginLeft: '1.5rem', marginBottom: '0.75rem' }} {...props} />,
+                                            ol: ({node, ...props}) => <ol style={{ marginLeft: '1.5rem', marginBottom: '0.75rem' }} {...props} />,
+                                            h1: ({node, ...props}) => <h1 style={{ fontSize: '1.5em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            h2: ({node, ...props}) => <h2 style={{ fontSize: '1.25em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            h3: ({node, ...props}) => <h3 style={{ fontSize: '1.1em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            table: ({node, ...props}) => <div style={{overflowX:'auto', marginBottom: '1rem'}}><table style={{width:'100%', borderCollapse:'collapse'}} {...props}/></div>,
+                                            th: ({node, ...props}) => <th style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px', background:'rgba(139, 92, 246, 0.1)', fontWeight: 600}} {...props}/>,
+                                            td: ({node, ...props}) => <td style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px'}} {...props}/>,
+                                            img: ({node, ...props}) => (
+                                                <img 
+                                                    {...props} 
+                                                    style={{
+                                                        maxWidth: '100%', 
+                                                        borderRadius: '8px', 
+                                                        ...props.style
+                                                    }} 
+                                                />
+                                            )
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
 
-                {/* Footer */}
                 <div className={styles.editorFooter}>
                     <div className={styles.footerInfo}>
                         <span className={styles.noteType} style={{
@@ -1026,7 +1170,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 </div>
             </div>
 
-            {/* AI Assistant Modal */}
             {showAiAssistant && (
                 <AiAssistant
                     onClose={() => {
@@ -1038,7 +1181,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 />
             )}
 
-            {/* Table Dialog */}
             {showTableDialog && (
                 <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && setShowTableDialog(false)}>
                     <div className={styles.tableModalContainer} onClick={(e) => e.stopPropagation()}>
@@ -1149,7 +1291,6 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                 </div>
             )}
             
-            {/* GLOBAL TOOLTIP - Renderowany poza strukturą paska narzędzi */}
             <GlobalTooltip 
                 text={tooltipState.text}
                 x={tooltipState.x}
