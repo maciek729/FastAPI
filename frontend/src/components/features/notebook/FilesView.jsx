@@ -22,6 +22,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     const [collaboratorUsername, setCollaboratorUsername] = useState('');
     const [collaborators, setCollaborators] = useState([]);
     const [isLoadingDetails, setIsLoadingDetails] = useState(true);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     
     // Dane
     const [notes, setNotes] = useState([]);
@@ -96,12 +97,30 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
         return () => clearTimeout(loadingTimer);
     }, [details?.id]);
 
-    useEffect(() => {
-        if (details?.is_shared && details?.id && !isLoadingDetails) fetchCollaborators();
-    }, [details?.id, details?.is_shared, isLoadingDetails]);
+
 
     useEffect(() => { if (details?.notes) setNotes(details.notes); }, [details?.notes]);
-    useEffect(() => { if (details?.id && userData?.id) { fetchFolders(); fetchFiles(); } }, [details?.id, userData?.id]);
+    
+    useEffect(() => {
+        const loadAllData = async () => {
+            if (details?.id && userData?.id) {
+                setIsLoadingData(true);
+                try {
+                    // Fetch all data in parallel
+                    await Promise.all([
+                        fetchFolders(),
+                        fetchFiles(),
+                        details?.is_shared && !isLoadingDetails ? fetchCollaborators() : Promise.resolve()
+                    ]);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                } finally {
+                    setIsLoadingData(false);
+                }
+            }
+        };
+        loadAllData();
+    }, [details?.id, userData?.id]);
 
     useEffect(() => {
         if (highlightedItemId) {
@@ -411,7 +430,7 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
     };
 
     // --- Render ---
-    if (isLoadingDetails) return <div className={styles.loading}><div className={styles.loadingSpinner}></div><p>{t('filesView.loading')}</p></div>;
+    if (isLoadingDetails || isLoadingData) return <div className={styles.loading}><div className={styles.loadingSpinner}></div><p>{t('filesView.loading')}</p></div>;
 
     return (
         <div 
