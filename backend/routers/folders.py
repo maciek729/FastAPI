@@ -130,15 +130,13 @@ async def create_folder(
 async def list_folders(
     folder_type: str,
     notebook_id: int,
-    user_id: int,
     db: db_dependency
 ):
     """Get all folders for a specific notebook"""
     FolderModel = get_folder_model(folder_type)
 
     folders = db.query(FolderModel).filter(
-        FolderModel.notebook_id == notebook_id,
-        FolderModel.user_id == user_id
+        FolderModel.notebook_id == notebook_id
     ).order_by(FolderModel.grid_position.asc().nullsfirst(), FolderModel.created_at.desc()).all()
     return folders
 

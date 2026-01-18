@@ -488,7 +488,6 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
 @router.get("/list", response_model=List[TestWithQuestions])
 async def list_tests(user_id: int, notebook_id: int, db: db_dependency):
     tests = db.query(Tests).filter(
-        Tests.user_id == user_id,
         Tests.notebook_id == notebook_id
     ).order_by(Tests.created_at.desc()).all()
 
