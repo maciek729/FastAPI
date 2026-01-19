@@ -189,8 +189,9 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
         raise HTTPException(status_code=500, detail="Brak klucza API Gemini")
 
     context_text = ""
-    if request.note_ids:
-        notes = db.query(Notes).filter(Notes.id.in_(request.note_ids)).all()
+    # tutaj wiki to dodałem, bo wcześniej mi nie działało, gdy nie załączałem notatek
+    if request.note_ids and len(request.note_ids) > 0:
+        notes = db.query(Notes).filter(Notes.id.in_(request.note_ids), Notes.type.in_(["Notatka", "Chat AI"])).all()
         if notes:
             context_text = "\n\n".join([f"Note Title: {n.title}\nContent: {n.content}" for n in notes])
     

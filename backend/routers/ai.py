@@ -24,9 +24,9 @@ GEMINI_MODELS = [
 ]
 
 STYLE_INSTRUCTIONS = {
-    "brief": "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE. Maksymalnie 2-3 zdania. Bądź konkretny bez zbędnych szczegółów. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$).",
-    "balanced": "Odpowiadaj w sposób zrównoważony. Udziel wyczerpującej odpowiedzi, ale bez przesadnej długości. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$, $\\sum$).",
-    "detailed": "Odpowiadaj DŁUGO i SZCZEGÓŁOWO. Rozwiń temat, podaj przykłady, omów różne aspekty. Używaj formatowania LaTeX do wzorów matematycznych. Stosuj bloki kodu tam gdzie to zasadne."
+    "brief": "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE. Maksymalnie 2-3 zdania. Bądź konkretny bez zbędnych szczegółów. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$)poza potęgami, potęgi mają być w stylu html czyli <sup> lub <sub>Stosuj bloki kodu tam gdzie to zasadne.",
+    "balanced": "Odpowiadaj w sposób zrównoważony. Udziel wyczerpującej odpowiedzi, ale bez przesadnej długości. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$, $\\sum$)poza potęgami, potęgi mają być w stylu html czyli <sup> lub <sub>Stosuj bloki kodu tam gdzie to zasadne.",
+    "detailed": "Odpowiadaj DŁUGO i SZCZEGÓŁOWO. Rozwiń temat, podaj przykłady, omów różne aspekty. Używaj formatowania LaTeX do wzorów matematycznych  (np. $\\sin(x)$, $\\int$, $\\sum$), poza potęgami, potęgi mają być w stylu html czyli <sup> lub <sub>Stosuj bloki kodu tam gdzie to zasadne."
 }
 
 last_used_model = GEMINI_MODELS[0]

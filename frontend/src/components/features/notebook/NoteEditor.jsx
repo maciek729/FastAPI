@@ -853,6 +853,16 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         }
     };
 
+    const formatContent = (text) => {
+        if (!text) return "";
+        
+        let formatted = text.replace(/\^(\w+)/g, '<sup>$1</sup>');
+
+        formatted = formatted.replace(/\_(\d+)/g, '<sub>$1</sub>');
+
+        return formatted;
+    };
+
     return (
         <div className={styles.editorOverlay}>
             <div className={styles.editorContainer}>
@@ -1166,10 +1176,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                 style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: 'var(--inner_section_bg)' }}>
                                 <div className={styles.readOnly}>
                                     <ReactMarkdown
-                                        children={content}
+                                        children={formatContent(content)}
                                         remarkPlugins={[remarkMath, remarkGfm]}
-                                        rehypePlugins={[rehypeKatex, rehypeRaw]}
-                                        urlTransform={(value) => value} 
+                                        rehypePlugins={[rehypeKatex, rehypeRaw]} 
+                                        urlTransform={(value) => value}
                                         components={{
                                             p: ({node, ...props}) => <p style={{ marginBottom: '0.75rem', lineHeight: '1.6' }} {...props} />,
                                             a: ({node, ...props}) => <a style={{ color: '#8b5cf6', textDecoration: 'underline' }} {...props} />,
@@ -1178,10 +1188,18 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                             h1: ({node, ...props}) => <h1 style={{ fontSize: '1.5em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
                                             h2: ({node, ...props}) => <h2 style={{ fontSize: '1.25em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
                                             h3: ({node, ...props}) => <h3 style={{ fontSize: '1.1em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            div: ({node, ...props}) => <div {...props} />, // Po prostu renderuj div
+                                            span: ({node, ...props}) => <span {...props} />,
+                                            br: ({node, ...props}) => <br {...props} />,
+                                            strong: ({node, ...props}) => <strong style={{ fontWeight: 'bold', color: 'var(--purple_brighter)' }} {...props} />,
+                                            b: ({node, ...props}) => <strong style={{ fontWeight: 'bold' }} {...props} />,
+                                            em: ({node, ...props}) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                                            i: ({node, ...props}) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                                            sup: ({node, ...props}) => <sup {...props} style={{ fontSize: '0.75em', verticalAlign: 'super', lineHeight: 0 }} />,
+                                            sub: ({node, ...props}) => <sub {...props} style={{ fontSize: '0.75em', verticalAlign: 'sub', lineHeight: 0 }} />,
                                             table: ({node, ...props}) => <div style={{overflowX:'auto', marginBottom: '1rem'}}><table style={{width:'100%', borderCollapse:'collapse'}} {...props}/></div>,
                                             th: ({node, ...props}) => <th style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px', background:'rgba(139, 92, 246, 0.1)', fontWeight: 600}} {...props}/>,
                                             td: ({node, ...props}) => <td style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px'}} {...props}/>,
-                                            
                                             img: ({node, ...props}) => (
                                                 <img 
                                                     {...props} 
@@ -1213,7 +1231,7 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                             ) : (
                                 <div className={`${styles.editor} ${styles.readOnly}`} style={{ height: '100%', overflowY: 'auto' }}>
                                     <ReactMarkdown
-                                        children={content}
+                                        children={formatContent(content)}
                                         remarkPlugins={[remarkMath, remarkGfm]}
                                         rehypePlugins={[rehypeKatex, rehypeRaw]} 
                                         urlTransform={(value) => value}
@@ -1225,6 +1243,15 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                                             h1: ({node, ...props}) => <h1 style={{ fontSize: '1.5em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
                                             h2: ({node, ...props}) => <h2 style={{ fontSize: '1.25em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
                                             h3: ({node, ...props}) => <h3 style={{ fontSize: '1.1em', fontWeight: 600, marginTop: '1rem', marginBottom: '0.5rem' }} {...props} />,
+                                            div: ({node, ...props}) => <div {...props} />, // Po prostu renderuj div
+                                            span: ({node, ...props}) => <span {...props} />,
+                                            br: ({node, ...props}) => <br {...props} />,
+                                            strong: ({node, ...props}) => <strong style={{ fontWeight: 'bold', color: 'var(--purple_brighter)' }} {...props} />,
+                                            b: ({node, ...props}) => <strong style={{ fontWeight: 'bold' }} {...props} />,
+                                            em: ({node, ...props}) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                                            i: ({node, ...props}) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                                            sup: ({node, ...props}) => <sup {...props} style={{ fontSize: '0.75em', verticalAlign: 'super', lineHeight: 0 }} />,
+                                            sub: ({node, ...props}) => <sub {...props} style={{ fontSize: '0.75em', verticalAlign: 'sub', lineHeight: 0 }} />,
                                             table: ({node, ...props}) => <div style={{overflowX:'auto', marginBottom: '1rem'}}><table style={{width:'100%', borderCollapse:'collapse'}} {...props}/></div>,
                                             th: ({node, ...props}) => <th style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px', background:'rgba(139, 92, 246, 0.1)', fontWeight: 600}} {...props}/>,
                                             td: ({node, ...props}) => <td style={{border:'1px solid rgba(148, 163, 184, 0.3)', padding:'8px 12px'}} {...props}/>,
