@@ -124,7 +124,9 @@
         "success": "Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.",
         "backHome": "Powrót do strony głównej",
         "alreadyHaveAccount": "Masz już konto? Zaloguj się",
-        "passwordMismatch": "Hasła nie pasują do siebie"
+        "passwordMismatch": "Hasła nie pasują do siebie",
+        "accountExists": "Konto o tym loginie lub emailu już istnieje",
+        "errorGeneric": "Wystąpił błąd podczas rejestracji"
       },
       "forgotPassword": {
         "title": "Przypomnienie hasła",
@@ -732,7 +734,32 @@
       "all":"@wszyscy",
       "textPH": "Wpisz wiadomość...",
       "pinned": "Przypięte wiadomości",
-      "files": "Pliki"
+      "files": "Pliki",
+      "today": "Dziś",
+      "yesterday": "Wczoraj",
+      "days": {
+        "monday": "Poniedziałek",
+        "tuesday": "Wtorek",
+        "wednesday": "Środa",
+        "thursday": "Czwartek",
+        "friday": "Piątek",
+        "saturday": "Sobota",
+        "sunday": "Niedziela"
+      },
+      "months": {
+        "january": "Styczeń",
+        "february": "Luty",
+        "march": "Marzec",
+        "april": "Kwiecień",
+        "may": "Maj",
+        "june": "Czerwiec",
+        "july": "Lipiec",
+        "august": "Sierpień",
+        "september": "Wrzesień",
+        "october": "Październik",
+        "november": "Listopad",
+        "december": "Grudzień"
+      }
     },
     "demo": {
       "buttons": {
@@ -1178,7 +1205,9 @@
         "success": "Registration completed successfully! You can now log in.",
         "backHome": "Back to homepage",
         "alreadyHaveAccount": "Already have an account? Log in",
-        "passwordMismatch": "Passwords do not match"
+        "passwordMismatch": "Passwords do not match",
+        "accountExists": "An account with this username or email already exists",
+        "errorGeneric": "An error occurred during registration"
       },
       "forgotPassword": {
         "title": "Forgot Password",
@@ -1774,7 +1803,32 @@
       "all": "@all",
       "textPH": "Type message...",
       "pinned": "Pinned message",
-      "files": "Files"
+      "files": "Files",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      }
     },
     "demo": {
       "buttons": {

@@ -48,7 +48,12 @@ function Register() {
       toast.success(t("auth.register.success"));
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
-      setError(err.message);
+      if (err.message === "NetworkError when attempting to fetch resource." || err.message === "Failed to fetch") {
+        setError(t("auth.register.accountExists") || "Błąd połączenia z serwerem. Spróbuj ponownie później.");
+      } 
+      else {
+        setError(t("auth.register.errorGeneric") || t("auth.login.errorGeneric") || "Wystąpił błąd rejestracji.");
+      }
     } finally {
       setIsLoading(false);
     }
