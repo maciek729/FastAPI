@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { X } from 'lucide-react';
+import { LanguageContext } from '../translations/LanguageContext';
 
-export const promptModal = (message, defaultValue = '') => {
+export const promptModal = (message, defaultValue = '', editText, btnCancel, btnOk) => {
   return new Promise((resolve) => {
     const modalContainer = document.createElement('div');
     document.body.appendChild(modalContainer);
@@ -22,6 +23,7 @@ export const promptModal = (message, defaultValue = '') => {
 
     const PromptModal = () => {
       const [value, setValue] = useState(defaultValue);
+
 
       return (
         <div
@@ -92,7 +94,7 @@ export const promptModal = (message, defaultValue = '') => {
                 type="text"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="Wpisz nazwę..."
+                placeholder={editText}
                 style={{
                   padding: '0.75rem 1rem',
                   border: '2px solid rgba(148, 163, 184, 0.2)',
@@ -136,7 +138,7 @@ export const promptModal = (message, defaultValue = '') => {
                     e.currentTarget.style.color = 'var(--subtitle)';
                   }}
                 >
-                  Anuluj
+                  {btnCancel}
                 </button>
                 <button
                   type="submit"
@@ -161,7 +163,7 @@ export const promptModal = (message, defaultValue = '') => {
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
                   }}
                 >
-                  OK
+                  {btnOk}
                 </button>
               </div>
             </form>

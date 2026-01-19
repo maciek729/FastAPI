@@ -310,6 +310,7 @@
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.25rem;
     padding-bottom: 2rem;
+    align-items: start;
 }
 
 /* Folder Card */
@@ -434,7 +435,6 @@
     position: relative;
     min-height: 190px;
     height: 190px;
-    gap: 0.75rem;
 }
 
 .podcastCard:hover {
@@ -446,6 +446,8 @@
     border-color: #8b5cf6;
     background-color: var(--inner_inner_section_bg);
     box-shadow: 0 4px 15px rgba(108, 99, 255, 0.15);
+    transform: translateY(-2px);
+    z-index: 1;
 }
 
 .pinnedCard {
@@ -564,11 +566,24 @@
     color: #ef4444 !important;
 }
 
-/* Player Controls */
 .playerControls {
     margin-top: 1rem;
     padding-top: 0.8rem;
     border-top: 1px solid var(--darker_subtitle);
+    animation: slideDown 0.3s ease-out forwards;
+    transform-origin: top;
+}
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 100px;
+    }
 }
 
 .timeInfo {

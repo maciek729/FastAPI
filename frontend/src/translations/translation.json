@@ -36,6 +36,9 @@
       "deleteColError": "Błąd usuwania współtwórcy",
       "removeColl": "Usuń współtwórcę",
       "leaveNotebookSuccess": "Opuszczono notatnik",
+      "editText": "Nowa nazwa notatnika",
+      "btnCancel": "Anuluj",
+      "btnOk": "OK",
       "copySuccess": {
         "test": "Test skopiowany do notatnika \"{notebookName}\"",
         "folder": "Folder skopiowany do notatnika \"{notebookName}\"",
@@ -101,7 +104,10 @@
         "loading": "Logowanie...",
         "backHome": "Powrót do strony głównej",
         "noAccount": "Nie masz konta? Zarejestruj się",
-        "forgotPassword": "Zapomniałeś hasła?"
+        "forgotPassword": "Zapomniałeś hasła?",
+        "errorInvalidCredentials": "Nieprawidłowa nazwa użytkownika lub hasło",
+        "errorVerifyEmail": "Proszę zweryfikować swój email przed zalogowaniem się",
+        "errorGeneric": "Błąd podczas logowania, spróbuj ponownie później"
       },
       "register": {
         "subtitle": "Zarejestruj się, aby rozpocząć",
@@ -118,7 +124,9 @@
         "success": "Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.",
         "backHome": "Powrót do strony głównej",
         "alreadyHaveAccount": "Masz już konto? Zaloguj się",
-        "passwordMismatch": "Hasła nie pasują do siebie"
+        "passwordMismatch": "Hasła nie pasują do siebie",
+        "accountExists": "Konto o tym loginie lub emailu już istnieje",
+        "errorGeneric": "Wystąpił błąd podczas rejestracji"
       },
       "forgotPassword": {
         "title": "Przypomnienie hasła",
@@ -681,7 +689,8 @@
       "removePhoto": "Usuń zdjęcie profilowe",
       "cropAndPick": "Przytnij i wybierz",
       "adjustPhoto": "Dostosuj zdjęcie profilowe",
-      "cancelPhoto": "Anuluj"
+      "cancelPhoto": "Anuluj",
+      "deleteAccountDescriptionModal": "Deaktywacja konta spowoduje utracenie dostępu do wszystkich danych i materiałów. Czy na pewno chcesz kontynuować?"
     },
     "userMenu": {
       "profile": "Profil",
@@ -724,7 +733,33 @@
       "openR":"Otwórz zasób",
       "all":"@wszyscy",
       "textPH": "Wpisz wiadomość...",
-      "pinned": "Przypięte wiadomości"
+      "pinned": "Przypięte wiadomości",
+      "files": "Pliki",
+      "today": "Dziś",
+      "yesterday": "Wczoraj",
+      "days": {
+        "monday": "Poniedziałek",
+        "tuesday": "Wtorek",
+        "wednesday": "Środa",
+        "thursday": "Czwartek",
+        "friday": "Piątek",
+        "saturday": "Sobota",
+        "sunday": "Niedziela"
+      },
+      "months": {
+        "january": "Styczeń",
+        "february": "Luty",
+        "march": "Marzec",
+        "april": "Kwiecień",
+        "may": "Maj",
+        "june": "Czerwiec",
+        "july": "Lipiec",
+        "august": "Sierpień",
+        "september": "Wrzesień",
+        "october": "Październik",
+        "november": "Listopad",
+        "december": "Grudzień"
+      }
     },
     "demo": {
       "buttons": {
@@ -953,6 +988,9 @@
       "deleteColError": "Error removing collaborator",
       "leaveNotebookSuccess": "You left the notebook",
       "removeColl": "Remove collaborator",
+      "editText": "New notebook name",
+      "btnCancel": "Cancel",
+      "btnOk": "OK",
       "copySuccess": {
         "test": "Test copied to notebook \"{notebookName}\"",
         "folder": "Folder copied to notebook \"{notebookName}\"",
@@ -1147,7 +1185,10 @@
         "loading": "Logging in...",
         "backHome": "Back to homepage",
         "noAccount": "Don't have an account? Register",
-        "forgotPassword": "Forgot password?"
+        "forgotPassword": "Forgot password?",
+        "errorInvalidCredentials": "Invalid username or password",
+        "errorVerifyEmail": "Please verify your email before logging in",
+        "errorGeneric": "An error occurred during login"
       },
       "register": {
         "subtitle": "Register to get started",
@@ -1164,7 +1205,9 @@
         "success": "Registration completed successfully! You can now log in.",
         "backHome": "Back to homepage",
         "alreadyHaveAccount": "Already have an account? Log in",
-        "passwordMismatch": "Passwords do not match"
+        "passwordMismatch": "Passwords do not match",
+        "accountExists": "An account with this username or email already exists",
+        "errorGeneric": "An error occurred during registration"
       },
       "forgotPassword": {
         "title": "Forgot Password",
@@ -1715,7 +1758,8 @@
       "removePhoto": "Remove Profile Picture",
       "cropAndPick": "Crop & Pick",
       "adjustPhoto": "Adjust Profile Photo",
-      "cancelPhoto": "Cancel"
+      "cancelPhoto": "Cancel",
+      "deleteAccountDescriptionModal": "Are you sure you want to deactivate your account? This action is irreversible and will result in the loss of all your data."
     },
     "userMenu": {
       "profile": "Profile",
@@ -1758,7 +1802,33 @@
       "openR": "Open resource",
       "all": "@all",
       "textPH": "Type message...",
-      "pinned": "Pinned message"
+      "pinned": "Pinned message",
+      "files": "Files",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      }
     },
     "demo": {
       "buttons": {

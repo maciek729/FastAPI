@@ -504,6 +504,23 @@
     opacity: 0.8;
     animation: pulseText 1.5s infinite ease-in-out;
 }
+.noResources {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--title);
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.7;
+    background: var(--inner_section_bg);
+    border-radius: 8px;
+    margin: 1rem;
+    border: 1px dashed var(--border_gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
 @keyframes pulseText {
     0%, 100% { opacity: 0.5; transform: scale(0.98); }

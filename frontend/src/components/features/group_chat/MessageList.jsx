@@ -84,13 +84,35 @@ const MessageList = ({
 
     const formatSeparatorDate = (dateStr) => {
         if (!dateStr) return "";
+        
         const date = new Date(dateStr);
-        date.setHours(date.getHours() + 1);
-        return date.toLocaleDateString('pl-PL', { 
-            weekday: 'long', 
-            day: 'numeric', 
-            month: 'long' 
-        });
+        const now = new Date();
+        if (date.toDateString() === now.toDateString()) {
+            return t('group_chat.today') || 'Dzisiaj';
+        }
+        
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (date.toDateString() === yesterday.toDateString()) {
+            return t('group_chat.yesterday') || 'Wczoraj';
+        }
+        
+        const dayKey = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        let dayName = t(`group_chat.days.${dayKey}`);
+        if (!dayName || dayName === `group_chat.days.${dayKey}`) {
+             dayName = date.toLocaleDateString('pl-PL', { weekday: 'long' });
+        }
+
+        const day = date.getDate();
+
+        const monthKey = date.toLocaleDateString('en-US', { month: 'long' }).toLowerCase();
+        let monthName = t(`group_chat.months.${monthKey}`);
+        if (!monthName || monthName === `group_chat.months.${monthKey}`) {
+            monthName = date.toLocaleDateString('pl-PL', { month: 'long' }); 
+        }
+
+        const month = date.toLocaleDateString('pl-PL', { month: 'long' });
+        return `${dayName}, ${day} ${monthName}`;
     };
 
     const formatText = (text) => {

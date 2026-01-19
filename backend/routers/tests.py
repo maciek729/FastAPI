@@ -424,7 +424,7 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
         note_id_for_db = None
 
         if request.note_ids and len(request.note_ids) > 0:
-            notes = db.query(Notes).filter(Notes.id.in_(request.note_ids)).all()
+            notes = db.query(Notes).filter(Notes.id.in_(request.note_ids),  Notes.type.in_(["Notatka", "Chat AI"])).all()
             if notes:
                 # Combine content from all selected notes
                 context_text = "\n\n--- Notatka: {} ---\n\n".join([

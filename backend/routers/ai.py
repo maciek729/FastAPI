@@ -24,9 +24,38 @@ GEMINI_MODELS = [
 ]
 
 STYLE_INSTRUCTIONS = {
-    "brief": "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE. Maksymalnie 2-3 zdania. Bądź konkretny bez zbędnych szczegółów. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$).",
-    "balanced": "Odpowiadaj w sposób zrównoważony. Udziel wyczerpującej odpowiedzi, ale bez przesadnej długości. Używaj formatowania LaTeX do wzorów matematycznych (np. $\\sin(x)$, $\\int$, $\\sum$).",
-    "detailed": "Odpowiadaj DŁUGO i SZCZEGÓŁOWO. Rozwiń temat, podaj przykłady, omów różne aspekty. Używaj formatowania LaTeX do wzorów matematycznych. Stosuj bloki kodu tam gdzie to zasadne."
+    "brief": (
+        "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE (max 2-3 zdania). "
+        "ZASADY FORMATOWANIA MATEMATYKI (BARDZO WAŻNE): "
+        "1. Dla potęg i indeksów dolnych oraz argumentów NIE UŻYWAJ LaTeXa ($...$). ZAWSZE używaj HTML: "
+        "Pisz 'x<sup>2</sup>' zamiast '$x^2$'. Pisz 'a<sub>1</sub>' zamiast '$a_1$'. "
+        "Pisz 'a', a nie $a$."
+        "2. Dla reszty matematyki (całki, pierwiastki, ułamki, greckie litery) używaj LaTeXa: "
+        "np. $\\int f(x) dx$, $\\frac{1}{2}$, $\\sqrt{x}$. "
+        "Stosuj bloki kodu tam gdzie to zasadne."
+    ),
+    "balanced": (
+        "Odpowiadaj w sposób zrównoważony. "
+        "ZASADY FORMATOWANIA MATEMATYKI (BARDZO WAŻNE): "
+        "1. Dla potęg i indeksów dolnych oraz argumentów BEZWZGLĘDNIE UŻYWAJ TYLKO HTML: "
+        "Pisz 'E = mc<sup>2</sup>' (HTML), a NIE '$E = mc^2$' (LaTeX). "
+        "Pisz 'H<sub>2</sub>O' (HTML), a NIE '$H_2O$' (LaTeX). "
+        "Pisz 'a', a nie $a$."
+        "2. Dla skomplikowanych wzorów (ułamki, całki, sumy) używaj standardowego LaTeXa: "
+        "np. $\\sum_{i=0}^{n}$. "
+        "Stosuj bloki kodu tam gdzie to zasadne."
+    ),
+    "detailed": (
+        "Odpowiadaj w sposób zrównoważony. "
+        "ZASADY FORMATOWANIA MATEMATYKI (BARDZO WAŻNE): "
+        "1. Dla potęg i indeksów dolnych oraz argumentów BEZWZGLĘDNIE UŻYWAJ TYLKO HTML: "
+        "Pisz 'E = mc<sup>2</sup>' (HTML), a NIE '$E = mc^2$' (LaTeX). "
+        "Pisz 'H<sub>2</sub>O' (HTML), a NIE '$H_2O$' (LaTeX). "
+        "Pisz 'a', a nie $a$."
+        "2. Dla skomplikowanych wzorów (ułamki, całki, sumy) używaj standardowego LaTeXa: "
+        "np. $\\sum_{i=0}^{n}$. "
+        "Stosuj bloki kodu tam gdzie to zasadne."
+    )
 }
 
 last_used_model = GEMINI_MODELS[0]

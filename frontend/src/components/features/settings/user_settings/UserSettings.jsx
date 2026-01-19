@@ -195,7 +195,7 @@ export default function UserSettings({ userData }) {
         } else if (type === 'deleteAccount') {
             content = {
                 title: t('userSettings.deleteAccountButton'),
-                newInputLabel: t('userSettings.deleteAccountDescription'),
+                newInputLabel: t('userSettings.deleteAccountDescriptionModal'),
                 inputType: 'password',
                 buttonText: t('userSettings.deleteAccountButton'),
                 saveType: 'deleteAccount',
@@ -264,7 +264,7 @@ export default function UserSettings({ userData }) {
                             <label className={styles.sectionTitle}>{t('userSettings.deleteAccount')}</label>
                             <label className={styles.optionLabel}>{t('userSettings.deleteAccountDescription')}</label>
                         </div>
-                        <button className={styles.deleteAccountButton} onClick={() => openModal('deleteAccount')}>{t('userSettings.deleteAccountButton')}</button>
+                        <button className={styles.deleteAccountButton} onClick={() => openModal('deleteAccount')}>{t('userSettings.deleteAccount')}</button>
                     </div>
                 </div>
             </div>

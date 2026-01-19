@@ -13,6 +13,7 @@ import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
@@ -215,6 +216,31 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
     }
   };
 
+  const formatContent = (text) => {
+    if (!text) return "";
+
+    const superscripts = {
+      '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+      '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹',
+      '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
+      'n': 'ⁿ', 'i': 'ⁱ', 'x': 'ˣ', 'a': 'ᵃ', 'b': 'ᵇ', 'c': 'ᶜ'
+    };
+
+    const subscripts = {
+      '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+      '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+      '+': '₊', '-': '₋', '=': '₌', '(': '₍', ')': '₎',
+      'a': 'ₐ', 'e': 'ₑ', 'x': 'ₓ'
+    };
+
+    return text
+      .replace(/<sup>(.*?)<\/sup>/gi, (match, body) => {
+        return body.split('').map(char => superscripts[char] || char).join('');
+      })
+      .replace(/<sub>(.*?)<\/sub>/gi, (match, body) => {
+        return body.split('').map(char => subscripts[char] || char).join('');
+      });
+  };
   return (
     <div className={styles.chatContainer}>
       <div className={styles.chatHeader}>
@@ -226,12 +252,6 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
           <Trash2 size={16} /> {t('chat.clear')}
         </button>
       </div>
-
-      {selectedMessages.length > 0 && (
-        <button className={styles.saveMegaBtn} onClick={saveSelectedMessagesAsNote}>
-          <Save size={16} /> {t('chat.saveSelected')}
-        </button>
-      )}
 
       <div className={styles.styleSelector}>
         <span className={styles.styleLabel}>{t('chat.responseStyle')}:</span>
@@ -266,6 +286,12 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
         </div>
       </div>
 
+      {selectedMessages.length > 0 && (
+        <button className={styles.saveMegaBtn} onClick={saveSelectedMessagesAsNote}>
+          <Save size={16} /> {t('chat.saveSelected')}
+        </button>
+      )}
+
       <div className={styles.messagesContainer}>
         {messages.length === 0 ? (
           <div className={styles.emptyState}>
@@ -286,12 +312,19 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
               {msg.role === 'assistant' ? (
                 <div className={styles.messageContent}>
                   <ReactMarkdown
-                    children={msg.content}
+                    children={formatContent(msg.content)}
                     remarkPlugins={[remarkMath]}
                     rehypePlugins={[rehypeKatex]}
+                    skipHtml={false}
                     components={{
                       p: ({node, ...props}) => <p style={{ margin: '0.5em 0' }} {...props} />,
                       a: ({node, ...props}) => <a style={{ color: '#007bff', textDecoration: 'underline' }} {...props} />,
+                      strong: ({node, ...props}) => <strong style={{ fontWeight: 'bold' }} {...props} />,
+                      b: ({node, ...props}) => <strong style={{ fontWeight: 'bold' }} {...props} />,
+                      em: ({node, ...props}) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                      i: ({node, ...props}) => <em style={{ fontStyle: 'italic' }} {...props} />,
+                      sup: ({node, ...props}) => <sup style={{ fontSize: '0.75em', verticalAlign: 'super', lineHeight: 0 }} {...props} />,
+                      sub: ({node, ...props}) => <sub style={{ fontSize: '0.75em', verticalAlign: 'sub', lineHeight: 0 }} {...props} />,
                     }}
                   />
                 </div>
