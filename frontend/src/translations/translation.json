@@ -124,7 +124,9 @@
         "success": "Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.",
         "backHome": "Powrót do strony głównej",
         "alreadyHaveAccount": "Masz już konto? Zaloguj się",
-        "passwordMismatch": "Hasła nie pasują do siebie"
+        "passwordMismatch": "Hasła nie pasują do siebie",
+        "accountExists": "Konto o tym loginie lub emailu już istnieje",
+        "errorGeneric": "Wystąpił błąd podczas rejestracji"
       },
       "forgotPassword": {
         "title": "Przypomnienie hasła",
@@ -1203,7 +1205,9 @@
         "success": "Registration completed successfully! You can now log in.",
         "backHome": "Back to homepage",
         "alreadyHaveAccount": "Already have an account? Log in",
-        "passwordMismatch": "Passwords do not match"
+        "passwordMismatch": "Passwords do not match",
+        "accountExists": "An account with this username or email already exists",
+        "errorGeneric": "An error occurred during registration"
       },
       "forgotPassword": {
         "title": "Forgot Password",
