@@ -1,5 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const WS_BASE_URL = API_BASE_URL.replace('http', 'ws');
+const API_BASE_URL = window.location.origin.includes('localhost')
+  ? 'http://localhost:8000'
+  : 'https://zdaito.pl/api';
+
+const WS_BASE_URL = window.location.origin.includes('localhost')
+  ? 'ws://localhost:8000'
+  : 'wss://zdaito.pl/api';
 
 class NoteCollaborationService {
     constructor() {
