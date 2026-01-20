@@ -31,7 +31,7 @@ export default function TestGenerator({
         }
 
         if (typeof translation === 'string' && Object.keys(params).length > 0) {
-            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
+            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
         }
 
         return translation || key;

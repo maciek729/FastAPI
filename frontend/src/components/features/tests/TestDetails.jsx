@@ -18,9 +18,9 @@ export default function TestDetails({ show, onClose, test, onStartTest, onViewRe
             if (!translation) return key;
         }
 
-        if (typeof translation === 'string' && Object.keys(params).length > 0) {
-            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
-        }
+            if (typeof translation === 'string' && Object.keys(params).length > 0) {
+                return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
+            }
 
         return translation || key;
     };
