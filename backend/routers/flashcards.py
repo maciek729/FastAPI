@@ -120,31 +120,101 @@ class FlashcardReviewOut(BaseModel):
 # FUNKCJE POMOCNICZE
 # ============================================
 
-def extract_flashcards_from_ai_response(ai_response: str) -> List[dict]:
-    """Parsowanie odpowiedzi AI do listy fiszek"""
+def truncate_flashcard_text(text: str, max_length: int) -> str:
+    """Przycinanie tekstu fiszki do maksymalnej długości"""
+    if len(text) <= max_length:
+        return text
+    return text[:max_length-3] + "..."
+
+
+def extract_flashcards_from_ai_response(ai_response: str, max_question_len: int = 100, max_answer_len: int = 150) -> List[dict]:
+    """Parsowanie odpowiedzi AI do listy fiszek - z obsługą uciętych odpowiedzi i walidacją długości"""
+
+    def clean_text(text: str) -> str:
+        """Usuwa HTML entities i tagi z tekstu"""
+        import re
+        # Usuń HTML tagi
+        text = re.sub(r'<[^>]+>', '', text)
+        # Zamień HTML entities
+        text = text.replace('&ne;', '≠').replace('&lt;', '<').replace('&gt;', '>')
+        text = text.replace('&amp;', '&').replace('&quot;', '"').replace('&apos;', "'")
+        text = text.replace('&le;', '≤').replace('&ge;', '≥')
+        return text.strip()
+
+    def validate_and_trim_flashcards(flashcards: List[dict]) -> List[dict]:
+        """Walidacja i przycinanie fiszek do maksymalnej długości"""
+        valid_flashcards = []
+        for card in flashcards:
+            if "question" in card and "answer" in card:
+                question = clean_text(str(card["question"]))
+                answer = clean_text(str(card["answer"]))
+
+                # Przytnij jeśli za długie
+                question = truncate_flashcard_text(question, max_question_len)
+                answer = truncate_flashcard_text(answer, max_answer_len)
+
+                if question and answer:
+                    valid_flashcards.append({
+                        "question": question,
+                        "answer": answer
+                    })
+        return valid_flashcards
+
+    # Usuń markdown code blocks
+    ai_response = ai_response.replace('```json', '').replace('```', '').strip()
+
     try:
+        # Próba 1: Pełny poprawny JSON
         if ai_response.strip().startswith('['):
             flashcards = json.loads(ai_response)
-            return flashcards
-        
+            return validate_and_trim_flashcards(flashcards)
+
+        # Próba 2: Znajdź tablicę JSON w odpowiedzi
         start = ai_response.find('[')
         end = ai_response.rfind(']') + 1
         if start != -1 and end > start:
             json_str = ai_response[start:end]
-            flashcards = json.loads(json_str)
-            return flashcards
-        
+            try:
+                flashcards = json.loads(json_str)
+                return validate_and_trim_flashcards(flashcards)
+            except json.JSONDecodeError:
+                pass
+
+        # Próba 3: Napraw ucięty JSON - znajdź ostatni kompletny obiekt
+        if start != -1:
+            json_str = ai_response[start:]
+            last_complete = json_str.rfind('},')
+            if last_complete == -1:
+                last_complete = json_str.rfind('}]')
+
+            if last_complete != -1:
+                if json_str[last_complete:last_complete+2] == '},':
+                    json_str = json_str[:last_complete+1] + ']'
+                else:
+                    json_str = json_str[:last_complete+2]
+
+                try:
+                    flashcards = json.loads(json_str)
+                    if len(flashcards) > 0:
+                        print(f"DEBUG: Naprawiono ucięty JSON, odzyskano {len(flashcards)} fiszek")
+                        return validate_and_trim_flashcards(flashcards)
+                except json.JSONDecodeError:
+                    pass
+
+        # Próba 4: Znajdź pojedynczy obiekt
         start = ai_response.find('{')
         end = ai_response.rfind('}') + 1
         if start != -1 and end > start:
             json_str = ai_response[start:end]
             data = json.loads(json_str)
             if "flashcards" in data:
-                return data["flashcards"]
-            return [data]
-        
+                return validate_and_trim_flashcards(data["flashcards"])
+            return validate_and_trim_flashcards([data])
+
         return []
-    except:
+    except Exception as e:
+        print(f"DEBUG: Błąd parsowania JSON: {e}")
+        print(f"DEBUG: Odpowiedź AI (pierwsze 500 znaków): {ai_response[:500]}")
         return []
 
 
@@ -312,25 +382,42 @@ ZASADY OBOWIĄZKOWE:
 1. Jeśli materiał zawiera KONKRETNE INFORMACJE (tekst, fakty, definicje):
    - Fiszki MUSZĄ być oparte WYŁĄCZNIE na treści z materiału
    - NIE dodawaj informacji spoza podanego materiału
-   - Każda fiszka dotyczy konkretnych faktów/pojęć z materiału
 
-2. Jeśli materiał zawiera TYLKO TEMAT (np. "historia Polski", "biologia - fotosynteza"):
+2. Jeśli materiał zawiera TYLKO TEMAT (np. "historia Polski", "matematyka - całki"):
    - Wygeneruj fiszki ściśle związane z podanym tematem
    - NIE generuj ogólnej wiedzy niezwiązanej z tematem
-   - Fiszki muszą dotyczyć tego konkretnego tematu
 
-WYMAGANIA:
-- Każda fiszka: pytanie (krótkie, konkretne) + odpowiedź (zwięzła, kompletna)
-- LIMIT ZNAKÓW: pytanie MAX 150 znaków, odpowiedź MAX 300 znaków
+KRYTYCZNE WYMAGANIA DŁUGOŚCI (NIEPRZEKRACZALNE):
+- Pytanie: MAX 80 znaków (krótkie, konkretne)
+- Odpowiedź: MAX 120 znaków (zwięzła, bez rozbudowanych wyjaśnień)
+- NIE pisz długich wyjaśnień, wzorów ani definicji
+- Odpowiedzi muszą być BARDZO KRÓTKIE
+
+PRZYKŁADY DOBRYCH FISZEK:
+{{"question": "Wzór na całkę z $x^n$", "answer": "$\\frac{{x^{{n+1}}}}{{n+1}} + C$"}}
+{{"question": "Kiedy była bitwa pod Grunwaldem?", "answer": "15 lipca 1410"}}
+{{"question": "Stolica Francji?", "answer": "Paryż"}}
+{{"question": "Wzór na pole koła", "answer": "$\\pi r^2$"}}
+{{"question": "Pochodna $\\sin(x)$", "answer": "$\\cos(x)$"}}
+
+FORMATOWANIE WZORÓW MATEMATYCZNYCH:
+- Wzory matematyczne otaczaj znakami dolara: $wzór$
+- Ułamki: $\\frac{{licznik}}{{mianownik}}$
+- Potęgi: $x^2$ lub $x^{{n+1}}$
+- Pierwiastki: $\\sqrt{{x}}$
+- Indeksy: $x_1$ lub $x_{{12}}$
+- Całki: $\\int x dx$
+- Greckie litery: $\\pi$, $\\alpha$, $\\beta$
+
+PRZYKŁADY ZŁYCH FISZEK (ZA DŁUGIE):
+{{"question": "Co oznacza litera C w całkach nieoznaczonych?", "answer": "Litera C oznacza stałą całkowania, która jest dodawana..."}} ❌ ZA DŁUGIE!
+
+FORMAT:
 - Poziom {request.difficulty}: {difficulty_hints.get(request.difficulty, 'standardowy')}
 - Format JSON: [{{"question": "...", "answer": "..."}}, ...]
-- Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
+- Zwróć TYLKO tablicę JSON, bez markdown
 - Pytania i odpowiedzi w języku polskim
 - Dokładnie {request.count} fiszek
-
-PRZYKŁAD:
-Materiał: "Bitwa pod Grunwaldem odbyła się 15 lipca 1410 roku."
-Fiszka: {{"question": "Kiedy odbyła się bitwa pod Grunwaldem?", "answer": "15 lipca 1410 roku"}}
 
 Wygeneruj fiszki:"""
 
@@ -471,21 +558,29 @@ MATERIAŁ ŹRÓDŁOWY/TEMAT:
 
 ZASADY OBOWIĄZKOWE:
 
-1. Jeśli materiał zawiera KONKRETNE INFORMACJE (tekst, fakty, definicje):
-   - Fiszki MUSZĄ być oparte WYŁĄCZNIE na treści z materiału
-   - NIE dodawaj informacji spoza podanego materiału
+1. Jeśli materiał zawiera KONKRETNE INFORMACJE:
+   - Fiszki oparte WYŁĄCZNIE na materiale
 
-2. Jeśli materiał zawiera TYLKO TEMAT (np. "historia Polski"):
-   - Wygeneruj fiszki ściśle związane z podanym tematem
-   - NIE generuj ogólnej wiedzy niezwiązanej z tematem
+2. Jeśli materiał zawiera TYLKO TEMAT:
+   - Wygeneruj fiszki związane z tematem
 
-WYMAGANIA:
-- Każda fiszka: pytanie (krótkie, konkretne) + odpowiedź (zwięzła, kompletna)
-- LIMIT ZNAKÓW: pytanie MAX 150 znaków, odpowiedź MAX 300 znaków
+KRYTYCZNE WYMAGANIA DŁUGOŚCI:
+- Pytanie: MAX 80 znaków
+- Odpowiedź: MAX 120 znaków
+- Odpowiedzi BARDZO KRÓTKIE, bez rozbudowanych wyjaśnień
+
+PRZYKŁADY DOBRYCH FISZEK:
+{{"question": "Wzór na całkę z $x^n$", "answer": "$\\frac{{x^{{n+1}}}}{{n+1}} + C$"}}
+{{"question": "Stolica Francji?", "answer": "Paryż"}}
+{{"question": "Wzór na pole koła", "answer": "$\\pi r^2$"}}
+
+WZORY MATEMATYCZNE - otaczaj znakami $:
+$\\frac{{a}}{{b}}$ (ułamek), $x^2$ (potęga), $\\sqrt{{x}}$ (pierwiastek), $\\pi$ (pi)
+
+FORMAT:
 - Poziom {difficulty}: {difficulty_hints.get(difficulty, 'standardowy')}
 - Format JSON: [{{"question": "...", "answer": "..."}}, ...]
-- Zwróć TYLKO tablicę JSON, bez dodatkowego tekstu, bez markdown
-- Pytania i odpowiedzi w języku polskim
+- TYLKO tablica JSON
 - Dokładnie {count} fiszek
 
 Wygeneruj fiszki:"""
