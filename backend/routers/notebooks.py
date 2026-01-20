@@ -144,7 +144,8 @@ def delete_notebook(notebook_id: int, db: db_dependency):
         )
     from models import (
         NoteFolders, TestFolders, FlashcardSets, Flashcards, FlashcardReviews,
-        FlashcardSetFolders, PodcastFolders, Podcasts, NotebookMessages, Notifications, Tests, NotebookCollaborator, Notes
+        FlashcardSetFolders, PodcastFolders, Podcasts, NotebookMessages, Notifications,
+        Tests, TestQuestions, UserAnswers, NotebookCollaborator, Notes
     )
 
     try:
@@ -154,6 +155,14 @@ def delete_notebook(notebook_id: int, db: db_dependency):
         db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(PodcastFolders).filter(PodcastFolders.notebook_id == notebook_id).delete(synchronize_session=False)
 
+        # Delete tests -> test_questions -> user_answers (in correct order to avoid FK violations)
+        test_ids_subq = db.query(Tests.id).filter(Tests.notebook_id == notebook_id).subquery()
+        test_question_ids_subq = db.query(TestQuestions.id).filter(TestQuestions.test_id.in_(test_ids_subq)).subquery()
+        # delete user answers referencing test questions
+        db.query(UserAnswers).filter(UserAnswers.test_question_id.in_(test_question_ids_subq)).delete(synchronize_session=False)
+        # delete test questions
+        db.query(TestQuestions).filter(TestQuestions.test_id.in_(test_ids_subq)).delete(synchronize_session=False)
+        # delete tests and test folders
         db.query(Tests).filter(Tests.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(TestFolders).filter(TestFolders.notebook_id == notebook_id).delete(synchronize_session=False)
         
