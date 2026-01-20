@@ -11,32 +11,34 @@ from routers.ai import get_gemini_response
 from PyPDF2 import PdfReader
 import io
 from docx import Document
+import re
+from json import JSONDecodeError
 
 router = APIRouter(
     prefix="/flashcards",
     tags=["flashcards"]
 )
 
+
+def _try_loads(s: str):
+    """Robust json.loads that attempts to fix single backslashes often present in LaTeX."""
+    try:
+        return json.loads(s)
+    except JSONDecodeError:
+        try:
+            fixed = re.sub(r'(?<!\\)\\(?!\\)', r'\\\\', s)
+            return json.loads(fixed)
+        except JSONDecodeError:
+            return None
+
+
 def get_db():
     db = SessionLocal()
     try:
-        import re as _re
-        from json import JSONDecodeError as _JSONDecodeError
-
-        def _try_loads(s: str):
-            try:
-                return json.loads(s)
-            except _JSONDecodeError:
-                # Attempt to escape single backslashes that often appear in LaTeX (e.g. \int) which break JSON
-                try:
-                    fixed = _re.sub(r'(?<!\\\\)\\(?!\\\\)', r'\\\\', s)
-                    return json.loads(fixed)
-                except _JSONDecodeError:
-                    return None
-
         yield db
     finally:
         db.close()
+
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -586,10 +588,10 @@ async def generate_flashcards_from_file(
         if is_language_learning:
             prompt = f"""Stwórz dokładnie {count} fiszek do nauki języka obcego.
 
-INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
-{combined_content[:6000]}
+        INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
+        {combined_content[:12000]}
 
-ZASADY OBOWIĄZKOWE:
+        ZASADY OBOWIĄZKOWE:
 
 1. Jeśli materiał zawiera KONKRETNE SŁÓWKA (np. lista "dog - pies, cat - kot"):
    - Użyj TYLKO tych słówek z materiału
@@ -624,7 +626,7 @@ Wygeneruj fiszki:"""
             prompt = f"""Stwórz dokładnie {count} fiszek edukacyjnych o poziomie trudności: {difficulty}.
 
 MATERIAŁ ŹRÓDŁOWY/TEMAT:
-{combined_content[:6000]}
+{combined_content[:12000]}
 
 ZASADY OBOWIĄZKOWE:
 
