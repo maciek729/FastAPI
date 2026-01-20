@@ -20,6 +20,20 @@ router = APIRouter(
 def get_db():
     db = SessionLocal()
     try:
+        import re as _re
+        from json import JSONDecodeError as _JSONDecodeError
+
+        def _try_loads(s: str):
+            try:
+                return json.loads(s)
+            except _JSONDecodeError:
+                # Attempt to escape single backslashes that often appear in LaTeX (e.g. \int) which break JSON
+                try:
+                    fixed = _re.sub(r'(?<!\\\\)\\(?!\\\\)', r'\\\\', s)
+                    return json.loads(fixed)
+                except _JSONDecodeError:
+                    return None
+
         yield db
     finally:
         db.close()
@@ -166,19 +180,18 @@ def extract_flashcards_from_ai_response(ai_response: str, max_question_len: int 
     try:
         # Próba 1: Pełny poprawny JSON
         if ai_response.strip().startswith('['):
-            flashcards = json.loads(ai_response)
-            return validate_and_trim_flashcards(flashcards)
+            flashcards = _try_loads(ai_response)
+            if flashcards is not None:
+                return validate_and_trim_flashcards(flashcards)
 
         # Próba 2: Znajdź tablicę JSON w odpowiedzi
         start = ai_response.find('[')
         end = ai_response.rfind(']') + 1
         if start != -1 and end > start:
             json_str = ai_response[start:end]
-            try:
-                flashcards = json.loads(json_str)
+            flashcards = _try_loads(json_str)
+            if flashcards is not None:
                 return validate_and_trim_flashcards(flashcards)
-            except json.JSONDecodeError:
-                pass
 
         # Próba 3: Napraw ucięty JSON - znajdź ostatni kompletny obiekt
         if start != -1:
@@ -193,23 +206,55 @@ def extract_flashcards_from_ai_response(ai_response: str, max_question_len: int 
                 else:
                     json_str = json_str[:last_complete+2]
 
-                try:
-                    flashcards = json.loads(json_str)
-                    if len(flashcards) > 0:
-                        print(f"DEBUG: Naprawiono ucięty JSON, odzyskano {len(flashcards)} fiszek")
-                        return validate_and_trim_flashcards(flashcards)
-                except json.JSONDecodeError:
-                    pass
+                flashcards = _try_loads(json_str)
+                if flashcards is not None and len(flashcards) > 0:
+                    print(f"DEBUG: Naprawiono ucięty JSON, odzyskano {len(flashcards)} fiszek")
+                    return validate_and_trim_flashcards(flashcards)
 
         # Próba 4: Znajdź pojedynczy obiekt
         start = ai_response.find('{')
         end = ai_response.rfind('}') + 1
         if start != -1 and end > start:
             json_str = ai_response[start:end]
-            data = json.loads(json_str)
-            if "flashcards" in data:
-                return validate_and_trim_flashcards(data["flashcards"])
-            return validate_and_trim_flashcards([data])
+            data = _try_loads(json_str)
+            if data is not None:
+                if "flashcards" in data:
+                    return validate_and_trim_flashcards(data["flashcards"])
+                return validate_and_trim_flashcards([data])
+
+        # Próba 5: Użyj JSONDecoder aby wyciągnąć kolejne poprawne obiekty/struktury JSON
+        try:
+            from json import JSONDecoder, JSONDecodeError
+            decoder = JSONDecoder()
+            objs = []
+            idx = 0
+            length = len(ai_response)
+            # Find likely start positions for JSON structures
+            import re
+            starts = [m.start() for m in re.finditer(r"[\{\[]", ai_response)]
+            for start_pos in starts:
+                try:
+                    obj, end = decoder.raw_decode(ai_response, start_pos)
+                    objs.append(obj)
+                except JSONDecodeError:
+                    continue
+
+            # If we decoded any objects, pick the first list or collect objects
+            if objs:
+                # If first object is a list, use it
+                if isinstance(objs[0], list):
+                    return validate_and_trim_flashcards(objs[0])
+                # Otherwise, if we have multiple objects, flatten them
+                flattened = []
+                for o in objs:
+                    if isinstance(o, list):
+                        flattened.extend(o)
+                    elif isinstance(o, dict):
+                        flattened.append(o)
+                if flattened:
+                    return validate_and_trim_flashcards(flattened)
+        except Exception:
+            pass
 
         return []
     except Exception as e:
@@ -329,8 +374,8 @@ async def generate_flashcards(
 
         prompt = f"""Stwórz dokładnie {request.count} fiszek do nauki języka obcego o poziomie trudności: {request.difficulty}.
 
-INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
-{combined_content[:6000]}
+    INSTRUKCJA/TEMAT OD UŻYTKOWNIKA:
+    {combined_content[:12000]}
 
 POZIOM TRUDNOŚCI - {request.difficulty.upper()}:
 {difficulty_vocab_hints.get(request.difficulty, 'standardowy')}
@@ -374,8 +419,8 @@ Wygeneruj fiszki:"""
 
         prompt = f"""Stwórz dokładnie {request.count} fiszek edukacyjnych o poziomie trudności: {request.difficulty}.
 
-MATERIAŁ ŹRÓDŁOWY/TEMAT:
-{combined_content[:6000]}
+    MATERIAŁ ŹRÓDŁOWY/TEMAT:
+    {combined_content[:12000]}
 
 ZASADY OBOWIĄZKOWE:
 
@@ -429,11 +474,36 @@ Wygeneruj fiszki:"""
     response_text = ai_response.get("response", "") if isinstance(ai_response, dict) else ai_response
     flashcards_data = extract_flashcards_from_ai_response(response_text)
 
+    # If parsing failed, try once more with a strict prompt asking for ONLY a JSON array
     if not flashcards_data or len(flashcards_data) == 0:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI nie wygenerowało poprawnych fiszek. Odpowiedź: {response_text[:200]}"
+        print("DEBUG: Initial flashcard parsing failed — logging full AI response for debugging:")
+        print(response_text)
+
+        # Build a strict recovery prompt asking the model to return only a JSON array
+        recovery_prompt = (
+            "Twoja poprzednia odpowiedź nie zawierała poprawnego JSON-a. "
+            "Proszę odpowiedzieć TYLKO PRZEZ TABLICĘ JSON w postaci: ````json [ {\"question\": \"...\", \"answer\": \"...\"}, ... ] ````. "
+            "Nic poza tym (bez komentarzy ani markdown). Każde pole: 'question' i 'answer'. "
+            "Zachowaj format matematyczny dokładnie tak, jak proszono wcześniej (używaj LaTeXa w $...$ dla wzorów)."
         )
+
+        recovery_messages = [
+            {"role": "user", "content": recovery_prompt},
+        ]
+
+        retry_response = get_gemini_response(recovery_messages)
+        retry_text = retry_response.get("response", "") if isinstance(retry_response, dict) else retry_response
+        print("DEBUG: Retry AI response:")
+        print(retry_text)
+
+        flashcards_data = extract_flashcards_from_ai_response(retry_text)
+
+        if not flashcards_data or len(flashcards_data) == 0:
+            # Final failure — include more of AI response in error for debugging
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"AI nie wygenerowało poprawnych fiszek. Odpowiedź (pierwsze 1000 znaków): {response_text[:1000]}"
+            )
 
     new_note = Notes(
         user_id=request.user_id,
