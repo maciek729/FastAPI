@@ -882,12 +882,43 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
     const formatContent = (text) => {
         if (!text) return "";
-        
-        let formatted = text.replace(/\^(\w+)/g, '<sup>$1</sup>');
 
-        formatted = formatted.replace(/\_(\d+)/g, '<sub>$1</sub>');
+        // Split text into math and non-math parts to avoid corrupting LaTeX
+        const parts = [];
+        const mathRegex = /(\$\$[\s\S]*?\$\$|\$(?:[^$\n]|\\\$)+\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
+        let lastIndex = 0;
+        let match;
 
-        return formatted;
+        while ((match = mathRegex.exec(text)) !== null) {
+            const idx = match.index;
+            if (idx > lastIndex) parts.push({ type: 'text', content: text.slice(lastIndex, idx) });
+            parts.push({ type: 'math', content: match[0] });
+            lastIndex = mathRegex.lastIndex;
+        }
+        if (lastIndex < text.length) parts.push({ type: 'text', content: text.slice(lastIndex) });
+
+        const normalizeText = (s) => {
+            let out = s;
+            // simple superscript/subscript shorthand outside math
+            out = out.replace(/\^(\w+)/g, '<sup>$1</sup>');
+            out = out.replace(/\_(\d+)/g, '<sub>$1</sub>');
+
+            // Normalize escaped HTML tag sequences and space-split tags
+            try {
+                out = out.replace(/&lt;\s*\/\s*([a-zA-Z0-9]+)\s*&gt;/g, '</$1>');
+                out = out.replace(/&lt;\s*([a-zA-Z0-9]+)([\s\S]*?)&gt;/g, '<$1$2>');
+                out = out.replace(/<\s*\/\s*([a-zA-Z0-9]+)\s*>/g, '</$1>');
+                out = out.replace(/<\s*([a-zA-Z0-9]+)([^>]*)\s*>/g, '<$1$2>');
+                out = out.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            } catch (err) {
+                // ignore
+            }
+
+            return out;
+        };
+
+        // Reassemble, leaving math segments untouched
+        return parts.map(p => p.type === 'math' ? p.content : normalizeText(p.content)).join('');
     };
 
     return (

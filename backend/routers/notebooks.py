@@ -58,17 +58,7 @@ class AddCollaboratorRequest(BaseModel):
 
 @router.post("/create", status_code=status.HTTP_201_CREATED, response_model=NotebookOut)
 def create_notebook(request: CreateNotebookRequest, db: db_dependency):
-    existing_notebook = db.query(Notebooks).filter(
-        Notebooks.name == request.name,
-        Notebooks.created_by == request.created_by,
-        Notebooks.space_type == request.space_type
-    ).first()
-
-    if existing_notebook:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Notebook with this name already exists in this space."
-        )
+    # Allow multiple notebooks with the same name — uniqueness is not enforced.
 
     new_notebook = Notebooks(
         name=request.name,
@@ -145,12 +135,18 @@ def delete_notebook(notebook_id: int, db: db_dependency):
     from models import (
         NoteFolders, TestFolders, FlashcardSets, Flashcards, FlashcardReviews,
         FlashcardSetFolders, PodcastFolders, Podcasts, NotebookMessages, Notifications,
-        Tests, TestQuestions, UserAnswers, NotebookCollaborator, Notes
+        Tests, TestQuestions, UserAnswers, NotebookCollaborator, Notes, ChatReadStatus, StudyFiles
     )
 
     try:
         db.query(Notifications).filter(Notifications.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(NotebookMessages).filter(NotebookMessages.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # remove any chat read status entries for this notebook
+        db.query(ChatReadStatus).filter(ChatReadStatus.notebook_id == notebook_id).delete(synchronize_session=False)
+
+        # remove study files attached to this notebook
+        db.query(StudyFiles).filter(StudyFiles.notebook_id == notebook_id).delete(synchronize_session=False)
 
         db.query(Podcasts).filter(Podcasts.notebook_id == notebook_id).delete(synchronize_session=False)
         db.query(PodcastFolders).filter(PodcastFolders.notebook_id == notebook_id).delete(synchronize_session=False)
@@ -200,15 +196,7 @@ def update_notebook(notebook_id: int, request: UpdateNotebookRequest, db: db_dep
             detail="Notebook not found"
         )
 
-    existing_notebook = db.query(Notebooks).filter(
-        Notebooks.name == request.name,
-        Notebooks.id != notebook_id
-    ).first()
-    if existing_notebook:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Notebook with this name already exists."
-        )
+    # Allow renaming to a name that may already exist; do not enforce uniqueness.
 
     # Only update the fields provided for rename
     notebook.name = request.name
