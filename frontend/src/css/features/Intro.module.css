@@ -381,7 +381,7 @@
   }
 }
 
-/* Hero Carousel - Simplified */
+/* Hero Carousel - Simplified with Image Support */
 .introHeroCarousel {
   position: relative;
   width: 100%;
@@ -400,12 +400,42 @@
   border: 1px solid rgba(139, 92, 246, 0.1);
 }
 
+/* Kontener obrazu karuzeli - stały rozmiar */
 .introHeroImagePlaceholder {
-  background: #f8f9fd;
-  height: 480px;
-  border: 2px dashed rgba(139, 92, 246, 0.2);
   position: relative;
+  width: 100%;
+  height: 480px;
   overflow: hidden;
+  border-radius: 12px;
+  background: #f8f9fd;
+}
+
+/* Obraz karuzeli - dopasowany do kontenera */
+.introCarouselImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Gradient overlay dla lepszej widoczności tekstu - fioletowy gradient */
+.introCarouselGradientOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: linear-gradient(
+    to top,
+    rgba(88, 28, 135, 0.95) 0%,
+    rgba(109, 40, 217, 0.85) 20%,
+    rgba(124, 58, 237, 0.7) 40%,
+    rgba(139, 92, 246, 0.5) 60%,
+    rgba(139, 92, 246, 0.2) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .introHeroImagePlaceholder::before {
@@ -434,32 +464,31 @@
   display: none;
 }
 
+/* Informacje o slajdzie - nad gradientem */
 .introHeroSlideInfo {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2rem;
-  background: transparent;
+  padding: 2.5rem 2rem;
+  z-index: 2;
+  color: white;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .introHeroSlideTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white;
   margin-bottom: 0.5rem;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .introHeroSlideDesc {
-  font-size: 0.9375rem;
-  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1rem;
   line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .introHeroCarouselDots {
@@ -532,7 +561,7 @@
 
 /* Features Section - Clean Grid */
 .introFeatures {
-  padding: 6rem 2rem;
+  padding: 6rem 2rem 0.066rem 2rem;
   max-width: 1280px;
   margin: 0 auto;
   background: white;
@@ -1072,66 +1101,9 @@
   border-radius: 6px;
 }
 
-@media (max-width: 768px) {
-  .introCarouselWrapper {
-    gap: 1rem;
-  }
-
-  .introCarouselButton {
-    width: 44px;
-    height: 44px;
-  }
-
-  .introCarouselButton svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .introCarouselSlide {
-    padding: 2rem 1.5rem;
-    min-height: 350px;
-  }
-
-  .introCarouselImagePlaceholder {
-    min-height: 200px;
-  }
-
-  .introCarouselTitle {
-    font-size: 1.5rem;
-  }
-
-  .introCarouselDescription {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .introCarouselButton {
-    display: none;
-  }
-
-  .introCarouselSlide {
-    padding: 1.5rem;
-  }
-
-  .introHeroTitle {
-    font-size: 2rem;
-  }
-
-  .introHeroImagePlaceholder {
-    height: 200px;
-  }
-}
-
-@media (max-width: 768px) {
-  .introHeroTitle {
-    font-size: 2.25rem;
-  }
-}
-
 /* CTA Section - Clean & Focused */
 .introCta {
-  padding: 2rem 2rem 3rem;
+  padding: 2rem 2rem 0;
   background: white;
   width: 100%;
   position: relative;
@@ -1195,7 +1167,7 @@
   background: linear-gradient(135deg, #fdfeff 0%, #f8f9fd 100%);
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 1.5rem;
-  padding: 2.5rem 2rem;
+  padding: 0.066rem 2rem 0.05rem 2rem;
   text-align: center;
   opacity: 0;
   transform: translateY(20px);
@@ -1301,7 +1273,7 @@
 .introFooter {
   background: white;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
-  padding: 2rem 2rem;
+  padding: 0 2rem 2rem 2rem;
   width: 100%;
 }
 
@@ -1447,7 +1419,46 @@
   }
 
   .introHeroImagePlaceholder {
-    height: 280px;
+    height: 300px;
+  }
+  
+  .introHeroSlideTitle {
+    font-size: 1.25rem;
+  }
+  
+  .introHeroSlideDesc {
+    font-size: 0.9rem;
+  }
+
+  .introCarouselWrapper {
+    gap: 1rem;
+  }
+
+  .introCarouselButton {
+    width: 44px;
+    height: 44px;
+  }
+
+  .introCarouselButton svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .introCarouselSlide {
+    padding: 2rem 1.5rem;
+    min-height: 350px;
+  }
+
+  .introCarouselImagePlaceholder {
+    min-height: 200px;
+  }
+
+  .introCarouselTitle {
+    font-size: 1.5rem;
+  }
+
+  .introCarouselDescription {
+    font-size: 1rem;
   }
 }
 
@@ -1471,6 +1482,36 @@
   }
 
   .introHeroImagePlaceholder {
-    height: 220px;
+    height: 250px;
+  }
+  
+  .introHeroSlideInfo {
+    padding: 1rem;
+  }
+  
+  .introHeroSlideTitle {
+    font-size: 1.1rem;
+  }
+  
+  .introHeroSlideDesc {
+    font-size: 0.85rem;
+  }
+
+  .introCarouselButton {
+    display: none;
+  }
+
+  .introCarouselSlide {
+    padding: 1.5rem;
+  }
+
+  .introHeroTitle {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .introHeroTitle {
+    font-size: 2.25rem;
   }
 }
