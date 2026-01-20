@@ -585,17 +585,33 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         };
 
         const formattedContent = parseAndFormatText(text);
-        
+
+        // Create a temporary marker wrapper so we can scroll/highlight the newly inserted content
+        const marker = document.createElement('div');
+        const markerId = `ai-insert-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+        marker.setAttribute('data-ai-insert', markerId);
+        marker.style.display = 'block';
+        marker.style.background = 'rgba(250,204,21,0.12)';
+        marker.style.transition = 'background-color 0.35s ease, box-shadow 0.35s ease';
+        marker.style.padding = '0.125rem 0.125rem';
+        marker.style.borderRadius = '6px';
+
         let inserted = false;
+
+        const insertIntoMarker = () => {
+            while (formattedContent.firstChild) {
+                marker.appendChild(formattedContent.firstChild);
+            }
+        };
 
         if (aiInsertRangeRef.current && editorRef.current && editorRef.current.contains(aiInsertRangeRef.current.startContainer)) {
             try {
                 const range = aiInsertRangeRef.current.cloneRange();
                 range.deleteContents();
-                while (formattedContent.firstChild) {
-                    range.insertNode(formattedContent.firstChild);
-                }
-                range.collapse(false);
+                range.insertNode(marker);
+                insertIntoMarker();
+                range.setStartAfter(marker);
+                range.collapse(true);
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(range);
@@ -605,9 +621,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             }
         } else {
             if (selectedTextContext && selectedTextContext.length > 0) {
-                while (formattedContent.firstChild) {
-                    editorRef.current?.appendChild(formattedContent.firstChild);
-                }
+                editorRef.current?.appendChild(marker);
+                insertIntoMarker();
                 inserted = true;
             } else {
                 const selection = window.getSelection();
@@ -615,10 +630,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     try {
                         const range = selection.getRangeAt(0);
                         range.deleteContents();
-                        while (formattedContent.firstChild) {
-                            range.insertNode(formattedContent.firstChild);
-                        }
-                        range.collapse(false);
+                        range.insertNode(marker);
+                        insertIntoMarker();
+                        range.setStartAfter(marker);
+                        range.collapse(true);
                         selection.removeAllRanges();
                         selection.addRange(range);
                         inserted = true;
@@ -630,17 +645,29 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         }
 
         if (!inserted) {
-            while (formattedContent.firstChild) {
-                editorRef.current?.appendChild(formattedContent.firstChild);
-            }
+            editorRef.current?.appendChild(marker);
+            insertIntoMarker();
         }
 
+        // Update state and UI
         setContent(editorRef.current?.innerHTML || '');
         setShowAiAssistant(false);
         toast.success(t('aiAssistant.insertSuccess'));
         setIsDirty(true);
         aiInsertRangeRef.current = null;
         setSelectedTextContext('');
+
+        // Scroll marker into view and apply a short highlight animation
+        try {
+            marker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            marker.style.boxShadow = '0 8px 24px rgba(139,92,246,0.12)';
+            setTimeout(() => {
+                marker.style.background = 'transparent';
+                marker.style.boxShadow = 'none';
+            }, 3000);
+        } catch (e) {
+            // ignore scrolling errors
+        }
     };
 
     const handleImageUpload = (e) => {

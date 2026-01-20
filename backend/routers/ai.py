@@ -24,6 +24,18 @@ GEMINI_MODELS = [
 ]
 
 STYLE_INSTRUCTIONS = {
+    "concise": (
+        "Odpowiadaj zwięźle i rzeczowo — około 5-6 zdań. "
+        "Nie rozciągaj odpowiedzi, ale daj wystarczająco informacji, aby użytkownik zrozumiał odpowiedź. "
+        "ZASADY FORMATOWANIA MATEMATYKI (BARDZO WAŻNE): "
+        "1. Dla potęg i indeksów dolnych oraz argumentów BEZWZGLĘDNIE UŻYWAJ TYLKO HTML: "
+        "Pisz 'E = mc<sup>2</sup>' (HTML), a NIE '$E = mc^2$' (LaTeX). "
+        "Pisz 'H<sub>2</sub>O' (HTML), a NIE '$H_2O$' (LaTeX). "
+        "Pisz 'a', a nie $a$. "
+        "2. Dla skomplikowanych wzorów (ułamki, całki, sumy) używaj standardowego LaTeXa: "
+        "np. $\\sum_{i=0}^{n}$. "
+        "Stosuj bloki kodu tam gdzie to zasadne."
+    ),
     "brief": (
         "Odpowiadaj BARDZO KRÓTKO i ZWIĘŹLE (max 2-3 zdania). "
         "ZASADY FORMATOWANIA MATEMATYKI (BARDZO WAŻNE): "

@@ -54,7 +54,8 @@ export default function AiAssistant({ onClose, onInsert, selectedText = '' }) {
                 },
                 body: JSON.stringify({
                     message: prompt.trim(),
-                    conversation: []
+                    conversation: [],
+                    response_style: 'concise'
                 })
             });
 
