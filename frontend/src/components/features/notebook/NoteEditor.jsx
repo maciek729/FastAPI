@@ -585,17 +585,33 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         };
 
         const formattedContent = parseAndFormatText(text);
-        
+
+        // Create a temporary marker wrapper so we can scroll/highlight the newly inserted content
+        const marker = document.createElement('div');
+        const markerId = `ai-insert-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+        marker.setAttribute('data-ai-insert', markerId);
+        marker.style.display = 'block';
+        marker.style.background = 'rgba(250,204,21,0.12)';
+        marker.style.transition = 'background-color 0.35s ease, box-shadow 0.35s ease';
+        marker.style.padding = '0.125rem 0.125rem';
+        marker.style.borderRadius = '6px';
+
         let inserted = false;
+
+        const insertIntoMarker = () => {
+            while (formattedContent.firstChild) {
+                marker.appendChild(formattedContent.firstChild);
+            }
+        };
 
         if (aiInsertRangeRef.current && editorRef.current && editorRef.current.contains(aiInsertRangeRef.current.startContainer)) {
             try {
                 const range = aiInsertRangeRef.current.cloneRange();
                 range.deleteContents();
-                while (formattedContent.firstChild) {
-                    range.insertNode(formattedContent.firstChild);
-                }
-                range.collapse(false);
+                range.insertNode(marker);
+                insertIntoMarker();
+                range.setStartAfter(marker);
+                range.collapse(true);
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(range);
@@ -605,9 +621,8 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
             }
         } else {
             if (selectedTextContext && selectedTextContext.length > 0) {
-                while (formattedContent.firstChild) {
-                    editorRef.current?.appendChild(formattedContent.firstChild);
-                }
+                editorRef.current?.appendChild(marker);
+                insertIntoMarker();
                 inserted = true;
             } else {
                 const selection = window.getSelection();
@@ -615,10 +630,10 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
                     try {
                         const range = selection.getRangeAt(0);
                         range.deleteContents();
-                        while (formattedContent.firstChild) {
-                            range.insertNode(formattedContent.firstChild);
-                        }
-                        range.collapse(false);
+                        range.insertNode(marker);
+                        insertIntoMarker();
+                        range.setStartAfter(marker);
+                        range.collapse(true);
                         selection.removeAllRanges();
                         selection.addRange(range);
                         inserted = true;
@@ -630,17 +645,29 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
         }
 
         if (!inserted) {
-            while (formattedContent.firstChild) {
-                editorRef.current?.appendChild(formattedContent.firstChild);
-            }
+            editorRef.current?.appendChild(marker);
+            insertIntoMarker();
         }
 
+        // Update state and UI
         setContent(editorRef.current?.innerHTML || '');
         setShowAiAssistant(false);
         toast.success(t('aiAssistant.insertSuccess'));
         setIsDirty(true);
         aiInsertRangeRef.current = null;
         setSelectedTextContext('');
+
+        // Scroll marker into view and apply a short highlight animation
+        try {
+            marker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            marker.style.boxShadow = '0 8px 24px rgba(139,92,246,0.12)';
+            setTimeout(() => {
+                marker.style.background = 'transparent';
+                marker.style.boxShadow = 'none';
+            }, 3000);
+        } catch (e) {
+            // ignore scrolling errors
+        }
     };
 
     const handleImageUpload = (e) => {
@@ -855,12 +882,43 @@ export default function NoteEditor({ note, onClose, onSave, onDelete, userData, 
 
     const formatContent = (text) => {
         if (!text) return "";
-        
-        let formatted = text.replace(/\^(\w+)/g, '<sup>$1</sup>');
 
-        formatted = formatted.replace(/\_(\d+)/g, '<sub>$1</sub>');
+        // Split text into math and non-math parts to avoid corrupting LaTeX
+        const parts = [];
+        const mathRegex = /(\$\$[\s\S]*?\$\$|\$(?:[^$\n]|\\\$)+\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
+        let lastIndex = 0;
+        let match;
 
-        return formatted;
+        while ((match = mathRegex.exec(text)) !== null) {
+            const idx = match.index;
+            if (idx > lastIndex) parts.push({ type: 'text', content: text.slice(lastIndex, idx) });
+            parts.push({ type: 'math', content: match[0] });
+            lastIndex = mathRegex.lastIndex;
+        }
+        if (lastIndex < text.length) parts.push({ type: 'text', content: text.slice(lastIndex) });
+
+        const normalizeText = (s) => {
+            let out = s;
+            // simple superscript/subscript shorthand outside math
+            out = out.replace(/\^(\w+)/g, '<sup>$1</sup>');
+            out = out.replace(/\_(\d+)/g, '<sub>$1</sub>');
+
+            // Normalize escaped HTML tag sequences and space-split tags
+            try {
+                out = out.replace(/&lt;\s*\/\s*([a-zA-Z0-9]+)\s*&gt;/g, '</$1>');
+                out = out.replace(/&lt;\s*([a-zA-Z0-9]+)([\s\S]*?)&gt;/g, '<$1$2>');
+                out = out.replace(/<\s*\/\s*([a-zA-Z0-9]+)\s*>/g, '</$1>');
+                out = out.replace(/<\s*([a-zA-Z0-9]+)([^>]*)\s*>/g, '<$1$2>');
+                out = out.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            } catch (err) {
+                // ignore
+            }
+
+            return out;
+        };
+
+        // Reassemble, leaving math segments untouched
+        return parts.map(p => p.type === 'math' ? p.content : normalizeText(p.content)).join('');
     };
 
     return (

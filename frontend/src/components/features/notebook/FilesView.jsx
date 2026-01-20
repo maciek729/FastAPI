@@ -63,9 +63,9 @@ export default function FilesView({ details, userData, refreshNotebook, highligh
             translation = translation?.[k];
             if (!translation) return key;
         }
-        if (typeof translation === 'string' && Object.keys(params).length > 0) {
-            return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] || `{${k}}`);
-        }
+            if (typeof translation === 'string' && Object.keys(params).length > 0) {
+                return translation.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
+            }
         return translation || key;
     };
 
