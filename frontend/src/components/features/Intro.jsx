@@ -5,6 +5,11 @@ import styles from '../../css/features/Intro.module.css';
 import { LanguageContext } from "../../translations/LanguageContext";
 import translations from "../../translations/translation.json";
 import logoLight from "../layout/logolight.png";
+import logo1 from "../layout/1.png";
+import logo3 from "../layout/3.png";
+import logo4 from "../layout/4.png";
+import logo5 from "../layout/5.png";
+import logo6 from "../layout/6.png";
 
 const Intro = () => {
   const navigate = useNavigate();
@@ -12,6 +17,8 @@ const Intro = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState({});
   const { language } = useContext(LanguageContext);
+
+  const carouselImages = [logo1, logo3, logo4, logo5, logo6];
 
   const t = (key, params = {}) => {
     const keys = key.split('.');
@@ -133,7 +140,6 @@ const Intro = () => {
       <header className={styles.introHeader}>
         <div className={styles.introNav}>
           <div className={styles.introLogo}>
-            {/* <Sparkles className={styles.introLogoIcon} /> */}
             <img src={logoLight} alt="zdAI to logo" className={styles.logoImg} />
             <span className={styles.introLogoText}>{t('intro.logo')}</span>
           </div>
@@ -205,7 +211,12 @@ const Intro = () => {
               <div className={styles.introHeroCarouselContent}>
                 <div className={styles.introHeroCarouselSlide}>
                   <div className={styles.introHeroImagePlaceholder}>
-                    <Sparkles size={40} className={styles.introHeroPlaceholderIcon} />
+                    <img 
+                      src={carouselImages[currentSlide]} 
+                      alt={slides[currentSlide]?.title || `Slide ${currentSlide + 1}`}
+                      className={styles.introCarouselImage}
+                    />
+                    <div className={styles.introCarouselGradientOverlay}></div>
                   </div>
                   <div className={styles.introHeroSlideInfo}>
                     <h3 className={styles.introHeroSlideTitle}>{slides[currentSlide]?.title}</h3>
