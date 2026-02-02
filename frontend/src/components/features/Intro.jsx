@@ -16,6 +16,7 @@ const Intro = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState({});
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const { language } = useContext(LanguageContext);
 
   const carouselImages = [logo1, logo3, logo4, logo5, logo6];
@@ -307,7 +308,7 @@ const Intro = () => {
             <div className={styles.introFooterNav}>
               <a href="#" className={styles.introFooterLink}>{t('intro.footer.terms')}</a>
               <a href="#" className={styles.introFooterLink}>{t('intro.footer.privacy')}</a>
-              <a href="#" className={styles.introFooterLink}>{t('intro.footer.contact')}</a>
+              <a href="#" className={styles.introFooterLink} onClick={(e) => { e.preventDefault(); setIsContactModalOpen(true); }}>{t('intro.footer.contact')}</a>
             </div>
             <div className={styles.introFooterCopyright}>
               {t('intro.footer.copyright')}
@@ -315,6 +316,22 @@ const Intro = () => {
           </div>
         </div>
       </footer>
+
+      {isContactModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsContactModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Kontakt</h3>
+              <button className={styles.modalClose} onClick={() => setIsContactModalOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <p>Strona została wykonana w ramach Zespołowego Projektu Informatycznego na UKW.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
