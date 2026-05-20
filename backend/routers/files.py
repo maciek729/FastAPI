@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import StudyFiles, Notebooks
 from dotenv import load_dotenv
-from supabase import create_client, Client
 from pydantic import BaseModel
 
 load_dotenv()
@@ -16,12 +15,6 @@ router = APIRouter(
     prefix="/files",
     tags=["files"]
 )
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-SUPABASE_BUCKET = "study-files"
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- DB Dependency ---
 def get_db():
@@ -70,21 +63,24 @@ async def upload_file(
     try:
         file_content = await file.read()
         file_ext = file.filename.split(".")[-1]
-        unique_filename = f"{user_id}/{notebook_id}/{uuid.uuid4()}.{file_ext}"
         
-        supabase.storage.from_(SUPABASE_BUCKET).upload(
-            path=unique_filename,
-            file=file_content,
-            file_options={"content-type": file.content_type}
-        )
+        notebook_folder = f"uploads/study-files/{notebook_id}"
+        os.makedirs(notebook_folder, exist_ok=True)
         
-        file_url = supabase.storage.from_(SUPABASE_BUCKET).get_public_url(unique_filename)
+        unique_filename = f"{uuid.uuid4()}.{file_ext}"
+        storage_path = f"{notebook_folder}/{unique_filename}"
+        
+        with open(storage_path, "wb") as buffer:
+            buffer.write(file_content)
+        
+        base_url = os.getenv("API_BASE_URL", "http://localhost:8000")
+        file_url = f"{base_url}/{storage_path}"
 
         new_file = StudyFiles(
             notebook_id=notebook_id,
             user_id=user_id,
             file_name=file.filename,
-            file_path=unique_filename,
+            file_path=storage_path,
             file_url=file_url,
             file_type=file.content_type,
             file_size=len(file_content)
@@ -119,7 +115,8 @@ def delete_file(file_id: int, db: db_dependency):
         raise HTTPException(status_code=404, detail="File not found")
 
     try:
-        supabase.storage.from_(SUPABASE_BUCKET).remove([file_record.file_path])
+        if file_record.file_path and os.path.exists(file_record.file_path):
+            os.remove(file_record.file_path)
         
         db.delete(file_record)
         db.commit()
