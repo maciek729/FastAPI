@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: myapp-db
+    restart: always
+    environment:
+      POSTGRES_USER: zdaito_admin
+      POSTGRES_PASSWORD: BardzoLubiePl@cki12 
+      POSTGRES_DB: zdaito_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build: ./backend
     container_name: myapp-backend
@@ -9,6 +22,10 @@ services:
       - "8001:8000"
     env_file:
       - ./backend/.env 
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/app/uploads
 
   frontend:
     build: ./frontend
@@ -18,3 +35,6 @@ services:
       - "3001:80" 
     depends_on:
       - backend
+
+volumes:
+  postgres_data:

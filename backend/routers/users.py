@@ -123,24 +123,25 @@ async def upload_avatar(
     try:
         contents = await file.read()
         
-        bucket_name = "pictures" 
+        storage_path = f"uploads/avatars/{filename}" 
         
-        supabase.storage.from_(bucket_name).upload(
-            path=storage_path,
-            file=contents,
-            file_options={"content-type": file.content_type}
-        )
+        with open(storage_path, "wb") as buffer:
+            buffer.write(contents)
 
-        public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
+        base_url = os.getenv("API_BASE_URL", "http://localhost:8000") 
+        public_url = f"{base_url}/uploads/avatars/{filename}"
 
         user_model = db.query(Users).filter(Users.id == user.get('id')).first()
         
         if user_model.avatar_url:
             try:
-                old_path = user_model.avatar_url.split(f"{bucket_name}/")[-1]
-                supabase.storage.from_(bucket_name).remove([old_path])
-            except:
-                pass
+                old_filename = user_model.avatar_url.split("/")[-1]
+                old_path = f"uploads/avatars/{old_filename}"
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+            except Exception as e:
+                print(f"Nie udało się usunąć starego avatara: {e}")
+
         user_model.avatar_url = public_url
         db.add(user_model)
         db.commit()
@@ -162,10 +163,11 @@ async def delete_avatar(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=404, detail="Użytkownik nie posiada zdjęcia profilowego")
 
     try:
-        bucket_name = "pictures"
-        file_path = user_model.avatar_url.split(f"{bucket_name}/")[-1]
+        filename = user_model.avatar_url.split("/")[-1]
+        file_path = f"uploads/avatars/{filename}"
 
-        supabase.storage.from_(bucket_name).remove([file_path])
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
         user_model.avatar_url = None
         db.add(user_model)

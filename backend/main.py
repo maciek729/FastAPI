@@ -1,5 +1,7 @@
+import os
 from click import group
 from fastapi import FastAPI, Request, status
+from fastapi.staticfiles import StaticFiles
 from models import Base
 from database import engine
 from routers import contact, auth, index, admin, users, ai, notebooks, notes, tests, flashcards, folders , chat_ws, notifications, files, note_collaboration
@@ -8,6 +10,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import podcasts
 
 app = FastAPI()
+
+os.makedirs("uploads/avatars", exist_ok=True)
+os.makedirs("uploads/study-files", exist_ok=True)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 Base.metadata.create_all(bind=engine)
 
