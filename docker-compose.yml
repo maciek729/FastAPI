@@ -5,10 +5,8 @@ services:
     image: postgres:16-alpine
     container_name: myapp-db
     restart: always
-    environment:
-      POSTGRES_USER: zdaito_admin
-      POSTGRES_PASSWORD: BardzoLubiePl@cki12 
-      POSTGRES_DB: zdaito_db
+    env_file:
+      - ./backend/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -35,6 +33,15 @@ services:
       - "3001:80" 
     depends_on:
       - backend
+
+  adminer:
+    image: adminer
+    container_name: myapp-adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
 
 volumes:
   postgres_data:
