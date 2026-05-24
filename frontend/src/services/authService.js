@@ -1,4 +1,5 @@
 import ENDPOINTS from "../api/endpoints";
+import { throwApiError } from "./apiError";
 
 export const VerifyEmail = async (token) => {
   const res = await fetch(ENDPOINTS.AUTH.VERIFY(token), {
@@ -33,6 +34,11 @@ export const RegisterUser = async (user) => {
 
   const data = await res.json();
   if (!res.ok) {
+    if (typeof data?.detail === 'object') {
+      const error = new Error(data.detail?.message || "Rejestracja nie powiodła się");
+      error.code = data.detail?.error || null;
+      throw error;
+    }
     throw new Error(data.detail || "Rejestracja nie powiodła się");
   }
 

@@ -10,7 +10,8 @@ import {
     requestPasswordReset,
     uploadAvatar,
     deleteAvatar,
-    archiveUserAccount
+    archiveUserAccount,
+    fetchUserCredits
 } from '../../../../services/userService';
 
 const getCookie = (name) => {
@@ -34,6 +35,7 @@ export default function UserSettings({ userData }) {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [showSavedMessage, setShowSavedMessage] = useState(false);
     const [pendingChanges, setPendingChanges] = useState({});
+    const [creditsData, setCreditsData] = useState(null);
 
     const t = (key, params = {}) => {
         const keys = key.split('.');
@@ -68,6 +70,21 @@ export default function UserSettings({ userData }) {
             return () => clearTimeout(timer);
         }
     }, [showSavedMessage]);
+
+    useEffect(() => {
+        const loadCredits = async () => {
+            const token = getCookie('access_token');
+            if (!token) return;
+            try {
+                const data = await fetchUserCredits(token);
+                setCreditsData(data);
+            } catch {
+                setCreditsData(null);
+            }
+        };
+
+        loadCredits();
+    }, []);
 
     const handleAvatarSaveFromModal = (croppedFile) => {
         setSelectedAvatarFile(croppedFile);
@@ -235,6 +252,26 @@ export default function UserSettings({ userData }) {
                         <div className={styles.userAvatar} onClick={() => setIsAvatarModalOpen(true)}>
                             {renderAvatar()}
                         </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <div className={styles.sectionOption}>
+                        <div className={styles.textWrapper}>
+                            <label className={styles.sectionTitle}>
+                                {language === 'pl' ? 'Kredyty AI' : 'AI Credits'}
+                            </label>
+                            <label className={styles.optionLabel}>
+                                {creditsData
+                                    ? `${creditsData.used}/${creditsData.quota} (${creditsData.used_percent}%) - ${language === 'pl' ? 'Pozostało' : 'Remaining'}: ${creditsData.remaining}`
+                                    : (language === 'pl' ? 'Nie udało się pobrać stanu kredytów.' : 'Unable to load credits usage.')}
+                            </label>
+                        </div>
+                        {creditsData && (
+                            <div className={styles.creditPill}>
+                                {creditsData.remaining}
+                            </div>
+                        )}
                     </div>
                 </div>
 

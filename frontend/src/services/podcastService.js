@@ -1,9 +1,9 @@
 import ENDPOINTS from "../api/endpoints";
+import { throwApiError } from "./apiError";
 
 const handleResponse = async (response) => {
     if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({ detail: 'Nieznany błąd serwera' }));
-        throw new Error(errorBody.detail || "Wystąpił błąd");
+        await throwApiError(response, "Wystąpił błąd");
     }
     return response.json();
 };

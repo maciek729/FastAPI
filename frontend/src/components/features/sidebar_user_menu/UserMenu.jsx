@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Settings, User, Palette, HelpCircle, Bell } from "lucide-react";
+import { Settings, User, Palette, HelpCircle, Bell, Shield } from "lucide-react";
 import styles from "../../../css/layout/SidebarFooter.module.css";
 import { LanguageContext } from "../../../translations/LanguageContext";
 import translations from "../../../translations/translation.json";
@@ -59,6 +59,14 @@ const UserMenu = ({ isCollapsed = false, onGoToSection, onClose, userData, isMob
             icon: HelpCircle,
         }
     ];
+
+    if (userData?.role === 'admin') {
+        menuItems.splice(3, 0, {
+            id: 'admin_quota',
+            label: language === 'pl' ? 'Panel limitow AI' : 'AI Quota Panel',
+            icon: Shield,
+        });
+    }
 
     useEffect(() => {
         const checkNotifications = async () => {

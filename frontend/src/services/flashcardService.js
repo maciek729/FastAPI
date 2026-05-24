@@ -1,4 +1,5 @@
 import ENDPOINTS from '../api/endpoints';
+import { throwApiError } from './apiError';
 
 export const getFlashcardSets = async (notebookId) => {
   const response = await fetch(ENDPOINTS.FLASHCARDS.LIST(notebookId), {
@@ -23,7 +24,7 @@ export const generateFlashcards = async (data) => {
     credentials: 'include',
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to generate flashcards');
+  if (!response.ok) await throwApiError(response, 'Failed to generate flashcards');
   return await response.json();
 };
 
@@ -33,7 +34,7 @@ export const generateFlashcardsFromFile = async (formData) => {
     credentials: 'include',
     body: formData,
   });
-  if (!response.ok) throw new Error('Failed to generate flashcards from file');
+  if (!response.ok) await throwApiError(response, 'Failed to generate flashcards from file');
   return await response.json();
 };
 

@@ -12,6 +12,7 @@ from passlib.context import CryptContext
 import os
 import uuid
 from datetime import datetime
+from quota import WARNING_THRESHOLDS
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -46,6 +47,31 @@ async def get_user(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail='Authentication Failed')
     return db.query(Users).filter(Users.id == user.get('id')).first()
+
+
+@router.get('/credits', status_code=status.HTTP_200_OK)
+async def get_user_credits(user: user_dependency, db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Authentication Failed')
+
+    user_model = db.query(Users).filter(Users.id == user.get('id')).first()
+    if user_model is None:
+        raise HTTPException(status_code=404, detail='User not found')
+
+    quota = user_model.monthly_quota_credits or 0
+    used = user_model.monthly_credits_used or 0
+    remaining = max(quota - used, 0)
+    used_percent = int((used / quota) * 100) if quota > 0 else 0
+
+    return {
+        "quota": quota,
+        "used": used,
+        "remaining": remaining,
+        "used_percent": used_percent,
+        "last_quota_warning_pct": user_model.last_quota_warning_pct,
+        "quota_reset_at": user_model.quota_reset_at,
+        "warning_thresholds": list(WARNING_THRESHOLDS),
+    }
 
 
 @router.put("/password", status_code=status.HTTP_204_NO_CONTENT)

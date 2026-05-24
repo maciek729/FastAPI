@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from supabase import create_client, Client
+from quota import preflight_quota_check, commit_quota_charge, log_quota_failure
 
 load_dotenv()
 
@@ -82,6 +83,7 @@ class PodcastResponse(BaseModel):
     folder_id: Optional[int] = None
     is_pinned: bool = False
     grid_position: Optional[int] = 0
+    quota: Optional[dict] = None
 
     class Config:
         from_attributes = True
@@ -188,6 +190,8 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     if not api_key:
         raise HTTPException(status_code=500, detail="Brak klucza API Gemini")
 
+    quota_context = preflight_quota_check(db, request.user_id, "podcast", "/podcasts/generate")
+
     context_text = ""
     # tutaj wiki to dodałem, bo wcześniej mi nie działało, gdy nie załączałem notatek
     if request.note_ids and len(request.note_ids) > 0:
@@ -198,6 +202,7 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     try:
         script = create_script(request.topic, context_text, api_key)
     except Exception as e:
+        log_quota_failure(db, quota_context, f"Script generation failed: {str(e)[:160]}")
         print(f"Error Script: {e}")
         raise HTTPException(status_code=500, detail=f"Błąd AI (Scenariusz): {str(e)}")
 
@@ -205,6 +210,7 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
         file_url, storage_path = generate_and_upload_audio(script, api_key)
         
     except Exception as e:
+        log_quota_failure(db, quota_context, f"Audio generation failed: {str(e)[:160]}")
         print(f"Error Audio/Upload: {e}")
         raise HTTPException(status_code=500, detail=f"Błąd generowania/uploadu audio: {str(e)}")
 
@@ -221,7 +227,20 @@ async def generate_podcast(request: PodcastCreateRequest, db: db_dependency):
     db.add(new_podcast)
     db.commit()
     db.refresh(new_podcast)
-    return new_podcast
+
+    quota_state = commit_quota_charge(db, quota_context)
+
+    return PodcastResponse(
+        id=new_podcast.id,
+        title=new_podcast.title,
+        file_url=new_podcast.file_url,
+        created_at=new_podcast.created_at,
+        script_content=new_podcast.script_content,
+        folder_id=new_podcast.folder_id,
+        is_pinned=new_podcast.is_pinned,
+        grid_position=new_podcast.grid_position,
+        quota=quota_state,
+    )
 
 @router.get("/list", response_model=List[PodcastResponse])
 async def list_podcasts(notebook_id: int, db: db_dependency):

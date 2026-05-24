@@ -1,13 +1,17 @@
-from fastapi import APIRouter, HTTPException, File, UploadFile
+from fastapi import APIRouter, HTTPException, File, UploadFile, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
+from typing import Annotated
 import os
 import base64
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from datetime import datetime
+from sqlalchemy.orm import Session
+from database import SessionLocal
+from quota import preflight_quota_check, commit_quota_charge, log_quota_failure
 from .notes import markdown_to_html
 
 load_dotenv()
@@ -84,10 +88,22 @@ else:
         print(f"[ERROR] Błąd inicjalizacji klienta Gemini: {e}")
 
 class ChatMessage(BaseModel):
+    user_id: int
     message: str
     conversation: list[dict] = []
     api_key: Optional[str] = None
     response_style: Optional[str] = "balanced"
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+db_dependency = Annotated[Session, Depends(get_db)]
 
 def get_gemini_response(messages: list, files: list = None, tmp_client=None, response_style: str = "balanced") -> dict:    
     global last_used_model, last_model_switch_date
@@ -255,7 +271,7 @@ async def clear_files():
     }
 
 @router.post("/chat", response_class=JSONResponse)
-async def chat_endpoint(chat_data: ChatMessage):
+async def chat_endpoint(chat_data: ChatMessage, db: db_dependency):
     messages = chat_data.conversation.copy()
     messages.append({"role": "user", "content": chat_data.message})
     
@@ -271,7 +287,12 @@ async def chat_endpoint(chat_data: ChatMessage):
             return JSONResponse(status_code=400, content={"status": "error", "response": "Invalid API key provided."})
 
     use_client = local_client or client
+    quota_context = None
     if use_client:
+        # Shared quota applies only to requests that use server-side Gemini key.
+        if not local_client:
+            quota_context = preflight_quota_check(db, chat_data.user_id, "chat", "/ai/chat")
+
         response_data = get_gemini_response(
             messages, 
             current_session_files, 
@@ -281,11 +302,18 @@ async def chat_endpoint(chat_data: ChatMessage):
         response_text = response_data.get("response", "")
         model_used = response_data.get("model_used", "unknown")
         response_style_used = response_data.get("response_style", response_style)
+
+        quota_state = None
+        if quota_context and response_data.get("status") == "success":
+            quota_state = commit_quota_charge(db, quota_context)
+        elif quota_context and response_data.get("status") != "success":
+            log_quota_failure(db, quota_context, response_text[:180] if response_text else "Gemini request failed", commit=True)
     else:
         response_data = get_fallback_response(chat_data.message)
         response_text = response_data.get("response", "")
         model_used = "fallback"
         response_style_used = response_style
+        quota_state = None
 
     # response_text = markdown_to_html(response_text)
 
@@ -300,7 +328,8 @@ async def chat_endpoint(chat_data: ChatMessage):
         "conversation": updated_conversation,
         "files_used": len(current_session_files) > 0,
         "model_used": model_used,
-        "response_style": response_style_used 
+        "response_style": response_style_used,
+        "quota": quota_state,
     }
 
 @router.post("/reset_session", response_class=JSONResponse)

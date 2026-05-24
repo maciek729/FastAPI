@@ -50,7 +50,10 @@ function Register() {
     } catch (err) {
       if (err.message === "NetworkError when attempting to fetch resource." || err.message === "Failed to fetch") {
         setError(t("auth.register.accountExists") || "Błąd połączenia z serwerem. Spróbuj ponownie później.");
-      } 
+      }
+      else if (err.code === "seat_limit_reached") {
+        setError(err.message || "Rejestracja jest chwilowo zamknięta - osiągnięto limit użytkowników.");
+      }
       else {
         setError(t("auth.register.errorGeneric") || t("auth.login.errorGeneric") || "Wystąpił błąd rejestracji.");
       }

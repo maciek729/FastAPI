@@ -173,6 +173,20 @@ export default function Settings({userData, onGoToSection}) {
                         <button className={styles.optionButton} onClick={()=>onGoToSection('notifications')}>{t('settings.manage')}</button>
                     </div>
                 </div>
+
+                {userData?.role === 'admin' && (
+                    <div className={styles.section}>
+                        <div className={styles.sectionOption}>
+                            <div className={styles.textWrapper}>
+                                <label className={styles.sectionTitle}>{language === 'pl' ? 'Panel limitow AI' : 'AI Quota Panel'}</label>
+                                <label className={styles.optionLabel}>{language === 'pl' ? 'Podglad wykorzystania kredytow i logow AI.' : 'Monitor credits usage and AI quota logs.'}</label>
+                            </div>
+                            <button className={styles.optionButton} onClick={() => onGoToSection('admin_quota')}>
+                                {t('settings.manage')}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Komunikaty */}

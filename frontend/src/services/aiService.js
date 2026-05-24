@@ -1,4 +1,5 @@
 import ENDPOINTS from '../api/endpoints';
+import { throwApiError } from './apiError';
 
 export const UploadFile = async (file) => {
   const formData = new FormData();
@@ -14,19 +15,20 @@ export const UploadFile = async (file) => {
   return await res.json();
 };
 
-export const SendMessage = async (message, conversation, responseStyle = 'balanced') => {
+export const SendMessage = async (userId, message, conversation, responseStyle = 'balanced') => {
   const res = await fetch(ENDPOINTS.AI.CHAT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: 'include',
     body: JSON.stringify({ 
+      user_id: userId,
       message, 
       conversation,
       response_style: responseStyle  
     })
   });
 
-  if (!res.ok) throw new Error("Failed to send message");
+  if (!res.ok) await throwApiError(res, "Failed to send message");
   return await res.json();
 };
 
