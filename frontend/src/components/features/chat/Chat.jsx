@@ -111,7 +111,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
     const content = selectedMessages.map(i => messages[i].content).join("\n\n");
     const savingToast = toast.loading(t('chat.savingNote'));
     try {
-      const response = await SendMessage(`Stwórz krótki, zwięzły tytuł dla tych wiadomości (w języku który jest użyty), maksymalnie 5 słów: ${content.slice(0, 500)}`, [], 'brief');
+      const response = await SendMessage(userId, `Stwórz krótki, zwięzły tytuł dla tych wiadomości (w języku który jest użyty), maksymalnie 5 słów: ${content.slice(0, 500)}`, [], 'brief');
       
       const title = response.status === "success" 
         ? response.response.replace(/["']/g, '').trim().slice(0, 50)
@@ -143,7 +143,7 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
   const saveBotMessageAsNote = async (content) => {
     const savingToast = toast.loading(t('chat.savingNote'));
     try {
-      const response = await SendMessage(`Stwórz krótki, zwięzły tytuł dla tej wiadomości (w języku który jest użyty), maksymalnie 5 słów: ${content.slice(0, 500)}`, [], 'brief');
+      const response = await SendMessage(userId, `Stwórz krótki, zwięzły tytuł dla tej wiadomości (w języku który jest użyty), maksymalnie 5 słów: ${content.slice(0, 500)}`, [], 'brief');
       const title = response.status === "success" 
         ? response.response.replace(/["']/g, '').trim().slice(0, 50)
         : content.slice(0, 50);
@@ -178,15 +178,27 @@ export default function Chat({ userId, notebookId, refreshNotebook }) {
     setIsLoading(true);
 
     try {
-      const data = await SendMessage(userMessage, messages, responseStyle);
+      const data = await SendMessage(userId, userMessage, messages, responseStyle);
 
       if (data.status === "success") {
         setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+        if (data?.quota?.warning?.triggered) {
+          const remaining = data?.quota?.remaining;
+          toast((tMsg) => (
+            <span>
+              Uwaga: zbliżasz się do miesięcznego limitu AI ({data?.quota?.warning?.threshold}%). Pozostało {remaining} kredytów.
+            </span>
+          ), { duration: 4500 });
+        }
       } else {
         setMessages(prev => [...prev, { role: "assistant", content: t('chat.serverError'), type: "error" }]);
       }
     } catch (error) {
-      setMessages(prev => [...prev, { role: "assistant", content: t('chat.connectionError'), type: "error" }]);
+      if (error?.code === 'quota_exceeded') {
+        setMessages(prev => [...prev, { role: "assistant", content: `${error.message} (Pozostało: ${error?.quota?.remaining ?? 0})`, type: "error" }]);
+      } else {
+        setMessages(prev => [...prev, { role: "assistant", content: t('chat.connectionError'), type: "error" }]);
+      }
     } finally {
       setIsLoading(false);
     }

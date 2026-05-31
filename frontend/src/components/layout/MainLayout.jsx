@@ -7,6 +7,7 @@ import Chat from "../features/chat/Chat";
 import NotebookView from "../features/notebook/NotebookView";
 import styles from "../../css/layout/MainLayout.module.css";
 import Settings from "../features/settings/app_settings/Settings";
+import AdminQuota from "../features/settings/app_settings/AdminQuota";
 import UserSettings from "../features/settings/user_settings/UserSettings";
 import Help from '../features/settings/help/Help';
 import NotificationView from "../features/settings/notifications/NotificationView";
@@ -235,6 +236,9 @@ export default function MainLayout() {
         return (
           <Chat
             key={getChatKey()}
+            userId={userData?.id}
+            notebookId={selectedNotebook?.id}
+            refreshNotebook={refreshNotebook}
           />
         );
 
@@ -243,6 +247,9 @@ export default function MainLayout() {
 
       case 'user_settings':
         return <UserSettings userData={userData}/>
+
+      case 'admin_quota':
+        return <AdminQuota />
 
       case 'help':
         return <Help userData={userData}/>;

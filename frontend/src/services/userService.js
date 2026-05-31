@@ -108,3 +108,17 @@ export const completeTutorial = async (token) => {
     }
     return true;
 };
+
+export const fetchUserCredits = async (token) => {
+    const response = await fetch(ENDPOINTS.USERS.CREDITS, {
+        method: 'GET',
+        headers: getAuthHeaders(token),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Błąd pobierania kredytów');
+    }
+
+    return await response.json();
+};

@@ -13,6 +13,7 @@ import io
 from docx import Document
 import re
 from json import JSONDecodeError
+from quota import preflight_quota_check, commit_quota_charge, log_quota_failure
 
 router = APIRouter(
     prefix="/flashcards",
@@ -329,6 +330,8 @@ async def generate_flashcards(
     print(f"DEBUG: description: {request.description}")
     print(f"DEBUG: source_note_ids: {request.source_note_ids}")
 
+    quota_context = preflight_quota_check(db, request.user_id, "flashcards", "/flashcards/generate")
+
     combined_content = ""
 
     if request.description and request.description.strip():
@@ -501,6 +504,7 @@ Wygeneruj fiszki:"""
         flashcards_data = extract_flashcards_from_ai_response(retry_text)
 
         if not flashcards_data or len(flashcards_data) == 0:
+            log_quota_failure(db, quota_context, "Flashcard AI response parse failed")
             # Final failure — include more of AI response in error for debugging
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -549,13 +553,15 @@ Wygeneruj fiszki:"""
         db.add(flashcard)
     
     db.commit()
+    quota_state = commit_quota_charge(db, quota_context)
     
     return {
         "status": "success",
         "message": f"Wygenerowano {len(flashcards_data)} fiszek",
         "flashcard_set_id": flashcard_set.id,
         "note_id": new_note.id,
-        "total_cards": len(flashcards_data)
+        "total_cards": len(flashcards_data),
+        "quota": quota_state,
     }
 
 
@@ -571,6 +577,8 @@ async def generate_flashcards_from_file(
     db: Session = Depends(get_db)
 ):
     """Generuje fiszki z przesłanego pliku"""
+    quota_context = preflight_quota_check(db, user_id, "flashcards", "/flashcards/generate-from-file")
+
     try:
         file_content = await file.read()
 
@@ -711,17 +719,22 @@ Wygeneruj fiszki:"""
 
         db.commit()
 
+        quota_state = commit_quota_charge(db, quota_context)
+
         return {
             "status": "success",
             "message": f"Wygenerowano {len(flashcards_data)} fiszek z pliku",
             "flashcard_set_id": flashcard_set.id,
             "note_id": new_note.id,
-            "total_cards": len(flashcards_data)
+            "total_cards": len(flashcards_data),
+            "quota": quota_state,
         }
 
     except HTTPException:
+        log_quota_failure(db, quota_context, "Flashcard generation from file failed")
         raise
     except Exception as e:
+        log_quota_failure(db, quota_context, f"Flashcard generation from file error: {str(e)[:160]}")
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

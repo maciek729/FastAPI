@@ -127,6 +127,15 @@ const ENDPOINTS = {
     DELETE_ACCOUNT: `${API_BASE_URL}/user/delete-account`,
     GET_AVATAR: (avatarPath) => avatarPath ? `${API_BASE_URL}${avatarPath}` : null,
     COMPLETE_TUTORIAL: `${API_BASE_URL}/user/complete-tutorial`,
+    CREDITS: `${API_BASE_URL}/user/credits`,
+  },
+  ADMIN: {
+    QUOTA_OVERVIEW: `${API_BASE_URL}/admin/quota/overview`,
+    QUOTA_USERS: (limit = 100) => `${API_BASE_URL}/admin/quota/users?limit=${limit}`,
+    QUOTA_LOGS: (limit = 200, userId = null) =>
+      userId
+        ? `${API_BASE_URL}/admin/quota/logs?limit=${limit}&user_id=${userId}`
+        : `${API_BASE_URL}/admin/quota/logs?limit=${limit}`,
   },
   AUTH: {
     REGISTER: `${API_BASE_URL}/auth/`,

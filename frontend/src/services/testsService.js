@@ -1,4 +1,5 @@
 import ENDPOINTS from "../api/endpoints";
+import { throwApiError } from "./apiError";
 
 export const fetchTests = async (userId, notebookId) => {
   const response = await fetch(ENDPOINTS.TESTS.LIST(notebookId, userId), {
@@ -19,8 +20,7 @@ export const generateTest = async (testData) => {
     body: JSON.stringify(testData),
   });
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({ detail: 'Nieznany błąd serwera' }));
-    throw new Error(errorBody.detail || 'Failed to generate test');
+    await throwApiError(response, 'Failed to generate test');
   }
   return await response.json();
 };
@@ -32,8 +32,7 @@ export const generateTestFromFile = async (formData) => {
     body: formData,
   });
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({ detail: 'Nieznany błąd serwera' }));
-    throw new Error(errorBody.detail || 'Failed to generate test from file');
+    await throwApiError(response, 'Failed to generate test from file');
   }
   return await response.json();
 };

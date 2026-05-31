@@ -26,6 +26,11 @@ class Users(Base):
 
     has_completed_tutorial = Column(Boolean, default=False, nullable=True)
 
+    monthly_quota_credits = Column(Integer, default=300, nullable=False)
+    monthly_credits_used = Column(Integer, default=0, nullable=False)
+    quota_reset_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_quota_warning_pct = Column(Integer, nullable=True)
+
 class Groups(Base):
     __tablename__ = 'groups'
 
@@ -336,3 +341,17 @@ class ChatReadStatus(Base):
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     notebook_id = Column(Integer, ForeignKey("notebooks.id"), index=True)
     last_viewed_at = Column(DateTime, default=datetime.utcnow)
+
+
+class AIUsageLog(Base):
+    __tablename__ = "ai_usage_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    action_type = Column(String(50), nullable=False)
+    endpoint = Column(String(100), nullable=False)
+    cost_credits = Column(Integer, nullable=False)
+    status = Column(String(20), nullable=False)
+    message = Column(Text, nullable=True)
+    metadata_json = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

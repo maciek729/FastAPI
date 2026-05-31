@@ -66,8 +66,11 @@ export default function PodcastGenerator({
         }
 
         try {
-            await generatePodcast(notebookId, userData.id, title, selectedNoteIds, null, topic);
+            const result = await generatePodcast(notebookId, userData.id, title, selectedNoteIds, null, topic);
             toast.success(t('podcastGenerator.success'));
+            if (result?.quota?.warning?.triggered) {
+                toast(`Uwaga: wykorzystano ${result.quota.warning.threshold}% miesięcznych kredytów AI.`);
+            }
             setTitle('');
             setTopic('');
             setSelectedNoteIds([]);

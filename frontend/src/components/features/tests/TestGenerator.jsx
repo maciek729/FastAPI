@@ -112,6 +112,7 @@ export default function TestGenerator({
         setUploadFile(null);
 
         try {
+            let result;
             if (newTest.source_type === 'file') {
                 const formData = new FormData();
                 formData.append('file', uploadFile);
@@ -125,9 +126,9 @@ export default function TestGenerator({
                     formData.append('folder_id', currentFolder.id);
                 }
 
-                await testsService.generateTestFromFile(formData);
+                result = await testsService.generateTestFromFile(formData);
             } else {
-                await testsService.generateTest({
+                result = await testsService.generateTest({
                     user_id: userData.id,
                     notebook_id: notebookId,
                     title: newTest.title,
@@ -140,9 +141,12 @@ export default function TestGenerator({
             }
 
             toast.success(t('testGenerator.success.generated'));
+            if (result?.quota?.warning?.triggered) {
+                toast(`Uwaga: wykorzystano ${result.quota.warning.threshold}% miesięcznych kredytów AI.`);
+            }
             onSuccess();
         } catch (err) {
-            toast.error(err.response?.data?.detail || t('testGenerator.errors.apiError'));
+            toast.error(err?.message || t('testGenerator.errors.apiError'));
             onError();
         } finally {
             setSubmitting(false);

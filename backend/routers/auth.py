@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 import os
 from fastapi.responses import HTMLResponse # type: ignore
 import re
+from quota import MAX_USERS, acquire_signup_lock
 
 load_dotenv()
 
@@ -152,6 +153,18 @@ async def create_user(db: db_dependency,
 
     if not frontend_url.endswith('/'):
         frontend_url += "/"
+
+    acquire_signup_lock(db)
+    active_accounts = db.query(Users).filter(Users.is_archived.isnot(True)).count()
+    if active_accounts >= MAX_USERS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "error": "seat_limit_reached",
+                "message": "Registration is temporarily closed. The 15-user limit has been reached.",
+                "max_users": MAX_USERS,
+            }
+        )
 
     token = secrets.token_urlsafe(32)
     # base_url = str(request.base_url)

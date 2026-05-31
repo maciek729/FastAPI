@@ -105,6 +105,7 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
         }
 
         try {
+            let result;
             if (formData.source_type === "file" && uploadFile) {
                 const requestData = new FormData();
                 requestData.append("user_id", userId);
@@ -115,9 +116,9 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
                 requestData.append("count", formData.count);
                 requestData.append("file", uploadFile);
 
-                await generateFlashcardsFromFile(requestData);
+                result = await generateFlashcardsFromFile(requestData);
             } else {
-                await generateFlashcards({
+                result = await generateFlashcards({
                     user_id: userId,
                     notebook_id: notebookId,
                     title: formData.title,
@@ -130,9 +131,12 @@ export default function FlashcardGenerator({ notebookId, userId, onSuccess, onCa
             }
 
             toast.success(t('flashcardGenerator.success'));
+            if (result?.quota?.warning?.triggered) {
+                toast(`Uwaga: wykorzystano ${result.quota.warning.threshold}% miesięcznych kredytów AI.`);
+            }
             onSuccess();
         } catch (error) {
-            const errorMessage = error.response?.data?.detail || error.message || t('flashcardGenerator.unknownError');
+            const errorMessage = error?.message || t('flashcardGenerator.unknownError');
             toast.error(t('flashcardGenerator.generationError') + ": " + errorMessage);
             if (onError) {
                 onError();

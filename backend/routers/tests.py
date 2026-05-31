@@ -15,6 +15,7 @@ from docx import Document
 from PIL import Image
 from google import genai
 from google.genai import types
+from quota import preflight_quota_check, commit_quota_charge, log_quota_failure
 
 router = APIRouter(
     prefix="/tests",
@@ -95,6 +96,7 @@ class TestWithQuestions(BaseModel):
     created_at: datetime
     questions: List[QuestionOut]
     last_result: Optional[str] = None
+    quota: Optional[dict] = None
 
     class Config:
         from_attributes = True
@@ -340,6 +342,8 @@ async def generate_test_from_file(
     folder_id: Optional[int] = Form(None),
     db: Session = Depends(get_db)
 ):
+    quota_context = preflight_quota_check(db, user_id, "tests", "/tests/generate-from-file")
+
     try:
         file_content = await file.read()
         file_extension = "." + file.filename.split(".")[-1].lower()
@@ -399,6 +403,8 @@ async def generate_test_from_file(
             db.refresh(new_question)
             questions_out.append(new_question)
 
+        quota_state = commit_quota_charge(db, quota_context)
+
         return TestWithQuestions(
             id=new_test.id,
             user_id=new_test.user_id,
@@ -407,17 +413,22 @@ async def generate_test_from_file(
             topic=new_test.topic,
             note_id=None,
             created_at=new_test.created_at,
-            questions=[QuestionOut.model_validate(q) for q in questions_out]
+            questions=[QuestionOut.model_validate(q) for q in questions_out],
+            quota=quota_state,
         )
 
     except HTTPException:
+        log_quota_failure(db, quota_context, "Test generation from file failed")
         raise
     except Exception as e:
+        log_quota_failure(db, quota_context, f"Test generation from file error: {str(e)[:160]}")
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Błąd generowania testu z pliku: {str(e)}")
 
 @router.post("/generate", response_model=TestWithQuestions, status_code=status.HTTP_201_CREATED)
 async def generate_test(request: TestGenerateRequest, db: db_dependency):
+    quota_context = preflight_quota_check(db, request.user_id, "tests", "/tests/generate")
+
     try:
         context_text = None
         source_type = "manual"
@@ -464,6 +475,8 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
             db.refresh(new_question)
             questions_out.append(new_question)
 
+        quota_state = commit_quota_charge(db, quota_context)
+
         return TestWithQuestions(
             id=new_test.id,
             user_id=new_test.user_id,
@@ -472,12 +485,15 @@ async def generate_test(request: TestGenerateRequest, db: db_dependency):
             topic=new_test.topic,
             note_id=new_test.note_id,
             created_at=new_test.created_at,
-            questions=[QuestionOut.model_validate(q) for q in questions_out]
+            questions=[QuestionOut.model_validate(q) for q in questions_out],
+            quota=quota_state,
         )
 
     except HTTPException:
+        log_quota_failure(db, quota_context, "Test generation failed")
         raise
     except Exception as e:
+        log_quota_failure(db, quota_context, f"Test generation error: {str(e)[:160]}")
         db.rollback()
         raise HTTPException(
             status_code=500,
